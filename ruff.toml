@@ -1,0 +1,20 @@
+# Root ruff configuration.
+#
+# Applies to Python outside the backend (mainly ml/ and .github/scripts/).
+# Code under backend/ uses backend/pyproject.toml instead, because ruff picks
+# the closest configuration file to the code it is checking. Keep the two in
+# step so a file does not pass in one place and fail in the other.
+
+line-length = 100
+target-version = "py311"
+exclude = ["migrations", ".venv", "venv", "node_modules", "build", "dist", "backend"]
+
+[lint]
+select = ["E", "F", "W", "B", "UP", "C4"]
+ignore = [
+    "E501",  # line length is enforced by black
+    "B008",  # function call in default argument (common in FastAPI Depends)
+]
+
+[lint.per-file-ignores]
+"__init__.py" = ["F401"]

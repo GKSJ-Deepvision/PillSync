@@ -1,0 +1,41 @@
+# PillSync internship roster — 26 interns, AI domain.
+# Source: "AI-Driven Medication Recognition and Personalized Reminder Platform..xlsx"
+#
+# This file is the single source of truth for branch naming. CI reads it to verify
+# that every pushed branch belongs to a known intern.
+#
+# Keep the one-line-per-intern format below — the CI parser depends on it.
+# Mentors: to add or correct an entry, edit this file on `main` only.
+
+project: "PillSync: Intelligent Medicine Reminder and Medication Tracking Platform"
+domain: "AI"
+protected_branch: "main"
+branch_prefix: "intern/"
+
+interns:
+  - { id: "01", name: "Advala Indhu", branch: "intern/01-advala-indhu" }
+  - { id: "02", name: "Dharmana Rohila", branch: "intern/02-dharmana-rohila" }
+  - { id: "03", name: "Rajasri Nallamilli", branch: "intern/03-rajasri-nallamilli" }
+  - { id: "04", name: "Deepika Duggirala", branch: "intern/04-deepika-duggirala" }
+  - { id: "05", name: "Aryan Kumar", branch: "intern/05-aryan-kumar" }
+  - { id: "06", name: "Aarthi Gd", branch: "intern/06-aarthi-gd" }
+  - { id: "07", name: "Muthukumaran K", branch: "intern/07-muthukumaran-k" }
+  - { id: "08", name: "Pallavi Kocherla", branch: "intern/08-pallavi-kocherla" }
+  - { id: "09", name: "Jyoti Prangya Patra", branch: "intern/09-jyoti-prangya-patra" }
+  - { id: "10", name: "Naga Vaishnavi Padala", branch: "intern/10-naga-vaishnavi-padala" }
+  - { id: "11", name: "Jangam Keerthana", branch: "intern/11-jangam-keerthana" }
+  - { id: "12", name: "Dushyant Singh Sisodiya", branch: "intern/12-dushyant-singh-sisodiya" }
+  - { id: "13", name: "Sujata Behera", branch: "intern/13-sujata-behera" }
+  - { id: "14", name: "Karthika Shree S", branch: "intern/14-karthika-shree-s" }
+  - { id: "15", name: "Kaviya Sree Rs", branch: "intern/15-kaviya-sree-rs" }
+  - { id: "16", name: "Lachigalla Parvathi", branch: "intern/16-lachigalla-parvathi" }
+  - { id: "17", name: "Panyala Alekhya Reddy", branch: "intern/17-panyala-alekhya-reddy" }
+  - { id: "18", name: "Shivangi Sahu", branch: "intern/18-shivangi-sahu" }
+  - { id: "19", name: "Syed Muhammed S R", branch: "intern/19-syed-muhammed-s-r" }
+  - { id: "20", name: "Ruchitha Puru", branch: "intern/20-ruchitha-puru" }
+  - { id: "21", name: "Yogesh Yadavrao Pagar", branch: "intern/21-yogesh-yadavrao-pagar" }
+  - { id: "22", name: "Vemula Purna Vijaya Sai Phani Kumar", branch: "intern/22-vemula-purna-vijaya-sai-phani-kumar" }
+  - { id: "23", name: "Swathi S", branch: "intern/23-swathi-s" }
+  - { id: "24", name: "Nelakurthi Ashritha Gowthami", branch: "intern/24-nelakurthi-ashritha-gowthami" }
+  - { id: "25", name: "Muskan Kumari", branch: "intern/25-muskan-kumari" }
+  - { id: "26", name: "Thalla Sri Pradeep", branch: "intern/26-thalla-sri-pradeep" }

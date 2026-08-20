@@ -1,0 +1,171 @@
+name: CD (release readiness)
+
+# The delivery half of the pipeline, for Milestone 4.
+#
+# Run it manually from the Actions tab with your own branch selected. It re-runs
+# the quality gates, builds both container images, and - if you ask it to -
+# publishes them to this repository's GitHub Container Registry so you have a
+# real artefact to deploy to Render, AWS, Azure or Vercel.
+#
+# It never deploys to a live environment on your behalf: your hosting account
+# and its credentials are yours, and the deployment step stays in your hands.
+on:
+  workflow_dispatch:
+    inputs:
+      publish_images:
+        description: "Publish images to ghcr.io (leave off for a build-only dry run)"
+        type: boolean
+        default: false
+      target:
+        description: "Where you intend to deploy this build (recorded in the summary)"
+        type: choice
+        default: "render"
+        options:
+          - render
+          - aws
+          - azure
+          - vercel
+          - other
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION: "20"
+  REGISTRY: ghcr.io
+
+jobs:
+  readiness:
+    name: Milestone 4 readiness
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.slug.outputs.image_tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Verify the branch
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+        run: python .github/scripts/check_branch_policy.py
+
+      - name: Secret scan
+        run: python .github/scripts/scan_secrets.py
+
+      - name: Release checklist
+        run: python .github/scripts/release_check.py
+
+      - name: Build the image tag
+        id: slug
+        shell: bash
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          # Image tags cannot contain "/" and must be lower case.
+          tag=$(echo "$BRANCH" | tr '[:upper:]/' '[:lower:]-' | tr -cd 'a-z0-9._-')
+          echo "image_tag=${tag:-unknown}" >> "$GITHUB_OUTPUT"
+          echo "Image tag: ${tag:-unknown}"
+
+  images:
+    name: Build and publish images
+    needs: readiness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: inputs.publish_images
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check what can be built
+        id: check
+        shell: bash
+        run: |
+          backend=false
+          if [ -f backend/Dockerfile ] && { [ -f backend/manage.py ] || [ -f backend/config/main.py ]; }; then
+            backend=true
+          fi
+          frontend=false
+          if [ -f frontend/Dockerfile ] && [ -f frontend/package.json ]; then
+            frontend=true
+          fi
+          echo "backend=$backend" >> "$GITHUB_OUTPUT"
+          echo "frontend=$frontend" >> "$GITHUB_OUTPUT"
+
+          if [ "$backend" = false ] && [ "$frontend" = false ]; then
+            echo "::error::Neither image can be built yet. Milestone 4 needs a deployable backend and frontend."
+            exit 1
+          fi
+
+      - name: Backend image
+        if: steps.check.outputs.backend == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: ${{ inputs.publish_images }}
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}/pillsync-backend:${{ needs.readiness.outputs.image_tag }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      - name: Frontend image
+        if: steps.check.outputs.frontend == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: ${{ inputs.publish_images }}
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}/pillsync-frontend:${{ needs.readiness.outputs.image_tag }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      - name: Summary
+        if: always()
+        shell: bash
+        env:
+          PUBLISHED: ${{ inputs.publish_images }}
+          TARGET: ${{ inputs.target }}
+          TAG: ${{ needs.readiness.outputs.image_tag }}
+          BACKEND: ${{ steps.check.outputs.backend }}
+          FRONTEND: ${{ steps.check.outputs.frontend }}
+        run: |
+          {
+            echo "### Release build"
+            echo ""
+            echo "| Item | Value |"
+            echo "|---|---|"
+            echo "| Branch | \`${{ github.ref_name }}\` |"
+            echo "| Image tag | \`$TAG\` |"
+            echo "| Backend image built | $BACKEND |"
+            echo "| Frontend image built | $FRONTEND |"
+            echo "| Pushed to ghcr.io | $PUBLISHED |"
+            echo "| Intended target | $TARGET |"
+            echo ""
+            if [ "$PUBLISHED" = "true" ]; then
+              echo "Pull with:"
+              echo ""
+              echo '```bash'
+              echo "docker pull ${{ env.REGISTRY }}/${{ github.repository }}/pillsync-backend:$TAG"
+              echo "docker pull ${{ env.REGISTRY }}/${{ github.repository }}/pillsync-frontend:$TAG"
+              echo '```'
+            else
+              echo "Dry run - nothing was published. Re-run with **publish images** enabled when you are ready."
+            fi
+            echo ""
+            echo "Record the live URL and the exact deployment steps in \`docs/demo/\` and \`docs/milestones/milestone-4.md\`."
+          } >> "$GITHUB_STEP_SUMMARY"

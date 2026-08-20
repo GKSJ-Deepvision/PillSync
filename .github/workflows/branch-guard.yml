@@ -1,0 +1,85 @@
+name: Branch guard
+
+# Nobody merges into main during this internship: every intern's work stays on
+# their own branch and is reviewed there. This workflow enforces that, and
+# leaves an explanation on any pull request that tries.
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: branch-guard-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  block-merge-to-main:
+    name: Pull requests into main are not accepted
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain the policy on the pull request
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const marker = '<!-- pillsync-branch-guard -->';
+
+            const body = [
+              marker,
+              '### This repository does not merge into `main`',
+              '',
+              `Hi @${pr.user.login} — thanks for the work, but this pull request will not be merged.`,
+              '',
+              'For the PillSync internship, **every intern keeps their work on their own branch**.',
+              '`main` holds only the shared skeleton, the CI pipeline and the instructions, and it',
+              'is maintained by the mentors.',
+              '',
+              '**What to do instead**',
+              '',
+              '1. Close this pull request.',
+              '2. Push your work to your own branch — that push is your submission:',
+              '',
+              '   ```bash',
+              '   git checkout <intern/NN-your-name>',
+              '   git add .',
+              '   git commit -m "feat(medications): add dosage scheduling"',
+              '   git push origin <intern/NN-your-name>',
+              '   ```',
+              '3. Watch the **CI** run on your branch under the **Actions** tab and fix anything it reports.',
+              '',
+              'If you need something changed on `main` — a fix to the skeleton, the roster or the',
+              'pipeline — open an issue and tag your mentor instead.',
+              '',
+              'See [INTERN_GUIDE.md](../blob/main/INTERN_GUIDE.md) for the full workflow.',
+            ].join('\n');
+
+            const existing = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              per_page: 100,
+            });
+
+            const mine = existing.data.find((c) => c.body && c.body.includes(marker));
+            if (mine) {
+              core.info('Policy comment already present; not repeating it.');
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body,
+              });
+            }
+
+      - name: Fail the check
+        run: |
+          echo "::error::Pull requests into main are not part of this internship workflow. Push to your own intern branch instead."
+          exit 1
