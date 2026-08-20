@@ -1,0 +1,52 @@
+name: Milestone review request
+description: Ask a mentor to review a completed milestone on your branch
+title: "[Review] Milestone "
+labels: ["milestone-review"]
+body:
+  - type: input
+    id: branch
+    attributes:
+      label: Your branch
+      placeholder: intern/07-muthukumaran-k
+    validations:
+      required: true
+
+  - type: dropdown
+    id: milestone
+    attributes:
+      label: Milestone
+      options:
+        - "1 - Requirements, Database Design & Core Setup (Week 1-2)"
+        - "2 - Medication Management & Reminder System (Week 3-4)"
+        - "3 - OCR Recognition & Refill Prediction (Week 5-6)"
+        - "4 - Analytics, Testing & Deployment (Week 7-8)"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Before you submit
+      options:
+        - label: The latest CI run on my branch is green
+          required: true
+        - label: I filled in the milestone report in docs/milestones/
+          required: true
+        - label: I added tests for what I built in this milestone
+          required: true
+        - label: No credentials, .env files or datasets are committed
+          required: true
+
+  - type: input
+    id: run
+    attributes:
+      label: Link to your passing CI run
+      placeholder: https://github.com/.../actions/runs/...
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: What should the reviewer look at first?
+      description: Point at the files or endpoints that carry the main work.

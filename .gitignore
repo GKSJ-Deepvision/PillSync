@@ -1,0 +1,87 @@
+# ---- Python / backend ----
+__pycache__/
+*.py[cod]
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+*.sqlite3
+*.db
+backend/media/*
+!backend/media/.gitkeep
+backend/staticfiles/
+
+# ---- Node / frontend ----
+node_modules/
+.npm/
+.yarn/
+frontend/dist/
+frontend/build/
+frontend/coverage/
+*.tsbuildinfo
+.vite/
+.eslintcache
+
+# ---- Secrets and environment ----
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.json
+serviceAccountKey.json
+firebase-adminsdk*.json
+credentials.json
+*.tfvars
+
+# ---- ML / data ----
+ml/data/raw/*
+ml/data/processed/*
+ml/models/*
+!ml/data/raw/.gitkeep
+!ml/data/processed/.gitkeep
+!ml/models/.gitkeep
+*.h5
+*.pt
+*.pth
+*.onnx
+*.pkl
+*.joblib
+.ipynb_checkpoints/
+
+# ---- Editors and OS ----
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Logs and temp ----
+*.log
+logs/
+tmp/
+temp/
+
+# ---- Cohort administration (not for the shared repo) ----
+# The intern roster spreadsheet carries 26 people's personal email addresses.
+# Branch assignments live in .github/interns.yml instead, without the emails.
+*.xlsx
