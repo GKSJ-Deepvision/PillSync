@@ -35,3 +35,5 @@ uvicorn[standard]==0.32.1
 # Utilities
 # python-dotenv==1.*
 # pydantic==2.*
+
+httpx==0.28.1
