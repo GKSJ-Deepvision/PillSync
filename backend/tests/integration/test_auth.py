@@ -9,11 +9,10 @@ from config.main import app
 def setup_database():
     with engine.begin() as connection:
         for table in reversed(Base.metadata.sorted_tables):
-            connection.exec_driver_sql(
-                f'DROP TABLE IF EXISTS "{table.name}" CASCADE'
-            )
+            connection.exec_driver_sql(f'DROP TABLE IF EXISTS "{table.name}" CASCADE')
 
     Base.metadata.create_all(bind=engine)
+
 
 @pytest.fixture
 def client():
