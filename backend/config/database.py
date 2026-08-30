@@ -1,12 +1,17 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy.engine import URL
 
-DATABASE_URL = "sqlite:///./db.sqlite3"
-
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False},
+DATABASE_URL = URL.create(
+    "postgresql+psycopg",
+    username="postgres",
+    password="sonu@7860",
+    host="localhost",
+    port=5432,
+    database="pillsync",
 )
+
+engine = create_engine(DATABASE_URL)
 
 SessionLocal = sessionmaker(
     autocommit=False,
