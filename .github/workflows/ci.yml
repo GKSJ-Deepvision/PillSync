@@ -1,16 +1,13 @@
 name: CI
 
-# Runs on every push to every branch. Nothing is merged into main in this
-# internship, so the branch push *is* the submission - this pipeline is what
-# checks it.
+# Runs on every push to every branch.
 on:
   push:
     branches:
       - "**"
   workflow_dispatch:
 
-# A newer push on the same branch cancels the previous run, so 26 people
-# pushing all week do not queue behind each other.
+# Cancel an older CI run when a newer push happens on the same branch.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -23,18 +20,21 @@ env:
   NODE_VERSION: "20"
 
 jobs:
+
   # ---------------------------------------------------------------------------
-  # Who is this branch, and what is on it?
+  # Identify what exists on this branch
   # ---------------------------------------------------------------------------
   identify:
     name: Branch policy
     runs-on: ubuntu-latest
+
     outputs:
       has_backend: ${{ steps.detect.outputs.has_backend }}
       has_frontend: ${{ steps.detect.outputs.has_frontend }}
       has_ml: ${{ steps.detect.outputs.has_ml }}
       has_backend_docker: ${{ steps.detect.outputs.has_backend_docker }}
       has_frontend_docker: ${{ steps.detect.outputs.has_frontend_docker }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -98,12 +98,14 @@ jobs:
             echo "| Frontend image buildable | $has_frontend_docker |"
           } >> "$GITHUB_STEP_SUMMARY"
 
+
   # ---------------------------------------------------------------------------
-  # Checks that apply to every file, whatever stage the branch is at.
+  # Repository checks
   # ---------------------------------------------------------------------------
   repo-checks:
     name: Repository checks
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -131,13 +133,17 @@ jobs:
         if: always()
         run: python .github/scripts/check_config_syntax.py
 
+
   # ---------------------------------------------------------------------------
-  # Backend: lint, format, import order, tests, coverage.
+  # Backend
   # ---------------------------------------------------------------------------
   backend:
     name: Backend (lint + tests)
+
     needs: identify
+
     if: needs.identify.outputs.has_backend == 'true'
+
     runs-on: ubuntu-latest
 
     defaults:
@@ -147,12 +153,15 @@ jobs:
     services:
       postgres:
         image: postgres:16-alpine
+
         env:
           POSTGRES_DB: pillsync_test
           POSTGRES_USER: pillsync
           POSTGRES_PASSWORD: pillsync
+
         ports:
           - 5432:5432
+
         options: >-
           --health-cmd="pg_isready -U pillsync"
           --health-interval=10s
@@ -161,9 +170,13 @@ jobs:
 
     env:
       DJANGO_SETTINGS_MODULE: config.settings.dev
+
       PYTHONPATH: .
+
       SECRET_KEY: ci-only-not-a-real-secret
+
       DEBUG: "False"
+
       POSTGRES_DB: pillsync_test
       POSTGRES_USER: pillsync
       POSTGRES_PASSWORD: pillsync
@@ -171,6 +184,7 @@ jobs:
       POSTGRES_PORT: "5432"
 
     steps:
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
@@ -179,9 +193,18 @@ jobs:
           cache: pip
           cache-dependency-path: backend/requirements/*.txt
 
-      - name: Point the test database at the service container
-        run: echo "DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}" >> "$GITHUB_ENV"
 
+      # ---------------------------------------------------------------------
+      # Database
+      # ---------------------------------------------------------------------
+      - name: Point the test database at the service container
+        run: |
+          echo "DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}" >> "$GITHUB_ENV"
+
+
+      # ---------------------------------------------------------------------
+      # Tesseract
+      # ---------------------------------------------------------------------
       - name: Install Tesseract (only if the branch uses OCR)
         shell: bash
         run: |
@@ -192,6 +215,10 @@ jobs:
             echo "pytesseract not in requirements yet - skipping Tesseract install."
           fi
 
+
+      # ---------------------------------------------------------------------
+      # Python dependencies
+      # ---------------------------------------------------------------------
       - name: Install dependencies
         shell: bash
         run: |
@@ -209,17 +236,46 @@ jobs:
             pip install -r requirements.txt
           fi
 
+          # CI tools
           pip install ruff black isort pytest pytest-cov
 
+          # Authentication and PostgreSQL dependencies
+          pip install "pwdlib[argon2]" "psycopg[binary]"
+
+
+      # ---------------------------------------------------------------------
+      # Verify dependencies
+      # ---------------------------------------------------------------------
+      - name: Verify backend dependencies
+        run: |
+          python -c "import pwdlib; print('pwdlib OK')"
+          python -c "import psycopg; print('psycopg OK')"
+
+
+      # ---------------------------------------------------------------------
+      # Ruff
+      # ---------------------------------------------------------------------
       - name: Ruff (lint)
         run: ruff check . --output-format=github
 
+
+      # ---------------------------------------------------------------------
+      # Black
+      # ---------------------------------------------------------------------
       - name: Black (formatting)
         run: black --check --diff .
 
+
+      # ---------------------------------------------------------------------
+      # isort
+      # ---------------------------------------------------------------------
       - name: isort (import order)
         run: isort --check-only --diff .
 
+
+      # ---------------------------------------------------------------------
+      # Django checks
+      # ---------------------------------------------------------------------
       - name: Django system checks
         shell: bash
         run: |
@@ -229,12 +285,23 @@ jobs:
             echo "No manage.py yet - skipping Django checks."
           fi
 
+
+      # ---------------------------------------------------------------------
+      # Pytest
+      # ---------------------------------------------------------------------
       - name: Pytest
         shell: bash
         run: |
           set +e
-          pytest --cov=. --cov-report=term-missing --cov-report=xml --junitxml=pytest-report.xml
+
+          pytest \
+            --cov=. \
+            --cov-report=term-missing \
+            --cov-report=xml \
+            --junitxml=pytest-report.xml
+
           code=$?
+
           set -e
 
           if [ "$code" -eq 5 ]; then
@@ -245,6 +312,10 @@ jobs:
 
           exit $code
 
+
+      # ---------------------------------------------------------------------
+      # Coverage
+      # ---------------------------------------------------------------------
       - name: Coverage summary
         if: always()
         shell: bash
@@ -253,24 +324,36 @@ jobs:
             python "$GITHUB_WORKSPACE/.github/scripts/coverage_summary.py" coverage.xml
           fi
 
+
+      # ---------------------------------------------------------------------
+      # Test artifacts
+      # ---------------------------------------------------------------------
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v4
+
         with:
           name: backend-test-results-${{ github.run_id }}
+
           path: |
             backend/pytest-report.xml
             backend/coverage.xml
+
           retention-days: 14
+
           if-no-files-found: ignore
 
+
   # ---------------------------------------------------------------------------
-  # Frontend: lint, format, tests, production build.
+  # Frontend
   # ---------------------------------------------------------------------------
   frontend:
     name: Frontend (lint + tests + build)
+
     needs: identify
+
     if: needs.identify.outputs.has_frontend == 'true'
+
     runs-on: ubuntu-latest
 
     defaults:
@@ -282,6 +365,7 @@ jobs:
       VITE_API_BASE_URL: http://localhost:8000/api
 
     steps:
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
@@ -294,7 +378,7 @@ jobs:
           if [ -f package-lock.json ]; then
             npm ci
           else
-            echo "::warning file=frontend/package.json::No package-lock.json committed. Commit it so every environment installs identical versions."
+            echo "::warning file=frontend/package.json::No package-lock.json committed."
             npm install
           fi
 
@@ -310,7 +394,7 @@ jobs:
           if find src tests -type f \( -name '*.test.*' -o -name '*.spec.*' \) 2>/dev/null | grep -q .; then
             npm test --if-present
           else
-            echo "::warning::No frontend test files found yet. Add *.test.jsx files next to the components they cover."
+            echo "::warning::No frontend test files found yet."
             echo "> Frontend: no test files yet." >> "$GITHUB_STEP_SUMMARY"
           fi
 
@@ -325,24 +409,33 @@ jobs:
       - name: Upload build output
         if: success()
         uses: actions/upload-artifact@v4
+
         with:
           name: frontend-build-${{ github.run_id }}
+
           path: |
             frontend/dist
             frontend/build
+
           retention-days: 7
+
           if-no-files-found: ignore
 
+
   # ---------------------------------------------------------------------------
-  # ML / OCR workbench.
+  # ML / OCR
   # ---------------------------------------------------------------------------
   ml:
     name: ML / OCR checks
+
     needs: identify
+
     if: needs.identify.outputs.has_ml == 'true'
+
     runs-on: ubuntu-latest
 
     steps:
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
@@ -372,8 +465,11 @@ jobs:
         working-directory: ml
         run: |
           set +e
+
           pytest
+
           code=$?
+
           set -e
 
           if [ "$code" -eq 5 ]; then
@@ -383,18 +479,23 @@ jobs:
 
           exit $code
 
+
   # ---------------------------------------------------------------------------
-  # Container images must actually build before Milestone 4.
+  # Docker
   # ---------------------------------------------------------------------------
   docker:
     name: Docker build
+
     needs: identify
+
     if: >-
       needs.identify.outputs.has_backend_docker == 'true' ||
       needs.identify.outputs.has_frontend_docker == 'true'
+
     runs-on: ubuntu-latest
 
     steps:
+
       - uses: actions/checkout@v4
 
       - uses: docker/setup-buildx-action@v3
@@ -402,6 +503,7 @@ jobs:
       - name: Build backend image
         if: needs.identify.outputs.has_backend_docker == 'true'
         uses: docker/build-push-action@v6
+
         with:
           context: ./backend
           push: false
@@ -410,23 +512,36 @@ jobs:
       - name: Build frontend image
         if: needs.identify.outputs.has_frontend_docker == 'true'
         uses: docker/build-push-action@v6
+
         with:
           context: ./frontend
           push: false
           tags: pillsync-frontend:ci
 
+
   # ---------------------------------------------------------------------------
-  # One job to look at when you want to know whether the push passed.
+  # Final CI status
   # ---------------------------------------------------------------------------
   ci-status:
     name: CI status
+
     runs-on: ubuntu-latest
-    needs: [identify, repo-checks, backend, frontend, ml, docker]
+
+    needs:
+      - identify
+      - repo-checks
+      - backend
+      - frontend
+      - ml
+      - docker
+
     if: always()
 
     steps:
+
       - name: Summarise
         shell: bash
+
         env:
           IDENTIFY: ${{ needs.identify.result }}
           REPO_CHECKS: ${{ needs.repo-checks.result }}
@@ -435,6 +550,7 @@ jobs:
           ML_CHECKS: ${{ needs.ml.result }}
           DOCKER: ${{ needs.docker.result }}
           BRANCH: ${{ github.ref_name }}
+
         run: |
           {
             echo "### CI result for \`$BRANCH\`"
@@ -455,7 +571,9 @@ jobs:
 
           for result in "$IDENTIFY" "$REPO_CHECKS" "$BACKEND" "$FRONTEND" "$ML_CHECKS" "$DOCKER"; do
             case "$result" in
-              failure|cancelled) failed=1 ;;
+              failure|cancelled)
+                failed=1
+                ;;
             esac
           done
 
