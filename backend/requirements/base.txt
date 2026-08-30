@@ -1,42 +1,40 @@
 # Runtime dependencies for the PillSync backend.
 # Pin a version when you add a package so every branch installs the same thing.
 #
-# Web framework (pick Django REST Framework or FastAPI, not both)
-# django==5.0.*
-# djangorestframework==3.15.*
-# django-cors-headers==4.*
+# Web framework
 fastapi==0.115.6
 uvicorn[standard]==0.32.1
-#
+
 # Auth
 python-jose==3.3.0
-# djangorestframework-simplejwt==5.*
-# django-oauth-toolkit==3.*
-#
+
 # Database
 sqlalchemy==2.0.36
-# psycopg[binary]==3.*
-#
+psycopg[binary]==3.*
+
 # Background jobs / scheduling
 # celery==5.*
 # redis==5.*
 # django-celery-beat==2.*
-#
+
 # OCR and NLP
 # pytesseract==0.3.*
 # Pillow==11.*
 # opencv-python-headless==4.*
 # spacy==3.*
 # openai==1.*
-#
+
 # Notifications
 # firebase-admin==6.*
 # twilio==9.*
 # sendgrid==6.*
-#
+
 # Utilities
 # python-dotenv==1.*
 email-validator==2.2.0
+
+# Pydantic
 # pydantic==2.*
 
+# HTTP
 httpx==0.28.1
