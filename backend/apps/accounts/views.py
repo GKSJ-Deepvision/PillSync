@@ -3,24 +3,10 @@ from sqlalchemy.orm import Session
 
 from apps.accounts.dependencies import get_current_user
 from apps.accounts.models import User, UserRole
-from apps.accounts.permissions import (
-    require_admin,
-    require_caregiver,
-    require_patient,
-)
-from apps.accounts.schemas import (
-    LoginRequest,
-    TokenResponse,
-    UserRegister,
-    UserResponse,
-)
-from apps.accounts.services.auth import (
-    create_access_token,
-    hash_password,
-    verify_password,
-)
+from apps.accounts.permissions import require_admin, require_caregiver, require_patient
+from apps.accounts.schemas import LoginRequest, TokenResponse, UserRegister, UserResponse
+from apps.accounts.services.auth import create_access_token, hash_password, verify_password
 from config.database import get_db
-
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
