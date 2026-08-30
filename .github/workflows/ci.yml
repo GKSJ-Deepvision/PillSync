@@ -192,19 +192,19 @@ jobs:
           else
             echo "pytesseract not in requirements yet - skipping Tesseract install."
           fi
-
       - name: Install dependencies
         shell: bash
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements/dev.txt ]; then
             pip install -r requirements/dev.txt
+          elif [ -f requirements/base.txt ]; then
+            pip install -r requirements/base.txt
           elif [ -f requirements.txt ]; then
             pip install -r requirements.txt
           fi
           # Guarantee the tools CI needs, even if the branch has not listed them.
           pip install ruff black isort pytest pytest-cov
-
       - name: Ruff (lint)
         run: ruff check . --output-format=github
 
