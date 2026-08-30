@@ -1,0 +1,5 @@
+.venv/
+.env
+*.db
+pillsync.db
+__pycache__/
