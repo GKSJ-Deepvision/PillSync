@@ -7,11 +7,13 @@ from config.main import app
 
 @pytest.fixture(autouse=True)
 def setup_database():
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
-    yield
-    Base.metadata.drop_all(bind=engine)
+    with engine.begin() as connection:
+        for table in reversed(Base.metadata.sorted_tables):
+            connection.exec_driver_sql(
+                f'DROP TABLE IF EXISTS "{table.name}" CASCADE'
+            )
 
+    Base.metadata.create_all(bind=engine)
 
 @pytest.fixture
 def client():
