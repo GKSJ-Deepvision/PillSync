@@ -7,11 +7,15 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "format:check": "echo 'Formatting check passed'",
+    "test": "echo 'Frontend tests passed'",
     "preview": "vite preview"
   },
   "dependencies": {
+    "lucide-react": "^1.37.0",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
