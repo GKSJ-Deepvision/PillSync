@@ -1,15 +1,25 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from config.database import Base, engine
 from config.main import app
 
-Base.metadata.drop_all(bind=engine)
-Base.metadata.create_all(bind=engine)
 
-client = TestClient(app)
+@pytest.fixture(autouse=True)
+def setup_database():
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    yield
+    Base.metadata.drop_all(bind=engine)
 
 
-def test_register_user():
+@pytest.fixture
+def client():
+    with TestClient(app) as test_client:
+        yield test_client
+
+
+def register_test_user(client):
     response = client.post(
         "/auth/register",
         json={
@@ -20,13 +30,20 @@ def test_register_user():
     )
 
     assert response.status_code == 201
-    data = response.json()
+    return response
 
+
+def test_register_user(client):
+    response = register_test_user(client)
+
+    data = response.json()
     assert data["email"] == "patient@test.com"
     assert data["role"] == "PATIENT"
 
 
-def test_login_user():
+def test_login_user(client):
+    register_test_user(client)
+
     response = client.post(
         "/auth/login",
         json={
@@ -42,7 +59,9 @@ def test_login_user():
     assert data["token_type"] == "bearer"
 
 
-def test_invalid_login():
+def test_invalid_login(client):
+    register_test_user(client)
+
     response = client.post(
         "/auth/login",
         json={
@@ -54,13 +73,15 @@ def test_invalid_login():
     assert response.status_code == 401
 
 
-def test_protected_endpoint_without_token():
+def test_protected_endpoint_without_token(client):
     response = client.get("/auth/me")
 
     assert response.status_code == 401
 
 
-def test_patient_role_access():
+def test_patient_role_access(client):
+    register_test_user(client)
+
     login_response = client.post(
         "/auth/login",
         json={
