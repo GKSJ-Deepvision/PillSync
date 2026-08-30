@@ -186,8 +186,7 @@ jobs:
       POSTGRES_HOST: localhost
       POSTGRES_PORT: "5432"
 
-      DATABASE_URL: postgresql://pillsync:pillsync@localhost:5432/pillsync_test
-
+      DATABASE_URL: postgresql+psycopg://pillsync:pillsync@localhost:5432/pillsync_test
     steps:
 
       - uses: actions/checkout@v4
