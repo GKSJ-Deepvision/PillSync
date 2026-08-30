@@ -34,9 +34,7 @@ def register(
     user_data: UserRegister,
     db: Session = Depends(get_db),
 ):
-    existing_user = db.query(User).filter(
-        User.email == user_data.email
-    ).first()
+    existing_user = db.query(User).filter(User.email == user_data.email).first()
 
     if existing_user:
         raise HTTPException(
@@ -66,9 +64,7 @@ def login(
     login_data: LoginRequest,
     db: Session = Depends(get_db),
 ):
-    user = db.query(User).filter(
-        User.email == login_data.email
-    ).first()
+    user = db.query(User).filter(User.email == login_data.email).first()
 
     if not user or not verify_password(
         login_data.password,
