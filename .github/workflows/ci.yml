@@ -1,13 +1,11 @@
 name: CI
 
-# Runs on every push to every branch.
 on:
   push:
     branches:
       - "**"
   workflow_dispatch:
 
-# Cancel an older CI run when a newer push happens on the same branch.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -21,9 +19,9 @@ env:
 
 jobs:
 
-  # ---------------------------------------------------------------------------
-  # Identify what exists on this branch
-  # ---------------------------------------------------------------------------
+  # ============================================================
+  # IDENTIFY
+  # ============================================================
   identify:
     name: Branch policy
     runs-on: ubuntu-latest
@@ -42,12 +40,12 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Verify the branch belongs to a roster intern
+      - name: Verify branch
         env:
           BRANCH_NAME: ${{ github.ref_name }}
         run: python .github/scripts/check_branch_policy.py
 
-      - name: Detect what has been built so far
+      - name: Detect project areas
         id: detect
         shell: bash
         run: |
@@ -64,12 +62,13 @@ jobs:
           fi
 
           has_ml=false
-          if find ml -name '*.py' | grep -q .; then
+          if find ml -name '*.py' 2>/dev/null | grep -q .; then
             has_ml=true
           fi
 
           has_backend_docker=false
-          if [ -f backend/Dockerfile ] && { [ -f backend/manage.py ] || [ -f backend/config/main.py ]; }; then
+          if [ -f backend/Dockerfile ] && \
+             { [ -f backend/manage.py ] || [ -f backend/config/main.py ]; }; then
             has_backend_docker=true
           fi
 
@@ -87,21 +86,21 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
           {
-            echo "### What CI found on this branch"
+            echo "### CI Detection"
             echo ""
             echo "| Area | Present |"
             echo "|---|---|"
-            echo "| Backend Python code | $has_backend |"
-            echo "| Frontend package.json | $has_frontend |"
-            echo "| ML / OCR code | $has_ml |"
-            echo "| Backend image buildable | $has_backend_docker |"
-            echo "| Frontend image buildable | $has_frontend_docker |"
+            echo "| Backend | $has_backend |"
+            echo "| Frontend | $has_frontend |"
+            echo "| ML | $has_ml |"
+            echo "| Backend Docker | $has_backend_docker |"
+            echo "| Frontend Docker | $has_frontend_docker |"
           } >> "$GITHUB_STEP_SUMMARY"
 
 
-  # ---------------------------------------------------------------------------
-  # Repository checks
-  # ---------------------------------------------------------------------------
+  # ============================================================
+  # REPOSITORY CHECKS
+  # ============================================================
   repo-checks:
     name: Repository checks
     runs-on: ubuntu-latest
@@ -129,14 +128,14 @@ jobs:
         if: always()
         run: python .github/scripts/check_structure.py
 
-      - name: Validate YAML and JSON syntax
+      - name: Validate YAML and JSON
         if: always()
         run: python .github/scripts/check_config_syntax.py
 
 
-  # ---------------------------------------------------------------------------
-  # Backend
-  # ---------------------------------------------------------------------------
+  # ============================================================
+  # BACKEND
+  # ============================================================
   backend:
     name: Backend (lint + tests)
 
@@ -150,6 +149,9 @@ jobs:
       run:
         working-directory: backend
 
+    # ----------------------------------------------------------
+    # PostgreSQL test database
+    # ----------------------------------------------------------
     services:
       postgres:
         image: postgres:16-alpine
@@ -163,18 +165,19 @@ jobs:
           - 5432:5432
 
         options: >-
-          --health-cmd="pg_isready -U pillsync"
+          --health-cmd="pg_isready -U pillsync -d pillsync_test"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
 
+    # ----------------------------------------------------------
+    # Backend environment
+    # IMPORTANT:
+    # These credentials MUST match the PostgreSQL service above.
+    # ----------------------------------------------------------
     env:
-      DJANGO_SETTINGS_MODULE: config.settings.dev
-
       PYTHONPATH: .
-
       SECRET_KEY: ci-only-not-a-real-secret
-
       DEBUG: "False"
 
       POSTGRES_DB: pillsync_test
@@ -182,6 +185,8 @@ jobs:
       POSTGRES_PASSWORD: pillsync
       POSTGRES_HOST: localhost
       POSTGRES_PORT: "5432"
+
+      DATABASE_URL: postgresql://pillsync:pillsync@localhost:5432/pillsync_test
 
     steps:
 
@@ -193,32 +198,38 @@ jobs:
           cache: pip
           cache-dependency-path: backend/requirements/*.txt
 
-
-      # ---------------------------------------------------------------------
-      # Database
-      # ---------------------------------------------------------------------
-      - name: Point the test database at the service container
+      # --------------------------------------------------------
+      # Wait for PostgreSQL
+      # --------------------------------------------------------
+      - name: Wait for PostgreSQL
+        shell: bash
         run: |
-          echo "DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}" >> "$GITHUB_ENV"
+          for i in {1..30}; do
+            if pg_isready -h localhost -p 5432 -U pillsync -d pillsync_test; then
+              echo "PostgreSQL is ready."
+              break
+            fi
 
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
 
-      # ---------------------------------------------------------------------
+      # --------------------------------------------------------
       # Tesseract
-      # ---------------------------------------------------------------------
-      - name: Install Tesseract (only if the branch uses OCR)
+      # --------------------------------------------------------
+      - name: Install Tesseract
         shell: bash
         run: |
           if grep -rqiE '^[[:space:]]*pytesseract' requirements/ 2>/dev/null; then
             sudo apt-get update -qq
             sudo apt-get install -y -qq tesseract-ocr libtesseract-dev
           else
-            echo "pytesseract not in requirements yet - skipping Tesseract install."
+            echo "pytesseract not found - skipping Tesseract."
           fi
 
-
-      # ---------------------------------------------------------------------
+      # --------------------------------------------------------
       # Python dependencies
-      # ---------------------------------------------------------------------
+      # --------------------------------------------------------
       - name: Install dependencies
         shell: bash
         run: |
@@ -236,59 +247,59 @@ jobs:
             pip install -r requirements.txt
           fi
 
-          # CI tools
           pip install ruff black isort pytest pytest-cov
 
-          # Authentication and PostgreSQL dependencies
+          # Required authentication and PostgreSQL drivers
           pip install "pwdlib[argon2]" "psycopg[binary]"
 
-
-      # ---------------------------------------------------------------------
-      # Verify dependencies
-      # ---------------------------------------------------------------------
+      # --------------------------------------------------------
+      # Verify required packages
+      # --------------------------------------------------------
       - name: Verify backend dependencies
         run: |
           python -c "import pwdlib; print('pwdlib OK')"
           python -c "import psycopg; print('psycopg OK')"
 
+      # --------------------------------------------------------
+      # Verify database configuration
+      # --------------------------------------------------------
+      - name: Verify database configuration
+        run: |
+          python -c "import os; print('DATABASE_URL:', os.environ.get('DATABASE_URL'))"
 
-      # ---------------------------------------------------------------------
+      # --------------------------------------------------------
       # Ruff
-      # ---------------------------------------------------------------------
-      - name: Ruff (lint)
+      # --------------------------------------------------------
+      - name: Ruff
         run: ruff check . --output-format=github
 
-
-      # ---------------------------------------------------------------------
+      # --------------------------------------------------------
       # Black
-      # ---------------------------------------------------------------------
-      - name: Black (formatting)
+      # --------------------------------------------------------
+      - name: Black
         run: black --check --diff .
 
-
-      # ---------------------------------------------------------------------
+      # --------------------------------------------------------
       # isort
-      # ---------------------------------------------------------------------
-      - name: isort (import order)
+      # --------------------------------------------------------
+      - name: isort
         run: isort --check-only --diff .
 
-
-      # ---------------------------------------------------------------------
+      # --------------------------------------------------------
       # Django checks
-      # ---------------------------------------------------------------------
+      # --------------------------------------------------------
       - name: Django system checks
         shell: bash
         run: |
           if [ -f manage.py ]; then
             python manage.py check
           else
-            echo "No manage.py yet - skipping Django checks."
+            echo "No manage.py - skipping Django checks."
           fi
 
-
-      # ---------------------------------------------------------------------
+      # --------------------------------------------------------
       # Pytest
-      # ---------------------------------------------------------------------
+      # --------------------------------------------------------
       - name: Pytest
         shell: bash
         run: |
@@ -305,17 +316,16 @@ jobs:
           set -e
 
           if [ "$code" -eq 5 ]; then
-            echo "::warning::No tests were collected. Add tests under backend/tests/ or backend/apps/<app>/tests/."
+            echo "::warning::No tests were collected."
             echo "> Backend: no tests collected yet." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
           exit $code
 
-
-      # ---------------------------------------------------------------------
+      # --------------------------------------------------------
       # Coverage
-      # ---------------------------------------------------------------------
+      # --------------------------------------------------------
       - name: Coverage summary
         if: always()
         shell: bash
@@ -324,10 +334,9 @@ jobs:
             python "$GITHUB_WORKSPACE/.github/scripts/coverage_summary.py" coverage.xml
           fi
 
-
-      # ---------------------------------------------------------------------
-      # Test artifacts
-      # ---------------------------------------------------------------------
+      # --------------------------------------------------------
+      # Upload test artifacts
+      # --------------------------------------------------------
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -340,13 +349,12 @@ jobs:
             backend/coverage.xml
 
           retention-days: 14
-
           if-no-files-found: ignore
 
 
-  # ---------------------------------------------------------------------------
-  # Frontend
-  # ---------------------------------------------------------------------------
+  # ============================================================
+  # FRONTEND
+  # ============================================================
   frontend:
     name: Frontend (lint + tests + build)
 
@@ -378,7 +386,7 @@ jobs:
           if [ -f package-lock.json ]; then
             npm ci
           else
-            echo "::warning file=frontend/package.json::No package-lock.json committed."
+            echo "::warning::No package-lock.json committed."
             npm install
           fi
 
@@ -391,17 +399,18 @@ jobs:
       - name: Tests
         shell: bash
         run: |
-          if find src tests -type f \( -name '*.test.*' -o -name '*.spec.*' \) 2>/dev/null | grep -q .; then
+          if find src tests -type f \
+            \( -name '*.test.*' -o -name '*.spec.*' \) 2>/dev/null | grep -q .; then
             npm test --if-present
           else
-            echo "::warning::No frontend test files found yet."
+            echo "::warning::No frontend test files found."
             echo "> Frontend: no test files yet." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Build
         run: npm run build --if-present
 
-      - name: Report which scripts are defined
+      - name: Report scripts
         if: always()
         shell: bash
         run: python3 "$GITHUB_WORKSPACE/.github/scripts/frontend_scripts_report.py"
@@ -418,13 +427,12 @@ jobs:
             frontend/build
 
           retention-days: 7
-
           if-no-files-found: ignore
 
 
-  # ---------------------------------------------------------------------------
+  # ============================================================
   # ML / OCR
-  # ---------------------------------------------------------------------------
+  # ============================================================
   ml:
     name: ML / OCR checks
 
@@ -457,7 +465,7 @@ jobs:
         working-directory: ml
         run: ruff check . --output-format=github
 
-      - name: Check notebooks have no stored outputs
+      - name: Check notebooks
         run: python .github/scripts/check_notebooks.py
 
       - name: Pytest
@@ -480,9 +488,9 @@ jobs:
           exit $code
 
 
-  # ---------------------------------------------------------------------------
-  # Docker
-  # ---------------------------------------------------------------------------
+  # ============================================================
+  # DOCKER
+  # ============================================================
   docker:
     name: Docker build
 
@@ -519,9 +527,9 @@ jobs:
           tags: pillsync-frontend:ci
 
 
-  # ---------------------------------------------------------------------------
-  # Final CI status
-  # ---------------------------------------------------------------------------
+  # ============================================================
+  # FINAL CI STATUS
+  # ============================================================
   ci-status:
     name: CI status
 
@@ -564,12 +572,19 @@ jobs:
             echo "| ML / OCR | $ML_CHECKS |"
             echo "| Docker | $DOCKER |"
             echo ""
-            echo "\`skipped\` means that area has no code on this branch yet - that is expected early on."
+            echo "\`skipped\` means that area has no code on this branch yet."
           } >> "$GITHUB_STEP_SUMMARY"
 
           failed=0
 
-          for result in "$IDENTIFY" "$REPO_CHECKS" "$BACKEND" "$FRONTEND" "$ML_CHECKS" "$DOCKER"; do
+          for result in \
+            "$IDENTIFY" \
+            "$REPO_CHECKS" \
+            "$BACKEND" \
+            "$FRONTEND" \
+            "$ML_CHECKS" \
+            "$DOCKER"
+          do
             case "$result" in
               failure|cancelled)
                 failed=1
@@ -578,8 +593,8 @@ jobs:
           done
 
           if [ "$failed" -eq 1 ]; then
-            echo "::error::At least one CI job did not pass. Open the failing job above for the details."
+            echo "::error::At least one CI job failed."
             exit 1
           fi
 
-          echo "All checks that applied to this branch passed."
+          echo "All applicable CI checks passed."
