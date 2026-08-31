@@ -1,48 +1,32 @@
 import { apiClient, USE_MOCK_API } from './client';
 
+const createMockToken = (type) =>
+  `mock-${type}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
 // Mock implementation
 const mockAuthApi = {
   login: async (email, password) => {
     await new Promise((resolve) => setTimeout(resolve, 800));
 
-    if (email === 'patient@example.com' && password === 'password') {
-      return {
-        accessToken: 'mock-access-token-patient',
-        refreshToken: 'mock-refresh-token-patient',
-        user: {
-          id: '1',
-          email,
-          name: 'John Patient',
-          role: 'patient',
-          avatar: 'https://ui-avatars.com/api/?name=John+Patient&background=0D8ABC&color=fff',
-        },
-      };
-    }
+    if (
+      (email === 'patient@example.com' && password === 'password') ||
+      (email === 'caregiver@example.com' && password === 'password') ||
+      (email === 'admin@example.com' && password === 'password')
+    ) {
+      const isPatient = email.startsWith('patient');
+      const isCaregiver = email.startsWith('caregiver');
 
-    if (email === 'caregiver@example.com' && password === 'password') {
       return {
-        accessToken: 'mock-access-token-caregiver',
-        refreshToken: 'mock-refresh-token-caregiver',
+        accessToken: createMockToken('access'),
+        refreshToken: createMockToken('refresh'),
         user: {
-          id: '2',
+          id: isPatient ? '1' : isCaregiver ? '2' : '3',
           email,
-          name: 'Jane Caregiver',
-          role: 'caregiver',
-          avatar: 'https://ui-avatars.com/api/?name=Jane+Caregiver&background=7C3AED&color=fff',
-        },
-      };
-    }
-
-    if (email === 'admin@example.com' && password === 'password') {
-      return {
-        accessToken: 'mock-access-token-admin',
-        refreshToken: 'mock-refresh-token-admin',
-        user: {
-          id: '3',
-          email,
-          name: 'Admin User',
-          role: 'admin',
-          avatar: 'https://ui-avatars.com/api/?name=Admin+User&background=DC2626&color=fff',
+          name: isPatient ? 'John Patient' : isCaregiver ? 'Jane Caregiver' : 'Admin User',
+          role: isPatient ? 'patient' : isCaregiver ? 'caregiver' : 'admin',
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+            isPatient ? 'John Patient' : isCaregiver ? 'Jane Caregiver' : 'Admin User'
+          )}`,
         },
       };
     }
@@ -54,14 +38,14 @@ const mockAuthApi = {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     return {
-      accessToken: 'mock-access-token-new',
-      refreshToken: 'mock-refresh-token-new',
+      accessToken: createMockToken('access'),
+      refreshToken: createMockToken('refresh'),
       user: {
         id: Date.now(),
         email: data.email,
         name: data.name,
         role: 'patient',
-        avatar: `https://ui-avatars.com/api/?name=${data.name}&background=0D8ABC&color=fff`,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}`,
       },
     };
   },
