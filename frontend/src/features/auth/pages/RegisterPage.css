@@ -1,0 +1,19 @@
+/* Register Page Styles */
+.register-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  padding: 2rem 1rem;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 32rem;
+  border-radius: 1.5rem;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  padding: 2.25rem 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
+}

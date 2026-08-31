@@ -45,12 +45,12 @@ export function Navbar() {
       <div className="navbar-container">
         <div className="navbar-content">
           {/* Mobile Brand (visible only on mobile) */}
-          <div className="flex items-center gap-3 md:hidden">
+          <div className="flex items-center gap-2.5 md:hidden">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
               <Pill className="h-4 w-4" />
             </div>
-            <span className="text-lg font-bold tracking-tight text-indigo-950 font-serif">
-              Mind<span className="text-indigo-600">Care.</span>
+            <span className="text-lg font-bold tracking-tight text-slate-900">
+              Pill<span className="text-indigo-600">Sync</span>
             </span>
           </div>
 

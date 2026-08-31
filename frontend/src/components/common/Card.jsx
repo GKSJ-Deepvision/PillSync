@@ -1,3 +1,5 @@
+import './Card.css';
+
 export function Card({ children, className = '', hoverable = false, ...props }) {
   return (
     <div

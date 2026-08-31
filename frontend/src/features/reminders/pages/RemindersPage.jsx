@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { reminderApi } from '../../../api/reminders';
 import { Layout } from '../../../components/layout';
-import { Card, CardBody } from '../../../components/common/Card';
-import { Button, Badge, EmptyState, CardSkeleton, Alert } from '../../../components/common';
-import { Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Badge } from '../../../components/common/Badge';
+import { Button, EmptyState, CardSkeleton, Alert } from '../../../components/common';
+import { Clock, CheckCircle, AlertCircle, Calendar, Plus, RefreshCw } from 'lucide-react';
+import './RemindersPage.css';
 
 export function RemindersPage() {
   const [reminders, setReminders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actioningId, setActioningId] = useState(null);
+  const [activeTab, setActiveTab] = useState('all');
 
   useEffect(() => {
     let cancelled = false;
@@ -95,194 +97,173 @@ export function RemindersPage() {
   };
 
   const groupedReminders = {
+    all: reminders,
     upcoming: reminders.filter((r) => r.status === 'upcoming'),
     taken: reminders.filter((r) => r.status === 'taken'),
     missed: reminders.filter((r) => r.status === 'missed'),
     snoozed: reminders.filter((r) => r.status === 'snoozed'),
   };
 
-  const totalReminders = reminders.length;
+  const displayedReminders = groupedReminders[activeTab] || reminders;
 
+  const totalReminders = reminders.length;
+  const takenCount = groupedReminders.taken.length;
+  const missedCount = groupedReminders.missed.length;
   const completionRate =
-    totalReminders > 0 ? Math.round((groupedReminders.taken.length / totalReminders) * 100) : 0;
+    totalReminders > 0 ? Math.round((takenCount / totalReminders) * 100) : 0;
 
   return (
     <Layout>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Reminders</h1>
-        <p className="text-gray-600 mt-1">Manage your medication reminders</p>
-      </div>
-
-      {error && (
-        <Alert type="danger" message={error} onClose={() => setError('')} className="mb-6" />
-      )}
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card>
-          <CardBody>
-            <p className="text-gray-600 text-sm">Today's Reminders</p>
-            <p className="text-3xl font-bold text-gray-900 mt-2">{totalReminders}</p>
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardBody>
-            <p className="text-gray-600 text-sm">Taken</p>
-            <p className="text-3xl font-bold text-green-600 mt-2">
-              {groupedReminders.taken.length}
+      <div className="reminders-container">
+        {/* Header */}
+        <div className="reminders-header">
+          <div>
+            <h1 className="reminders-title">Appointments & Dose Reminders</h1>
+            <p className="reminders-subtitle">
+              Real-time daily schedule and automated SMS/push notification timestamps
             </p>
-          </CardBody>
-        </Card>
+          </div>
 
-        <Card>
-          <CardBody>
-            <p className="text-gray-600 text-sm">Missed</p>
-            <p className="text-3xl font-bold text-red-600 mt-2">{groupedReminders.missed.length}</p>
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardBody>
-            <p className="text-gray-600 text-sm">Completion Rate</p>
-            <p className="text-3xl font-bold text-blue-600 mt-2">{completionRate}%</p>
-          </CardBody>
-        </Card>
-      </div>
-
-      {loading ? (
-        <CardSkeleton count={3} />
-      ) : totalReminders === 0 ? (
-        <EmptyState
-          icon={Clock}
-          title="No reminders"
-          message="You don't have any reminders set up yet"
-        />
-      ) : (
-        <div className="space-y-8">
-          {/* Upcoming */}
-          {groupedReminders.upcoming.length > 0 && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Reminders</h2>
-
-              <div className="space-y-3">
-                {groupedReminders.upcoming.map((reminder) => (
-                  <Card key={reminder.id} hoverable>
-                    <CardBody>
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            {reminder.medicationName}
-                          </h3>
-
-                          <p className="text-gray-600 text-sm mt-1">
-                            {reminder.time} · {reminder.schedule} · {reminder.dosage}
-                          </p>
-                        </div>
-
-                        <Badge variant="primary">{reminder.schedule}</Badge>
-                      </div>
-
-                      <div className="flex gap-2 pt-4 border-t border-gray-100">
-                        <Button
-                          size="sm"
-                          variant="success"
-                          onClick={() => handleMarkTaken(reminder.id)}
-                          loading={actioningId === reminder.id}
-                          className="flex-1 flex items-center justify-center gap-2"
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                          Taken
-                        </Button>
-
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => handleSnooze(reminder.id)}
-                          loading={actioningId === reminder.id}
-                          className="flex-1"
-                        >
-                          Snooze (30m)
-                        </Button>
-
-                        <Button
-                          size="sm"
-                          variant="danger"
-                          onClick={() => handleMarkMissed(reminder.id)}
-                          loading={actioningId === reminder.id}
-                          className="flex-1"
-                        >
-                          Missed
-                        </Button>
-                      </div>
-                    </CardBody>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Taken */}
-          {groupedReminders.taken.length > 0 && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                Taken ({groupedReminders.taken.length})
-              </h2>
-
-              <div className="space-y-2">
-                {groupedReminders.taken.map((reminder) => (
-                  <Card key={reminder.id}>
-                    <CardBody>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900">{reminder.medicationName}</p>
-
-                          <p className="text-sm text-gray-600">
-                            {reminder.time} · {reminder.dosage}
-                          </p>
-                        </div>
-
-                        <Badge variant="success">Taken</Badge>
-                      </div>
-                    </CardBody>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Missed */}
-          {groupedReminders.missed.length > 0 && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-red-600" />
-                Missed ({groupedReminders.missed.length})
-              </h2>
-
-              <div className="space-y-2">
-                {groupedReminders.missed.map((reminder) => (
-                  <Card key={reminder.id}>
-                    <CardBody>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900">{reminder.medicationName}</p>
-
-                          <p className="text-sm text-gray-600">
-                            {reminder.time} · {reminder.dosage}
-                          </p>
-                        </div>
-
-                        <Badge variant="danger">Missed</Badge>
-                      </div>
-                    </CardBody>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-2xs">
+              <Calendar className="h-3.5 w-3.5 text-indigo-600" />
+              Today: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </span>
+          </div>
         </div>
-      )}
+
+        {error && (
+          <Alert type="danger" message={error} onClose={() => setError('')} />
+        )}
+
+        {/* 4 Stat KPI Cards */}
+        <div className="reminders-stats-grid">
+          <div className="reminders-stat-card">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Doses</p>
+            <p className="text-2xl font-black text-slate-900 mt-1">{totalReminders}</p>
+            <p className="text-[10px] font-semibold text-slate-500 mt-0.5">Scheduled for today</p>
+          </div>
+
+          <div className="reminders-stat-card">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Taken</p>
+            <p className="text-2xl font-black text-emerald-600 mt-1">{takenCount}</p>
+            <p className="text-[10px] font-semibold text-emerald-600 mt-0.5">Logged on time</p>
+          </div>
+
+          <div className="reminders-stat-card">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Missed / Skipped</p>
+            <p className="text-2xl font-black text-rose-600 mt-1">{missedCount}</p>
+            <p className="text-[10px] font-semibold text-rose-500 mt-0.5">Attention needed</p>
+          </div>
+
+          <div className="reminders-stat-card">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Completion Rate</p>
+            <p className="text-2xl font-black text-indigo-600 mt-1">{completionRate}%</p>
+            <p className="text-[10px] font-semibold text-indigo-600 mt-0.5">Overall daily score</p>
+          </div>
+        </div>
+
+        {/* Tab Filters */}
+        <div className="reminders-tabs">
+          {[
+            { id: 'all', label: `All Doses (${totalReminders})` },
+            { id: 'upcoming', label: `Upcoming (${groupedReminders.upcoming.length})` },
+            { id: 'taken', label: `Taken (${takenCount})` },
+            { id: 'missed', label: `Missed (${missedCount})` },
+            { id: 'snoozed', label: `Snoozed (${groupedReminders.snoozed.length})` },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`reminders-tab-btn ${
+                activeTab === tab.id ? 'reminders-tab-btn-active' : ''
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Reminders List */}
+        {loading ? (
+          <CardSkeleton count={3} />
+        ) : displayedReminders.length === 0 ? (
+          <EmptyState
+            icon={Clock}
+            title="No reminders in this view"
+            message="No dose events match the selected status filter."
+          />
+        ) : (
+          <div className="reminders-list">
+            {displayedReminders.map((reminder) => (
+              <div key={reminder.id} className="reminder-card">
+                <div className="flex items-start gap-3.5">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+                    <Clock className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-bold text-indigo-700">
+                        {reminder.time} · {reminder.schedule}
+                      </span>
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-extrabold capitalize ${
+                          reminder.status === 'taken'
+                            ? 'bg-emerald-50 text-emerald-700'
+                            : reminder.status === 'missed'
+                            ? 'bg-rose-50 text-rose-700'
+                            : reminder.status === 'snoozed'
+                            ? 'bg-amber-50 text-amber-700'
+                            : 'bg-slate-100 text-slate-700'
+                        }`}
+                      >
+                        ● {reminder.status}
+                      </span>
+                    </div>
+
+                    <h3 className="text-sm font-black text-slate-900 mt-1">
+                      {reminder.medicationName || reminder.name}
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">{reminder.dosage} · With water</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {reminder.status !== 'taken' && (
+                    <button
+                      onClick={() => handleMarkTaken(reminder.id)}
+                      disabled={actioningId === reminder.id}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 transition cursor-pointer shadow-2xs"
+                    >
+                      <CheckCircle className="h-3.5 w-3.5" />
+                      Mark Taken
+                    </button>
+                  )}
+
+                  {reminder.status === 'upcoming' && (
+                    <>
+                      <button
+                        onClick={() => handleSnooze(reminder.id)}
+                        disabled={actioningId === reminder.id}
+                        className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                      >
+                        Snooze 30m
+                      </button>
+                      <button
+                        onClick={() => handleMarkMissed(reminder.id)}
+                        disabled={actioningId === reminder.id}
+                        className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100 transition cursor-pointer"
+                      >
+                        Missed
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </Layout>
   );
 }

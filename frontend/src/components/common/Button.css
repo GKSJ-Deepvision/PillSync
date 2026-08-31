@@ -1,0 +1,10 @@
+/* Button Component Styles */
+.btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border-radius: 0.875rem;
+  transition: all 150ms ease;
+  cursor: pointer;
+}

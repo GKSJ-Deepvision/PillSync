@@ -1,3 +1,5 @@
+import './EmptyState.css';
+
 export function EmptyState({ icon: Icon, title, message, action, className = '' }) {
   return (
     <div className={`flex flex-col items-center justify-center py-12 ${className}`}>

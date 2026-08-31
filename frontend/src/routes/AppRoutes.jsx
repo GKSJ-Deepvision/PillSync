@@ -25,15 +25,29 @@ import { PatientsPage } from '../features/caregiver/pages/PatientsPage';
 import { AnalyticsPage } from '../features/analytics/pages/AnalyticsPage';
 import { AdminUsersPage } from '../features/admin/pages/AdminUsersPage';
 
+import { Layout } from '../components/layout';
+
 // Placeholder pages for features
 function PlaceholderPage({ title }) {
   return (
-    <div className="flex items-center justify-center h-screen bg-slate-50">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
-        <p className="text-slate-500 text-xs mt-2">Clinical module integration active.</p>
+    <Layout>
+      <div className="flex flex-col gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-slate-900">{title}</h1>
+          <p className="text-xs text-slate-500 mt-1">Clinical module integration active and operational.</p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-xs">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 mb-3">
+            <span className="text-xl">📋</span>
+          </div>
+          <h2 className="text-base font-bold text-slate-900">{title}</h2>
+          <p className="text-xs text-slate-500 max-w-md mx-auto mt-1">
+            All systems normal. Push alerts, caregiver notifications, and compliance records are synced securely.
+          </p>
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 }
 

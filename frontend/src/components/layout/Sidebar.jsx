@@ -53,10 +53,14 @@ export function Sidebar() {
       <div>
         {/* Brand Header */}
         <div className="sidebar-brand-header">
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <span className="sidebar-brand-logo">
-              Mind<span className="sidebar-brand-accent">Care.</span>
-            </span>
+          <Link to="/dashboard" className="flex items-center gap-3 text-decoration-none">
+            <div className="sidebar-logo-icon-box">
+              <Pill className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="sidebar-brand-title">PillSync</h2>
+              <p className="sidebar-brand-subtitle">Smart Medication SaaS</p>
+            </div>
           </Link>
         </div>
 
@@ -91,40 +95,29 @@ export function Sidebar() {
       </div>
 
       {/* Role Badge & Quick Switcher Card */}
-      <div className="sidebar-premium-container">
-        <div className="sidebar-premium-card">
-          <div className="sidebar-premium-icon">
-            <Shield className="h-5 w-5 fill-amber-300 text-amber-300" />
-          </div>
+      <div className="sidebar-role-card">
+        <div className="sidebar-role-header">
+          <span className="sidebar-role-title">Active Persona</span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
+            <Shield className="h-3 w-3" />
+            {userRole}
+          </span>
+        </div>
 
-          <h4 className="sidebar-premium-title">
-            {userRole === 'admin'
-              ? 'Admin Director'
-              : userRole === 'caregiver'
-              ? 'Caregiver Portal'
-              : 'Patient Care'}
-          </h4>
-          <p className="sidebar-premium-subtitle">
-            Active Role: <span className="font-black uppercase tracking-wider text-amber-300">{userRole}</span>
-          </p>
-
-          {/* 1-Click Role Switcher */}
-          <div className="mt-3 flex items-center justify-center gap-1">
-            {['patient', 'caregiver', 'admin'].map((role) => (
-              <button
-                key={role}
-                onClick={() => switchRole?.(role)}
-                className={`rounded-lg px-2 py-1 text-[10px] font-bold capitalize transition cursor-pointer ${
-                  userRole === role
-                    ? 'bg-white text-indigo-900 shadow-xs'
-                    : 'bg-white/20 text-white hover:bg-white/30'
-                }`}
-                title={`Switch persona to ${role}`}
-              >
-                {role}
-              </button>
-            ))}
-          </div>
+        {/* 1-Click Role Switcher */}
+        <div className="sidebar-role-pill-group">
+          {['patient', 'caregiver', 'admin'].map((role) => (
+            <button
+              key={role}
+              onClick={() => switchRole?.(role)}
+              className={`sidebar-role-btn ${
+                userRole === role ? 'sidebar-role-btn-active' : ''
+              }`}
+              title={`Switch view to ${role}`}
+            >
+              {role}
+            </button>
+          ))}
         </div>
       </div>
     </aside>

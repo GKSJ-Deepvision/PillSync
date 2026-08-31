@@ -1,0 +1,7 @@
+/* Card Component Styles */
+.card-surface {
+  border-radius: 1.25rem;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}

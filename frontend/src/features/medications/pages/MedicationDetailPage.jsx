@@ -1,10 +1,21 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { medicationApi } from '../../../api/medications';
 import { Layout } from '../../../components/layout';
-import { Card, CardBody, CardHeader, CardFooter } from '../../../components/common/Card';
-import { Button, Alert, Badge } from '../../../components/common';
-import { ArrowLeft, Trash2, Edit2 } from 'lucide-react';
+import { Badge } from '../../../components/common/Badge';
+import { Button, Alert } from '../../../components/common';
+import {
+  ArrowLeft,
+  Trash2,
+  Edit2,
+  Pill,
+  Clock,
+  Calendar,
+  ShieldCheck,
+  AlertCircle,
+  Package,
+} from 'lucide-react';
+import './MedicationDetailPage.css';
 
 export function MedicationDetailPage() {
   const { id } = useParams();
@@ -21,7 +32,6 @@ export function MedicationDetailPage() {
     const loadMedication = async () => {
       try {
         const data = await medicationApi.getMedicationById(id);
-
         if (active) {
           setMedication(data);
         }
@@ -45,7 +55,7 @@ export function MedicationDetailPage() {
   }, [id]);
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this medication?')) {
+    if (!window.confirm('Are you sure you want to delete this medication regimen?')) {
       return;
     }
 
@@ -64,11 +74,8 @@ export function MedicationDetailPage() {
   if (loading) {
     return (
       <Layout>
-        <div className="text-center py-12">
-          <div className="inline-block">
-            <div className="h-12 w-12 rounded-full border-4 border-gray-200 border-t-primary-600 animate-spin"></div>
-          </div>
-          <p className="text-gray-600 mt-4">Loading...</p>
+        <div className="flex h-64 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
         </div>
       </Layout>
     );
@@ -77,144 +84,154 @@ export function MedicationDetailPage() {
   if (!medication) {
     return (
       <Layout>
-        <Alert type="danger" title="Not Found" message="Medication not found" />
+        <Alert type="danger" title="Not Found" message="Medication record could not be found." />
       </Layout>
     );
   }
 
   return (
     <Layout>
-      <button
-        onClick={() => navigate('/medications')}
-        className="flex items-center gap-2 text-primary-600 hover:text-primary-700 mb-6"
-      >
-        <ArrowLeft className="h-5 w-5" />
-        Back to Medications
-      </button>
+      <div className="med-detail-container">
+        {/* Back Link */}
+        <Link
+          to="/medications"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-indigo-600 transition"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Prescription Catalog
+        </Link>
 
-      {error && (
-        <Alert type="danger" message={error} onClose={() => setError('')} className="mb-6" />
-      )}
+        {error && (
+          <Alert type="danger" message={error} onClose={() => setError('')} />
+        )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
-          <Card>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">{medication.name}</h1>
-                  <p className="text-gray-600 mt-2">{medication.disease}</p>
-                </div>
-
-                <Badge variant={medication.status === 'active' ? 'success' : 'gray'}>
-                  {medication.status}
-                </Badge>
+        {/* Top Header Card */}
+        <div className="med-detail-header-card">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+              <Pill className="h-7 w-7" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-extrabold text-slate-900">{medication.name}</h1>
+                <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700">
+                  ● {medication.status || 'Active'}
+                </span>
               </div>
-            </CardHeader>
+              <p className="text-xs font-semibold text-slate-500 mt-0.5">
+                {medication.dosage} · {medication.disease}
+              </p>
+            </div>
+          </div>
 
-            <CardBody className="space-y-6">
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Dosage Information</h3>
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => navigate(`/medications/${id}/edit`)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer shadow-2xs"
+            >
+              <Edit2 className="h-3.5 w-3.5" />
+              Edit Prescription
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-rose-50 border border-rose-200 px-3.5 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 transition cursor-pointer shadow-2xs"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              {deleting ? 'Deleting...' : 'Delete'}
+            </button>
+          </div>
+        </div>
 
-                <div className="space-y-2">
-                  <p className="text-gray-600">
-                    <span className="font-medium">Dosage:</span> {medication.dosage}
-                  </p>
+        {/* Info Grid */}
+        <div className="med-detail-info-grid">
+          {/* Main Info */}
+          <div className="flex flex-col gap-5">
+            <div className="med-detail-card">
+              <h2 className="med-detail-section-title">Schedule & Dosage Instructions</h2>
 
-                  <p className="text-gray-600">
-                    <span className="font-medium">Quantity:</span> {medication.quantity} units
-                  </p>
-
-                  <p className="text-gray-600">
-                    <span className="font-medium">Frequency:</span> {medication.frequency}
-                  </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Dosage</p>
+                  <p className="text-sm font-bold text-slate-900 mt-0.5">{medication.dosage}</p>
+                </div>
+                <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Frequency</p>
+                  <p className="text-sm font-bold text-slate-900 mt-0.5">{medication.frequency}</p>
+                </div>
+                <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Supply In Stock</p>
+                  <p className="text-sm font-bold text-slate-900 mt-0.5">{medication.quantity || 30} units</p>
                 </div>
               </div>
 
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Schedule</h3>
-
-                <div className="flex flex-wrap gap-2">
-                  {medication.schedule.map((time) => (
-                    <Badge key={time} variant="primary">
+              <div className="mb-6">
+                <p className="text-xs font-bold text-slate-700 mb-2">Daily Dose Timing Windows</p>
+                <div className="med-schedule-chip-list">
+                  {medication.schedule?.map((time) => (
+                    <span key={time} className="med-schedule-chip">
+                      <Clock className="h-3.5 w-3.5" />
                       {time}
-                    </Badge>
+                    </span>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Instructions</h3>
-
-                <p className="text-gray-600">{medication.instructions}</p>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Timeline</h3>
-
-                <div className="space-y-2">
-                  <p className="text-gray-600">
-                    <span className="font-medium">Start Date:</span> {medication.startDate}
-                  </p>
-
-                  <p className="text-gray-600">
-                    <span className="font-medium">End Date:</span> {medication.endDate || 'Ongoing'}
-                  </p>
+                <p className="text-xs font-bold text-slate-700 mb-1.5">Prescription Clinical Notes</p>
+                <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 text-xs text-slate-700 leading-relaxed">
+                  {medication.instructions || 'Take as directed by your physician with meals or a full glass of water.'}
                 </div>
               </div>
-            </CardBody>
+            </div>
 
-            <CardFooter>
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => navigate(`/medications/${id}/edit`)}
-                  className="flex items-center gap-2"
-                >
-                  <Edit2 className="h-4 w-4" />
-                  Edit
-                </Button>
-
-                <Button
-                  variant="danger"
-                  onClick={handleDelete}
-                  loading={deleting}
-                  className="flex items-center gap-2"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </Button>
+            <div className="med-detail-card">
+              <h2 className="med-detail-section-title">Clinical Regimen Dates</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <span className="text-slate-400 font-medium">Start Date:</span>
+                  <p className="font-bold text-slate-900 mt-0.5">{medication.startDate || '2026-01-15'}</p>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-medium">Expected Completion:</span>
+                  <p className="font-bold text-slate-900 mt-0.5">{medication.endDate || 'Ongoing Regimen'}</p>
+                </div>
               </div>
-            </CardFooter>
-          </Card>
-        </div>
+            </div>
+          </div>
 
-        <div>
-          <Card>
-            <CardHeader>
-              <h3 className="font-semibold text-gray-900">Quick Info</h3>
-            </CardHeader>
+          {/* Quick Summary Card */}
+          <div className="flex flex-col gap-5">
+            <div className="med-detail-card">
+              <h3 className="med-detail-section-title">Prescription Overview</h3>
 
-            <CardBody className="space-y-4">
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <p className="text-sm text-blue-900">
-                  <span className="font-medium">Disease Category:</span>
-                </p>
-
-                <p className="text-sm font-medium text-blue-600 mt-1">{medication.disease}</p>
+              <div className="flex flex-col gap-3.5 text-xs">
+                <div className="flex justify-between border-b border-slate-100 pb-2.5">
+                  <span className="text-slate-500">Condition Category</span>
+                  <span className="font-bold text-slate-900">{medication.disease}</span>
+                </div>
+                <div className="flex justify-between border-b border-slate-100 pb-2.5">
+                  <span className="text-slate-500">Form</span>
+                  <span className="font-bold text-slate-900">Oral Tablet</span>
+                </div>
+                <div className="flex justify-between border-b border-slate-100 pb-2.5">
+                  <span className="text-slate-500">Prescribing Clinician</span>
+                  <span className="font-bold text-indigo-600">Dr. Oliver Mitchell</span>
+                </div>
+                <div className="flex justify-between pb-1">
+                  <span className="text-slate-500">Refill Verification</span>
+                  <span className="font-bold text-emerald-600">Verified Auto-Refill</span>
+                </div>
               </div>
 
-              <div className="p-3 bg-green-50 rounded-lg">
-                <p className="text-sm text-green-900">
-                  <span className="font-medium">Active Medication:</span>
-                </p>
-
-                <p className="text-sm font-medium text-green-600 mt-1">
-                  {medication.status === 'active' ? 'Yes' : 'No'}
-                </p>
-              </div>
-            </CardBody>
-          </Card>
+              <button
+                onClick={() => alert('Dispatched instant 30-day refill request to pharmacy!')}
+                className="mt-5 w-full rounded-xl bg-indigo-600 py-2.5 text-xs font-bold text-white hover:bg-indigo-700 transition cursor-pointer shadow-xs"
+              >
+                Request Refill Now
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </Layout>

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { medicationApi } from '../../../api/medications';
 import { Layout } from '../../../components/layout';
-import { Card, CardBody, CardHeader, CardFooter } from '../../../components/common/Card';
 import { Button, Alert, Input } from '../../../components/common';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Save, Pill, Plus } from 'lucide-react';
+import './MedicationFormPage.css';
 
 export function MedicationFormPage() {
   const { id } = useParams();
@@ -106,12 +106,12 @@ export function MedicationFormPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
 
     if (!validateForm()) return;
 
     try {
       setSaving(true);
-      setError('');
 
       if (isEdit) {
         await medicationApi.updateMedication(id, formData);
@@ -131,11 +131,8 @@ export function MedicationFormPage() {
   if (loading) {
     return (
       <Layout>
-        <div className="text-center py-12">
-          <div className="inline-block">
-            <div className="h-12 w-12 rounded-full border-4 border-gray-200 border-t-primary-600 animate-spin"></div>
-          </div>
-          <p className="text-gray-600 mt-4">Loading...</p>
+        <div className="flex h-64 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
         </div>
       </Layout>
     );
@@ -143,136 +140,174 @@ export function MedicationFormPage() {
 
   return (
     <Layout>
-      <button
-        type="button"
-        onClick={() => navigate('/medications')}
-        className="flex items-center gap-2 text-primary-600 hover:text-primary-700 mb-6"
-      >
-        <ArrowLeft className="h-5 w-5" />
-        Back to Medications
-      </button>
+      <div className="med-form-container">
+        <Link
+          to="/medications"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-indigo-600 transition"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Prescriptions
+        </Link>
 
-      <Card>
-        <CardHeader>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {isEdit ? 'Edit Medication' : 'Add Medication'}
-          </h1>
-          <p className="text-gray-600 mt-1">
-            {isEdit ? 'Update medication details' : 'Add a new medication to your list'}
-          </p>
-        </CardHeader>
+        <div className="med-form-card">
+          <div className="mb-6 border-b border-slate-100 pb-4">
+            <h1 className="text-xl font-black text-slate-900">
+              {isEdit ? 'Edit Prescription Record' : 'Add New Prescription'}
+            </h1>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Enter clinical dosage, frequency, and supply instructions for automated tracking
+            </p>
+          </div>
 
-        <form onSubmit={handleSubmit}>
-          <CardBody className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {error && <Alert type="danger" message={error} onClose={() => setError('')} />}
 
-            <Input
-              label="Medication Name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Enter medication name"
-            />
+            <div className="med-form-grid">
+              <div className="med-form-full">
+                <label className="med-form-label">Medication Name *</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="e.g. Metformin HCl"
+                  required
+                  className="med-form-input"
+                />
+              </div>
 
-            <Input
-              label="Disease"
-              name="disease"
-              value={formData.disease}
-              onChange={handleChange}
-              placeholder="Enter disease"
-            />
+              <div>
+                <label className="med-form-label">Disease / Condition</label>
+                <input
+                  type="text"
+                  name="disease"
+                  value={formData.disease}
+                  onChange={handleChange}
+                  placeholder="e.g. Diabetes, Blood Pressure"
+                  className="med-form-input"
+                />
+              </div>
 
-            <Input
-              label="Dosage"
-              name="dosage"
-              value={formData.dosage}
-              onChange={handleChange}
-              placeholder="Example: 500mg"
-            />
+              <div>
+                <label className="med-form-label">Dosage *</label>
+                <input
+                  type="text"
+                  name="dosage"
+                  value={formData.dosage}
+                  onChange={handleChange}
+                  placeholder="e.g. 500mg, 1 tablet"
+                  required
+                  className="med-form-input"
+                />
+              </div>
 
-            <Input
-              label="Quantity"
-              name="quantity"
-              type="number"
-              value={formData.quantity}
-              onChange={handleChange}
-              placeholder="Enter quantity"
-            />
+              <div>
+                <label className="med-form-label">Quantity in Supply</label>
+                <input
+                  type="number"
+                  name="quantity"
+                  value={formData.quantity}
+                  onChange={handleChange}
+                  placeholder="e.g. 30"
+                  className="med-form-input"
+                />
+              </div>
 
-            <Input
-              label="Frequency"
-              name="frequency"
-              value={formData.frequency}
-              onChange={handleChange}
-              placeholder="Example: Twice daily"
-            />
+              <div>
+                <label className="med-form-label">Frequency *</label>
+                <input
+                  type="text"
+                  name="frequency"
+                  value={formData.frequency}
+                  onChange={handleChange}
+                  placeholder="e.g. Twice Daily, Once Daily"
+                  required
+                  className="med-form-input"
+                />
+              </div>
 
-            <Input
-              label="Schedule"
-              name="schedule"
-              value={formData.schedule.join(', ')}
-              onChange={handleScheduleChange}
-              placeholder="Example: 08:00, 20:00"
-            />
+              <div className="med-form-full">
+                <label className="med-form-label">Daily Dose Schedule (comma-separated 24h or 12h times)</label>
+                <input
+                  type="text"
+                  name="schedule"
+                  value={formData.schedule.join(', ')}
+                  onChange={handleScheduleChange}
+                  placeholder="e.g. 08:00 AM, 08:30 PM"
+                  className="med-form-input"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Instructions</label>
-              <textarea
-                name="instructions"
-                value={formData.instructions}
-                onChange={handleChange}
-                rows="4"
-                placeholder="Enter medication instructions"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
+              <div className="med-form-full">
+                <label className="med-form-label">Instructions & Special Notes</label>
+                <textarea
+                  name="instructions"
+                  value={formData.instructions}
+                  onChange={handleChange}
+                  rows="3"
+                  placeholder="e.g. Take immediately after meals with plenty of water."
+                  className="med-form-input"
+                />
+              </div>
+
+              <div>
+                <label className="med-form-label">Start Date *</label>
+                <input
+                  type="date"
+                  name="startDate"
+                  value={formData.startDate}
+                  onChange={handleChange}
+                  required
+                  className="med-form-input"
+                />
+              </div>
+
+              <div>
+                <label className="med-form-label">End Date (Optional)</label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={formData.endDate}
+                  onChange={handleChange}
+                  className="med-form-input"
+                />
+              </div>
+
+              <div>
+                <label className="med-form-label">Status</label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  className="med-form-input cursor-pointer"
+                >
+                  <option value="active">Active Regimen</option>
+                  <option value="inactive">Paused / Inactive</option>
+                </select>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Start Date"
-                name="startDate"
-                type="date"
-                value={formData.startDate}
-                onChange={handleChange}
-              />
-
-              <Input
-                label="End Date"
-                name="endDate"
-                type="date"
-                value={formData.endDate}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            <div className="med-form-actions">
+              <button
+                type="button"
+                onClick={() => navigate('/medications')}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
               >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-          </CardBody>
-
-          <CardFooter>
-            <div className="flex gap-3">
-              <Button type="button" variant="outline" onClick={() => navigate('/medications')}>
                 Cancel
-              </Button>
+              </button>
 
-              <Button type="submit" loading={saving}>
-                {isEdit ? 'Update Medication' : 'Add Medication'}
-              </Button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-2 text-xs font-bold text-white hover:bg-indigo-700 transition cursor-pointer shadow-xs"
+              >
+                <Save className="h-4 w-4" />
+                {saving ? 'Saving...' : isEdit ? 'Update Prescription' : 'Save Prescription'}
+              </button>
             </div>
-          </CardFooter>
-        </form>
-      </Card>
+          </form>
+        </div>
+      </div>
     </Layout>
   );
 }

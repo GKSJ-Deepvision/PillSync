@@ -1,117 +1,98 @@
-import { useState } from "react";
+import React, { useState } from 'react';
 import { useAuth } from '../context/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Layout } from '../components/layout';
 import { Badge } from '../components/common/Badge';
+import { Button } from '../components/common/Button';
 import {
-  MessageSquare,
-  Edit3,
+  Pill,
+  Clock,
+  TrendingUp,
+  AlertTriangle,
   CheckCircle2,
-  MoreHorizontal,
+  Calendar,
+  ArrowUpRight,
+  Shield,
   Phone,
-  Minus,
-  X,
+  MessageSquare,
   Send,
+  Sparkles,
   Users,
+  Activity,
+  ChevronRight,
+  AlertCircle,
+  Plus,
 } from 'lucide-react';
 import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
   BarChart,
   Bar,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
 } from 'recharts';
 import './DashboardPage.css';
 
-const PATIENT_PROFILES = [
-  {
-    id: 'p1',
-    name: 'Ibrahim Kadri',
-    age: 54,
-    consultation: 'Individual Therapy & Diabetes Regimen',
-    visited: 'Online',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    activityPie: [
-      { name: 'Quizzes', value: 4, color: '#f87171' },
-      { name: 'Articles', value: 7, color: '#6366f1' },
-      { name: 'Medication', value: 2, color: '#fbbf24' },
-    ],
-    selfControl: [
-      { label: 'Emotion Control', left: 45, right: 55 },
-      { label: 'Stress Management', left: 60, right: 40 },
-      { label: 'Daily Routine', left: 80, right: 20 },
-      { label: 'Self Esteem', left: 70, right: 30 },
-      { label: 'Diet & Rx Adherence', left: 90, right: 10 },
-    ],
-  },
-  {
-    id: 'p2',
-    name: 'Sarah Connor',
-    age: 48,
-    consultation: 'Cardiac Care & Cholesterol Protocol',
-    visited: 'Clinic Visited',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
-    activityPie: [
-      { name: 'Quizzes', value: 2, color: '#f87171' },
-      { name: 'Articles', value: 4, color: '#6366f1' },
-      { name: 'Medication', value: 5, color: '#fbbf24' },
-    ],
-    selfControl: [
-      { label: 'Emotion Control', left: 35, right: 65 },
-      { label: 'Stress Management', left: 40, right: 60 },
-      { label: 'Daily Routine', left: 65, right: 35 },
-      { label: 'Self Esteem', left: 55, right: 45 },
-      { label: 'Diet & Rx Adherence', left: 64, right: 36 },
-    ],
-  },
+const PATIENTS = [
+  { id: 'p1', name: 'Ibrahim Kadri', age: 54, condition: 'Type 2 Diabetes & Hypertension', adherence: 94, totalMeds: 4, todayDoses: 6, avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80' },
+  { id: 'p2', name: 'Sarah Connor', age: 48, condition: 'Cardiac Arrhythmia & High Cholesterol', adherence: 64, totalMeds: 5, todayDoses: 8, avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80' },
+  { id: 'p3', name: 'Michael Chang', age: 62, condition: 'Hypothyroidism', adherence: 82, totalMeds: 3, todayDoses: 4, avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80' },
+];
+
+const WEEKLY_ADHERENCE = [
+  { day: 'Mon', score: 90, target: 80 },
+  { day: 'Tue', score: 100, target: 80 },
+  { day: 'Wed', score: 85, target: 80 },
+  { day: 'Thu', score: 95, target: 80 },
+  { day: 'Fri', score: 75, target: 80 },
+  { day: 'Sat', score: 100, target: 80 },
+  { day: 'Sun', score: 92, target: 80 },
+];
+
+const INITIAL_DOSES = [
+  { id: 1, time: '08:00 AM', window: 'Morning', med: 'Metformin 500mg', instruction: '1 tablet after breakfast', status: 'taken' },
+  { id: 2, time: '08:00 AM', window: 'Morning', med: 'Lisinopril 10mg', instruction: '1 tablet with full glass of water', status: 'taken' },
+  { id: 3, time: '01:00 PM', window: 'Afternoon', med: 'Vitamin D3 2000 IU', instruction: '1 softgel with lunch', status: 'upcoming' },
+  { id: 4, time: '08:30 PM', window: 'Evening', med: 'Atorvastatin 20mg', instruction: '1 tablet before bed', status: 'upcoming' },
+  { id: 5, time: '10:00 PM', window: 'Night', med: 'Melatonin 3mg', instruction: '30 mins before sleep', status: 'upcoming' },
 ];
 
 const INITIAL_TASKS = [
-  { id: 1, text: 'Morning Metformin 500mg (8:00 AM)', done: true },
-  { id: 2, text: 'Take Blood Pressure Reading', done: true },
-  { id: 3, text: 'Log 20-min Post-Lunch Walk', done: false },
-  { id: 4, text: 'Evening Atorvastatin 20mg (9:00 PM)', done: false },
-];
-
-const WELLBEING_DATA = [
-  { month: 'Jan', thisMonth: 40, lastMonth: 30 },
-  { month: 'Feb', thisMonth: 60, lastMonth: 45 },
-  { month: 'Mar', thisMonth: 75, lastMonth: 60 },
-  { month: 'Apr', thisMonth: 50, lastMonth: 70 },
-  { month: 'May', thisMonth: 65, lastMonth: 55 },
-  { month: 'Jun', thisMonth: 80, lastMonth: 65 },
-  { month: 'Jul', thisMonth: 70, lastMonth: 75 },
-  { month: 'Aug', thisMonth: 95, lastMonth: 70 },
-  { month: 'Sep', thisMonth: 85, lastMonth: 80 },
-  { month: 'Oct', thisMonth: 75, lastMonth: 65 },
-  { month: 'Nov', thisMonth: 90, lastMonth: 85 },
-  { month: 'Dec', thisMonth: 88, lastMonth: 80 },
+  { id: 1, text: 'Log Blood Pressure Reading (Morning)', done: true },
+  { id: 2, text: 'Post-Lunch 20-min Light Walk', done: true },
+  { id: 3, text: 'Hydration Check: 2.5L Water Target', done: false },
+  { id: 4, text: 'Log Evening Glucose Level', done: false },
 ];
 
 export function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [selectedPatientIndex, setSelectedPatientIndex] = useState(0);
-  const [selfControlRange, setSelfControlRange] = useState('W');
-  const [progressRange, setProgressRange] = useState('M');
+  const [doses, setDoses] = useState(INITIAL_DOSES);
   const [tasks, setTasks] = useState(INITIAL_TASKS);
-
-  const activePatient = PATIENT_PROFILES[selectedPatientIndex];
-
   const [chatMessages, setChatMessages] = useState([
-    { id: 1, sender: 'patient', text: 'Hello Doctor Oliver. I logged my morning Metformin on time!' },
-    { id: 2, sender: 'doctor', text: 'Great job, Ibrahim! Keep up this consistency. Your adherence score is at 94%.' },
+    { id: 1, sender: 'doctor', text: 'Good morning Ibrahim! Your adherence is at 94% this week. Keep up the morning routine!' },
+    { id: 2, sender: 'patient', text: 'Thank you Dr. Oliver. Just took my Metformin and Lisinopril on time.' },
   ]);
   const [inputMsg, setInputMsg] = useState('');
 
-  const toggleTask = (taskId) => {
-    setTasks(
-      tasks.map((t) => (t.id === taskId ? { ...t, done: !t.done } : t))
-    );
+  const currentPatient = PATIENTS[selectedPatientIndex];
+  const isCaregiverOrAdmin = user?.role === 'caregiver' || user?.role === 'admin';
+
+  const handleTakeDose = (id) => {
+    setDoses(doses.map((d) => (d.id === id ? { ...d, status: 'taken' } : d)));
+  };
+
+  const handleSnoozeDose = (id) => {
+    setDoses(doses.map((d) => (d.id === id ? { ...d, status: 'snoozed' } : d)));
+    alert('Dose snoozed for 30 minutes. A push reminder will sound.');
+  };
+
+  const toggleTask = (id) => {
+    setTasks(tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
   };
 
   const handleSendMessage = (e) => {
@@ -126,380 +107,336 @@ export function DashboardPage() {
     setInputMsg('');
   };
 
-  const isCaregiverOrAdmin = user?.role === 'caregiver' || user?.role === 'admin';
+  const takenCount = doses.filter((d) => d.status === 'taken').length;
 
   return (
     <Layout>
-      <div className="dashboard-container">
-        {/* Caregiver & Admin Patient Switcher Bar */}
+      <div className="dashboard-root">
+        {/* Caregiver & Admin Patient Selector Bar */}
         {isCaregiverOrAdmin && (
-          <div className="flex items-center justify-between rounded-2xl bg-indigo-50/80 border border-indigo-100 p-3.5 text-xs">
-            <div className="flex items-center gap-2 text-indigo-950 font-bold">
-              <Users className="h-4 w-4 text-indigo-600" />
-              <span>Monitoring Patient:</span>
+          <div className="dashboard-patient-selector-bar">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
+                <Users className="h-4 w-4" />
+              </div>
+              <div>
+                <span className="text-xs font-bold text-indigo-950">Caregiver Oversight: </span>
+                <span className="text-xs font-medium text-slate-600">Monitoring cohort patient:</span>
+              </div>
               <select
                 value={selectedPatientIndex}
                 onChange={(e) => setSelectedPatientIndex(Number(e.target.value))}
-                className="rounded-xl border border-indigo-200 bg-white px-3 py-1 font-bold text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
+                className="rounded-xl border border-indigo-200 bg-white px-3 py-1 text-xs font-bold text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
               >
-                {PATIENT_PROFILES.map((p, idx) => (
+                {PATIENTS.map((p, idx) => (
                   <option key={p.id} value={idx}>
-                    {p.name} (Age: {p.age})
+                    {p.name} · {p.condition} (Adherence: {p.adherence}%)
                   </option>
                 ))}
               </select>
             </div>
+
             <div className="hidden sm:flex items-center gap-2">
-              <span className="text-slate-500 font-medium">Caregiver Oversight Active</span>
               <Badge variant="primary" size="xs">
-                Clinical Live Mode
+                Live Patient Feed
               </Badge>
             </div>
           </div>
         )}
 
-        {/* 1. Top Patient Hero Banner */}
-        <div className="dashboard-hero-banner">
-          <div className="dashboard-hero-inner">
-            {/* Left: Patient Avatar & Info */}
-            <div className="dashboard-hero-patient">
-              <img
-                src={activePatient.avatar}
-                alt={activePatient.name}
-                className="dashboard-hero-avatar"
-              />
-              <div>
-                <h2 className="dashboard-hero-name">
-                  {activePatient.name}
-                </h2>
-                <div className="dashboard-hero-meta">
-                  <span>Age: {activePatient.age}</span>
-                  <span>·</span>
-                  <span>Consultation: {activePatient.consultation}</span>
-                  <span>·</span>
-                  <span className="flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-                    Visited: {activePatient.visited}
-                  </span>
-                </div>
-              </div>
+        {/* 1. Header Banner */}
+        <div className="dashboard-header-banner">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
+                <Sparkles className="h-3.5 w-3.5" />
+                Care Plan Active
+              </span>
+              <span className="text-xs font-semibold text-slate-400">
+                {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
+              </span>
             </div>
+            <h1 className="dashboard-greeting-title">
+              Welcome back, {isCaregiverOrAdmin ? user?.name || 'Oliver' : currentPatient.name}
+            </h1>
+            <p className="dashboard-greeting-subtitle">
+              Here is your daily medication schedule, clinical adherence progress, and health tasks.
+            </p>
+          </div>
 
-            {/* Right: Quick Action Buttons */}
-            <div className="dashboard-hero-actions">
-              <button
-                onClick={() => {
-                  const chatEl = document.getElementById('chat-widget');
-                  chatEl?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="dashboard-hero-btn"
-              >
-                <MessageSquare className="h-3.5 w-3.5" />
-                <span>Message</span>
-              </button>
-              <button
-                onClick={() => navigate('/medications')}
-                className="dashboard-hero-btn"
-              >
-                <Edit3 className="h-3.5 w-3.5" />
-                <span>Edit Regimen</span>
-              </button>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/medications/new"
+              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 transition"
+            >
+              <Plus className="h-4 w-4" />
+              Add Medication
+            </Link>
+          </div>
+        </div>
+
+        {/* 2. Four Key Stat KPI Cards */}
+        <div className="dashboard-kpi-grid">
+          <div className="dashboard-kpi-card">
+            <div>
+              <p className="dashboard-kpi-label">Total Prescriptions</p>
+              <p className="dashboard-kpi-value">{currentPatient.totalMeds}</p>
+              <p className="dashboard-kpi-meta text-indigo-600 font-semibold">4 active regimens</p>
+            </div>
+            <div className="dashboard-kpi-icon bg-indigo-50 text-indigo-600">
+              <Pill className="h-6 w-6" />
+            </div>
+          </div>
+
+          <div className="dashboard-kpi-card">
+            <div>
+              <p className="dashboard-kpi-label">Today's Doses</p>
+              <p className="dashboard-kpi-value">{takenCount} / {doses.length}</p>
+              <p className="dashboard-kpi-meta text-emerald-600 font-semibold">{doses.length - takenCount} remaining today</p>
+            </div>
+            <div className="dashboard-kpi-icon bg-emerald-50 text-emerald-600">
+              <Clock className="h-6 w-6" />
+            </div>
+          </div>
+
+          <div className="dashboard-kpi-card">
+            <div>
+              <p className="dashboard-kpi-label">7-Day Adherence</p>
+              <p className="dashboard-kpi-value">{currentPatient.adherence}%</p>
+              <p className="dashboard-kpi-meta text-emerald-600 font-semibold">+4.2% vs target</p>
+            </div>
+            <div className="dashboard-kpi-icon bg-violet-50 text-violet-600">
+              <TrendingUp className="h-6 w-6" />
+            </div>
+          </div>
+
+          <div className="dashboard-kpi-card">
+            <div>
+              <p className="dashboard-kpi-label">Refill Status</p>
+              <p className="dashboard-kpi-value text-amber-600">1 Low</p>
+              <p className="dashboard-kpi-meta text-amber-600 font-semibold">Metformin (4 days left)</p>
+            </div>
+            <div className="dashboard-kpi-icon bg-amber-50 text-amber-600">
+              <AlertTriangle className="h-6 w-6" />
             </div>
           </div>
         </div>
 
-        {/* 2. Top Grid Row (3 Cards: Self Control, Weekly Activities, Daily Tasks) */}
-        <div className="dashboard-grid-top">
-          {/* Card 1: Self Control */}
-          <div className="dashboard-card">
-            <div className="dashboard-card-header">
-              <h3 className="dashboard-card-title">Self Control</h3>
-              <div className="dashboard-range-group">
-                {['W', 'M', 'Y'].map((range) => (
-                  <button
-                    key={range}
-                    onClick={() => setSelfControlRange(range)}
-                    className={`dashboard-range-btn ${
-                      selfControlRange === range ? 'dashboard-range-btn-active' : ''
-                    }`}
-                  >
-                    {range}
-                  </button>
+        {/* 3. Main Dashboard 2-Column Grid */}
+        <div className="dashboard-main-grid">
+          {/* Left Column: Dose Schedule & Weekly Chart */}
+          <div className="dashboard-card-section">
+            {/* Today's Medication & Dose Schedule Timeline */}
+            <div className="dashboard-panel">
+              <div className="dashboard-panel-header">
+                <div>
+                  <h2 className="dashboard-panel-title">Today's Medication Timeline</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">Log scheduled doses to maintain your verified clinical streak</p>
+                </div>
+                <Badge variant="primary" size="xs">
+                  {takenCount} of {doses.length} Completed
+                </Badge>
+              </div>
+
+              <div className="dose-timeline-list">
+                {doses.map((dose) => (
+                  <div key={dose.id} className="dose-timeline-item">
+                    <div className="flex items-start gap-3.5">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+                        <Pill className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="dose-timing-badge">
+                            <Clock className="h-3 w-3" />
+                            {dose.time} · {dose.window}
+                          </span>
+                          {dose.status === 'taken' && (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600">
+                              <CheckCircle2 className="h-3.5 w-3.5" /> Taken
+                            </span>
+                          )}
+                          {dose.status === 'snoozed' && (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600">
+                              <Clock className="h-3.5 w-3.5" /> Snoozed (+30m)
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="dose-med-title">{dose.med}</h3>
+                        <p className="dose-med-instruction">{dose.instruction}</p>
+                      </div>
+                    </div>
+
+                    <div className="dose-action-buttons">
+                      {dose.status === 'taken' ? (
+                        <span className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
+                          Completed ✓
+                        </span>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleTakeDose(dose.id)}
+                            className="dose-btn-take"
+                          >
+                            <CheckCircle2 className="h-4 w-4" />
+                            Take Dose
+                          </button>
+                          <button
+                            onClick={() => handleSnoozeDose(dose.id)}
+                            className="dose-btn-snooze"
+                          >
+                            Snooze
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
 
-            <div className="self-control-list">
-              {activePatient.selfControl.map((metric) => (
-                <div key={metric.label} className="self-control-item">
-                  <div className="self-control-header">
-                    <span className="self-control-label">{metric.label}</span>
-                    <div className="self-control-values">
-                      <span>{metric.left}%</span>
-                      <div className="self-control-track">
-                        <div
-                          className="self-control-fill"
-                          style={{ width: `${metric.left}%` }}
-                        />
-                      </div>
-                      <span>{metric.right}%</span>
-                    </div>
-                  </div>
+            {/* Weekly Adherence & Compliance Chart */}
+            <div className="dashboard-panel">
+              <div className="dashboard-panel-header">
+                <div>
+                  <h2 className="dashboard-panel-title">Weekly Adherence Trend</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">Daily adherence performance vs 80% clinical baseline</p>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Card 2: Weekly Activities Donut Chart */}
-          <div className="dashboard-card">
-            <div className="dashboard-card-header">
-              <h3 className="dashboard-card-title">Weekly Activities</h3>
-              <span className="text-[11px] font-semibold text-slate-400">2 Feb - 9 Feb</span>
-            </div>
-
-            <div className="donut-chart-container">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={activePatient.activityPie}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={46}
-                    outerRadius={68}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {activePatient.activityPie.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="donut-center-score">
-                <span className="donut-score-text">40%</span>
-                <span className="donut-score-label">Score</span>
-              </div>
-            </div>
-
-            {/* Donut Legend */}
-            <div className="donut-legend">
-              <div className="donut-legend-row">
-                <div className="donut-legend-info">
-                  <span className="donut-legend-dot bg-[#f87171]"></span>
-                  <span className="donut-legend-name">Quizzes</span>
-                </div>
-                <span className="donut-legend-value">04</span>
-              </div>
-              <div className="donut-legend-row">
-                <div className="donut-legend-info">
-                  <span className="donut-legend-dot bg-[#6366f1]"></span>
-                  <span className="donut-legend-name">Articles</span>
-                </div>
-                <span className="donut-legend-value">07</span>
-              </div>
-              <div className="donut-legend-row">
-                <div className="donut-legend-info">
-                  <span className="donut-legend-dot bg-[#fbbf24]"></span>
-                  <span className="donut-legend-name">Medication</span>
-                </div>
-                <span className="donut-legend-value">02</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 3: Daily Tasks */}
-          <div className="dashboard-card">
-            <div className="dashboard-card-header">
-              <h3 className="dashboard-card-title">Daily Tasks</h3>
-              <span className="text-[11px] font-bold text-indigo-600">
-                {tasks.filter((t) => t.done).length}/{tasks.length} Done
-              </span>
-            </div>
-
-            <div className="task-list">
-              {tasks.map((task) => (
-                <div
-                  key={task.id}
-                  onClick={() => toggleTask(task.id)}
-                  className="task-item"
-                >
-                  <span
-                    className={`task-text ${
-                      task.done ? 'task-text-done' : 'task-text-pending'
-                    }`}
-                  >
-                    {task.text}
+                <div className="flex items-center gap-3 text-xs font-semibold">
+                  <span className="flex items-center gap-1.5 text-indigo-600">
+                    <span className="h-2 w-2 rounded-full bg-indigo-600" /> Adherence %
                   </span>
-
-                  {task.done ? (
-                    <div className="task-badge-done">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                    </div>
-                  ) : (
-                    <div className="task-badge-pending">
-                      <MoreHorizontal className="h-3.5 w-3.5" />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* 3. Bottom Grid Row (2 Columns: Progress of Well-being & Consultation Chat) */}
-        <div className="dashboard-grid-bottom">
-          {/* Card 4: Progress of Well-being Bar Chart */}
-          <div className="wellbeing-card">
-            <div className="wellbeing-header">
-              <h3 className="dashboard-card-title">Progress of well-being</h3>
-
-              <div className="wellbeing-legend-group">
-                <div className="flex items-center gap-3 text-xs font-medium text-slate-500">
-                  <span className="wellbeing-legend-item">
-                    <span className="wellbeing-legend-dot bg-indigo-600"></span>
-                    This Month
-                  </span>
-                  <span className="wellbeing-legend-item">
-                    <span className="wellbeing-legend-dot bg-indigo-200"></span>
-                    Last Month
+                  <span className="flex items-center gap-1.5 text-slate-400">
+                    <span className="h-2 w-2 rounded-full bg-slate-300" /> Baseline
                   </span>
                 </div>
-
-                <div className="dashboard-range-group border-l border-slate-200 pl-3">
-                  {['W', 'M', 'Y'].map((range) => (
-                    <button
-                      key={range}
-                      onClick={() => setProgressRange(range)}
-                      className={`dashboard-range-btn ${
-                        progressRange === range ? 'dashboard-range-btn-active' : ''
-                      }`}
-                    >
-                      {range}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Bar Chart with Emoji Y-Axis */}
-            <div className="wellbeing-chart-layout">
-              <div className="wellbeing-emoji-axis">
-                <span>😊</span>
-                <span>😐</span>
-                <span>🙁</span>
-                <span>😴</span>
               </div>
 
-              <div className="wellbeing-chart-area">
-                <div className="wellbeing-floating-peak">
-                  <span className="h-2 w-2 rounded-full bg-amber-400"></span>
-                  <span>Excellent · Aug 2026</span>
-                </div>
-
+              <div className="h-56 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={WELLBEING_DATA} margin={{ top: 20, right: 10, left: -25, bottom: 0 }}>
-                    <XAxis
-                      dataKey="month"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 600 }}
-                    />
-                    <YAxis domain={[0, 100]} hide={true} />
+                  <BarChart data={WEEKLY_ADHERENCE} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }} />
+                    <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11 }} />
                     <Tooltip
                       formatter={(val) => [`${val}%`, 'Adherence']}
                       contentStyle={{
                         borderRadius: '12px',
                         border: '1px solid #e2e8f0',
-                        fontSize: '12px',
                         boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                        fontSize: '12px',
                       }}
                     />
-                    <Bar
-                      dataKey="thisMonth"
-                      fill="#6366f1"
-                      radius={[6, 6, 0, 0]}
-                      maxBarSize={18}
-                    />
-                    <Bar
-                      dataKey="lastMonth"
-                      fill="#e0e7ff"
-                      radius={[6, 6, 0, 0]}
-                      maxBarSize={18}
-                    />
+                    <Bar dataKey="score" fill="#6366f1" radius={[6, 6, 0, 0]} maxBarSize={28} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
           </div>
 
-          {/* Card 5: Interactive Consultation Chat Widget */}
-          <div id="chat-widget" className="chat-card">
-            {/* Chat Top Header */}
-            <div className="chat-card-header">
-              <div className="chat-user-info">
-                <img
-                  src={activePatient.avatar}
-                  alt={activePatient.name}
-                  className="chat-avatar"
-                />
-                <div>
-                  <h4 className="chat-user-name">{activePatient.name}</h4>
-                  <span className="chat-user-status">Active now</span>
+          {/* Right Column: Tasks, Refill Alert & Care Team Messenger */}
+          <div className="dashboard-card-section">
+            {/* Daily Tasks Checklist */}
+            <div className="dashboard-panel">
+              <div className="dashboard-panel-header">
+                <h2 className="dashboard-panel-title">Daily Health Tasks</h2>
+                <span className="text-xs font-bold text-indigo-600">
+                  {tasks.filter((t) => t.done).length}/{tasks.length} Done
+                </span>
+              </div>
+
+              <div className="task-checklist">
+                {tasks.map((task) => (
+                  <div
+                    key={task.id}
+                    onClick={() => toggleTask(task.id)}
+                    className="task-check-row"
+                  >
+                    <span
+                      className={`task-check-text ${
+                        task.done ? 'task-check-text-done' : 'task-check-text-pending'
+                      }`}
+                    >
+                      {task.text}
+                    </span>
+
+                    {task.done ? (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    ) : (
+                      <div className="h-4 w-4 rounded-full border-2 border-slate-300 shrink-0" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Low Stock / Refill Alert Banner */}
+            <div className="dashboard-alert-banner">
+              <AlertCircle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
+              <div>
+                <h3 className="text-xs font-bold text-rose-900">Prescription Refill Warning</h3>
+                <p className="text-xs text-rose-700 mt-0.5 leading-relaxed">
+                  <strong>Metformin 500mg</strong> has only 4 tablets remaining in your current supply.
+                </p>
+                <button
+                  onClick={() => alert('Refill request dispatched to City Health Pharmacy!')}
+                  className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1 text-xs font-bold text-white hover:bg-rose-700 transition cursor-pointer"
+                >
+                  Request 30-Day Refill Now
+                </button>
+              </div>
+            </div>
+
+            {/* Care Team Consultation Chat Widget */}
+            <div className="care-chat-box">
+              <div className="care-chat-header">
+                <div className="flex items-center gap-2.5">
+                  <img
+                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+                    alt="Dr. Oliver Mitchell"
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-900">Dr. Oliver Mitchell</h3>
+                    <p className="text-[10px] text-emerald-600 font-semibold">Lead Caregiver · Online</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => alert('Calling Dr. Oliver Mitchell at +1 (555) 019-2834...')}
+                    className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition"
+                    title="Call Doctor"
+                  >
+                    <Phone className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
 
-              <div className="chat-header-actions">
-                <button
-                  onClick={() => alert(`Initiating secure audio consultation call with ${activePatient.name}...`)}
-                  className="chat-header-icon-btn"
-                  title="Call"
-                >
-                  <Phone className="h-4 w-4" />
-                </button>
-                <button className="chat-header-icon-btn" title="Minimize">
-                  <Minus className="h-4 w-4" />
-                </button>
-                <button className="chat-header-icon-btn" title="Close">
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Chat Message Stream */}
-            <div className="chat-stream">
-              {chatMessages.map((msg) => {
-                const isPatient = msg.sender === 'patient';
-                return (
+              <div className="care-chat-stream">
+                {chatMessages.map((msg) => (
                   <div
                     key={msg.id}
-                    className={`flex ${isPatient ? 'justify-start' : 'justify-end'}`}
+                    className={msg.sender === 'patient' ? 'care-bubble-patient' : 'care-bubble-doctor'}
                   >
-                    <div
-                      className={`chat-bubble ${
-                        isPatient ? 'chat-bubble-patient' : 'chat-bubble-doctor'
-                      }`}
-                    >
-                      {msg.text}
-                    </div>
+                    {msg.text}
                   </div>
-                );
-              })}
-            </div>
+                ))}
+              </div>
 
-            {/* Chat Input Bar */}
-            <form onSubmit={handleSendMessage} className="chat-input-bar">
-              <input
-                type="text"
-                placeholder="Type message..."
-                value={inputMsg}
-                onChange={(e) => setInputMsg(e.target.value)}
-                className="chat-input-field"
-              />
-              <button type="submit" className="chat-send-btn">
-                <Send className="h-3.5 w-3.5" />
-              </button>
-            </form>
+              <form onSubmit={handleSendMessage} className="care-chat-input-row">
+                <input
+                  type="text"
+                  placeholder="Message care team..."
+                  value={inputMsg}
+                  onChange={(e) => setInputMsg(e.target.value)}
+                  className="care-chat-input"
+                />
+                <button type="submit" className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transition shrink-0">
+                  <Send className="h-3.5 w-3.5" />
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </div>

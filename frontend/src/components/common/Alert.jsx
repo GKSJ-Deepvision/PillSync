@@ -1,3 +1,5 @@
+import './Alert.css';
+
 export function Alert({ type = 'info', title, message, onClose, className = '' }) {
   const typeStyles = {
     info: 'bg-blue-50 border-blue-200 text-blue-800',

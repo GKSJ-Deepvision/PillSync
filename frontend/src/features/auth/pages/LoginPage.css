@@ -1,0 +1,106 @@
+/* Login Page Styles */
+.auth-page-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  padding: 2rem 1rem;
+}
+
+.auth-card-container {
+  width: 100%;
+  max-width: 64rem;
+  overflow: hidden;
+  border-radius: 1.75rem;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 1024px) {
+  .auth-card-container {
+    grid-template-columns: 1.1fr 0.9fr;
+  }
+}
+
+.auth-hero-side {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #4338ca 100%);
+  padding: 2.5rem;
+  color: #ffffff;
+}
+
+.auth-form-side {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2.5rem 2rem;
+  background-color: #ffffff;
+}
+
+@media (min-width: 640px) {
+  .auth-form-side {
+    padding: 3rem 2.5rem;
+  }
+}
+
+.auth-form-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.auth-form-subtitle {
+  font-size: 0.8125rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.demo-credentials-box {
+  border-radius: 1rem;
+  border: 1px solid #e0e7ff;
+  background-color: #f8faff;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.demo-credentials-title {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #4f46e5;
+  margin-bottom: 0.5rem;
+}
+
+.demo-buttons-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.demo-btn {
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.demo-btn:hover {
+  background-color: #eef2ff;
+  border-color: #6366f1;
+  color: #4338ca;
+}

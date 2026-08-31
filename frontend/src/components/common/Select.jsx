@@ -1,3 +1,5 @@
+import './Select.css';
+
 export function Select({ label, error, options = [], required = false, className = '', ...props }) {
   return (
     <div className="w-full">

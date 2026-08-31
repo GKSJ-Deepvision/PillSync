@@ -1,3 +1,5 @@
+import './Badge.css';
+
 export function Badge({ children, variant = 'primary', size = 'md', className = '' }) {
   const variants = {
     primary: 'bg-primary-100 text-primary-800',

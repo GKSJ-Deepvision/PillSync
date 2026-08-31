@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../../context/useAuth';
 import { Input, Button, Alert } from '../../../components/common';
 import { Mail, Lock, User, ShieldCheck } from 'lucide-react';
+import './RegisterPage.css';
 
 export function RegisterPage() {
   const navigate = useNavigate();

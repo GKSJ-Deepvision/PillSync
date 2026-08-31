@@ -1,0 +1,7 @@
+/* Alert Component Styles */
+.alert-box {
+  border-radius: 0.875rem;
+  padding: 1rem;
+  border-width: 1px;
+  border-style: solid;
+}

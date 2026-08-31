@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../../context/useAuth';
 import { Input, Button, Alert } from '../../../components/common';
 import { Mail } from 'lucide-react';
+import './ForgotPasswordPage.css';
 
 export function ForgotPasswordPage() {
   const { forgotPassword, error, setError, isAuthenticating } = useAuth();

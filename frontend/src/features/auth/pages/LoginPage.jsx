@@ -12,6 +12,7 @@ import {
   ArrowRight,
   CheckCircle2,
 } from 'lucide-react';
+import './LoginPage.css';
 
 export function LoginPage() {
   const navigate = useNavigate();

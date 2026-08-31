@@ -1,0 +1,7 @@
+/* Badge Component Styles */
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  font-weight: 700;
+}
