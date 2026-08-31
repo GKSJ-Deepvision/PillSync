@@ -67,10 +67,10 @@ const mockAdherenceApi = {
     return mockAdherenceData.weeklyAdherence;
   },
 
-  getMonthlyAdherence: async (month, year) => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return mockAdherenceData.monthlyAdherence;
-  },
+  getMonthlyAdherence: async () => {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  return mockAdherenceData.monthlyAdherence;
+},
 
   getMedicationHistory: async () => {
     await new Promise((resolve) => setTimeout(resolve, 600));

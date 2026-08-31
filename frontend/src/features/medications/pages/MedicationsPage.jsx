@@ -2,8 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { medicationApi } from '../../../api/medications';
 import { Layout } from '../../../components/layout';
-import { Card, CardBody, CardHeader } from '../../../components/common/Card';
-import { Button, Input, Badge, EmptyState, CardSkeleton } from '../../../components/common';
+import { Card, CardBody } from '../../../components/common/Card';
+import {
+  Button,
+  Input,
+  Badge,
+  EmptyState,
+  CardSkeleton,
+} from '../../../components/common';
 import { Search, Plus, Pill } from 'lucide-react';
 
 const DISEASE_CATEGORIES = [
@@ -18,40 +24,51 @@ const DISEASE_CATEGORIES = [
 
 export function MedicationsPage() {
   const navigate = useNavigate();
+
   const [medications, setMedications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDisease, setSelectedDisease] = useState('All');
 
   useEffect(() => {
-    fetchMedications();
+    let cancelled = false;
+
+    const loadMedications = async () => {
+      try {
+        const data = await medicationApi.getMedications();
+
+        if (!cancelled) {
+          setMedications(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch medications:', error);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadMedications();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const fetchMedications = async () => {
-    try {
-      setLoading(true);
-      const data = await medicationApi.getMedications();
-      setMedications(data);
-    } catch (error) {
-      console.error('Failed to fetch medications:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const filteredMeds = medications.filter((med) => {
+    const query = searchQuery.toLowerCase();
 
-  let filteredMeds = medications;
+    const matchesSearch =
+      !searchQuery ||
+      med.name.toLowerCase().includes(query) ||
+      med.disease.toLowerCase().includes(query);
 
-  if (searchQuery) {
-    filteredMeds = filteredMeds.filter(
-      (med) =>
-        med.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        med.disease.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }
+    const matchesDisease =
+      selectedDisease === 'All' || med.disease === selectedDisease;
 
-  if (selectedDisease !== 'All') {
-    filteredMeds = filteredMeds.filter((med) => med.disease === selectedDisease);
-  }
+    return matchesSearch && matchesDisease;
+  });
 
   const getDiseaseColor = (disease) => {
     const colors = {
@@ -62,6 +79,7 @@ export function MedicationsPage() {
       Vitamins: 'bg-green-100 text-green-800',
       'Heart Medications': 'bg-pink-100 text-pink-800',
     };
+
     return colors[disease] || 'bg-gray-100 text-gray-800';
   };
 
@@ -69,9 +87,14 @@ export function MedicationsPage() {
     <Layout>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Medications</h1>
-          <p className="text-gray-600 mt-1">Manage your medications</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Medications
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Manage your medications
+          </p>
         </div>
+
         <Button
           onClick={() => navigate('/medications/new')}
           className="flex items-center gap-2"
@@ -81,7 +104,6 @@ export function MedicationsPage() {
         </Button>
       </div>
 
-      {/* Search & Filter */}
       <div className="mb-6 space-y-4">
         <Input
           icon={Search}
@@ -90,7 +112,6 @@ export function MedicationsPage() {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
 
-        {/* Disease Filter */}
         <div className="flex flex-wrap gap-2">
           {DISEASE_CATEGORIES.map((disease) => (
             <button
@@ -111,14 +132,17 @@ export function MedicationsPage() {
         </div>
       </div>
 
-      {/* Medications List */}
       {loading ? (
         <CardSkeleton count={3} />
       ) : filteredMeds.length === 0 ? (
         <EmptyState
           icon={Pill}
           title="No medications found"
-          message={searchQuery ? 'Try adjusting your search criteria' : 'Add your first medication to get started'}
+          message={
+            searchQuery
+              ? 'Try adjusting your search criteria'
+              : 'Add your first medication to get started'
+          }
           action={
             !searchQuery && (
               <Button onClick={() => navigate('/medications/new')}>
@@ -134,7 +158,9 @@ export function MedicationsPage() {
               key={medication.id}
               hoverable
               className="cursor-pointer"
-              onClick={() => navigate(`/medications/${medication.id}`)}
+              onClick={() =>
+                navigate(`/medications/${medication.id}`)
+              }
             >
               <CardBody>
                 <div className="flex items-start justify-between mb-4">
@@ -142,31 +168,47 @@ export function MedicationsPage() {
                     <h3 className="text-lg font-semibold text-gray-900">
                       {medication.name}
                     </h3>
+
                     <p className="text-gray-600 text-sm mt-1">
                       {medication.dosage}
                     </p>
                   </div>
-                  <Badge variant="primary" className={getDiseaseColor(medication.disease)}>
+
+                  <Badge
+                    variant="primary"
+                    className={getDiseaseColor(medication.disease)}
+                  >
                     {medication.disease}
                   </Badge>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-100">
                   <div>
-                    <p className="text-xs text-gray-600">Frequency</p>
+                    <p className="text-xs text-gray-600">
+                      Frequency
+                    </p>
+
                     <p className="text-sm font-medium text-gray-900 mt-1">
                       {medication.frequency}
                     </p>
                   </div>
+
                   <div>
-                    <p className="text-xs text-gray-600">Quantity</p>
+                    <p className="text-xs text-gray-600">
+                      Quantity
+                    </p>
+
                     <p className="text-sm font-medium text-gray-900 mt-1">
                       {medication.quantity} units
                     </p>
                   </div>
+
                   <div>
-                    <p className="text-xs text-gray-600">Schedule</p>
-                    <div className="flex gap-2 mt-1">
+                    <p className="text-xs text-gray-600">
+                      Schedule
+                    </p>
+
+                    <div className="flex flex-wrap gap-2 mt-1">
                       {medication.schedule.map((time) => (
                         <span
                           key={time}
@@ -177,10 +219,18 @@ export function MedicationsPage() {
                       ))}
                     </div>
                   </div>
+
                   <div>
-                    <p className="text-xs text-gray-600">Status</p>
+                    <p className="text-xs text-gray-600">
+                      Status
+                    </p>
+
                     <Badge
-                      variant={medication.status === 'active' ? 'success' : 'gray'}
+                      variant={
+                        medication.status === 'active'
+                          ? 'success'
+                          : 'gray'
+                      }
                       size="sm"
                       className="mt-1"
                     >

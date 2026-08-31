@@ -1,120 +1,140 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { medicationApi } from '../../../api/medications';
 import { Layout } from '../../../components/layout';
-import { Card, CardBody, CardHeader, CardFooter } from '../../../components/common/Card';
-import { Button, Input, Select, Alert } from '../../../components/common';
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  CardFooter,
+} from '../../../components/common/Card';
+import { Button, Alert, Input } from '../../../components/common';
 import { ArrowLeft } from 'lucide-react';
-
-const DISEASE_OPTIONS = [
-  { value: 'Blood Pressure', label: 'Blood Pressure' },
-  { value: 'Diabetes', label: 'Diabetes' },
-  { value: 'Thyroid', label: 'Thyroid' },
-  { value: 'Antibiotics', label: 'Antibiotics' },
-  { value: 'Vitamins', label: 'Vitamins' },
-  { value: 'Heart Medications', label: 'Heart Medications' },
-];
-
-const FREQUENCY_OPTIONS = [
-  { value: 'Once daily', label: 'Once daily' },
-  { value: 'Twice daily', label: 'Twice daily' },
-  { value: 'Three times daily', label: 'Three times daily' },
-  { value: 'Every 4 hours', label: 'Every 4 hours' },
-  { value: 'Every 6 hours', label: 'Every 6 hours' },
-  { value: 'Every 8 hours', label: 'Every 8 hours' },
-  { value: 'Weekly', label: 'Weekly' },
-  { value: 'As needed', label: 'As needed' },
-];
-
-const SCHEDULE_OPTIONS = ['Morning', 'Afternoon', 'Evening', 'Night'];
 
 export function MedicationFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const isEdit = !!id;
+  const isEdit = Boolean(id);
 
   const [formData, setFormData] = useState({
     name: '',
+    disease: '',
     dosage: '',
     quantity: '',
     frequency: '',
     schedule: [],
-    disease: '',
     instructions: '',
-    startDate: new Date().toISOString().split('T')[0],
+    startDate: '',
     endDate: '',
+    status: 'active',
   });
 
-  const [loading, setLoading] = useState(isEdit);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [validationErrors, setValidationErrors] = useState({});
 
   useEffect(() => {
-    if (isEdit) {
-      fetchMedication();
-    }
+    if (!isEdit) return;
+
+    const loadMedication = async () => {
+      try {
+        setLoading(true);
+        const data = await medicationApi.getMedicationById(id);
+
+        setFormData({
+          name: data.name || '',
+          disease: data.disease || '',
+          dosage: data.dosage || '',
+          quantity: data.quantity || '',
+          frequency: data.frequency || '',
+          schedule: data.schedule || [],
+          instructions: data.instructions || '',
+          startDate: data.startDate || '',
+          endDate: data.endDate || '',
+          status: data.status || 'active',
+        });
+      } catch (err) {
+        setError('Failed to load medication');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMedication();
   }, [id, isEdit]);
 
-  const fetchMedication = async () => {
-    try {
-      setLoading(true);
-      const data = await medicationApi.getMedicationById(id);
-      setFormData(data);
-    } catch (err) {
-      setError('Failed to load medication');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleScheduleChange = (e) => {
+    const values = e.target.value
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    setFormData((prev) => ({
+      ...prev,
+      schedule: values,
+    }));
   };
 
   const validateForm = () => {
-    const errors = {};
-    if (!formData.name) errors.name = 'Name is required';
-    if (!formData.dosage) errors.dosage = 'Dosage is required';
-    if (!formData.quantity) errors.quantity = 'Quantity is required';
-    if (!formData.frequency) errors.frequency = 'Frequency is required';
-    if (formData.schedule.length === 0) errors.schedule = 'Select at least one schedule';
-    if (!formData.disease) errors.disease = 'Disease is required';
-    if (!formData.startDate) errors.startDate = 'Start date is required';
-    return errors;
+    if (!formData.name.trim()) {
+      setError('Medication name is required');
+      return false;
+    }
+
+    if (!formData.dosage.trim()) {
+      setError('Dosage is required');
+      return false;
+    }
+
+    if (!formData.frequency.trim()) {
+      setError('Frequency is required');
+      return false;
+    }
+
+    if (!formData.startDate) {
+      setError('Start date is required');
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setValidationErrors({});
-    setError('');
 
-    const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       setSaving(true);
+      setError('');
+
       if (isEdit) {
         await medicationApi.updateMedication(id, formData);
       } else {
         await medicationApi.createMedication(formData);
       }
+
       navigate('/medications');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to save medication');
+      setError(
+        isEdit
+          ? 'Failed to update medication'
+          : 'Failed to create medication'
+      );
       console.error(err);
     } finally {
       setSaving(false);
     }
-  };
-
-  const handleScheduleChange = (schedule) => {
-    setFormData((prev) => {
-      const newSchedule = prev.schedule.includes(schedule)
-        ? prev.schedule.filter((s) => s !== schedule)
-        : [...prev.schedule, schedule];
-      return { ...prev, schedule: newSchedule };
-    });
   };
 
   if (loading) {
@@ -133,6 +153,7 @@ export function MedicationFormPage() {
   return (
     <Layout>
       <button
+        type="button"
         onClick={() => navigate('/medications')}
         className="flex items-center gap-2 text-primary-600 hover:text-primary-700 mb-6"
       >
@@ -140,171 +161,146 @@ export function MedicationFormPage() {
         Back to Medications
       </button>
 
-      <div className="max-w-2xl">
-        <Card>
-          <CardHeader>
-            <h1 className="text-2xl font-bold text-gray-900">
-              {isEdit ? 'Edit Medication' : 'Add New Medication'}
-            </h1>
-          </CardHeader>
+      <Card>
+        <CardHeader>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {isEdit ? 'Edit Medication' : 'Add Medication'}
+          </h1>
+          <p className="text-gray-600 mt-1">
+            {isEdit
+              ? 'Update medication details'
+              : 'Add a new medication to your list'}
+          </p>
+        </CardHeader>
 
-          <CardBody>
+        <form onSubmit={handleSubmit}>
+          <CardBody className="space-y-5">
             {error && (
               <Alert
                 type="danger"
                 message={error}
                 onClose={() => setError('')}
-                className="mb-6"
               />
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label="Medication Name"
-                  placeholder="e.g., Aspirin"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  error={validationErrors.name}
-                  required
-                />
+            <Input
+              label="Medication Name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Enter medication name"
+            />
 
-                <Input
-                  label="Dosage"
-                  placeholder="e.g., 100mg"
-                  value={formData.dosage}
-                  onChange={(e) =>
-                    setFormData({ ...formData, dosage: e.target.value })
-                  }
-                  error={validationErrors.dosage}
-                  required
-                />
-              </div>
+            <Input
+              label="Disease"
+              name="disease"
+              value={formData.disease}
+              onChange={handleChange}
+              placeholder="Enter disease"
+            />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label="Quantity"
-                  type="number"
-                  placeholder="e.g., 30"
-                  value={formData.quantity}
-                  onChange={(e) =>
-                    setFormData({ ...formData, quantity: e.target.value })
-                  }
-                  error={validationErrors.quantity}
-                  required
-                />
+            <Input
+              label="Dosage"
+              name="dosage"
+              value={formData.dosage}
+              onChange={handleChange}
+              placeholder="Example: 500mg"
+            />
 
-                <Select
-                  label="Frequency"
-                  options={FREQUENCY_OPTIONS}
-                  value={formData.frequency}
-                  onChange={(e) =>
-                    setFormData({ ...formData, frequency: e.target.value })
-                  }
-                  error={validationErrors.frequency}
-                  required
-                />
-              </div>
+            <Input
+              label="Quantity"
+              name="quantity"
+              type="number"
+              value={formData.quantity}
+              onChange={handleChange}
+              placeholder="Enter quantity"
+            />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Schedule Times
-                  <span className="text-danger-500 ml-1">*</span>
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {SCHEDULE_OPTIONS.map((schedule) => (
-                    <label
-                      key={schedule}
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={formData.schedule.includes(schedule)}
-                        onChange={() => handleScheduleChange(schedule)}
-                        className="rounded border-gray-300"
-                      />
-                      <span className="text-sm text-gray-700">{schedule}</span>
-                    </label>
-                  ))}
-                </div>
-                {validationErrors.schedule && (
-                  <p className="text-sm text-danger-500 mt-1">
-                    {validationErrors.schedule}
-                  </p>
-                )}
-              </div>
+            <Input
+              label="Frequency"
+              name="frequency"
+              value={formData.frequency}
+              onChange={handleChange}
+              placeholder="Example: Twice daily"
+            />
 
-              <Select
-                label="Disease Category"
-                options={DISEASE_OPTIONS}
-                value={formData.disease}
-                onChange={(e) =>
-                  setFormData({ ...formData, disease: e.target.value })
-                }
-                error={validationErrors.disease}
-                required
+            <Input
+              label="Schedule"
+              name="schedule"
+              value={formData.schedule.join(', ')}
+              onChange={handleScheduleChange}
+              placeholder="Example: 08:00, 20:00"
+            />
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Instructions
+              </label>
+              <textarea
+                name="instructions"
+                value={formData.instructions}
+                onChange={handleChange}
+                rows="4"
+                placeholder="Enter medication instructions"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Start Date"
+                name="startDate"
+                type="date"
+                value={formData.startDate}
+                onChange={handleChange}
               />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Instructions
-                </label>
-                <textarea
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-gray-900 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-                  rows="4"
-                  placeholder="e.g., Take with food"
-                  value={formData.instructions}
-                  onChange={(e) =>
-                    setFormData({ ...formData, instructions: e.target.value })
-                  }
-                />
-              </div>
+              <Input
+                label="End Date"
+                name="endDate"
+                type="date"
+                value={formData.endDate}
+                onChange={handleChange}
+              />
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label="Start Date"
-                  type="date"
-                  value={formData.startDate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, startDate: e.target.value })
-                  }
-                  error={validationErrors.startDate}
-                  required
-                />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Status
+              </label>
 
-                <Input
-                  label="End Date (Optional)"
-                  type="date"
-                  value={formData.endDate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, endDate: e.target.value })
-                  }
-                />
-              </div>
-            </form>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
           </CardBody>
 
           <CardFooter>
             <div className="flex gap-3">
               <Button
-                variant="secondary"
+                type="button"
+                variant="outline"
                 onClick={() => navigate('/medications')}
               >
                 Cancel
               </Button>
+
               <Button
-                variant="primary"
-                onClick={handleSubmit}
+                type="submit"
                 loading={saving}
               >
                 {isEdit ? 'Update Medication' : 'Add Medication'}
               </Button>
             </div>
           </CardFooter>
-        </Card>
-      </div>
+        </form>
+      </Card>
     </Layout>
   );
 }

@@ -2,34 +2,52 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { medicationApi } from '../../../api/medications';
 import { Layout } from '../../../components/layout';
-import { Card, CardBody, CardHeader, CardFooter } from '../../../components/common/Card';
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  CardFooter,
+} from '../../../components/common/Card';
 import { Button, Alert, Badge } from '../../../components/common';
 import { ArrowLeft, Trash2, Edit2 } from 'lucide-react';
 
 export function MedicationDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [medication, setMedication] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    fetchMedication();
-  }, [id]);
+    let active = true;
 
-  const fetchMedication = async () => {
-    try {
-      setLoading(true);
-      const data = await medicationApi.getMedicationById(id);
-      setMedication(data);
-    } catch (err) {
-      setError('Failed to load medication details');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const loadMedication = async () => {
+      try {
+        const data = await medicationApi.getMedicationById(id);
+
+        if (active) {
+          setMedication(data);
+        }
+      } catch (err) {
+        if (active) {
+          setError('Failed to load medication details');
+        }
+        console.error(err);
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadMedication();
+
+    return () => {
+      active = false;
+    };
+  }, [id]);
 
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this medication?')) {
@@ -93,7 +111,6 @@ export function MedicationDetailPage() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Main Details */}
         <div className="md:col-span-2">
           <Card>
             <CardHeader>
@@ -104,8 +121,11 @@ export function MedicationDetailPage() {
                   </h1>
                   <p className="text-gray-600 mt-2">{medication.disease}</p>
                 </div>
+
                 <Badge
-                  variant={medication.status === 'active' ? 'success' : 'gray'}
+                  variant={
+                    medication.status === 'active' ? 'success' : 'gray'
+                  }
                 >
                   {medication.status}
                 </Badge>
@@ -117,15 +137,21 @@ export function MedicationDetailPage() {
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">
                   Dosage Information
                 </h3>
+
                 <div className="space-y-2">
                   <p className="text-gray-600">
-                    <span className="font-medium">Dosage:</span> {medication.dosage}
+                    <span className="font-medium">Dosage:</span>{' '}
+                    {medication.dosage}
                   </p>
+
                   <p className="text-gray-600">
-                    <span className="font-medium">Quantity:</span> {medication.quantity} units
+                    <span className="font-medium">Quantity:</span>{' '}
+                    {medication.quantity} units
                   </p>
+
                   <p className="text-gray-600">
-                    <span className="font-medium">Frequency:</span> {medication.frequency}
+                    <span className="font-medium">Frequency:</span>{' '}
+                    {medication.frequency}
                   </p>
                 </div>
               </div>
@@ -134,6 +160,7 @@ export function MedicationDetailPage() {
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">
                   Schedule
                 </h3>
+
                 <div className="flex flex-wrap gap-2">
                   {medication.schedule.map((time) => (
                     <Badge key={time} variant="primary">
@@ -147,6 +174,7 @@ export function MedicationDetailPage() {
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">
                   Instructions
                 </h3>
+
                 <p className="text-gray-600">{medication.instructions}</p>
               </div>
 
@@ -154,10 +182,13 @@ export function MedicationDetailPage() {
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">
                   Timeline
                 </h3>
+
                 <div className="space-y-2">
                   <p className="text-gray-600">
-                    <span className="font-medium">Start Date:</span> {medication.startDate}
+                    <span className="font-medium">Start Date:</span>{' '}
+                    {medication.startDate}
                   </p>
+
                   <p className="text-gray-600">
                     <span className="font-medium">End Date:</span>{' '}
                     {medication.endDate || 'Ongoing'}
@@ -176,6 +207,7 @@ export function MedicationDetailPage() {
                   <Edit2 className="h-4 w-4" />
                   Edit
                 </Button>
+
                 <Button
                   variant="danger"
                   onClick={handleDelete}
@@ -190,25 +222,28 @@ export function MedicationDetailPage() {
           </Card>
         </div>
 
-        {/* Side Info */}
         <div>
           <Card>
             <CardHeader>
               <h3 className="font-semibold text-gray-900">Quick Info</h3>
             </CardHeader>
+
             <CardBody className="space-y-4">
               <div className="p-3 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-900">
                   <span className="font-medium">Disease Category:</span>
                 </p>
+
                 <p className="text-sm font-medium text-blue-600 mt-1">
                   {medication.disease}
                 </p>
               </div>
+
               <div className="p-3 bg-green-50 rounded-lg">
                 <p className="text-sm text-green-900">
                   <span className="font-medium">Active Medication:</span>
                 </p>
+
                 <p className="text-sm font-medium text-green-600 mt-1">
                   {medication.status === 'active' ? 'Yes' : 'No'}
                 </p>

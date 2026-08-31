@@ -3,9 +3,8 @@ import { apiClient, USE_MOCK_API } from './client';
 // Mock implementation
 const mockAuthApi = {
   login: async (email, password) => {
-    // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 800));
-    
+
     if (email === 'patient@example.com' && password === 'password') {
       return {
         accessToken: 'mock-access-token-patient',
@@ -15,10 +14,12 @@ const mockAuthApi = {
           email,
           name: 'John Patient',
           role: 'patient',
-          avatar: 'https://ui-avatars.com/api/?name=John+Patient&background=0D8ABC&color=fff',
+          avatar:
+            'https://ui-avatars.com/api/?name=John+Patient&background=0D8ABC&color=fff',
         },
       };
     }
+
     if (email === 'caregiver@example.com' && password === 'password') {
       return {
         accessToken: 'mock-access-token-caregiver',
@@ -28,10 +29,12 @@ const mockAuthApi = {
           email,
           name: 'Jane Caregiver',
           role: 'caregiver',
-          avatar: 'https://ui-avatars.com/api/?name=Jane+Caregiver&background=7C3AED&color=fff',
+          avatar:
+            'https://ui-avatars.com/api/?name=Jane+Caregiver&background=7C3AED&color=fff',
         },
       };
     }
+
     if (email === 'admin@example.com' && password === 'password') {
       return {
         accessToken: 'mock-access-token-admin',
@@ -41,15 +44,18 @@ const mockAuthApi = {
           email,
           name: 'Admin User',
           role: 'admin',
-          avatar: 'https://ui-avatars.com/api/?name=Admin+User&background=DC2626&color=fff',
+          avatar:
+            'https://ui-avatars.com/api/?name=Admin+User&background=DC2626&color=fff',
         },
       };
     }
+
     throw new Error('Invalid credentials');
   },
 
   register: async (data) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
+
     return {
       accessToken: 'mock-access-token-new',
       refreshToken: 'mock-refresh-token-new',
@@ -65,26 +71,40 @@ const mockAuthApi = {
 
   forgotPassword: async (email) => {
     await new Promise((resolve) => setTimeout(resolve, 600));
-    return { message: 'Reset link sent to email' };
+
+    return {
+      message: `Reset link sent to ${email}`,
+    };
   },
 
   resetPassword: async (token, newPassword) => {
     await new Promise((resolve) => setTimeout(resolve, 600));
-    return { message: 'Password reset successfully' };
+
+    return {
+      message: 'Password reset successfully',
+      token,
+      passwordUpdated: Boolean(newPassword),
+    };
   },
 
   me: async () => {
     await new Promise((resolve) => setTimeout(resolve, 300));
+
     const storedUser = localStorage.getItem('user');
+
     if (storedUser) {
       return JSON.parse(storedUser);
     }
+
     throw new Error('Not authenticated');
   },
 
   logout: async () => {
     await new Promise((resolve) => setTimeout(resolve, 200));
-    return { message: 'Logged out successfully' };
+
+    return {
+      message: 'Logged out successfully',
+    };
   },
 };
 
@@ -97,10 +117,14 @@ const realAuthApi = {
     apiClient.post('/auth/register', data).then((res) => res.data),
 
   forgotPassword: (email) =>
-    apiClient.post('/auth/forgot-password', { email }).then((res) => res.data),
+    apiClient
+      .post('/auth/forgot-password', { email })
+      .then((res) => res.data),
 
   resetPassword: (token, newPassword) =>
-    apiClient.post('/auth/reset-password', { token, newPassword }).then((res) => res.data),
+    apiClient
+      .post('/auth/reset-password', { token, newPassword })
+      .then((res) => res.data),
 
   me: () => apiClient.get('/auth/me').then((res) => res.data),
 

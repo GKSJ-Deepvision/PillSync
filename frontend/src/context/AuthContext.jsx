@@ -1,140 +1,77 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useEffect, useState } from 'react';
+import { AuthContext } from './AuthContext';
 import { authApi } from '../api/auth';
-
-const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
-  // Restore session on mount
   useEffect(() => {
-    const restoreSession = async () => {
+    const loadUser = async () => {
       try {
         const storedUser = localStorage.getItem('user');
-        const storedToken = localStorage.getItem('accessToken');
 
-        if (storedUser && storedToken) {
+        if (storedUser) {
           setUser(JSON.parse(storedUser));
         }
-      } catch (err) {
-        console.error('Failed to restore session:', err);
+      } catch (error) {
+        console.error('Failed to load user:', error);
+        localStorage.removeItem('user');
       } finally {
         setLoading(false);
       }
     };
 
-    restoreSession();
+    loadUser();
   }, []);
 
-  const login = useCallback(async (email, password) => {
-    setIsAuthenticating(true);
-    setError(null);
-    try {
-      const response = await authApi.login(email, password);
-      const { accessToken, refreshToken, user: userData } = response;
+  const login = async (email, password) => {
+    const data = await authApi.login(email, password);
 
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('user', JSON.stringify(userData));
+    setUser(data.user);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.setItem('accessToken', data.accessToken);
+    localStorage.setItem('refreshToken', data.refreshToken);
 
-      setUser(userData);
-      return userData;
-    } catch (err) {
-      const errorMessage = err.response?.data?.message || err.message || 'Login failed';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsAuthenticating(false);
-    }
-  }, []);
+    return data;
+  };
 
-  const register = useCallback(async (data) => {
-    setIsAuthenticating(true);
-    setError(null);
-    try {
-      const response = await authApi.register(data);
-      const { accessToken, refreshToken, user: userData } = response;
+  const register = async (data) => {
+    const result = await authApi.register(data);
 
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('user', JSON.stringify(userData));
+    setUser(result.user);
+    localStorage.setItem('user', JSON.stringify(result.user));
+    localStorage.setItem('accessToken', result.accessToken);
+    localStorage.setItem('refreshToken', result.refreshToken);
 
-      setUser(userData);
-      return userData;
-    } catch (err) {
-      const errorMessage = err.response?.data?.message || err.message || 'Registration failed';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsAuthenticating(false);
-    }
-  }, []);
+    return result;
+  };
 
-  const logout = useCallback(async () => {
-    setIsAuthenticating(true);
+  const logout = async () => {
     try {
       await authApi.logout();
-    } catch (err) {
-      console.error('Logout failed:', err);
+    } catch (error) {
+      console.error('Logout error:', error);
     } finally {
+      setUser(null);
+      localStorage.removeItem('user');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
-      setUser(null);
-      setIsAuthenticating(false);
     }
-  }, []);
-
-  const forgotPassword = useCallback(async (email) => {
-    setError(null);
-    try {
-      const response = await authApi.forgotPassword(email);
-      return response;
-    } catch (err) {
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to send reset link';
-      setError(errorMessage);
-      throw err;
-    }
-  }, []);
-
-  const resetPassword = useCallback(async (token, newPassword) => {
-    setError(null);
-    try {
-      const response = await authApi.resetPassword(token, newPassword);
-      return response;
-    } catch (err) {
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to reset password';
-      setError(errorMessage);
-      throw err;
-    }
-  }, []);
-
-  const isAuthenticated = !!user;
+  };
 
   const value = {
     user,
     loading,
-    error,
-    isAuthenticated,
-    isAuthenticating,
     login,
     register,
     logout,
-    forgotPassword,
-    resetPassword,
-    setError,
+    isAuthenticated: !!user,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-  return context;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
