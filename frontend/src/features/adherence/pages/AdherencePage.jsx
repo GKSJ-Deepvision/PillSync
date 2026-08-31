@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { adherenceApi } from '../../../api/adherence';
 import { Layout } from '../../../components/layout';
-import { Badge } from '../../../components/common/Badge';
+//import { Badge } from '../../../components/common/Badge';
 import { CardSkeleton, Alert } from '../../../components/common';
 import {
   BarChart,
@@ -10,21 +10,21 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
+  
   ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
+  
+ 
 } from 'recharts';
-import { TrendingUp, CheckCircle2, AlertTriangle, Flame, ShieldCheck } from 'lucide-react';
+import { TrendingUp,  Flame, ShieldCheck } from 'lucide-react';
 import './AdherencePage.css';
 
 export function AdherencePage() {
   const [summary, setSummary] = useState(null);
   const [weeklyData, setWeeklyData] = useState([]);
-  const [monthlyData, setMonthlyData] = useState([]);
+  const [ setMonthlyData] = useState([]);
   const [medicationHistory, setMedicationHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -54,7 +54,7 @@ export function AdherencePage() {
     };
 
     fetchAdherenceData();
-  }, []);
+  }, [setMonthlyData]);
 
   if (loading) {
     return (

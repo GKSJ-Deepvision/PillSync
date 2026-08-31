@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../context/useAuth';
-import { Input, Button, Alert } from '../../../components/common';
-import { Mail } from 'lucide-react';
+import { Alert } from '../../../components/common';
+import { Mail, Pill, ArrowRight, CheckCircle2 } from 'lucide-react';
 import './ForgotPasswordPage.css';
 
 export function ForgotPasswordPage() {
@@ -36,98 +36,84 @@ export function ForgotPasswordPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md">
-          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-            <div className="mb-6">
-              <div className="h-16 w-16 bg-success-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="h-8 w-8 text-success-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Check your email</h2>
-              <p className="text-gray-600">
-                We've sent password reset instructions to <strong>{email}</strong>
-              </p>
-            </div>
-
-            <Link
-              to="/login"
-              className="inline-block text-primary-600 hover:text-primary-700 font-medium mt-4"
-            >
-              Back to login
-            </Link>
+      <div className="forgot-page-wrapper">
+        <div className="forgot-card-container text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+            <CheckCircle2 className="h-8 w-8" />
           </div>
+          <h2 className="forgot-title">Check your email</h2>
+          <p className="forgot-subtitle">
+            We've sent password reset instructions to <strong className="text-slate-900">{email}</strong>
+          </p>
+
+          <Link
+            to="/login"
+            className="forgot-submit-btn mt-6 inline-flex"
+          >
+            Back to Sign In
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="h-12 w-12 bg-primary-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">P</span>
-            </div>
+    <div className="forgot-page-wrapper">
+      <div className="forgot-card-container">
+        <div className="forgot-header">
+          <div className="forgot-logo-box">
+            <Pill className="h-6 w-6" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">PillSync</h1>
-          <p className="text-gray-600 mt-2">Reset your password</p>
+          <h1 className="forgot-title">Reset your password</h1>
+          <p className="forgot-subtitle">
+            Enter your verified clinical email address to receive password recovery instructions.
+          </p>
         </div>
 
-        {/* Forgot Password Card */}
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          {error && (
-            <Alert type="danger" message={error} onClose={() => setError(null)} className="mb-6" />
-          )}
+        {error && (
+          <Alert type="danger" message={error} onClose={() => setError(null)} className="mb-4" />
+        )}
 
-          <p className="text-gray-600 mb-6 text-sm">
-            Enter your email address and we'll send you a link to reset your password.
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              label="Email Address"
-              type="email"
-              icon={Mail}
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              error={validationError}
-              required
-            />
-
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              className="w-full"
-              loading={isAuthenticating}
-            >
-              Send Reset Link
-            </Button>
-          </form>
-
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-center text-sm text-gray-600">
-              Remember your password?{' '}
-              <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
-                Sign in
-              </Link>
-            </p>
+        <form onSubmit={handleSubmit} className="forgot-form">
+          <div className="forgot-input-group">
+            <label className="forgot-input-label">
+              Email address <span>*</span>
+            </label>
+            <div className="forgot-input-box">
+              <Mail className="forgot-input-icon" />
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className={`forgot-input-field ${validationError ? 'forgot-input-error' : ''}`}
+              />
+            </div>
+            {validationError && (
+              <p className="forgot-input-error-msg">{validationError}</p>
+            )}
           </div>
+
+          <button
+            type="submit"
+            disabled={isAuthenticating}
+            className="forgot-submit-btn"
+          >
+            {isAuthenticating ? (
+              <span>Sending reset link...</span>
+            ) : (
+              <>
+                <span>Send Reset Link</span>
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
+          </button>
+        </form>
+
+        <div className="forgot-footer-box">
+          <span>Remember your password? </span>
+          <Link to="/login">Sign in here</Link>
         </div>
       </div>
     </div>

@@ -2,18 +2,14 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { medicationApi } from '../../../api/medications';
 import { Layout } from '../../../components/layout';
-import { Badge } from '../../../components/common/Badge';
-import { Button, Alert } from '../../../components/common';
+import { Alert } from '../../../components/common/Alert';
 import {
   ArrowLeft,
   Trash2,
   Edit2,
   Pill,
   Clock,
-  Calendar,
-  ShieldCheck,
-  AlertCircle,
-  Package,
+  
 } from 'lucide-react';
 import './MedicationDetailPage.css';
 

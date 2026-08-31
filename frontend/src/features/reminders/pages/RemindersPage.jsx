@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { reminderApi } from '../../../api/reminders';
 import { Layout } from '../../../components/layout';
-import { Badge } from '../../../components/common/Badge';
-import { Button, EmptyState, CardSkeleton, Alert } from '../../../components/common';
-import { Clock, CheckCircle, AlertCircle, Calendar, Plus, RefreshCw } from 'lucide-react';
+//import { Badge } from '../../../components/common/Badge';
+import { EmptyState, CardSkeleton, Alert } from '../../../components/common';
+import { Clock, CheckCircle,  Calendar } from 'lucide-react';
 import './RemindersPage.css';
 
 export function RemindersPage() {

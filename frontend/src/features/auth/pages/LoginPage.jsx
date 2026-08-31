@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../../context/useAuth';
-import { Input, Button, Alert } from '../../../components/common';
+import { Alert } from '../../../components/common';
 import {
   Mail,
   Lock,
   ShieldCheck,
   Pill,
-  HeartPulse,
   Sparkles,
   ArrowRight,
   CheckCircle2,
+  Activity,
+  HeartPulse,
 } from 'lucide-react';
 import './LoginPage.css';
 
@@ -50,9 +51,9 @@ export function LoginPage() {
   };
 
   const demoCredentials = [
-    { role: 'Patient', email: 'patient@example.com', password: 'password' },
-    { role: 'Caregiver', email: 'caregiver@example.com', password: 'password' },
-    { role: 'Admin', email: 'admin@example.com', password: 'password' },
+    { role: 'Patient', email: 'patient@example.com', password: 'password', name: 'Ibrahim' },
+    { role: 'Caregiver', email: 'caregiver@example.com', password: 'password', name: 'Dr. Oliver' },
+    { role: 'Admin', email: 'admin@example.com', password: 'password', name: 'Sarah' },
   ];
 
   const handleDemoLogin = (email, password) => {
@@ -60,173 +61,172 @@ export function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.18),transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(16,185,129,0.14),transparent_24%),linear-gradient(135deg,#f1fbff_0%,#f8fbff_48%,#eefaf6_100%)] px-4 py-8 sm:px-6 lg:px-8">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-20 top-10 h-64 w-64 rounded-full bg-sky-200/40 blur-3xl" />
-        <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
-      </div>
-
-      <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl items-center justify-center">
-        <div className="grid w-full overflow-hidden rounded-[32px] border border-white/60 bg-white/70 shadow-[0_30px_80px_rgba(12,69,94,0.14)] ring-1 ring-slate-200/60 backdrop-blur-lg lg:grid-cols-[1.08fr_0.92fr]">
-          <div className="relative overflow-hidden bg-gradient-to-br from-[#061d38] via-[#0d3b66] to-[#11a7b8] p-8 text-white sm:p-10 lg:p-12">
-            <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
-            <div className="absolute bottom-0 left-10 h-36 w-36 rounded-full bg-emerald-300/15 blur-3xl" />
-
-            <div className="relative z-10 flex h-full flex-col justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/15 bg-white/10 shadow-[0_12px_30px_rgba(4,14,30,0.18)] backdrop-blur-sm">
-                  <Pill className="h-7 w-7 text-white" />
-                </div>
-                <div>
-                  <p className="text-2xl font-black tracking-tight">PillSync</p>
-                  <p className="text-xs uppercase tracking-[0.28em] text-sky-100/90">
-                    Care intelligence
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-6 py-10">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-sky-50">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Trusted by care teams
-                </div>
-
-                <div className="space-y-5">
-                  <h1 className="max-w-md text-4xl font-black leading-tight tracking-tight sm:text-5xl">
-                    Medication care that feels easy.
-                  </h1>
-                  <p className="max-w-lg text-base text-sky-50/90">
-                    Keep every prescription, reminder, and health routine on track with a calmer,
-                    smarter daily care plan.
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {['Daily dose tracking', 'Caregiver visibility', 'Adherence insights'].map(
-                  (item) => (
-                    <div
-                      key={item}
-                      className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/8 px-3 py-2.5 backdrop-blur-sm"
-                    >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-400/20">
-                        <CheckCircle2 className="h-4 w-4 text-emerald-200" />
-                      </div>
-                      <span className="text-sm font-medium text-sky-50">{item}</span>
-                    </div>
-                  )
-                )}
-              </div>
+    <div className="login-page-wrapper">
+      <div className="login-card-container">
+        {/* Left Hero Panel */}
+        <div className="login-hero-panel">
+          <div className="login-hero-brand">
+            <div className="login-hero-logo-box">
+              <Pill className="h-6 w-6" />
+            </div>
+            <div>
+              <h1 className="login-hero-brand-title">PillSync</h1>
+              <p className="login-hero-brand-tagline">Clinical Care Platform</p>
             </div>
           </div>
 
-          <div className="bg-white p-6 sm:p-8 lg:p-10">
-            <div className="mb-8">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-700 ring-1 ring-sky-100">
-                <HeartPulse className="h-6 w-6" />
+          <div className="login-hero-content">
+            <div className="login-hero-badge">
+              <Sparkles className="h-3.5 w-3.5" />
+              Trusted by Care Teams
+            </div>
+            <h2 className="login-hero-headline">
+              Medication care that feels easy and reliable.
+            </h2>
+            <p className="login-hero-description">
+              Keep every prescription, reminder, and patient adherence routine strictly on track with a calmer daily care plan.
+            </p>
+          </div>
+
+          <div className="login-hero-features">
+            <div className="login-hero-feature-item">
+              <div className="login-hero-feature-icon">
+                <CheckCircle2 className="h-4 w-4" />
               </div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-700">
-                Welcome back
-              </p>
-              <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-900">Sign in</h2>
+              <span className="login-hero-feature-text">Real-time daily dose verification & reminders</span>
+            </div>
+            <div className="login-hero-feature-item">
+              <div className="login-hero-feature-icon">
+                <Activity className="h-4 w-4" />
+              </div>
+              <span className="login-hero-feature-text">Caregiver patient cohort oversight & nudges</span>
+            </div>
+            <div className="login-hero-feature-item">
+              <div className="login-hero-feature-icon">
+                <HeartPulse className="h-4 w-4" />
+              </div>
+              <span className="login-hero-feature-text">Longitudinal adherence trend reports</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Form Panel */}
+        <div className="login-form-panel">
+          <div className="login-form-header">
+            <h2 className="login-form-title">Sign in to your account</h2>
+            <p className="login-form-subtitle">
+              Enter your clinical credentials to access your portal
+            </p>
+          </div>
+
+          {error && (
+            <Alert
+              type="danger"
+              message={error}
+              onClose={() => setError(null)}
+              className="mb-4"
+            />
+          )}
+
+          <form onSubmit={handleSubmit} className="login-form-body">
+            {/* Email Field */}
+            <div className="login-input-group">
+              <label className="login-input-label">Email address *</label>
+              <div className="login-input-box">
+                <Mail className="login-input-icon" />
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                  className={`login-input-field ${validationErrors.email ? 'login-input-error' : ''}`}
+                />
+              </div>
+              {validationErrors.email && (
+                <p className="login-input-error-msg">{validationErrors.email}</p>
+              )}
             </div>
 
-            {error && (
-              <Alert
-                type="danger"
-                message={error}
-                onClose={() => setError(null)}
-                className="mb-6"
-              />
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <Input
-                label="Email address"
-                type="email"
-                icon={Mail}
-                placeholder="you@example.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                error={validationErrors.email}
-                required
-              />
-              <Input
-                label="Password"
-                type="password"
-                icon={Lock}
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                error={validationErrors.password}
-                required
-              />
-
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center gap-2 text-slate-600">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
-                  />
-                  Remember me
-                </label>
-                <Link
-                  to="/forgot-password"
-                  className="font-semibold text-sky-700 transition hover:text-sky-800"
-                >
-                  Forgot password?
-                </Link>
+            {/* Password Field */}
+            <div className="login-input-group">
+              <label className="login-input-label">Password *</label>
+              <div className="login-input-box">
+                <Lock className="login-input-icon" />
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  required
+                  className={`login-input-field ${validationErrors.password ? 'login-input-error' : ''}`}
+                />
               </div>
+              {validationErrors.password && (
+                <p className="login-input-error-msg">{validationErrors.password}</p>
+              )}
+            </div>
 
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                className="w-full"
-                loading={isAuthenticating}
-              >
-                <span>Sign In</span>
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </form>
-
-            <div className="mt-7 border-t border-slate-200 pt-6">
-              <p className="mb-4 text-center text-sm text-slate-600">New to PillSync?</p>
-              <Link
-                to="/register"
-                className="block text-center text-base font-semibold text-sky-700 transition hover:text-sky-800"
-              >
-                Create your account
+            {/* Remember Me & Forgot Password */}
+            <div className="login-form-options">
+              <label className="login-remember-me">
+                <input type="checkbox" defaultChecked />
+                <span>Remember me</span>
+              </label>
+              <Link to="/forgot-password" className="login-forgot-link">
+                Forgot password?
               </Link>
             </div>
 
-            <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-slate-800">Demo access</p>
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                  <ShieldCheck className="h-3 w-3" />
-                  Secure
-                </span>
-              </div>
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isAuthenticating}
+              className="login-submit-btn"
+            >
+              {isAuthenticating ? (
+                <span>Authenticating...</span>
+              ) : (
+                <>
+                  <span>Sign In</span>
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          </form>
 
-              <div className="space-y-2.5">
-                {demoCredentials.map((cred) => (
-                  <button
-                    key={cred.email}
-                    type="button"
-                    onClick={() => handleDemoLogin(cred.email, cred.password)}
-                    className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left transition hover:border-sky-200 hover:bg-sky-50/60"
-                  >
-                    <div>
-                      <p className="text-sm font-semibold text-slate-800">{cred.role}</p>
-                      <p className="text-xs text-slate-500">{cred.email}</p>
-                    </div>
-                    <span className="text-[10px] uppercase tracking-[0.18em] text-slate-400">
-                      Use
-                    </span>
-                  </button>
-                ))}
-              </div>
+          <div className="login-divider">
+            <span>or</span>
+          </div>
+
+          <div className="login-register-link-box">
+            <span>New to PillSync? </span>
+            <Link to="/register">Create an account</Link>
+          </div>
+
+          {/* Quick 1-Click Demo Logins */}
+          <div className="login-demo-box">
+            <div className="login-demo-header">
+              <span className="login-demo-title">1-Click Demo Login</span>
+              <span className="login-demo-badge">
+                <ShieldCheck className="h-3 w-3" />
+                Verified
+              </span>
+            </div>
+
+            <div className="login-demo-grid">
+              {demoCredentials.map((cred) => (
+                <button
+                  key={cred.role}
+                  type="button"
+                  onClick={() => handleDemoLogin(cred.email, cred.password)}
+                  className="login-demo-card"
+                  title={`Fill ${cred.role} credentials`}
+                >
+                  <span className="login-demo-role">{cred.role}</span>
+                  <span className="login-demo-email">{cred.email}</span>
+                </button>
+              ))}
             </div>
           </div>
         </div>

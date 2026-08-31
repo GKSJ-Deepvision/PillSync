@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { medicationApi } from '../../../api/medications';
 import { Layout } from '../../../components/layout';
-import { Button, Alert, Input } from '../../../components/common';
-import { ArrowLeft, Save, Pill, Plus } from 'lucide-react';
+import {  Alert } from '../../../components/common';
+import { ArrowLeft, Save } from 'lucide-react';
 import './MedicationFormPage.css';
 
 export function MedicationFormPage() {

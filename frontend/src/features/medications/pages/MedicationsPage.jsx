@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { medicationApi } from '../../../api/medications';
 import { Layout } from '../../../components/layout';
-import { Badge } from '../../../components/common/Badge';
+//import { Badge } from '../../../components/common/Badge';
 import { EmptyState, CardSkeleton } from '../../../components/common';
-import { Search, Plus, Pill, Clock, ChevronRight, AlertCircle, Sparkles } from 'lucide-react';
+import { Search, Plus, Pill, Clock, ChevronRight } from 'lucide-react';
 import './MedicationsPage.css';
 
 const DISEASE_CATEGORIES = [

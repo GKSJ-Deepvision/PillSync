@@ -1,33 +1,32 @@
-import React, { useState } from 'react';
+//import React, { useState } from 'react';
+import { useState } from "react";
 import { useAuth } from '../context/useAuth';
-import { useNavigate, Link } from 'react-router-dom';
+//import { useNavigate, Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import { Layout } from '../components/layout';
 import { Badge } from '../components/common/Badge';
-import { Button } from '../components/common/Button';
+//import { Button } from '../components/common/Button';
 import {
   Pill,
   Clock,
   TrendingUp,
   AlertTriangle,
   CheckCircle2,
-  Calendar,
-  ArrowUpRight,
-  Shield,
+  
+ 
   Phone,
-  MessageSquare,
+  
   Send,
   Sparkles,
   Users,
-  Activity,
-  ChevronRight,
+  
   AlertCircle,
   Plus,
 } from 'lucide-react';
 import {
   BarChart,
   Bar,
-  AreaChart,
-  Area,
+  
   XAxis,
   YAxis,
   CartesianGrid,
@@ -69,7 +68,7 @@ const INITIAL_TASKS = [
 
 export function DashboardPage() {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [selectedPatientIndex, setSelectedPatientIndex] = useState(0);
   const [doses, setDoses] = useState(INITIAL_DOSES);
   const [tasks, setTasks] = useState(INITIAL_TASKS);
