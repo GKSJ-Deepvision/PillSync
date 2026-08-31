@@ -1,37 +1,33 @@
-import { useEffect, useState } from 'react';
-import { AuthContext } from './AuthContext';
+import { useState } from 'react';
 import { authApi } from '../api/auth';
+import { AuthContext } from './AuthContextValue';
+
+function getStoredUser() {
+  const storedUser = localStorage.getItem('user');
+
+  if (!storedUser) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(storedUser);
+  } catch {
+    localStorage.removeItem('user');
+    return null;
+  }
+}
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const storedUser = localStorage.getItem('user');
-
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        }
-      } catch (error) {
-        console.error('Failed to load user:', error);
-        localStorage.removeItem('user');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadUser();
-  }, []);
+  const [user, setUser] = useState(getStoredUser);
 
   const login = async (email, password) => {
     const data = await authApi.login(email, password);
 
-    setUser(data.user);
-    localStorage.setItem('user', JSON.stringify(data.user));
     localStorage.setItem('accessToken', data.accessToken);
     localStorage.setItem('refreshToken', data.refreshToken);
+    localStorage.setItem('user', JSON.stringify(data.user));
+
+    setUser(data.user);
 
     return data;
   };
@@ -39,10 +35,11 @@ export function AuthProvider({ children }) {
   const register = async (data) => {
     const result = await authApi.register(data);
 
-    setUser(result.user);
-    localStorage.setItem('user', JSON.stringify(result.user));
     localStorage.setItem('accessToken', result.accessToken);
     localStorage.setItem('refreshToken', result.refreshToken);
+    localStorage.setItem('user', JSON.stringify(result.user));
+
+    setUser(result.user);
 
     return result;
   };
@@ -50,24 +47,36 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     try {
       await authApi.logout();
-    } catch (error) {
-      console.error('Logout error:', error);
     } finally {
-      setUser(null);
-      localStorage.removeItem('user');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      setUser(null);
     }
+  };
+
+  const forgotPassword = async (email) => {
+    return authApi.forgotPassword(email);
+  };
+
+  const resetPassword = async (token, newPassword) => {
+    return authApi.resetPassword(token, newPassword);
   };
 
   const value = {
     user,
-    loading,
+    loading: false,
+    isAuthenticated: Boolean(user),
     login,
     register,
     logout,
-    isAuthenticated: !!user,
+    forgotPassword,
+    resetPassword,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }

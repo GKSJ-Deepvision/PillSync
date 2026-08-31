@@ -1,4 +1,4 @@
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 import { useLocation, Link } from 'react-router-dom';
 import { Pill, Clock, TrendingUp, BarChart3, Users } from 'lucide-react';
 

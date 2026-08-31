@@ -1,4 +1,4 @@
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { Layout } from '../components/layout';
 import { Card, CardBody, CardHeader } from '../components/common/Card';
 import { Button } from '../components/common';
