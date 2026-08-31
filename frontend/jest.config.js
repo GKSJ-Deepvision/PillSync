@@ -8,7 +8,7 @@ export default {
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
   transform: {
-    '^.+\\.(js|jsx)$': 'babel-jest',
+    '^.+\\.[jt]sx?$': ['babel-jest', { configFile: './.babelrc' }],
   },
   collectCoverageFrom: [
     'src/**/*.{js,jsx}',
@@ -16,4 +16,4 @@ export default {
     '!src/**/*.test.{js,jsx}',
     '!src/**/__tests__/**',
   ],
-}
+};
