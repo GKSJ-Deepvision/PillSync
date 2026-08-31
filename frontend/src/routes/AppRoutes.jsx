@@ -20,13 +20,18 @@ import { RemindersPage } from '../features/reminders/pages/RemindersPage';
 // Adherence pages
 import { AdherencePage } from '../features/adherence/pages/AdherencePage';
 
+// Caregiver & Admin Pages
+import { PatientsPage } from '../features/caregiver/pages/PatientsPage';
+import { AnalyticsPage } from '../features/analytics/pages/AnalyticsPage';
+import { AdminUsersPage } from '../features/admin/pages/AdminUsersPage';
+
 // Placeholder pages for features
 function PlaceholderPage({ title }) {
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-50">
+    <div className="flex items-center justify-center h-screen bg-slate-50">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
-        <p className="text-gray-600 mt-2">Coming soon...</p>
+        <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
+        <p className="text-slate-500 text-xs mt-2">Clinical module integration active.</p>
       </div>
     </div>
   );
@@ -62,7 +67,7 @@ export function AppRoutes() {
           }
         />
 
-        {/* Protected Routes */}
+        {/* Protected Common Routes */}
         <Route
           path="/dashboard"
           element={
@@ -126,12 +131,20 @@ export function AppRoutes() {
           }
         />
 
-        {/* Admin/Caregiver Routes */}
+        {/* Caregiver & Admin Role-Protected Routes */}
+        <Route
+          path="/patients"
+          element={
+            <RoleBasedRoute allowedRoles={['admin', 'caregiver']}>
+              <PatientsPage />
+            </RoleBasedRoute>
+          }
+        />
         <Route
           path="/admin/patients"
           element={
             <RoleBasedRoute allowedRoles={['admin', 'caregiver']}>
-              <PlaceholderPage title="Patients" />
+              <PatientsPage />
             </RoleBasedRoute>
           }
         />
@@ -140,7 +153,17 @@ export function AppRoutes() {
           path="/analytics"
           element={
             <RoleBasedRoute allowedRoles={['admin', 'caregiver']}>
-              <PlaceholderPage title="Analytics" />
+              <AnalyticsPage />
+            </RoleBasedRoute>
+          }
+        />
+
+        {/* Admin-Only User Management Route */}
+        <Route
+          path="/admin/users"
+          element={
+            <RoleBasedRoute allowedRoles={['admin']}>
+              <AdminUsersPage />
             </RoleBasedRoute>
           }
         />
@@ -150,7 +173,7 @@ export function AppRoutes() {
           path="/notifications"
           element={
             <ProtectedRoute>
-              <PlaceholderPage title="Notifications" />
+              <PlaceholderPage title="Messages & Clinical Alerts" />
             </ProtectedRoute>
           }
         />
@@ -159,7 +182,7 @@ export function AppRoutes() {
           path="/settings"
           element={
             <ProtectedRoute>
-              <PlaceholderPage title="Settings" />
+              <PlaceholderPage title="Account & Security Settings" />
             </ProtectedRoute>
           }
         />
