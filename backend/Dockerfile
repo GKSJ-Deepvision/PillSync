@@ -21,13 +21,15 @@ COPY requirements/ requirements/
 RUN pip install --upgrade pip && pip install -r requirements/base.txt
 
 COPY . .
+RUN chmod +x scripts/entrypoint.sh
 
 RUN adduser --disabled-password --gecos "" appuser && chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8000
 
-# Django:
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-# FastAPI alternative:
-# CMD ["uvicorn", "config.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# This branch uses the FastAPI alternative (see backend/README.md).
+# Alembic migrations run first so a fresh container always starts on an
+# up-to-date schema; see scripts/entrypoint.sh.
+ENTRYPOINT ["/app/scripts/entrypoint.sh"]
+CMD ["uvicorn", "config.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

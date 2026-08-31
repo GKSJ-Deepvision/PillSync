@@ -7,9 +7,11 @@ isort==5.13.2
 pytest==8.3.4
 pytest-cov==6.0.0
 
+# Async test support (this branch uses FastAPI, not Django)
+pytest-asyncio==0.25.0
+httpx==0.28.1
+aiosqlite==0.20.0
+
 # Uncomment as you need them
-# pytest-django==4.9.0
-# pytest-asyncio==0.25.0
 # factory-boy==3.3.1
 # faker==33.1.0
-# httpx==0.28.1

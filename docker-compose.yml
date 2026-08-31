@@ -14,7 +14,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pillsync}"]
       interval: 10s
@@ -31,6 +31,13 @@ services:
       context: ./backend
     env_file:
       - ./backend/.env
+    environment:
+      # Overrides backend/.env's `localhost` defaults with the in-network
+      # service names — .env is written for running the app on bare metal.
+      POSTGRES_HOST: db
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-pillsync}:${POSTGRES_PASSWORD:-pillsync}@db:5432/${POSTGRES_DB:-pillsync}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
     volumes:
       - ./backend:/app
     ports:
@@ -47,6 +54,11 @@ services:
     command: celery -A config worker -l info
     env_file:
       - ./backend/.env
+    environment:
+      POSTGRES_HOST: db
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-pillsync}:${POSTGRES_PASSWORD:-pillsync}@db:5432/${POSTGRES_DB:-pillsync}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
     volumes:
       - ./backend:/app
     depends_on:
@@ -59,6 +71,11 @@ services:
     command: celery -A config beat -l info
     env_file:
       - ./backend/.env
+    environment:
+      POSTGRES_HOST: db
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-pillsync}:${POSTGRES_PASSWORD:-pillsync}@db:5432/${POSTGRES_DB:-pillsync}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
     volumes:
       - ./backend:/app
     depends_on:

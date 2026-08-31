@@ -1,37 +1,42 @@
 # Runtime dependencies for the PillSync backend.
-# Pin a version when you add a package so every branch installs the same thing.
+# This branch uses the FastAPI alternative (see backend/README.md) — versions
+# pinned so every environment installs the same thing.
 #
-# Web framework (pick Django REST Framework or FastAPI, not both)
-# django==5.0.*
-# djangorestframework==3.15.*
-# django-cors-headers==4.*
-# fastapi==0.115.*
-# uvicorn[standard]==0.32.*
-#
-# Auth
-# djangorestframework-simplejwt==5.*
-# django-oauth-toolkit==3.*
-#
+# Web framework
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+
 # Database
-# psycopg[binary]==3.*
-#
-# Background jobs / scheduling
-# celery==5.*
-# redis==5.*
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+alembic==1.14.0
+
+# Settings & validation
+pydantic==2.10.3
+pydantic-settings==2.7.0
+
+# Auth (issuing/verifying JWTs — full auth flow lands with the accounts app)
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.2.1
+python-multipart==0.0.20
+
+# Background jobs / scheduling (used from Milestone 2 onward)
+# celery==5.4.*
+# redis==5.2.*
 # django-celery-beat==2.*
-#
-# OCR and NLP
+
+# OCR and NLP (used from Milestone 3 onward)
 # pytesseract==0.3.*
 # Pillow==11.*
 # opencv-python-headless==4.*
 # spacy==3.*
 # openai==1.*
-#
-# Notifications
+
+# Notifications (used from Milestone 2 onward)
 # firebase-admin==6.*
 # twilio==9.*
 # sendgrid==6.*
-#
+
 # Utilities
-# python-dotenv==1.*
-# pydantic==2.*
+python-dotenv==1.0.1
