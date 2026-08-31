@@ -11,25 +11,25 @@ from __future__ import annotations
 import enum
 
 
-class UserRole(str, enum.Enum):
+class UserRole(enum.StrEnum):
     PATIENT = "PATIENT"
     CAREGIVER = "CAREGIVER"
     ADMIN = "ADMIN"
 
 
-class CaregiverAccessLevel(str, enum.Enum):
+class CaregiverAccessLevel(enum.StrEnum):
     VIEW_ONLY = "VIEW_ONLY"
     MANAGE_MEDICATIONS = "MANAGE_MEDICATIONS"
     FULL_ACCESS = "FULL_ACCESS"
 
 
-class CaregiverMappingStatus(str, enum.Enum):
+class CaregiverMappingStatus(enum.StrEnum):
     PENDING = "PENDING"
     ACCEPTED = "ACCEPTED"
     REJECTED = "REJECTED"
 
 
-class MedicineForm(str, enum.Enum):
+class MedicineForm(enum.StrEnum):
     TABLET = "TABLET"
     CAPSULE = "CAPSULE"
     SYRUP = "SYRUP"
@@ -39,7 +39,7 @@ class MedicineForm(str, enum.Enum):
     OTHER = "OTHER"
 
 
-class ReminderFrequency(str, enum.Enum):
+class ReminderFrequency(enum.StrEnum):
     ONCE_DAILY = "ONCE_DAILY"
     TWICE_DAILY = "TWICE_DAILY"
     THREE_TIMES_DAILY = "THREE_TIMES_DAILY"
@@ -48,7 +48,7 @@ class ReminderFrequency(str, enum.Enum):
     CUSTOM = "CUSTOM"
 
 
-class AdherenceStatus(str, enum.Enum):
+class AdherenceStatus(enum.StrEnum):
     TAKEN = "TAKEN"
     MISSED = "MISSED"
     SNOOZED = "SNOOZED"
