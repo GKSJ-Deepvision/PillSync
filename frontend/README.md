@@ -1,47 +1,47 @@
-# PillSync — Frontend
+# PillSync — Milestone 1 (Frontend)
 
-React.js single-page app for patients, caregivers and admins.
+React 18 + Vite 5 + Tailwind + React Router 6 frontend, Supabase for Auth
+and PostgreSQL (managed backend). Covers Milestone 1 scope: authentication,
+RBAC, profile management, and the database schema.
 
-**Stack (from the project spec):** React.js, Tailwind CSS, Axios, Redux Toolkit or
-Context API, Firebase Cloud Messaging for push, Jest + React Testing Library.
-
-## Layout
-
-| Path | Purpose |
-|---|---|
-| `src/api/` | Axios instance, interceptors, one module per backend resource |
-| `src/features/` | One folder per spec module (auth, medications, ocr, reminders, adherence, refills, notifications, analytics, caregiver, admin) |
-| `src/components/` | Reusable UI — `common/`, `layout/`, `charts/` |
-| `src/pages/` | Route-level screens composed from features |
-| `src/routes/` | Router setup and role-protected routes |
-| `src/store/` | Redux store and slices (skip if you use Context) |
-| `src/context/` | React contexts (auth, theme, notifications) |
-| `src/hooks/` | Shared custom hooks |
-| `src/utils/` | Formatters, date helpers, validators |
-| `src/styles/` | Tailwind entry CSS and design tokens |
-| `tests/` | Cross-cutting `unit/` and `integration/` tests |
-
-## Scaffolding (do this once, on your own branch)
+## Setup
 
 ```bash
-cd frontend
-npm create vite@latest . -- --template react
 npm install
-npm install axios react-router-dom @reduxjs/toolkit react-redux
-npm install -D tailwindcss postcss autoprefixer eslint prettier vitest @testing-library/react @testing-library/jest-dom jsdom
+cp .env.example .env
+# fill in VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY from your Supabase project
 ```
 
-Keep the folders above — move the generated files into them rather than starting
-a new layout.
+In the Supabase SQL editor, run `docs/database/schema.sql` to create the
+`profiles` / `caregiver_links` tables, triggers, and RLS policies.
 
-## Checks CI will run on your branch
+Then:
 
 ```bash
-npm run lint
-npm run format:check
-npm test
-npm run build
+npm run dev      # local dev server
+npm run build    # production build
+npm run lint     # oxlint
+npm test         # vitest
 ```
 
-Define those four scripts in `package.json`. CI skips any script you have not
-defined yet, so add them as soon as the tooling is installed.
+## What's implemented
+
+- `src/context/AuthContext.jsx` — sign up, sign in, Google OAuth, session
+  sync, password reset/update.
+- `src/routes/ProtectedRoute.jsx` — role-gated route wrapper (UI only; RLS
+  is the real boundary — see `docs/database/README.md`).
+- `src/features/profile/ProfilePage.jsx` — profile edit form, patient-only
+  fields conditional on role.
+- `docs/database/schema.sql` — `profiles` + `caregiver_links` tables,
+  triggers, RLS policies.
+- `tests/unit/` — DoseRing and greeting-helper unit tests.
+
+## Pushing to your branch
+
+```bash
+git checkout -b intern/<your-id>-<your-name> main
+# copy these files into the repo's frontend/ directory
+git add .
+git commit -m "Milestone 1: Supabase auth, RBAC, profile management, schema"
+git push origin intern/<your-id>-<your-name>
+```
