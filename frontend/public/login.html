@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PillSync - Login</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('pillsync.jpg');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;    
+    }
+    .login-box {
+      background: white;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      width: 320px;
+      text-align: center;
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      color: #2a8ccd;
+      margin-bottom: 5px;
+    }
+    .subtitle {
+      color: #888;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+        .role-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+    .role-tab {
+      flex: 1;
+      padding: 8px 5px;
+      font-size: 12px;
+      border: 1px solid #2a8ccd;
+      background: white;
+      color: #2a8ccd;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .role-tab.active {
+      background: #2a8ccd;
+      color: white;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    input:focus {
+      outline: none;
+      border-color: #2a8ccd;
+    }
+    .options-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin: 10px 0;
+    }
+    .options-row a {
+      color: #2a8ccd;
+      text-decoration: none;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #2a8ccd;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #2a8ccd;
+    }
+    #errorMsg {
+      color: #e63946;
+      font-size: 13px;
+      min-height: 18px;
+    }
+    .signup-link {
+      margin-top: 15px;
+      font-size: 13px;
+      color: #555;
+    }
+    .signup-link a {
+      color: #2a8ccd;
+      font-weight: bold;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-box" id="loginView">
+    <div class="logo">💊 PillSync</div>
+    <div class="subtitle">Your smart medicine companion</div>
+      <div class="role-tabs">
+      <button type="button" class="role-tab active" onclick="selectRole('patient', this)">Patient</button>
+      <button type="button" class="role-tab" onclick="selectRole('caregiver', this)">Caregiver</button>
+      <button type="button" class="role-tab" onclick="selectRole('admin', this)">Admin</button>
+    </div>
+
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+
+    <div class="options-row">
+      <label><input type="checkbox" style="width:auto;"> Remember me</label>
+      <a onclick="showView('forgotView')" style="cursor:pointer;">Forgot password?</a>
+    </div>
+
+    <p id="errorMsg"></p>
+    <button onclick="handleLogin()">Login</button>
+
+    <div class="signup-link">
+      Don't have an account? <a onclick="showView('signupView')" style="cursor:pointer;">Sign up</a>
+    </div>
+  </div>
+    <div class="login-box" id="signupView" style="display:none;">
+    <div class="logo">💊 PillSync</div>
+    <div class="subtitle">Create your account</div>
+    <div class="role-tabs">
+      <button type="button" class="role-tab active" onclick="selectSignupRole('patient', this)">Patient</button>
+      <button type="button" class="role-tab" onclick="selectSignupRole('caregiver', this)">Caregiver</button>
+      <button type="button" class="role-tab" onclick="selectSignupRole('admin', this)">Admin</button>
+    </div>
+    <input type="text" id="signupName" placeholder="Full Name">
+    <input type="email" id="signupEmail" placeholder="Email">
+    <input type="password" id="signupPassword" placeholder="Password">
+    <input type="password" id="signupConfirm" placeholder="Confirm Password">
+    <input type="email" id="caregiverPatientEmail" placeholder="Patient's Email (to link)" style="display:none;">
+    <p id="signupError" style="color:#e63946; font-size:13px; min-height:18px;"></p>
+    <button onclick="handleSignup()">Sign Up</button>
+    <div class="signup-link">
+      Already have an account? <a onclick="showView('loginView')" style="cursor:pointer;">Login</a>
+    </div>
+  </div>
+
+  <div class="login-box" id="forgotView" style="display:none;">
+    <div class="logo">💊 PillSync</div>
+    <div class="subtitle">Reset your password</div>
+    <input type="email" id="forgotEmail" placeholder="Enter your email">
+    <p id="forgotError" style="color:#e63946; font-size:13px; min-height:18px;"></p>
+    <button onclick="handleForgotPassword()">Send Reset Link</button>
+    <div class="signup-link">
+      Remembered it? <a onclick="showView('loginView')" style="cursor:pointer;">Back to Login</a>
+    </div>
+  </div>
+
+  <script>
+    function handleLogin() {
+      const email = document.getElementById("loginEmail") ? document.getElementById("loginEmail").value : document.getElementById("email").value;
+      const password = document.getElementById("loginPassword") ? document.getElementById("loginPassword").value : document.getElementById("password").value;
+      const errorMsg = document.getElementById("errorMsg");
+
+      if (email === "" || password === "") {
+        errorMsg.textContent = "Please fill in both fields.";
+        return;
+      }
+
+      errorMsg.textContent = "";
+      console.log("Attempting login with:", email, password, "as role:", selectedRole);
+    }
+    let selectedSignupRole = "patient";
+
+    function selectSignupRole(role, btn) {
+      selectedSignupRole = role;
+      document.querySelectorAll("#signupView .role-tab").forEach(tab => tab.classList.remove("active"));
+      btn.classList.add("active");
+
+      const caregiverField = document.getElementById("caregiverPatientEmail");
+      caregiverField.style.display = (role === "caregiver") ? "block" : "none";
+    }
+        function showView(viewId) {
+      document.getElementById("loginView").style.display = "none";
+      document.getElementById("signupView").style.display = "none";
+      document.getElementById("forgotView").style.display = "none";
+      document.getElementById(viewId).style.display = "block";
+    }
+
+    function handleSignup() {
+      const name = document.getElementById("signupName").value;
+      const email = document.getElementById("signupEmail").value;
+      const password = document.getElementById("signupPassword").value;
+      const confirm = document.getElementById("signupConfirm").value;
+      const errorMsg = document.getElementById("signupError");
+
+      if (name === "" || email === "" || password === "") {
+        errorMsg.textContent = "Please fill in all fields.";
+        return;
+      }
+      if (password !== confirm) {
+        errorMsg.textContent = "Passwords do not match.";
+        return;
+      }
+      if (selectedSignupRole === "caregiver") {
+        const patientEmail = document.getElementById("caregiverPatientEmail").value;
+        if (patientEmail === "") {
+          errorMsg.textContent = "Please enter the patient's email to link.";
+          return;
+        }
+      }
+      errorMsg.textContent = "";
+      console.log("Signing up:", name, email, password, "as role:", selectedSignupRole);
+      
+    }
+
+    function handleForgotPassword() {
+      const email = document.getElementById("forgotEmail").value;
+      const errorMsg = document.getElementById("forgotError");
+
+      if (email === "") {
+        errorMsg.textContent = "Please enter your email.";
+        return;
+      }
+      errorMsg.textContent = "";
+      alert("If this email exists, a reset link has been sent.");
+    }
+    let selectedRole = "patient"; // default
+
+    function selectRole(role, btn) {
+      selectedRole = role;
+      document.querySelectorAll("#loginView .role-tab").forEach(tab => tab.classList.remove("active"));
+      btn.classList.add("active");
+    }
+  </script>
+
+</body>
+</html>
