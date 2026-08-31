@@ -2,17 +2,15 @@ import { useState } from 'react';
 import { useAuth } from '../../context/useAuth';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import {
+  Pill,
   Search,
+  Shield,
+  ChevronDown,
   Bell,
   LogOut,
-  Pill,
-  Menu,
   X,
-  Shield,
-  User,
-  Users,
-  ChevronDown,
-} from 'lucide-react';
+  Menu,
+} from "lucide-react";
 import './Navbar.css';
 
 export function Navbar() {

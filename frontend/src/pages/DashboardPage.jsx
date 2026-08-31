@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 import { useAuth } from '../context/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Layout } from '../components/layout';
@@ -13,7 +13,6 @@ import {
   X,
   Send,
   Users,
-  ChevronDown,
 } from 'lucide-react';
 import {
   PieChart,

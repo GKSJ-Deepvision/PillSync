@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Layout } from '../../../components/layout';
 import { Badge } from '../../../components/common/Badge';
 import { Button } from '../../../components/common/Button';
 import { Input } from '../../../components/common/Input';
 import { Card } from '../../../components/common/Card';
 import {
-  Users,
+  
   Search,
   Plus,
   Activity,
@@ -13,7 +13,7 @@ import {
   CheckCircle2,
   Phone,
   MessageSquare,
-  ChevronRight,
+  
   Pill,
   Send,
   Calendar,
@@ -94,7 +94,7 @@ const INITIAL_PATIENTS = [
 ];
 
 export function PatientsPage() {
-  const [patients, setPatients] = useState(INITIAL_PATIENTS);
+  const [patients] = useState(INITIAL_PATIENTS);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRisk, setSelectedRisk] = useState('all');
   const [nudgedPatientId, setNudgedPatientId] = useState(null);

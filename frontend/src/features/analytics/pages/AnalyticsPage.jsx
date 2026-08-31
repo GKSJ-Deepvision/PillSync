@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
+
 import { Layout } from '../../../components/layout';
-import { Card, CardHeader, CardBody } from '../../../components/common/Card';
+import { Card } from '../../../components/common/Card';
 import { Badge } from '../../../components/common/Badge';
 import { Button } from '../../../components/common/Button';
 import {
-  BarChart,
-  Bar,
+  
   AreaChart,
   Area,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
+  Cell,
   ResponsiveContainer,
   PieChart,
-  Pie,
-  Cell,
+  Pie
+  
 } from 'recharts';
 import {
   TrendingUp,
@@ -23,9 +23,7 @@ import {
   Activity,
   ShieldCheck,
   Download,
-  Calendar,
-  AlertCircle,
-  Clock,
+  
   CheckCircle2,
 } from 'lucide-react';
 import './AnalyticsPage.css';
@@ -39,13 +37,13 @@ const MONTHLY_TREND = [
   { month: 'Aug', adherence: 92, target: 80 },
 ];
 
-const DISEASE_COMPLIANCE = [
-  { disease: 'Hypertension', adherence: 91, count: 420 },
-  { disease: 'Type 2 Diabetes', adherence: 88, count: 380 },
-  { disease: 'Thyroid', adherence: 95, count: 210 },
-  { disease: 'Cardiac', adherence: 78, count: 160 },
-  { disease: 'Supplements', adherence: 84, count: 190 },
-];
+// const DISEASE_COMPLIANCE = [
+//   { disease: 'Hypertension', adherence: 91, count: 420 },
+//   { disease: 'Type 2 Diabetes', adherence: 88, count: 380 },
+//   { disease: 'Thyroid', adherence: 95, count: 210 },
+//   { disease: 'Cardiac', adherence: 78, count: 160 },
+//   { disease: 'Supplements', adherence: 84, count: 190 },
+// ];
 
 const RISK_PIE_DATA = [
   { name: 'Compliant (>85%)', value: 68, color: '#10b981' },
@@ -62,7 +60,7 @@ const AUDIT_LOGS = [
 ];
 
 export function AnalyticsPage() {
-  const [timeRange, setTimeRange] = useState('6M');
+  
 
   return (
     <Layout>

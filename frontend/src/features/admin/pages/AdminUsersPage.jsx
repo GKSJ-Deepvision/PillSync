@@ -1,20 +1,13 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 import { Layout } from '../../../components/layout';
 import { Badge } from '../../../components/common/Badge';
 import { Button } from '../../../components/common/Button';
 import { Input } from '../../../components/common/Input';
+
 import {
-  Users,
-  Search,
   Plus,
-  Shield,
-  UserCheck,
-  UserX,
-  MoreVertical,
-  Mail,
-  CheckCircle2,
-  Lock,
-} from 'lucide-react';
+Search
+} from "lucide-react";
 import './AdminUsersPage.css';
 
 const INITIAL_USERS = [

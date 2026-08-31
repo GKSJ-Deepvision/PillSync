@@ -1,6 +1,6 @@
 import { Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
-import { ShieldAlert, ArrowLeft, Shield, Lock } from 'lucide-react';
+import { ShieldAlert, ArrowLeft } from 'lucide-react';
 import './ProtectedRoute.css';
 
 export function ProtectedRoute({ children }) {
