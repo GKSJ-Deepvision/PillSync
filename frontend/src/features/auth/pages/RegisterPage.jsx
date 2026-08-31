@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../../context/useAuth';
 import { Alert } from '../../../components/common';
-import { Mail, Lock, User, ShieldCheck, Pill, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, ShieldCheck, Pill, ArrowRight, Stethoscope, Shield } from 'lucide-react';
 import './RegisterPage.css';
 
 export function RegisterPage() {
   const navigate = useNavigate();
   const { register, error, setError, isAuthenticating } = useAuth();
+  
+  const [selectedRole, setSelectedRole] = useState('patient');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -50,6 +52,7 @@ export function RegisterPage() {
         name: formData.name,
         email: formData.email,
         password: formData.password,
+        role: selectedRole,
       });
       navigate('/dashboard');
     } catch (err) {
@@ -66,7 +69,7 @@ export function RegisterPage() {
           </div>
           <h1 className="register-title">Create your account</h1>
           <p className="register-subtitle">
-            Join PillSync to automate medication schedules, smart reminders, and care coordination.
+            Join PillSync with role-based clinical privileges and smart medication workflows.
           </p>
           <div className="register-security-badge">
             <ShieldCheck className="h-3.5 w-3.5" />
@@ -79,6 +82,38 @@ export function RegisterPage() {
         )}
 
         <form onSubmit={handleSubmit} className="register-form">
+          {/* Role Selection */}
+          <div className="register-role-section">
+            <span className="register-role-label">Choose Account Type</span>
+            <div className="register-role-grid">
+              <div
+                onClick={() => setSelectedRole('patient')}
+                className={`register-role-card ${selectedRole === 'patient' ? 'active' : ''}`}
+              >
+                <User className="h-5 w-5 text-indigo-600" />
+                <span className="register-role-card-title">Patient</span>
+                <span className="register-role-card-desc">Doses & Logs</span>
+              </div>
+
+              <div
+                onClick={() => setSelectedRole('caregiver')}
+                className={`register-role-card ${selectedRole === 'caregiver' ? 'active' : ''}`}
+              >
+                <Stethoscope className="h-5 w-5 text-indigo-600" />
+                <span className="register-role-card-title">Caregiver</span>
+                <span className="register-role-card-desc">Manage Patients</span>
+              </div>
+
+              <div
+                onClick={() => setSelectedRole('admin')}
+                className={`register-role-card ${selectedRole === 'admin' ? 'active' : ''}`}
+              >
+                <Shield className="h-5 w-5 text-indigo-600" />
+                <span className="register-role-card-title">Admin</span>
+                <span className="register-role-card-desc">Platform Oversight</span>
+              </div>
+            </div>
+          </div>
           <div className="register-input-group">
             <label className="register-input-label">
               Full Name <span>*</span>
@@ -178,7 +213,7 @@ export function RegisterPage() {
               <span>Creating your account...</span>
             ) : (
               <>
-                <span>Create Free Account</span>
+                <span>Create {selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)} Account</span>
                 <ArrowRight className="h-4 w-4" />
               </>
             )}

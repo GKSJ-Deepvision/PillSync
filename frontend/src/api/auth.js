@@ -1,98 +1,233 @@
 import { apiClient, USE_MOCK_API } from './client';
+import { generateJWT, decodeJWT } from '../utils/jwt';
 
-const createMockToken = (type) =>
-  `mock-${type}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+// Default initial accounts for 3 role-based personas
+const INITIAL_USERS = [
+  {
+    id: 'u-patient-1',
+    email: 'patient@example.com',
+    password: 'password',
+    name: 'Ibrahim Kadri',
+    role: 'patient',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'u-caregiver-1',
+    email: 'caregiver@example.com',
+    password: 'password',
+    name: 'Dr. Oliver Mitchell',
+    role: 'caregiver',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'u-admin-1',
+    email: 'admin@example.com',
+    password: 'password',
+    name: 'Sarah Jenkins',
+    role: 'admin',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80',
+  },
+];
 
-// Mock implementation
+// Helper to get all registered users (seeded + local storage)
+function getRegisteredUsers() {
+  try {
+    const local = localStorage.getItem('pillsync_registered_users');
+    if (local) {
+      const parsed = JSON.parse(local);
+      if (Array.isArray(parsed)) {
+        // Merge with initial users, avoiding duplicate emails
+        const emails = new Set(parsed.map((u) => u.email.toLowerCase()));
+        const missingInitial = INITIAL_USERS.filter((u) => !emails.has(u.email.toLowerCase()));
+        return [...missingInitial, ...parsed];
+      }
+    }
+  } catch (err) {
+    console.error('Error reading registered users:', err);
+  }
+  return INITIAL_USERS;
+}
+
+// Helper to save a new user into persistent storage
+function saveUser(user) {
+  try {
+    const existing = getRegisteredUsers();
+    const updated = existing.filter((u) => u.email.toLowerCase() !== user.email.toLowerCase());
+    updated.push(user);
+    localStorage.setItem('pillsync_registered_users', JSON.stringify(updated));
+  } catch (err) {
+    console.error('Error saving registered user:', err);
+  }
+}
+
+// Mock JWT Auth API
 const mockAuthApi = {
-  login: async (email, password) => {
-    await new Promise((resolve) => setTimeout(resolve, 800));
+  login: async (email, password, selectedRole = null) => {
+    await new Promise((resolve) => setTimeout(resolve, 400));
 
-    if (
-      (email === 'patient@example.com' && password === 'password') ||
-      (email === 'caregiver@example.com' && password === 'password') ||
-      (email === 'admin@example.com' && password === 'password')
-    ) {
-      const isPatient = email.startsWith('patient');
-      const isCaregiver = email.startsWith('caregiver');
-
-      return {
-        accessToken: createMockToken('access'),
-        refreshToken: createMockToken('refresh'),
-        user: {
-          id: isPatient ? '1' : isCaregiver ? '2' : '3',
-          email,
-          name: isPatient ? 'John Patient' : isCaregiver ? 'Jane Caregiver' : 'Admin User',
-          role: isPatient ? 'patient' : isCaregiver ? 'caregiver' : 'admin',
-          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-            isPatient ? 'John Patient' : isCaregiver ? 'Jane Caregiver' : 'Admin User'
-          )}`,
-        },
-      };
+    if (!email || !password) {
+      throw new Error('Please provide both email and password');
     }
 
-    throw new Error('Invalid credentials');
+    const users = getRegisteredUsers();
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Look for exact registered user
+    let user = users.find((u) => u.email.toLowerCase() === normalizedEmail);
+
+    if (user) {
+      // Validate password if stored
+      if (user.password && user.password !== password) {
+        throw new Error('Incorrect password. Please try again.');
+      }
+      // If role was explicitly specified and matches, or update role if specified
+      if (selectedRole && selectedRole !== user.role) {
+        user = { ...user, role: selectedRole };
+      }
+    } else {
+      // Fallback: If user enters an email that is not yet registered,
+      // create a session with the selected role or default based on email/role
+      const role = selectedRole || (normalizedEmail.includes('admin') ? 'admin' : normalizedEmail.includes('caregiver') || normalizedEmail.includes('doctor') ? 'caregiver' : 'patient');
+      const name = normalizedEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) || 'User';
+      
+      user = {
+        id: 'u-' + Date.now(),
+        email: normalizedEmail,
+        password,
+        name,
+        role,
+        avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=4f46e5&color=fff',
+      };
+
+      saveUser(user);
+    }
+
+    // Generate real JWT tokens
+    const accessToken = generateJWT({
+      sub: user.id,
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    }, 86400); // 24 hours
+
+    const refreshToken = generateJWT({
+      sub: user.id,
+      id: user.id,
+      type: 'refresh',
+    }, 604800); // 7 days
+
+    const sanitizedUser = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      avatar: user.avatar,
+    };
+
+    return {
+      accessToken,
+      refreshToken,
+      user: sanitizedUser,
+    };
   },
 
   register: async (data) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    if (!data.email || !data.password || !data.name) {
+      throw new Error('Name, email, and password are required');
+    }
+
+    const normalizedEmail = data.email.trim().toLowerCase();
+    const role = data.role || 'patient';
+
+    const newUser = {
+      id: 'u-' + Date.now(),
+      email: normalizedEmail,
+      password: data.password,
+      name: data.name.trim(),
+      role,
+      avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.name) + '&background=4f46e5&color=fff',
+    };
+
+    saveUser(newUser);
+
+    const accessToken = generateJWT({
+      sub: newUser.id,
+      id: newUser.id,
+      email: newUser.email,
+      name: newUser.name,
+      role: newUser.role,
+    }, 86400);
+
+    const refreshToken = generateJWT({
+      sub: newUser.id,
+      id: newUser.id,
+      type: 'refresh',
+    }, 604800);
 
     return {
-      accessToken: createMockToken('access'),
-      refreshToken: createMockToken('refresh'),
+      accessToken,
+      refreshToken,
       user: {
-        id: Date.now(),
-        email: data.email,
-        name: data.name,
-        role: 'patient',
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}`,
+        id: newUser.id,
+        email: newUser.email,
+        name: newUser.name,
+        role: newUser.role,
+        avatar: newUser.avatar,
       },
     };
   },
 
   forgotPassword: async (email) => {
-    await new Promise((resolve) => setTimeout(resolve, 600));
-
+    await new Promise((resolve) => setTimeout(resolve, 300));
     return {
-      message: `Reset link sent to ${email}`,
+      message: 'Password reset instructions sent to ' + email,
     };
   },
 
-  resetPassword: async (token, newPassword) => {
-    await new Promise((resolve) => setTimeout(resolve, 600));
+ resetPassword: async (token, newPassword) => {
+  if (!token || !newPassword) {
+    throw new Error("Invalid reset password request");
+  }
 
-    return {
-      message: 'Password reset successfully',
-      token,
-      passwordUpdated: Boolean(newPassword),
-    };
-  },
+  return Promise.resolve({
+    success: true,
+    message: "Password reset successfully",
+  });
+},
 
   me: async () => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    const token = localStorage.getItem('accessToken');
+    if (!token) throw new Error('Not authenticated');
+
+    const decoded = decodeJWT(token);
+    if (!decoded) throw new Error('Invalid JWT token');
 
     const storedUser = localStorage.getItem('user');
-
     if (storedUser) {
       return JSON.parse(storedUser);
     }
 
-    throw new Error('Not authenticated');
+    return {
+      id: decoded.id || decoded.sub,
+      email: decoded.email,
+      name: decoded.name,
+      role: decoded.role || 'patient',
+    };
   },
 
   logout: async () => {
-    await new Promise((resolve) => setTimeout(resolve, 200));
-
-    return {
-      message: 'Logged out successfully',
-    };
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    return { message: 'Logged out successfully' };
   },
 };
 
-// Real API implementation
+// Real backend API endpoints (JWT based)
 const realAuthApi = {
-  login: (email, password) =>
-    apiClient.post('/auth/login', { email, password }).then((res) => res.data),
+  login: (email, password, role) =>
+    apiClient.post('/auth/login', { email, password, role }).then((res) => res.data),
 
   register: (data) => apiClient.post('/auth/register', data).then((res) => res.data),
 

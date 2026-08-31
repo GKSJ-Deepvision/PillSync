@@ -12,13 +12,19 @@ import {
   CheckCircle2,
   Activity,
   HeartPulse,
+  User,
+  Stethoscope,
+  Shield,
 } from 'lucide-react';
 import './LoginPage.css';
 
 export function LoginPage() {
   const navigate = useNavigate();
   const { login, error, setError, isAuthenticating } = useAuth();
+  
+  // Clean empty inputs by default (no hardcoded prefill)
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [selectedRole, setSelectedRole] = useState('patient');
   const [validationErrors, setValidationErrors] = useState({});
 
   const validateForm = () => {
@@ -26,7 +32,7 @@ export function LoginPage() {
     if (!formData.email) errors.email = 'Email is required';
     if (!formData.password) errors.password = 'Password is required';
     if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'Email is invalid';
+      errors.email = 'Please enter a valid email address';
     }
     return errors;
   };
@@ -43,21 +49,22 @@ export function LoginPage() {
     }
 
     try {
-      await login(formData.email, formData.password);
+      await login(formData.email, formData.password, selectedRole);
       navigate('/dashboard');
     } catch (err) {
       console.error('Login failed:', err);
     }
   };
 
-  const demoCredentials = [
-    { role: 'Patient', email: 'patient@example.com', password: 'password', name: 'Ibrahim' },
-    { role: 'Caregiver', email: 'caregiver@example.com', password: 'password', name: 'Dr. Oliver' },
-    { role: 'Admin', email: 'admin@example.com', password: 'password', name: 'Sarah' },
+  const demoAccounts = [
+    { role: 'patient', label: 'Patient', email: 'patient@example.com', password: 'password' },
+    { role: 'caregiver', label: 'Caregiver', email: 'caregiver@example.com', password: 'password' },
+    { role: 'admin', label: 'Admin', email: 'admin@example.com', password: 'password' },
   ];
 
-  const handleDemoLogin = (email, password) => {
-    setFormData({ email, password });
+  const handleSelectDemo = (account) => {
+    setSelectedRole(account.role);
+    setFormData({ email: account.email, password: account.password });
   };
 
   return (
@@ -78,13 +85,13 @@ export function LoginPage() {
           <div className="login-hero-content">
             <div className="login-hero-badge">
               <Sparkles className="h-3.5 w-3.5" />
-              Trusted by Care Teams
+              Role-Based HIPAA Platform
             </div>
             <h2 className="login-hero-headline">
               Medication care that feels easy and reliable.
             </h2>
             <p className="login-hero-description">
-              Keep every prescription, reminder, and patient adherence routine strictly on track with a calmer daily care plan.
+              Comprehensive role-based access for Patients, Caregivers, and Clinical Administrators.
             </p>
           </div>
 
@@ -93,19 +100,19 @@ export function LoginPage() {
               <div className="login-hero-feature-icon">
                 <CheckCircle2 className="h-4 w-4" />
               </div>
-              <span className="login-hero-feature-text">Real-time daily dose verification & reminders</span>
+              <span className="login-hero-feature-text">Patient medication schedule & dose verification</span>
             </div>
             <div className="login-hero-feature-item">
               <div className="login-hero-feature-icon">
                 <Activity className="h-4 w-4" />
               </div>
-              <span className="login-hero-feature-text">Caregiver patient cohort oversight & nudges</span>
+              <span className="login-hero-feature-text">Caregiver cohort adherence monitoring & nudges</span>
             </div>
             <div className="login-hero-feature-item">
               <div className="login-hero-feature-icon">
                 <HeartPulse className="h-4 w-4" />
               </div>
-              <span className="login-hero-feature-text">Longitudinal adherence trend reports</span>
+              <span className="login-hero-feature-text">Admin platform metrics & compliance audit logs</span>
             </div>
           </div>
         </div>
@@ -115,8 +122,39 @@ export function LoginPage() {
           <div className="login-form-header">
             <h2 className="login-form-title">Sign in to your account</h2>
             <p className="login-form-subtitle">
-              Enter your clinical credentials to access your portal
+              Select your role and enter your clinical credentials to access your portal
             </p>
+          </div>
+
+          {/* 3-Role Persona Selector Tabs */}
+          <div className="login-role-selector-container">
+            <span className="login-role-selector-label">Select Portal Role</span>
+            <div className="login-role-tabs">
+              <button
+                type="button"
+                onClick={() => setSelectedRole('patient')}
+                className={`login-role-tab ${selectedRole === 'patient' ? 'active' : ''}`}
+              >
+                <User className="h-3.5 w-3.5" />
+                <span>Patient</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedRole('caregiver')}
+                className={`login-role-tab ${selectedRole === 'caregiver' ? 'active' : ''}`}
+              >
+                <Stethoscope className="h-3.5 w-3.5" />
+                <span>Caregiver</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedRole('admin')}
+                className={`login-role-tab ${selectedRole === 'admin' ? 'active' : ''}`}
+              >
+                <Shield className="h-3.5 w-3.5" />
+                <span>Admin</span>
+              </button>
+            </div>
           </div>
 
           {error && (
@@ -131,12 +169,14 @@ export function LoginPage() {
           <form onSubmit={handleSubmit} className="login-form-body">
             {/* Email Field */}
             <div className="login-input-group">
-              <label className="login-input-label">Email address *</label>
+              <label className="login-input-label">
+                Email address <span>*</span>
+              </label>
               <div className="login-input-box">
                 <Mail className="login-input-icon" />
                 <input
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="Enter your email address"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   required
@@ -150,12 +190,14 @@ export function LoginPage() {
 
             {/* Password Field */}
             <div className="login-input-group">
-              <label className="login-input-label">Password *</label>
+              <label className="login-input-label">
+                Password <span>*</span>
+              </label>
               <div className="login-input-box">
                 <Lock className="login-input-icon" />
                 <input
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   required
@@ -185,10 +227,10 @@ export function LoginPage() {
               className="login-submit-btn"
             >
               {isAuthenticating ? (
-                <span>Authenticating...</span>
+                <span>Authenticating with JWT...</span>
               ) : (
                 <>
-                  <span>Sign In</span>
+                  <span>Sign In as {selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}</span>
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}
@@ -204,27 +246,27 @@ export function LoginPage() {
             <Link to="/register">Create an account</Link>
           </div>
 
-          {/* Quick 1-Click Demo Logins */}
+          {/* Quick Demo Credentials Preset Grid */}
           <div className="login-demo-box">
             <div className="login-demo-header">
-              <span className="login-demo-title">1-Click Demo Login</span>
+              <span className="login-demo-title">Quick Demo Accounts</span>
               <span className="login-demo-badge">
                 <ShieldCheck className="h-3 w-3" />
-                Verified
+                JWT Auth
               </span>
             </div>
 
             <div className="login-demo-grid">
-              {demoCredentials.map((cred) => (
+              {demoAccounts.map((account) => (
                 <button
-                  key={cred.role}
+                  key={account.role}
                   type="button"
-                  onClick={() => handleDemoLogin(cred.email, cred.password)}
+                  onClick={() => handleSelectDemo(account)}
                   className="login-demo-card"
-                  title={`Fill ${cred.role} credentials`}
+                  title={`Quick-fill ${account.label}`}
                 >
-                  <span className="login-demo-role">{cred.role}</span>
-                  <span className="login-demo-email">{cred.email}</span>
+                  <span className="login-demo-role">{account.label}</span>
+                  <span className="login-demo-email">{account.email}</span>
                 </button>
               ))}
             </div>
