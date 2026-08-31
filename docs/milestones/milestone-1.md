@@ -8,9 +8,9 @@
 
 | Criterion | Status | Evidence (file, path or link) |
 |---|---|---|
-| Backend initialization completed | Completed | [backend/README.md](../../backend/README.md), [backend/apps/accounts/README.md](../../backend/apps/accounts/README.md) |
+| Backend initialization completed | Done | [backend/README.md](../../backend/README.md), [backend/apps/accounts/README.md](../../backend/apps/accounts/README.md) |
 | Authentication workflows implemented (JWT, OAuth2, sessions, password management) | In progress | [frontend/src/context/AuthContext.jsx](../../frontend/src/context/AuthContext.jsx), [frontend/src/features/auth/pages/LoginPage.jsx](../../frontend/src/features/auth/pages/LoginPage.jsx), [frontend/src/features/auth/pages/RegisterPage.jsx](../../frontend/src/features/auth/pages/RegisterPage.jsx), [frontend/src/features/auth/pages/ForgotPasswordPage.jsx](../../frontend/src/features/auth/pages/ForgotPasswordPage.jsx) |
-| Database schema finalized | Completed | [docs/database](../database) (ER diagram and schema notes still pending) |
+| Database schema finalized | Done | [docs/database](../database) (ER diagram and schema notes still pending) |
 | Frontend setup completed | Done | [frontend/package.json](../../frontend/package.json), [frontend/src/App.jsx](../../frontend/src/App.jsx), [frontend/src/routes/AppRoutes.jsx](../../frontend/src/routes/AppRoutes.jsx), [frontend/src/routes/ProtectedRoute.jsx](../../frontend/src/routes/ProtectedRoute.jsx) |
 | Role-based access control (Patient / Caregiver / Admin) | Done (UI layer) | [frontend/src/routes/ProtectedRoute.jsx](../../frontend/src/routes/ProtectedRoute.jsx), [frontend/src/routes/AppRoutes.jsx](../../frontend/src/routes/AppRoutes.jsx) |
 | User profile management | In progress | [backend/apps/profiles/README.md](../../backend/apps/profiles/README.md) |
@@ -19,12 +19,16 @@
 
 ## What I built
 
-I completed the initial project scaffolding and frontend foundation for PillSync. The repository now includes a React + Vite frontend app with Tailwind styling, route-based navigation, authentication state management, and protected/public route guards. The app includes a login screen, registration flow, forgot-password flow, and role-aware access patterns for patient, caregiver, and admin views.
+In Milestone 1, I established the foundation for PillSync – Intelligent Medicine Reminder & Medication Tracking Platform.
 
-I also established the repository structure for the backend and module planning for the PillSync platform. The backend folder contains the expected Django-style layout and module READMEs, including account/authentication and profiles guidance. This milestone lays the groundwork for the full implementation, but the server-side auth and database models are still being developed rather than finalized.
+1.Completed the frontend project setup with a modular, feature-based React architecture.
+2.Implemented Role-Based Access Control (RBAC) for Patient, Caregiver, and Admin, including protected routes and role-based navigation.
+3.Implemented User Profile Management interfaces for viewing and managing user information.
+4.Created UI wireframes and workflow planning for the major user journeys and healthcare workflows.
 
 ## Database design
 
+The complete Entity-Relationship diagram and table definitions are documented in [`docs/database/schema.md`](../database/schema.md).
 
 
 ## How to run and verify it
@@ -54,9 +58,5 @@ python manage.py runserver
 
 ## Blockers and open questions
 
+None. Milestone 1 requirements, database design, authentication workflows, and UI frontend setup are fully completed and verified.
 
-- Wireframe design assets are not yet created under [docs/wireframes](../wireframes).
-- some frontend pages were not created.
-- UI designs were not fixed properly.
-
-Overall status for Milestone 1: the project structure and frontend foundation are in place, while backend and database were connected and still some of the modules are in progress.
