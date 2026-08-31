@@ -3,7 +3,12 @@ import { useLocation, Link } from 'react-router-dom';
 import { Pill, Clock, TrendingUp, BarChart3, Users } from 'lucide-react';
 
 const MOBILE_NAVIGATION = [
-  { label: 'Medications', href: '/medications', icon: Pill, roles: ['patient', 'caregiver', 'admin'] },
+  {
+    label: 'Medications',
+    href: '/medications',
+    icon: Pill,
+    roles: ['patient', 'caregiver', 'admin'],
+  },
   { label: 'Reminders', href: '/reminders', icon: Clock, roles: ['patient', 'caregiver'] },
   { label: 'Adherence', href: '/adherence', icon: TrendingUp, roles: ['patient', 'caregiver'] },
   { label: 'Analytics', href: '/analytics', icon: BarChart3, roles: ['admin', 'caregiver'] },

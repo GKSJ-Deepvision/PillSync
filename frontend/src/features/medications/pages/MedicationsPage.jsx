@@ -3,13 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { medicationApi } from '../../../api/medications';
 import { Layout } from '../../../components/layout';
 import { Card, CardBody } from '../../../components/common/Card';
-import {
-  Button,
-  Input,
-  Badge,
-  EmptyState,
-  CardSkeleton,
-} from '../../../components/common';
+import { Button, Input, Badge, EmptyState, CardSkeleton } from '../../../components/common';
 import { Search, Plus, Pill } from 'lucide-react';
 
 const DISEASE_CATEGORIES = [
@@ -64,8 +58,7 @@ export function MedicationsPage() {
       med.name.toLowerCase().includes(query) ||
       med.disease.toLowerCase().includes(query);
 
-    const matchesDisease =
-      selectedDisease === 'All' || med.disease === selectedDisease;
+    const matchesDisease = selectedDisease === 'All' || med.disease === selectedDisease;
 
     return matchesSearch && matchesDisease;
   });
@@ -87,18 +80,11 @@ export function MedicationsPage() {
     <Layout>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Medications
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Manage your medications
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Medications</h1>
+          <p className="text-gray-600 mt-1">Manage your medications</p>
         </div>
 
-        <Button
-          onClick={() => navigate('/medications/new')}
-          className="flex items-center gap-2"
-        >
+        <Button onClick={() => navigate('/medications/new')} className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
           Add Medication
         </Button>
@@ -145,9 +131,7 @@ export function MedicationsPage() {
           }
           action={
             !searchQuery && (
-              <Button onClick={() => navigate('/medications/new')}>
-                Add Medication
-              </Button>
+              <Button onClick={() => navigate('/medications/new')}>Add Medication</Button>
             )
           }
         />
@@ -158,45 +142,30 @@ export function MedicationsPage() {
               key={medication.id}
               hoverable
               className="cursor-pointer"
-              onClick={() =>
-                navigate(`/medications/${medication.id}`)
-              }
+              onClick={() => navigate(`/medications/${medication.id}`)}
             >
               <CardBody>
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {medication.name}
-                    </h3>
+                    <h3 className="text-lg font-semibold text-gray-900">{medication.name}</h3>
 
-                    <p className="text-gray-600 text-sm mt-1">
-                      {medication.dosage}
-                    </p>
+                    <p className="text-gray-600 text-sm mt-1">{medication.dosage}</p>
                   </div>
 
-                  <Badge
-                    variant="primary"
-                    className={getDiseaseColor(medication.disease)}
-                  >
+                  <Badge variant="primary" className={getDiseaseColor(medication.disease)}>
                     {medication.disease}
                   </Badge>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-100">
                   <div>
-                    <p className="text-xs text-gray-600">
-                      Frequency
-                    </p>
+                    <p className="text-xs text-gray-600">Frequency</p>
 
-                    <p className="text-sm font-medium text-gray-900 mt-1">
-                      {medication.frequency}
-                    </p>
+                    <p className="text-sm font-medium text-gray-900 mt-1">{medication.frequency}</p>
                   </div>
 
                   <div>
-                    <p className="text-xs text-gray-600">
-                      Quantity
-                    </p>
+                    <p className="text-xs text-gray-600">Quantity</p>
 
                     <p className="text-sm font-medium text-gray-900 mt-1">
                       {medication.quantity} units
@@ -204,9 +173,7 @@ export function MedicationsPage() {
                   </div>
 
                   <div>
-                    <p className="text-xs text-gray-600">
-                      Schedule
-                    </p>
+                    <p className="text-xs text-gray-600">Schedule</p>
 
                     <div className="flex flex-wrap gap-2 mt-1">
                       {medication.schedule.map((time) => (
@@ -221,16 +188,10 @@ export function MedicationsPage() {
                   </div>
 
                   <div>
-                    <p className="text-xs text-gray-600">
-                      Status
-                    </p>
+                    <p className="text-xs text-gray-600">Status</p>
 
                     <Badge
-                      variant={
-                        medication.status === 'active'
-                          ? 'success'
-                          : 'gray'
-                      }
+                      variant={medication.status === 'active' ? 'success' : 'gray'}
                       size="sm"
                       className="mt-1"
                     >

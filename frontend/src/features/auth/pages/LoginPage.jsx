@@ -78,7 +78,9 @@ export function LoginPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-black tracking-tight">PillSync</p>
-                  <p className="text-xs uppercase tracking-[0.28em] text-sky-100/90">Care intelligence</p>
+                  <p className="text-xs uppercase tracking-[0.28em] text-sky-100/90">
+                    Care intelligence
+                  </p>
                 </div>
               </div>
 
@@ -93,24 +95,26 @@ export function LoginPage() {
                     Medication care that feels easy.
                   </h1>
                   <p className="max-w-lg text-base text-sky-50/90">
-                    Keep every prescription, reminder, and health routine on track with a calmer, smarter daily care plan.
+                    Keep every prescription, reminder, and health routine on track with a calmer,
+                    smarter daily care plan.
                   </p>
                 </div>
               </div>
 
               <div className="space-y-3">
-                {[
-                  'Daily dose tracking',
-                  'Caregiver visibility',
-                  'Adherence insights',
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/8 px-3 py-2.5 backdrop-blur-sm">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-400/20">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-200" />
+                {['Daily dose tracking', 'Caregiver visibility', 'Adherence insights'].map(
+                  (item) => (
+                    <div
+                      key={item}
+                      className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/8 px-3 py-2.5 backdrop-blur-sm"
+                    >
+                      <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-400/20">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-200" />
+                      </div>
+                      <span className="text-sm font-medium text-sky-50">{item}</span>
                     </div>
-                    <span className="text-sm font-medium text-sky-50">{item}</span>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             </div>
           </div>
@@ -120,12 +124,19 @@ export function LoginPage() {
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-700 ring-1 ring-sky-100">
                 <HeartPulse className="h-6 w-6" />
               </div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-700">Welcome back</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-700">
+                Welcome back
+              </p>
               <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-900">Sign in</h2>
             </div>
 
             {error && (
-              <Alert type="danger" message={error} onClose={() => setError(null)} className="mb-6" />
+              <Alert
+                type="danger"
+                message={error}
+                onClose={() => setError(null)}
+                className="mb-6"
+              />
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -152,15 +163,27 @@ export function LoginPage() {
 
               <div className="flex items-center justify-between text-sm">
                 <label className="flex items-center gap-2 text-slate-600">
-                  <input type="checkbox" className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500" />
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                  />
                   Remember me
                 </label>
-                <Link to="/forgot-password" className="font-semibold text-sky-700 transition hover:text-sky-800">
+                <Link
+                  to="/forgot-password"
+                  className="font-semibold text-sky-700 transition hover:text-sky-800"
+                >
                   Forgot password?
                 </Link>
               </div>
 
-              <Button type="submit" variant="primary" size="lg" className="w-full" loading={isAuthenticating}>
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                className="w-full"
+                loading={isAuthenticating}
+              >
                 <span>Sign In</span>
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -168,7 +191,10 @@ export function LoginPage() {
 
             <div className="mt-7 border-t border-slate-200 pt-6">
               <p className="mb-4 text-center text-sm text-slate-600">New to PillSync?</p>
-              <Link to="/register" className="block text-center text-base font-semibold text-sky-700 transition hover:text-sky-800">
+              <Link
+                to="/register"
+                className="block text-center text-base font-semibold text-sky-700 transition hover:text-sky-800"
+              >
                 Create your account
               </Link>
             </div>
@@ -194,7 +220,9 @@ export function LoginPage() {
                       <p className="text-sm font-semibold text-slate-800">{cred.role}</p>
                       <p className="text-xs text-slate-500">{cred.email}</p>
                     </div>
-                    <span className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Use</span>
+                    <span className="text-[10px] uppercase tracking-[0.18em] text-slate-400">
+                      Use
+                    </span>
                   </button>
                 ))}
               </div>

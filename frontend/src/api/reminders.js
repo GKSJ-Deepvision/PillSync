@@ -118,20 +118,16 @@ const realReminderApi = {
     return apiClient.get(`/reminders?${params}`).then((res) => res.data);
   },
 
-  getReminderById: (id) =>
-    apiClient.get(`/reminders/${id}`).then((res) => res.data),
+  getReminderById: (id) => apiClient.get(`/reminders/${id}`).then((res) => res.data),
 
-  markTaken: (id) =>
-    apiClient.post(`/reminders/${id}/taken`).then((res) => res.data),
+  markTaken: (id) => apiClient.post(`/reminders/${id}/taken`).then((res) => res.data),
 
-  markMissed: (id) =>
-    apiClient.post(`/reminders/${id}/missed`).then((res) => res.data),
+  markMissed: (id) => apiClient.post(`/reminders/${id}/missed`).then((res) => res.data),
 
   snoozeReminder: (id, minutes = 30) =>
     apiClient.post(`/reminders/${id}/snooze`, { minutes }).then((res) => res.data),
 
-  getTodayReminders: () =>
-    apiClient.get('/reminders/today').then((res) => res.data),
+  getTodayReminders: () => apiClient.get('/reminders/today').then((res) => res.data),
 
   getUpcomingReminders: (days = 7) =>
     apiClient.get('/reminders/upcoming', { params: { days } }).then((res) => res.data),

@@ -110,20 +110,15 @@ const mockMedicationApi = {
 };
 
 const realMedicationApi = {
-  getMedications: () =>
-    apiClient.get('/medications').then((res) => res.data),
+  getMedications: () => apiClient.get('/medications').then((res) => res.data),
 
-  getMedicationById: (id) =>
-    apiClient.get(`/medications/${id}`).then((res) => res.data),
+  getMedicationById: (id) => apiClient.get(`/medications/${id}`).then((res) => res.data),
 
-  createMedication: (data) =>
-    apiClient.post('/medications', data).then((res) => res.data),
+  createMedication: (data) => apiClient.post('/medications', data).then((res) => res.data),
 
-  updateMedication: (id, data) =>
-    apiClient.put(`/medications/${id}`, data).then((res) => res.data),
+  updateMedication: (id, data) => apiClient.put(`/medications/${id}`, data).then((res) => res.data),
 
-  deleteMedication: (id) =>
-    apiClient.delete(`/medications/${id}`).then((res) => res.data),
+  deleteMedication: (id) => apiClient.delete(`/medications/${id}`).then((res) => res.data),
 
   searchMedications: (query) =>
     apiClient.get('/medications/search', { params: { q: query } }).then((res) => res.data),

@@ -68,9 +68,9 @@ const mockAdherenceApi = {
   },
 
   getMonthlyAdherence: async () => {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  return mockAdherenceData.monthlyAdherence;
-},
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    return mockAdherenceData.monthlyAdherence;
+  },
 
   getMedicationHistory: async () => {
     await new Promise((resolve) => setTimeout(resolve, 600));
@@ -97,23 +97,19 @@ const mockAdherenceApi = {
 };
 
 const realAdherenceApi = {
-  getSummary: () =>
-    apiClient.get('/adherence/summary').then((res) => res.data),
+  getSummary: () => apiClient.get('/adherence/summary').then((res) => res.data),
 
-  getWeeklyAdherence: () =>
-    apiClient.get('/adherence/weekly').then((res) => res.data),
+  getWeeklyAdherence: () => apiClient.get('/adherence/weekly').then((res) => res.data),
 
   getMonthlyAdherence: (month, year) =>
     apiClient.get('/adherence/monthly', { params: { month, year } }).then((res) => res.data),
 
-  getMedicationHistory: () =>
-    apiClient.get('/adherence/history').then((res) => res.data),
+  getMedicationHistory: () => apiClient.get('/adherence/history').then((res) => res.data),
 
   getAdherenceReport: (filters = {}) =>
     apiClient.get('/adherence/report', { params: filters }).then((res) => res.data),
 
-  getConsistency: () =>
-    apiClient.get('/adherence/consistency').then((res) => res.data),
+  getConsistency: () => apiClient.get('/adherence/consistency').then((res) => res.data),
 };
 
 export const adherenceApi = USE_MOCK_API ? mockAdherenceApi : realAdherenceApi;

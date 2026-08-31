@@ -33,13 +33,12 @@ export function AdherencePage() {
       try {
         setLoading(true);
 
-        const [summaryData, weekly, monthly, history] =
-          await Promise.all([
-            adherenceApi.getSummary(),
-            adherenceApi.getWeeklyAdherence(),
-            adherenceApi.getMonthlyAdherence(),
-            adherenceApi.getMedicationHistory(),
-          ]);
+        const [summaryData, weekly, monthly, history] = await Promise.all([
+          adherenceApi.getSummary(),
+          adherenceApi.getWeeklyAdherence(),
+          adherenceApi.getMonthlyAdherence(),
+          adherenceApi.getMedicationHistory(),
+        ]);
 
         setSummary(summaryData);
         setWeeklyData(weekly);
@@ -80,22 +79,13 @@ export function AdherencePage() {
   return (
     <Layout>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Adherence Dashboard
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-900">Adherence Dashboard</h1>
 
-        <p className="text-gray-600 mt-1">
-          Track your medication adherence and consistency
-        </p>
+        <p className="text-gray-600 mt-1">Track your medication adherence and consistency</p>
       </div>
 
       {error && (
-        <Alert
-          type="danger"
-          message={error}
-          onClose={() => setError('')}
-          className="mb-6"
-        />
+        <Alert type="danger" message={error} onClose={() => setError('')} className="mb-6" />
       )}
 
       {summary && (
@@ -105,9 +95,7 @@ export function AdherencePage() {
               <p className="text-gray-600 text-sm">Overall Adherence</p>
 
               <div className="flex items-end gap-2 mt-2">
-                <p className="text-3xl font-bold text-primary-600">
-                  {summary.overallAdherence}%
-                </p>
+                <p className="text-3xl font-bold text-primary-600">{summary.overallAdherence}%</p>
 
                 <p className="text-gray-600 text-sm mb-1">
                   <TrendingUp className="h-4 w-4 inline text-green-600" />
@@ -120,13 +108,9 @@ export function AdherencePage() {
             <CardBody>
               <p className="text-gray-600 text-sm">Doses Taken</p>
 
-              <p className="text-3xl font-bold text-green-600 mt-2">
-                {summary.takenDoses}
-              </p>
+              <p className="text-3xl font-bold text-green-600 mt-2">{summary.takenDoses}</p>
 
-              <p className="text-xs text-gray-500 mt-1">
-                out of {summary.totalDoses}
-              </p>
+              <p className="text-xs text-gray-500 mt-1">out of {summary.totalDoses}</p>
             </CardBody>
           </Card>
 
@@ -134,13 +118,9 @@ export function AdherencePage() {
             <CardBody>
               <p className="text-gray-600 text-sm">Doses Missed</p>
 
-              <p className="text-3xl font-bold text-red-600 mt-2">
-                {summary.missedDoses}
-              </p>
+              <p className="text-3xl font-bold text-red-600 mt-2">{summary.missedDoses}</p>
 
-              <p className="text-xs text-gray-500 mt-1">
-                out of {summary.totalDoses}
-              </p>
+              <p className="text-xs text-gray-500 mt-1">out of {summary.totalDoses}</p>
             </CardBody>
           </Card>
 
@@ -148,13 +128,9 @@ export function AdherencePage() {
             <CardBody>
               <p className="text-gray-600 text-sm">Consecutive Days</p>
 
-              <p className="text-3xl font-bold text-blue-600 mt-2">
-                {summary.streak}
-              </p>
+              <p className="text-3xl font-bold text-blue-600 mt-2">{summary.streak}</p>
 
-              <p className="text-xs text-gray-500 mt-1">
-                Current streak
-              </p>
+              <p className="text-xs text-gray-500 mt-1">Current streak</p>
             </CardBody>
           </Card>
         </div>
@@ -164,9 +140,7 @@ export function AdherencePage() {
         {weeklyData.length > 0 && (
           <Card className="lg:col-span-2">
             <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900">
-                Weekly Adherence
-              </h2>
+              <h2 className="text-lg font-semibold text-gray-900">Weekly Adherence</h2>
             </CardHeader>
 
             <CardBody>
@@ -178,11 +152,7 @@ export function AdherencePage() {
                   <Tooltip />
                   <Legend />
 
-                  <Bar
-                    dataKey="adherence"
-                    fill="#0ea5e9"
-                    name="Adherence %"
-                  />
+                  <Bar dataKey="adherence" fill="#0ea5e9" name="Adherence %" />
                 </BarChart>
               </ResponsiveContainer>
             </CardBody>
@@ -191,9 +161,7 @@ export function AdherencePage() {
 
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900">
-              Doses Overview
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-900">Doses Overview</h2>
           </CardHeader>
 
           <CardBody>
@@ -209,10 +177,7 @@ export function AdherencePage() {
                   dataKey="value"
                 >
                   {adherenceData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={entry.color}
-                    />
+                    <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
 
@@ -222,24 +187,14 @@ export function AdherencePage() {
 
             <div className="mt-4 space-y-2">
               {adherenceData.map((item) => (
-                <div
-                  key={item.name}
-                  className="flex items-center justify-between"
-                >
+                <div key={item.name} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div
-                      className="h-3 w-3 rounded-full"
-                      style={{ backgroundColor: item.color }}
-                    />
+                    <div className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
 
-                    <span className="text-sm text-gray-600">
-                      {item.name}
-                    </span>
+                    <span className="text-sm text-gray-600">{item.name}</span>
                   </div>
 
-                  <span className="font-medium text-gray-900">
-                    {item.value}
-                  </span>
+                  <span className="font-medium text-gray-900">{item.value}</span>
                 </div>
               ))}
             </div>
@@ -250,9 +205,7 @@ export function AdherencePage() {
       {monthlyData.length > 0 && (
         <Card className="mb-6">
           <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900">
-              Monthly Adherence Trend
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-900">Monthly Adherence Trend</h2>
           </CardHeader>
 
           <CardBody>
@@ -280,9 +233,7 @@ export function AdherencePage() {
       {medicationHistory.length > 0 && (
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900">
-              Adherence by Medication
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-900">Adherence by Medication</h2>
           </CardHeader>
 
           <CardBody>
@@ -290,44 +241,27 @@ export function AdherencePage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">
-                      Medication
-                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">Medication</th>
 
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">
-                      Taken
-                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">Taken</th>
 
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">
-                      Missed
-                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">Missed</th>
 
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">
-                      Adherence
-                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">Adherence</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {medicationHistory.map((med) => (
-                    <tr
-                      key={med.id}
-                      className="border-b border-gray-100 hover:bg-gray-50"
-                    >
-                      <td className="py-3 px-4 text-gray-900 font-medium">
-                        {med.medicationName}
+                    <tr key={med.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-3 px-4 text-gray-900 font-medium">{med.medicationName}</td>
+
+                      <td className="py-3 px-4 text-gray-600">
+                        <Badge variant="success">{med.taken}</Badge>
                       </td>
 
                       <td className="py-3 px-4 text-gray-600">
-                        <Badge variant="success">
-                          {med.taken}
-                        </Badge>
-                      </td>
-
-                      <td className="py-3 px-4 text-gray-600">
-                        <Badge variant="danger">
-                          {med.missed}
-                        </Badge>
+                        <Badge variant="danger">{med.missed}</Badge>
                       </td>
 
                       <td className="py-3 px-4">
@@ -341,9 +275,7 @@ export function AdherencePage() {
                             />
                           </div>
 
-                          <span className="font-medium text-gray-900">
-                            {med.adherence}%
-                          </span>
+                          <span className="font-medium text-gray-900">{med.adherence}%</span>
                         </div>
                       </td>
                     </tr>

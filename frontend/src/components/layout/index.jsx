@@ -9,9 +9,7 @@ export function Layout({ children }) {
       <div className="flex flex-1 flex-col overflow-hidden">
         <Navbar />
         <main className="flex-1 overflow-y-auto pb-20 md:pb-10">
-          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-            {children}
-          </div>
+          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</div>
         </main>
       </div>
       <MobileNav />

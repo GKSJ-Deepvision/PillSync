@@ -8,9 +8,27 @@ export function DashboardPage() {
   const { user } = useAuth();
 
   const stats = [
-    { label: 'Total Medications', value: '4', icon: Pill, color: 'bg-sky-100 text-sky-700', detail: '+1 this month' },
-    { label: "Today's Reminders", value: '6', icon: Clock, color: 'bg-emerald-100 text-emerald-700', detail: '2 due soon' },
-    { label: 'Adherence Rate', value: '87%', icon: TrendingUp, color: 'bg-violet-100 text-violet-700', detail: '+5.2% vs last week' },
+    {
+      label: 'Total Medications',
+      value: '4',
+      icon: Pill,
+      color: 'bg-sky-100 text-sky-700',
+      detail: '+1 this month',
+    },
+    {
+      label: "Today's Reminders",
+      value: '6',
+      icon: Clock,
+      color: 'bg-emerald-100 text-emerald-700',
+      detail: '2 due soon',
+    },
+    {
+      label: 'Adherence Rate',
+      value: '87%',
+      icon: TrendingUp,
+      color: 'bg-violet-100 text-violet-700',
+      detail: '+5.2% vs last week',
+    },
   ];
 
   return (
@@ -23,7 +41,9 @@ export function DashboardPage() {
         <h1 className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
           Welcome back, {user?.name || 'Patient'}
         </h1>
-        <p className="text-base text-slate-600">Stay on top of your care plan, prescriptions, and daily health routine.</p>
+        <p className="text-base text-slate-600">
+          Stay on top of your care plan, prescriptions, and daily health routine.
+        </p>
       </div>
 
       <div className="mb-8 grid gap-4 md:grid-cols-3">
@@ -35,7 +55,9 @@ export function DashboardPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-sm font-medium text-slate-500">{stat.label}</p>
-                    <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{stat.value}</p>
+                    <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">
+                      {stat.value}
+                    </p>
                     <p className="mt-2 text-xs font-medium text-emerald-600">{stat.detail}</p>
                   </div>
                   <div className={`${stat.color} metric-icon`}>
@@ -53,23 +75,42 @@ export function DashboardPage() {
           <CardHeader>
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-lg font-bold text-slate-900">Daily care plan</h2>
-              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">On track</span>
+              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                On track
+              </span>
             </div>
           </CardHeader>
           <CardBody>
             <div className="space-y-4">
               {[
                 { label: 'Morning dose', time: '08:00 AM', med: 'Metformin', status: 'Taken' },
-                { label: 'Afternoon check-in', time: '01:00 PM', med: 'Hydration + vitamins', status: 'Upcoming' },
-                { label: 'Evening reminder', time: '08:30 PM', med: 'Aspirin', status: 'Scheduled' },
+                {
+                  label: 'Afternoon check-in',
+                  time: '01:00 PM',
+                  med: 'Hydration + vitamins',
+                  status: 'Upcoming',
+                },
+                {
+                  label: 'Evening reminder',
+                  time: '08:30 PM',
+                  med: 'Aspirin',
+                  status: 'Scheduled',
+                },
               ].map((item) => (
-                <div key={item.label} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-3.5">
+                <div
+                  key={item.label}
+                  className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-3.5"
+                >
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                      {item.label}
+                    </p>
                     <p className="mt-1 font-semibold text-slate-800">{item.med}</p>
                     <p className="text-sm text-slate-500">{item.time}</p>
                   </div>
-                  <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${item.status === 'Taken' ? 'bg-emerald-50 text-emerald-700' : item.status === 'Upcoming' ? 'bg-amber-50 text-amber-700' : 'bg-sky-50 text-sky-700'}`}>
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${item.status === 'Taken' ? 'bg-emerald-50 text-emerald-700' : item.status === 'Upcoming' ? 'bg-amber-50 text-amber-700' : 'bg-sky-50 text-sky-700'}`}
+                  >
                     {item.status}
                   </span>
                 </div>

@@ -77,7 +77,9 @@ export function RegisterPage() {
 
         <div className="p-7 sm:p-8">
           <div className="mb-7">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary-600">Create account</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary-600">
+              Create account
+            </p>
             <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-900">Get started</h2>
           </div>
 
@@ -86,23 +88,77 @@ export function RegisterPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <Input label="Full Name" type="text" icon={User} placeholder="John Doe" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} error={validationErrors.name} required />
-            <Input label="Email Address" type="email" icon={Mail} placeholder="you@example.com" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} error={validationErrors.email} required />
-            <Input label="Password" type="password" icon={Lock} placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} error={validationErrors.password} required />
-            <Input label="Confirm Password" type="password" icon={Lock} placeholder="••••••••" value={formData.confirmPassword} onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })} error={validationErrors.confirmPassword} required />
+            <Input
+              label="Full Name"
+              type="text"
+              icon={User}
+              placeholder="John Doe"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              error={validationErrors.name}
+              required
+            />
+            <Input
+              label="Email Address"
+              type="email"
+              icon={Mail}
+              placeholder="you@example.com"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              error={validationErrors.email}
+              required
+            />
+            <Input
+              label="Password"
+              type="password"
+              icon={Lock}
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              error={validationErrors.password}
+              required
+            />
+            <Input
+              label="Confirm Password"
+              type="password"
+              icon={Lock}
+              placeholder="••••••••"
+              value={formData.confirmPassword}
+              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+              error={validationErrors.confirmPassword}
+              required
+            />
 
             <div className="flex items-start gap-2 text-sm text-slate-600">
-              <input type="checkbox" required className="mt-1 h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500" />
+              <input
+                type="checkbox"
+                required
+                className="mt-1 h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+              />
               <span>
-                I agree to the <a href="#" className="font-semibold text-primary-600 hover:text-primary-700">Terms of Service</a>
+                I agree to the{' '}
+                <a href="#" className="font-semibold text-primary-600 hover:text-primary-700">
+                  Terms of Service
+                </a>
               </span>
             </div>
 
-            <Button type="submit" variant="primary" size="lg" className="w-full" loading={isAuthenticating}>Create Account</Button>
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              className="w-full"
+              loading={isAuthenticating}
+            >
+              Create Account
+            </Button>
           </form>
 
           <div className="mt-7 border-t border-slate-200 pt-6 text-center text-sm text-slate-600">
-            Already have an account? <Link to="/login" className="font-semibold text-primary-600 hover:text-primary-700">Sign in</Link>
+            Already have an account?{' '}
+            <Link to="/login" className="font-semibold text-primary-600 hover:text-primary-700">
+              Sign in
+            </Link>
           </div>
         </div>
       </div>

@@ -31,7 +31,10 @@ export function CardBody({ children, className = '', ...props }) {
 
 export function CardFooter({ children, className = '', ...props }) {
   return (
-    <div className={`border-t border-slate-200/80 bg-slate-50/60 px-5 py-4 ${className}`} {...props}>
+    <div
+      className={`border-t border-slate-200/80 bg-slate-50/60 px-5 py-4 ${className}`}
+      {...props}
+    >
       {children}
     </div>
   );

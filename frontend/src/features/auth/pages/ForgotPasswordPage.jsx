@@ -54,9 +54,7 @@ export function ForgotPasswordPage() {
                   />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Check your email
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Check your email</h2>
               <p className="text-gray-600">
                 We've sent password reset instructions to <strong>{email}</strong>
               </p>
@@ -91,12 +89,7 @@ export function ForgotPasswordPage() {
         {/* Forgot Password Card */}
         <div className="bg-white rounded-xl shadow-lg p-8">
           {error && (
-            <Alert
-              type="danger"
-              message={error}
-              onClose={() => setError(null)}
-              className="mb-6"
-            />
+            <Alert type="danger" message={error} onClose={() => setError(null)} className="mb-6" />
           )}
 
           <p className="text-gray-600 mb-6 text-sm">
@@ -129,10 +122,7 @@ export function ForgotPasswordPage() {
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-center text-sm text-gray-600">
               Remember your password?{' '}
-              <Link
-                to="/login"
-                className="text-primary-600 hover:text-primary-700 font-medium"
-              >
+              <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
                 Sign in
               </Link>
             </p>

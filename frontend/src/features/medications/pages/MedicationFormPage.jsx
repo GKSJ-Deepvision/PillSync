@@ -2,12 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { medicationApi } from '../../../api/medications';
 import { Layout } from '../../../components/layout';
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  CardFooter,
-} from '../../../components/common/Card';
+import { Card, CardBody, CardHeader, CardFooter } from '../../../components/common/Card';
 import { Button, Alert, Input } from '../../../components/common';
 import { ArrowLeft } from 'lucide-react';
 
@@ -126,11 +121,7 @@ export function MedicationFormPage() {
 
       navigate('/medications');
     } catch (err) {
-      setError(
-        isEdit
-          ? 'Failed to update medication'
-          : 'Failed to create medication'
-      );
+      setError(isEdit ? 'Failed to update medication' : 'Failed to create medication');
       console.error(err);
     } finally {
       setSaving(false);
@@ -167,21 +158,13 @@ export function MedicationFormPage() {
             {isEdit ? 'Edit Medication' : 'Add Medication'}
           </h1>
           <p className="text-gray-600 mt-1">
-            {isEdit
-              ? 'Update medication details'
-              : 'Add a new medication to your list'}
+            {isEdit ? 'Update medication details' : 'Add a new medication to your list'}
           </p>
         </CardHeader>
 
         <form onSubmit={handleSubmit}>
           <CardBody className="space-y-5">
-            {error && (
-              <Alert
-                type="danger"
-                message={error}
-                onClose={() => setError('')}
-              />
-            )}
+            {error && <Alert type="danger" message={error} onClose={() => setError('')} />}
 
             <Input
               label="Medication Name"
@@ -233,9 +216,7 @@ export function MedicationFormPage() {
             />
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Instructions
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Instructions</label>
               <textarea
                 name="instructions"
                 value={formData.instructions}
@@ -265,9 +246,7 @@ export function MedicationFormPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
 
               <select
                 name="status"
@@ -283,18 +262,11 @@ export function MedicationFormPage() {
 
           <CardFooter>
             <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate('/medications')}
-              >
+              <Button type="button" variant="outline" onClick={() => navigate('/medications')}>
                 Cancel
               </Button>
 
-              <Button
-                type="submit"
-                loading={saving}
-              >
+              <Button type="submit" loading={saving}>
                 {isEdit ? 'Update Medication' : 'Add Medication'}
               </Button>
             </div>

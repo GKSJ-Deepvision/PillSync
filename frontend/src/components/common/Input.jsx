@@ -16,7 +16,9 @@ export function Input({
         </label>
       )}
       <div className="relative">
-        {Icon && <Icon className="pointer-events-none absolute left-4 top-3.5 h-5 w-5 text-slate-400" />}
+        {Icon && (
+          <Icon className="pointer-events-none absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
+        )}
         <input
           type={type}
           className={`

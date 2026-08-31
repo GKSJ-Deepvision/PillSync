@@ -14,8 +14,7 @@ const mockAuthApi = {
           email,
           name: 'John Patient',
           role: 'patient',
-          avatar:
-            'https://ui-avatars.com/api/?name=John+Patient&background=0D8ABC&color=fff',
+          avatar: 'https://ui-avatars.com/api/?name=John+Patient&background=0D8ABC&color=fff',
         },
       };
     }
@@ -29,8 +28,7 @@ const mockAuthApi = {
           email,
           name: 'Jane Caregiver',
           role: 'caregiver',
-          avatar:
-            'https://ui-avatars.com/api/?name=Jane+Caregiver&background=7C3AED&color=fff',
+          avatar: 'https://ui-avatars.com/api/?name=Jane+Caregiver&background=7C3AED&color=fff',
         },
       };
     }
@@ -44,8 +42,7 @@ const mockAuthApi = {
           email,
           name: 'Admin User',
           role: 'admin',
-          avatar:
-            'https://ui-avatars.com/api/?name=Admin+User&background=DC2626&color=fff',
+          avatar: 'https://ui-avatars.com/api/?name=Admin+User&background=DC2626&color=fff',
         },
       };
     }
@@ -113,18 +110,13 @@ const realAuthApi = {
   login: (email, password) =>
     apiClient.post('/auth/login', { email, password }).then((res) => res.data),
 
-  register: (data) =>
-    apiClient.post('/auth/register', data).then((res) => res.data),
+  register: (data) => apiClient.post('/auth/register', data).then((res) => res.data),
 
   forgotPassword: (email) =>
-    apiClient
-      .post('/auth/forgot-password', { email })
-      .then((res) => res.data),
+    apiClient.post('/auth/forgot-password', { email }).then((res) => res.data),
 
   resetPassword: (token, newPassword) =>
-    apiClient
-      .post('/auth/reset-password', { token, newPassword })
-      .then((res) => res.data),
+    apiClient.post('/auth/reset-password', { token, newPassword }).then((res) => res.data),
 
   me: () => apiClient.get('/auth/me').then((res) => res.data),
 

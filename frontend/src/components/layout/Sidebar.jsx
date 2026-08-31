@@ -1,24 +1,36 @@
 import { useAuth } from '../../context/AuthContext';
 import { useLocation, Link } from 'react-router-dom';
-import {
-  Pill,
-  Clock,
-  TrendingUp,
-  Settings,
-  BarChart3,
-  Users,
-  Inbox,
-} from 'lucide-react';
+import { Pill, Clock, TrendingUp, Settings, BarChart3, Users, Inbox } from 'lucide-react';
 
 const NAVIGATION = [
-  { label: 'Dashboard', href: '/dashboard', icon: TrendingUp, roles: ['patient', 'caregiver', 'admin'] },
-  { label: 'Medications', href: '/medications', icon: Pill, roles: ['patient', 'caregiver', 'admin'] },
+  {
+    label: 'Dashboard',
+    href: '/dashboard',
+    icon: TrendingUp,
+    roles: ['patient', 'caregiver', 'admin'],
+  },
+  {
+    label: 'Medications',
+    href: '/medications',
+    icon: Pill,
+    roles: ['patient', 'caregiver', 'admin'],
+  },
   { label: 'Reminders', href: '/reminders', icon: Clock, roles: ['patient', 'caregiver'] },
   { label: 'Adherence', href: '/adherence', icon: TrendingUp, roles: ['patient', 'caregiver'] },
   { label: 'Patients', href: '/admin/patients', icon: Users, roles: ['admin', 'caregiver'] },
   { label: 'Analytics', href: '/analytics', icon: BarChart3, roles: ['admin', 'caregiver'] },
-  { label: 'Notifications', href: '/notifications', icon: Inbox, roles: ['patient', 'caregiver', 'admin'] },
-  { label: 'Settings', href: '/settings', icon: Settings, roles: ['patient', 'caregiver', 'admin'] },
+  {
+    label: 'Notifications',
+    href: '/notifications',
+    icon: Inbox,
+    roles: ['patient', 'caregiver', 'admin'],
+  },
+  {
+    label: 'Settings',
+    href: '/settings',
+    icon: Settings,
+    roles: ['patient', 'caregiver', 'admin'],
+  },
 ];
 
 export function Sidebar() {
@@ -60,7 +72,9 @@ export function Sidebar() {
                   }
                 `}
               >
-                <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${isActive ? 'bg-primary-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                <div
+                  className={`flex h-9 w-9 items-center justify-center rounded-xl ${isActive ? 'bg-primary-600 text-white' : 'bg-slate-100 text-slate-600'}`}
+                >
                   <Icon className="h-4 w-4" />
                 </div>
                 <span>{item.label}</span>

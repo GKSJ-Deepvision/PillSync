@@ -1,9 +1,5 @@
 export function Skeleton({ width = 'w-full', height = 'h-4', className = '' }) {
-  return (
-    <div
-      className={`${width} ${height} ${className} bg-gray-200 rounded animate-pulse`}
-    />
-  );
+  return <div className={`${width} ${height} ${className} bg-gray-200 rounded animate-pulse`} />;
 }
 
 export function CardSkeleton({ count = 3 }) {
