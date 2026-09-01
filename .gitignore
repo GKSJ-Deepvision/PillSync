@@ -31,9 +31,12 @@ node_modules/
 frontend/dist/
 frontend/build/
 frontend/coverage/
+dist
+dist-ssr
 *.tsbuildinfo
 .vite/
 .eslintcache
+*.local
 
 # ---- Secrets and environment ----
 .env
@@ -74,10 +77,16 @@ ml/models/*
 .DS_Store
 Thumbs.db
 desktop.ini
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 # ---- Logs and temp ----
 *.log
 logs/
+logs
 tmp/
 temp/
 

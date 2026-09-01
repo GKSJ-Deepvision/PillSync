@@ -88,13 +88,13 @@ Report templates are in [`docs/milestones/`](docs/milestones/).
 
 ## Tech stack
 
-**Backend** Python · Django REST Framework / FastAPI · PostgreSQL (SQLite for dev) · Celery
-**Frontend** React.js · Tailwind CSS · Axios · Redux Toolkit or Context API
-**AI & OCR** Tesseract OCR · spaCy · OpenAI API
-**Auth** JWT · OAuth2
-**Notifications** Firebase Cloud Messaging · Twilio · SendGrid
-**Testing** Pytest · Django Test Client · Jest / Vitest · React Testing Library
-**DevOps** Docker · Docker Compose · GitHub Actions · AWS / Azure / Render / Vercel
+**Backend** Python · Django REST Framework / FastAPI · PostgreSQL (SQLite for dev) · Celery  
+**Frontend** React.js · Tailwind CSS · Axios · Redux Toolkit or Context API  
+**AI & OCR** Tesseract OCR · spaCy · OpenAI API  
+**Auth** JWT · OAuth2  
+**Notifications** Firebase Cloud Messaging · Twilio · SendGrid  
+**Testing** Pytest · Django Test Client · Jest / Vitest · React Testing Library  
+**DevOps** Docker · Docker Compose · GitHub Actions · AWS / Azure / Render / Vercel  
 
 ---
 
@@ -138,6 +138,115 @@ collaborator access, Actions permissions, the weekly cohort report — are liste
 
 ---
 
-## Licence
+# PillSync — Milestone 1 Frontend (intern/04-deepika-duggirala)
+
+PillSync is an **intelligent medication-management and caregiver-support platform** that links patients, caregivers, and administrators in a unified healthcare network. This section documents the **Milestone 1 React frontend** — a complete, polished, and functional UI ready for Django REST API backend integration.
+
+---
+
+## 📋 Milestone 1 Scope
+
+Milestone 1 delivers the complete frontend foundation:
+
+- ✅ Authentication system (Login, Register, Forgot/Reset Password)
+- ✅ Three role types: **Patient**, **Caregiver**, **Admin**
+- ✅ Role-based navigation (sidebar auto-adjusts per role)
+- ✅ Role-based route protection
+- ✅ Patient Dashboard, Profile, Edit Profile, Settings
+- ✅ Patient feature placeholders: Medicines, Schedule, Adherence, Notifications
+- ✅ Caregiver Dashboard, Profile, My Patients, Patient Details, Alerts
+- ✅ Admin Dashboard, User Management (with modals), Activity Log
+- ✅ Reusable component library (Button, Input, Card, Modal, Loading, etc.)
+- ✅ Centralized Axios API service layer (ready for Django REST backend)
+- ✅ Mock data layer separated from UI components
+- ✅ Workflow documentation
+- ✅ Automated tests (Vitest + React Testing Library)
+- ✅ ESLint configured
+- ✅ Production build tested
+
+---
+
+## 🛠 Technology Stack
+
+| Technology | Version | Purpose |
+|---|---|---|
+| React | ^19 | UI Framework |
+| Vite | ^8 | Build Tool & Dev Server |
+| JavaScript (JSX) | ES2020+ | Application Language |
+| Tailwind CSS | ^3 | Component Styling |
+| React Router DOM | ^7 | Client-Side Routing |
+| Axios | ^1 | HTTP Client |
+| React Context API | Built-in | Auth State Management |
+| Lucide React | Latest | Icon Library |
+| Vitest | Latest | Unit Testing |
+| React Testing Library | Latest | Component Testing |
+| ESLint | ^10 | Code Quality |
+
+---
+
+## 🚀 Installation & Running Locally
+
+### Prerequisites
+
+- Node.js >= 18
+- npm >= 9
+
+### Setup
+
+```bash
+# 1. Navigate to the project directory
+cd pillsync-frontend
+
+# 2. Install all dependencies
+npm install
+
+# 3. Copy environment variables
+cp .env.example .env
+
+# 4. Start the development server
+npm run dev
+```
+
+The application will be available at: **http://localhost:5173**
+
+---
+
+## 🔐 Authentication — Test Credentials
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Patient** | patient@pillsync.com | password123 |
+| **Caregiver** | caregiver@pillsync.com | password123 |
+| **Admin** | admin@pillsync.com | password123 |
+
+---
+
+## 🔌 API Service Architecture
+
+The API layer is centralized in `src/services/`:
+
+- `authService.js` — login, register, forgotPassword, resetPassword, logout
+- `userService.js` — fetchProfile, updateProfile
+- `patientService.js` — fetchMyPatients, fetchPatientDetails, fetchUserList, fetchActivityLogs
+
+---
+
+## 🧪 Testing
+
+```bash
+npm test
+```
+
+Tests use **Vitest** and **React Testing Library** — run without a backend (all dependencies mocked).
+
+---
+
+## ⚠️ Security Notice
+
+Frontend role-based access control (RoleRoute) is a **UI convenience only**. All true authorization and security enforcement will be handled by the Django REST API backend.
+
+---
+
+## 📄 License
 
 [MIT](LICENSE)
