@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../../context/useAuth';
 import { Alert } from '../../../components/common';
 import { Mail, Lock, User, ShieldCheck, Pill, ArrowRight, Stethoscope, Shield } from 'lucide-react';
+import { isValidEmail } from '../../../utils/validation';
 import './RegisterPage.css';
 
 export function RegisterPage() {
@@ -24,7 +25,7 @@ export function RegisterPage() {
     if (!formData.email) errors.email = 'Email address is required';
     if (!formData.password) errors.password = 'Password is required';
     if (!formData.confirmPassword) errors.confirmPassword = 'Confirmation password is required';
-    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+    if (formData.email && !isValidEmail(formData.email)) {
       errors.email = 'Please enter a valid email address';
     }
     if (formData.password && formData.password.length < 6) {
@@ -86,41 +87,46 @@ export function RegisterPage() {
           <div className="register-role-section">
             <span className="register-role-label">Choose Account Type</span>
             <div className="register-role-grid">
-              <div
+              <button
+                type="button"
                 onClick={() => setSelectedRole('patient')}
                 className={`register-role-card ${selectedRole === 'patient' ? 'active' : ''}`}
               >
                 <User className="h-5 w-5 text-indigo-600" />
                 <span className="register-role-card-title">Patient</span>
                 <span className="register-role-card-desc">Doses & Logs</span>
-              </div>
+              </button>
 
-              <div
+              <button
+                type="button"
                 onClick={() => setSelectedRole('caregiver')}
                 className={`register-role-card ${selectedRole === 'caregiver' ? 'active' : ''}`}
               >
                 <Stethoscope className="h-5 w-5 text-indigo-600" />
                 <span className="register-role-card-title">Caregiver</span>
                 <span className="register-role-card-desc">Manage Patients</span>
-              </div>
+              </button>
 
-              <div
+              <button
+                type="button"
                 onClick={() => setSelectedRole('admin')}
                 className={`register-role-card ${selectedRole === 'admin' ? 'active' : ''}`}
               >
                 <Shield className="h-5 w-5 text-indigo-600" />
                 <span className="register-role-card-title">Admin</span>
                 <span className="register-role-card-desc">Platform Oversight</span>
-              </div>
+              </button>
             </div>
           </div>
+
           <div className="register-input-group">
-            <label className="register-input-label">
+            <label className="register-input-label" htmlFor="register-name">
               Full Name <span>*</span>
             </label>
             <div className="register-input-box">
               <User className="register-input-icon" />
               <input
+                id="register-name"
                 type="text"
                 placeholder="e.g. Sarah Jenkins"
                 value={formData.name}
@@ -135,12 +141,13 @@ export function RegisterPage() {
           </div>
 
           <div className="register-input-group">
-            <label className="register-input-label">
+            <label className="register-input-label" htmlFor="register-email">
               Email Address <span>*</span>
             </label>
             <div className="register-input-box">
               <Mail className="register-input-icon" />
               <input
+                id="register-email"
                 type="email"
                 placeholder="you@example.com"
                 value={formData.email}
@@ -155,12 +162,13 @@ export function RegisterPage() {
           </div>
 
           <div className="register-input-group">
-            <label className="register-input-label">
+            <label className="register-input-label" htmlFor="register-password">
               Password <span>*</span>
             </label>
             <div className="register-input-box">
               <Lock className="register-input-icon" />
               <input
+                id="register-password"
                 type="password"
                 placeholder="Minimum 6 characters"
                 value={formData.password}
@@ -175,12 +183,13 @@ export function RegisterPage() {
           </div>
 
           <div className="register-input-group">
-            <label className="register-input-label">
+            <label className="register-input-label" htmlFor="register-confirm-password">
               Confirm Password <span>*</span>
             </label>
             <div className="register-input-box">
               <Lock className="register-input-icon" />
               <input
+                id="register-confirm-password"
                 type="password"
                 placeholder="Re-enter your password"
                 value={formData.confirmPassword}
@@ -194,8 +203,8 @@ export function RegisterPage() {
             )}
           </div>
 
-          <label className="register-terms-box">
-            <input type="checkbox" defaultChecked required />
+          <label className="register-terms-box" htmlFor="register-terms">
+            <input id="register-terms" type="checkbox" defaultChecked required />
             <span>
               I agree to the{' '}
               <a href="#terms" className="register-terms-link">Terms of Service</a>

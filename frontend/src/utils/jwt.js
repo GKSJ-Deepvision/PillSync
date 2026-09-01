@@ -4,16 +4,26 @@
  */
 
 function base64UrlEncode(str) {
-  const base64 = btoa(unescape(encodeURIComponent(str)));
-  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  const base64 = btoa(binary);
+  return base64.replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
 }
 
 function base64UrlDecode(str) {
-  let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
-  while (base64.length % 4) {
+  let base64 = str.replaceAll('-', '+').replaceAll('_', '/');
+  while (base64.length % 4 !== 0) {
     base64 += '=';
   }
-  return decodeURIComponent(escape(atob(base64)));
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new TextDecoder().decode(bytes);
 }
 
 /**
@@ -65,8 +75,9 @@ export function decodeJWT(token) {
  */
 export function isTokenExpired(token) {
   const payload = decodeJWT(token);
-  if (!payload || !payload.exp) return false;
+  if (!payload?.exp) return false;
 
   const now = Math.floor(Date.now() / 1000);
   return payload.exp < now;
 }
+

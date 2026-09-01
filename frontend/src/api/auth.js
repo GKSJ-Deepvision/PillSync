@@ -7,7 +7,7 @@ const INITIAL_USERS = [
     id: 'u-patient-1',
     email: 'patient@example.com',
     password: 'password',
-    name: 'Ibrahim Kadri',
+    name: 'swathi',
     role: 'patient',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
   },
@@ -28,6 +28,19 @@ const INITIAL_USERS = [
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80',
   },
 ];
+
+function inferRoleFromEmail(email, fallbackRole) {
+  if (fallbackRole) {
+    return fallbackRole;
+  }
+  if (email.includes('admin')) {
+    return 'admin';
+  }
+  if (email.includes('caregiver') || email.includes('doctor')) {
+    return 'caregiver';
+  }
+  return 'patient';
+}
 
 // Helper to get all registered users (seeded + local storage)
 function getRegisteredUsers() {
@@ -87,7 +100,7 @@ const mockAuthApi = {
     } else {
       // Fallback: If user enters an email that is not yet registered,
       // create a session with the selected role or default based on email/role
-      const role = selectedRole || (normalizedEmail.includes('admin') ? 'admin' : normalizedEmail.includes('caregiver') || normalizedEmail.includes('doctor') ? 'caregiver' : 'patient');
+      const role = inferRoleFromEmail(normalizedEmail, selectedRole);
       const name = normalizedEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) || 'User';
       
       user = {
@@ -187,16 +200,16 @@ const mockAuthApi = {
     };
   },
 
- resetPassword: async (token, newPassword) => {
-  if (!token || !newPassword) {
-    throw new Error("Invalid reset password request");
-  }
+  resetPassword: async (token, newPassword) => {
+    if (!token || !newPassword) {
+      throw new Error('Invalid reset password request');
+    }
 
-  return Promise.resolve({
-    success: true,
-    message: "Password reset successfully",
-  });
-},
+    return {
+      success: true,
+      message: 'Password reset successfully',
+    };
+  },
 
   me: async () => {
     const token = localStorage.getItem('accessToken');

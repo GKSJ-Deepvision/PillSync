@@ -16,6 +16,7 @@ import {
   Stethoscope,
   Shield,
 } from 'lucide-react';
+import { isValidEmail } from '../../../utils/validation';
 import './LoginPage.css';
 
 export function LoginPage() {
@@ -31,7 +32,7 @@ export function LoginPage() {
     const errors = {};
     if (!formData.email) errors.email = 'Email is required';
     if (!formData.password) errors.password = 'Password is required';
-    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+    if (formData.email && !isValidEmail(formData.email)) {
       errors.email = 'Please enter a valid email address';
     }
     return errors;
@@ -169,12 +170,13 @@ export function LoginPage() {
           <form onSubmit={handleSubmit} className="login-form-body">
             {/* Email Field */}
             <div className="login-input-group">
-              <label className="login-input-label">
+              <label className="login-input-label" htmlFor="login-email">
                 Email address <span>*</span>
               </label>
               <div className="login-input-box">
                 <Mail className="login-input-icon" />
                 <input
+                  id="login-email"
                   type="email"
                   placeholder="Enter your email address"
                   value={formData.email}
@@ -190,12 +192,13 @@ export function LoginPage() {
 
             {/* Password Field */}
             <div className="login-input-group">
-              <label className="login-input-label">
+              <label className="login-input-label" htmlFor="login-password">
                 Password <span>*</span>
               </label>
               <div className="login-input-box">
                 <Lock className="login-input-icon" />
                 <input
+                  id="login-password"
                   type="password"
                   placeholder="Enter your password"
                   value={formData.password}
@@ -211,8 +214,8 @@ export function LoginPage() {
 
             {/* Remember Me & Forgot Password */}
             <div className="login-form-options">
-              <label className="login-remember-me">
-                <input type="checkbox" defaultChecked />
+              <label className="login-remember-me" htmlFor="login-remember">
+                <input id="login-remember" type="checkbox" defaultChecked />
                 <span>Remember me</span>
               </label>
               <Link to="/forgot-password" className="login-forgot-link">

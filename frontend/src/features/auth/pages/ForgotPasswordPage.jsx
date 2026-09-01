@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../../context/useAuth';
 import { Alert } from '../../../components/common';
 import { Mail, Pill, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { isValidEmail } from '../../../utils/validation';
 import './ForgotPasswordPage.css';
 
 export function ForgotPasswordPage() {
@@ -21,7 +22,7 @@ export function ForgotPasswordPage() {
       return;
     }
 
-    if (!/\S+@\S+\.\S+/.test(email)) {
+    if (!isValidEmail(email)) {
       setValidationError('Email is invalid');
       return;
     }
@@ -76,12 +77,13 @@ export function ForgotPasswordPage() {
 
         <form onSubmit={handleSubmit} className="forgot-form">
           <div className="forgot-input-group">
-            <label className="forgot-input-label">
+            <label className="forgot-input-label" htmlFor="forgot-email">
               Email address <span>*</span>
             </label>
             <div className="forgot-input-box">
               <Mail className="forgot-input-icon" />
               <input
+                id="forgot-email"
                 type="email"
                 placeholder="you@example.com"
                 value={email}
