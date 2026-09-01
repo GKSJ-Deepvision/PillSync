@@ -7,15 +7,11 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from apps.medicines.models import Medicine
 
+from apps.medicines.models import Medicine
 from apps.profiles.models import Profile
 
-from .serializers import (
-    UserRegistrationSerializer,
-    ProfileSerializer,
-    MedicineSerializer,
-)
+from .serializers import MedicineSerializer, ProfileSerializer, UserRegistrationSerializer
 
 
 class HealthCheckView(APIView):
