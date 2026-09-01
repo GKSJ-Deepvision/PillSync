@@ -18,16 +18,17 @@ from .serializers import (
 )
 
 
-
 class HealthCheckView(APIView):
     authentication_classes = []
     permission_classes = []
 
     def get(self, request):
-        return Response({
-            "status": "ok",
-            "service": "PillSync API",
-        })
+        return Response(
+            {
+                "status": "ok",
+                "service": "PillSync API",
+            }
+        )
 
 
 class RegisterView(APIView):
@@ -58,14 +59,18 @@ class RegisterView(APIView):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+
 class MeView(APIView):
     def get(self, request):
-        return Response({
-            "id": request.user.id,
-            "username": request.user.username,
-            "email": request.user.email,
-            "role": request.user.role,
-        })
+        return Response(
+            {
+                "id": request.user.id,
+                "username": request.user.username,
+                "email": request.user.email,
+                "role": request.user.role,
+            }
+        )
+
 
 class ProfileView(APIView):
     def get(self, request):
@@ -90,6 +95,7 @@ class ProfileView(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST,
         )
+
 
 class MedicineListCreateView(APIView):
     def get(self, request):
