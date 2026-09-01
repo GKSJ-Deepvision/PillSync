@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ---- Python / backend ----
 __pycache__/
 *.py[cod]
@@ -85,3 +86,24 @@ temp/
 # The intern roster spreadsheet carries 26 people's personal email addresses.
 # Branch assignments live in .github/interns.yml instead, without the emails.
 *.xlsx
+=======
+# Environment variables
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+.venv/
+env/
+ENV/
+
+# Database
+*.sqlite3
+
+# Static / Media
+staticfiles/
+media/
+>>>>>>> 87bbb35 (Initial commit)

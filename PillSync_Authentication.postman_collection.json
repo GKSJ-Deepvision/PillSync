@@ -1,0 +1,508 @@
+{
+	"info": {
+		"_postman_id": "8f3b145d-4f21-4d1a-995f-pillsync-auth",
+		"name": "PillSync - Authentication APIs",
+		"description": "Postman Collection for PillSync Authentication Workflows (Task 2) and Database Schema (Task 3).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://127.0.0.1:8000",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refreshToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "oauthAccessToken",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. User Registration",
+			"item": [
+				{
+					"name": "Register - Success (201 Created)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"test@example.com\",\n    \"password\": \"Test@12345\",\n    \"first_name\": \"Test\",\n    \"last_name\": \"User\",\n    \"phone_number\": \"9876543210\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register", ""]
+						}
+					}
+				},
+				{
+					"name": "Register - Failure: Duplicate Username (400 Bad Request)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"another@example.com\",\n    \"password\": \"Test@12345\",\n    \"first_name\": \"Test\",\n    \"last_name\": \"User\",\n    \"phone_number\": \"9876543210\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register", ""]
+						}
+					}
+				},
+				{
+					"name": "Register - Failure: Duplicate Email (400 Bad Request)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"anotheruser\",\n    \"email\": \"test@example.com\",\n    \"password\": \"Test@12345\",\n    \"first_name\": \"Test\",\n    \"last_name\": \"User\",\n    \"phone_number\": \"9876543210\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register", ""]
+						}
+					}
+				},
+				{
+					"name": "Register - Failure: Weak Password (400 Bad Request)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"weakuser\",\n    \"email\": \"weak@example.com\",\n    \"password\": \"123\",\n    \"first_name\": \"Weak\",\n    \"last_name\": \"Pass\",\n    \"phone_number\": \"9876543210\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register", ""]
+						}
+					}
+				},
+				{
+					"name": "Register - Failure: Missing Fields (400 Bad Request)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"incompleteuser\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. JWT Authentication",
+			"item": [
+				{
+					"name": "Login - Success (200 OK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.access) {",
+									"    pm.collectionVariables.set('accessToken', jsonData.access);",
+									"}",
+									"if (jsonData.refresh) {",
+									"    pm.collectionVariables.set('refreshToken', jsonData.refresh);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"Test@12345\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login", ""]
+						}
+					}
+				},
+				{
+					"name": "Login - Failure: Incorrect Password (401 Unauthorized)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"WrongPassword@123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login", ""]
+						}
+					}
+				},
+				{
+					"name": "Token Refresh - Success (200 OK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.access) {",
+									"    pm.collectionVariables.set('accessToken', jsonData.access);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"{{refreshToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/token/refresh/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "token", "refresh", ""]
+						}
+					}
+				},
+				{
+					"name": "Token Refresh - Failure: Invalid Token (401 Unauthorized)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"invalid_token_sample\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/token/refresh/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "token", "refresh", ""]
+						}
+					}
+				},
+				{
+					"name": "JWT Logout - Invalidate Refresh Token (200 OK)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"{{refreshToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/logout/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "logout", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. User Profile (/me/)",
+			"item": [
+				{
+					"name": "Me Profile - Success (200 OK)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "me", ""]
+						}
+					}
+				},
+				{
+					"name": "Me Profile - Failure: Unauthorized / Missing Token (401 Unauthorized)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "me", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Password Management",
+			"item": [
+				{
+					"name": "Change Password - Success (200 OK)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"old_password\": \"Test@12345\",\n    \"new_password\": \"NewPassword@12345\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/change-password/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "change-password", ""]
+						}
+					}
+				},
+				{
+					"name": "Change Password - Failure: Incorrect Old Password (400 Bad Request)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"old_password\": \"WrongOldPassword@123\",\n    \"new_password\": \"NewPassword@12345\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/change-password/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "change-password", ""]
+						}
+					}
+				},
+				{
+					"name": "Password Reset - Request (200 OK)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/password-reset/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "password-reset", ""]
+						}
+					}
+				},
+				{
+					"name": "Password Reset - Confirm (200 OK)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"uidb64\": \"<UIDB64_FROM_EMAIL>\",\n    \"token\": \"<TOKEN_FROM_EMAIL>\",\n    \"new_password\": \"ResetPassword@12345\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/password-reset/confirm/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "password-reset", "confirm", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Session Management",
+			"item": [
+				{
+					"name": "Session Login - Success (200 OK)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"Test@12345\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/session/login/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "session", "login", ""]
+						}
+					}
+				},
+				{
+					"name": "Session Logout - Success (200 OK)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/session/logout/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "session", "logout", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "6. OAuth2 Authentication",
+			"item": [
+				{
+					"name": "OAuth2 Token - Password Grant (200 OK)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "testuser",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "Test@12345",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "<CLIENT_ID>",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "<CLIENT_SECRET>",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/o/token/",
+							"host": ["{{baseUrl}}"],
+							"path": ["o", "token", ""]
+						}
+					}
+				}
+			]
+		}
+	]
+}
