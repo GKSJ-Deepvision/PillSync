@@ -9,7 +9,7 @@ import './RegisterPage.css';
 export function RegisterPage() {
   const navigate = useNavigate();
   const { register, error, setError, isAuthenticating } = useAuth();
-  
+
   const [selectedRole, setSelectedRole] = useState('patient');
   const [formData, setFormData] = useState({
     name: '',
@@ -207,22 +207,24 @@ export function RegisterPage() {
             <input id="register-terms" type="checkbox" defaultChecked required />
             <span>
               I agree to the{' '}
-              <a href="#terms" className="register-terms-link">Terms of Service</a>
-              {' '}and{' '}
-              <a href="#privacy" className="register-terms-link">Privacy Policy</a>
+              <a href="#terms" className="register-terms-link">
+                Terms of Service
+              </a>{' '}
+              and{' '}
+              <a href="#privacy" className="register-terms-link">
+                Privacy Policy
+              </a>
             </span>
           </label>
 
-          <button
-            type="submit"
-            disabled={isAuthenticating}
-            className="register-submit-btn"
-          >
+          <button type="submit" disabled={isAuthenticating} className="register-submit-btn">
             {isAuthenticating ? (
               <span>Creating your account...</span>
             ) : (
               <>
-                <span>Create {selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)} Account</span>
+                <span>
+                  Create {selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)} Account
+                </span>
                 <ArrowRight className="h-4 w-4" />
               </>
             )}

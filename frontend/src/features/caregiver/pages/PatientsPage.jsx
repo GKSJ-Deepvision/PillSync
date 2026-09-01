@@ -5,7 +5,6 @@ import { Button } from '../../../components/common/Button';
 import { Input } from '../../../components/common/Input';
 import { Card } from '../../../components/common/Card';
 import {
-  
   Search,
   Plus,
   Activity,
@@ -13,7 +12,6 @@ import {
   CheckCircle2,
   Phone,
   MessageSquare,
-  
   Pill,
   Send,
   Calendar,
@@ -32,7 +30,8 @@ const INITIAL_PATIENTS = [
     activePrescriptions: 4,
     nextDose: 'Metformin 500mg · 08:00 AM',
     phone: '+1 (555) 234-5678',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    avatar:
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
     lastTaken: 'Today, 08:15 AM',
   },
   {
@@ -46,7 +45,8 @@ const INITIAL_PATIENTS = [
     activePrescriptions: 5,
     nextDose: 'Atorvastatin 20mg · 09:00 PM',
     phone: '+1 (555) 876-5432',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
+    avatar:
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
     lastTaken: 'Yesterday, 09:30 PM (Missed morning dose)',
   },
   {
@@ -60,7 +60,8 @@ const INITIAL_PATIENTS = [
     activePrescriptions: 3,
     nextDose: 'Levothyroxine 75mcg · 07:00 AM',
     phone: '+1 (555) 345-6789',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+    avatar:
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
     lastTaken: 'Today, 07:10 AM',
   },
   {
@@ -74,7 +75,8 @@ const INITIAL_PATIENTS = [
     activePrescriptions: 2,
     nextDose: 'Calcium + Vit D3 · 12:30 PM',
     phone: '+1 (555) 987-6543',
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
+    avatar:
+      'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
     lastTaken: 'Today, 12:45 PM',
   },
   {
@@ -88,7 +90,8 @@ const INITIAL_PATIENTS = [
     activePrescriptions: 3,
     nextDose: 'Lisinopril 10mg · 08:00 AM',
     phone: '+1 (555) 456-7890',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
+    avatar:
+      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
     lastTaken: '2 days ago (2 consecutive doses missed)',
   },
 ];
@@ -140,7 +143,8 @@ export function PatientsPage() {
               )}
             </div>
             <p className="patients-subtitle">
-              Caregiver & Clinical team oversight: Real-time adherence tracking, prescription management, and dose nudges
+              Caregiver & Clinical team oversight: Real-time adherence tracking, prescription
+              management, and dose nudges
             </p>
           </div>
 
@@ -160,20 +164,26 @@ export function PatientsPage() {
           <Card className="p-4 rounded-2xl border border-slate-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Cohort Adherence</p>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Cohort Adherence
+                </p>
                 <p className="text-2xl font-black text-indigo-700 mt-1">{avgAdherence}%</p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
                 <Activity className="h-5 w-5" />
               </div>
             </div>
-            <p className="text-xs text-emerald-600 font-semibold mt-2">+4.8% improvement this month</p>
+            <p className="text-xs text-emerald-600 font-semibold mt-2">
+              +4.8% improvement this month
+            </p>
           </Card>
 
           <Card className="p-4 rounded-2xl border border-slate-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Doses Taken Today</p>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Doses Taken Today
+                </p>
                 <p className="text-2xl font-black text-emerald-600 mt-1">18 / 22</p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
@@ -186,14 +196,18 @@ export function PatientsPage() {
           <Card className="p-4 rounded-2xl border border-slate-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Critical Risk Flag</p>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Critical Risk Flag
+                </p>
                 <p className="text-2xl font-black text-rose-600 mt-1">{highRiskCount} Patients</p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
                 <AlertTriangle className="h-5 w-5" />
               </div>
             </div>
-            <p className="text-xs text-rose-600 font-semibold mt-2">Requires immediate dose follow-up</p>
+            <p className="text-xs text-rose-600 font-semibold mt-2">
+              Requires immediate dose follow-up
+            </p>
           </Card>
         </div>
 
@@ -213,8 +227,16 @@ export function PatientsPage() {
             {[
               { id: 'all', label: 'All Patients', count: patients.length },
               { id: 'high_risk', label: 'High Risk (<70%)', count: highRiskCount },
-              { id: 'moderate', label: 'Moderate (70-85%)', count: patients.filter((p) => p.adherence >= 70 && p.adherence < 85).length },
-              { id: 'adherent', label: 'Compliant (>85%)', count: patients.filter((p) => p.adherence >= 85).length },
+              {
+                id: 'moderate',
+                label: 'Moderate (70-85%)',
+                count: patients.filter((p) => p.adherence >= 70 && p.adherence < 85).length,
+              },
+              {
+                id: 'adherent',
+                label: 'Compliant (>85%)',
+                count: patients.filter((p) => p.adherence >= 85).length,
+              },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -244,11 +266,7 @@ export function PatientsPage() {
                 <div className="patient-card-header">
                   <div className="flex items-center gap-3">
                     <div className="patient-avatar-box">
-                      <img
-                        src={patient.avatar}
-                        alt={patient.name}
-                        className="patient-avatar-img"
-                      />
+                      <img src={patient.avatar} alt={patient.name} className="patient-avatar-img" />
                       <span className="patient-online-dot" />
                     </div>
                     <div>
@@ -289,7 +307,11 @@ export function PatientsPage() {
                     <span className="font-semibold text-slate-600">30-Day Adherence</span>
                     <span
                       className={`font-black ${
-                        isHighRisk ? 'text-rose-600' : isModerate ? 'text-amber-600' : 'text-emerald-600'
+                        isHighRisk
+                          ? 'text-rose-600'
+                          : isModerate
+                            ? 'text-amber-600'
+                            : 'text-emerald-600'
                       }`}
                     >
                       {patient.adherence}%

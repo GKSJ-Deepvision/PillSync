@@ -12,11 +12,8 @@ export function isValidEmail(email) {
   const trimmed = email.trim();
   const atIndex = trimmed.indexOf('@');
   const dotIndex = trimmed.lastIndexOf('.');
-  
+
   return (
-    atIndex > 0 &&
-    dotIndex > atIndex + 1 &&
-    dotIndex < trimmed.length - 1 &&
-    !trimmed.includes(' ')
+    atIndex > 0 && dotIndex > atIndex + 1 && dotIndex < trimmed.length - 1 && !trimmed.includes(' ')
   );
 }

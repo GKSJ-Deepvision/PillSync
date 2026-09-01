@@ -13,7 +13,9 @@ export function ProtectedRoute({ children }) {
           <div className="inline-block">
             <div className="h-10 w-10 rounded-full border-4 border-slate-200 border-t-indigo-600 animate-spin"></div>
           </div>
-          <p className="text-slate-600 text-xs font-semibold mt-4">Validating clinical credentials...</p>
+          <p className="text-slate-600 text-xs font-semibold mt-4">
+            Validating clinical credentials...
+          </p>
         </div>
       </div>
     );
@@ -57,24 +59,31 @@ export function RoleBasedRoute({ children, allowedRoles = [] }) {
           <span className="access-denied-code">Error 403 · Access Restricted</span>
           <h2 className="access-denied-title">Clinical Role Authorization Required</h2>
           <p className="access-denied-message">
-            This portal view is strictly restricted to clinical roles with designated HIPAA privileges.
+            This portal view is strictly restricted to clinical roles with designated HIPAA
+            privileges.
           </p>
 
           <div className="access-denied-roles-box">
             <div className="flex items-center justify-between mb-2">
               <span className="text-slate-500 font-semibold">Your Current Role:</span>
-              <span className="font-bold text-rose-600 uppercase tracking-wider">{user?.role || 'Guest'}</span>
+              <span className="font-bold text-rose-600 uppercase tracking-wider">
+                {user?.role || 'Guest'}
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-slate-500 font-semibold">Allowed Role(s):</span>
-              <span className="font-bold text-indigo-700 capitalize">{allowedRoles.join(' / ')}</span>
+              <span className="font-bold text-indigo-700 capitalize">
+                {allowedRoles.join(' / ')}
+              </span>
             </div>
           </div>
 
           {/* Quick Demo Switcher if user wants to test allowed role */}
           {allowedRoles.length > 0 && (
             <div className="mt-4 border-t border-slate-100 pt-3">
-              <p className="text-[11px] text-slate-400 mb-2">Want to test as an authorized persona?</p>
+              <p className="text-[11px] text-slate-400 mb-2">
+                Want to test as an authorized persona?
+              </p>
               <div className="flex justify-center gap-2">
                 {allowedRoles.map((role) => (
                   <button

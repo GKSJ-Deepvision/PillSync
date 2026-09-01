@@ -6,8 +6,8 @@
 function base64UrlEncode(str) {
   const bytes = new TextEncoder().encode(str);
   let binary = '';
-  for (let i = 0; i < bytes.length; i++) {
-    binary += String.fromCharCode(bytes[i]);
+  for (const byte of bytes) {
+    binary += String.fromCodePoint(byte);
   }
   const base64 = btoa(binary);
   return base64.replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
@@ -20,8 +20,9 @@ function base64UrlDecode(str) {
   }
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
+  let i = 0;
+  for (const char of binary) {
+    bytes[i++] = char.codePointAt(0);
   }
   return new TextDecoder().decode(bytes);
 }
@@ -45,7 +46,7 @@ export function generateJWT(payload, expiresInSeconds = 86400) {
 
   const encodedHeader = base64UrlEncode(JSON.stringify(header));
   const encodedPayload = base64UrlEncode(JSON.stringify(fullPayload));
-  
+
   // Mock signature for client-side JWT token verification
   const signature = base64UrlEncode('sig_' + (payload.id || payload.sub || 'user') + '_' + now);
 
@@ -80,4 +81,3 @@ export function isTokenExpired(token) {
   const now = Math.floor(Date.now() / 1000);
   return payload.exp < now;
 }
-

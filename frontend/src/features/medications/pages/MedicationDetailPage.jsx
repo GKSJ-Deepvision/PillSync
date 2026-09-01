@@ -3,14 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { medicationApi } from '../../../api/medications';
 import { Layout } from '../../../components/layout';
 import { Alert } from '../../../components/common/Alert';
-import {
-  ArrowLeft,
-  Trash2,
-  Edit2,
-  Pill,
-  Clock,
-  
-} from 'lucide-react';
+import { ArrowLeft, Trash2, Edit2, Pill, Clock } from 'lucide-react';
 import './MedicationDetailPage.css';
 
 export function MedicationDetailPage() {
@@ -97,9 +90,7 @@ export function MedicationDetailPage() {
           Back to Prescription Catalog
         </Link>
 
-        {error && (
-          <Alert type="danger" message={error} onClose={() => setError('')} />
-        )}
+        {error && <Alert type="danger" message={error} onClose={() => setError('')} />}
 
         {/* Top Header Card */}
         <div className="med-detail-header-card">
@@ -148,16 +139,24 @@ export function MedicationDetailPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Dosage</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Dosage
+                  </p>
                   <p className="text-sm font-bold text-slate-900 mt-0.5">{medication.dosage}</p>
                 </div>
                 <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Frequency</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Frequency
+                  </p>
                   <p className="text-sm font-bold text-slate-900 mt-0.5">{medication.frequency}</p>
                 </div>
                 <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Supply In Stock</p>
-                  <p className="text-sm font-bold text-slate-900 mt-0.5">{medication.quantity || 30} units</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Supply In Stock
+                  </p>
+                  <p className="text-sm font-bold text-slate-900 mt-0.5">
+                    {medication.quantity || 30} units
+                  </p>
                 </div>
               </div>
 
@@ -174,9 +173,12 @@ export function MedicationDetailPage() {
               </div>
 
               <div>
-                <p className="text-xs font-bold text-slate-700 mb-1.5">Prescription Clinical Notes</p>
+                <p className="text-xs font-bold text-slate-700 mb-1.5">
+                  Prescription Clinical Notes
+                </p>
                 <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 text-xs text-slate-700 leading-relaxed">
-                  {medication.instructions || 'Take as directed by your physician with meals or a full glass of water.'}
+                  {medication.instructions ||
+                    'Take as directed by your physician with meals or a full glass of water.'}
                 </div>
               </div>
             </div>
@@ -186,11 +188,15 @@ export function MedicationDetailPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
                   <span className="text-slate-400 font-medium">Start Date:</span>
-                  <p className="font-bold text-slate-900 mt-0.5">{medication.startDate || '2026-01-15'}</p>
+                  <p className="font-bold text-slate-900 mt-0.5">
+                    {medication.startDate || '2026-01-15'}
+                  </p>
                 </div>
                 <div>
                   <span className="text-slate-400 font-medium">Expected Completion:</span>
-                  <p className="font-bold text-slate-900 mt-0.5">{medication.endDate || 'Ongoing Regimen'}</p>
+                  <p className="font-bold text-slate-900 mt-0.5">
+                    {medication.endDate || 'Ongoing Regimen'}
+                  </p>
                 </div>
               </div>
             </div>

@@ -1,16 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/useAuth';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
-import {
-  Pill,
-  Search,
-  Shield,
-  ChevronDown,
-  Bell,
-  LogOut,
-  X,
-  Menu,
-} from "lucide-react";
+import { Pill, Search, Shield, ChevronDown, Bell, LogOut, X, Menu } from 'lucide-react';
 import './Navbar.css';
 
 export function Navbar() {
@@ -56,9 +47,7 @@ export function Navbar() {
 
           {/* Desktop Left: Page Title Breadcrumb */}
           <div className="hidden md:flex items-center gap-2.5">
-            <span className="navbar-page-title">
-              {getPageTitle(location.pathname)}
-            </span>
+            <span className="navbar-page-title">{getPageTitle(location.pathname)}</span>
           </div>
 
           {/* Center Search Bar */}
@@ -85,8 +74,8 @@ export function Navbar() {
                   userRole === 'admin'
                     ? 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
                     : userRole === 'caregiver'
-                    ? 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100'
-                    : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                      ? 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100'
+                      : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
                 }`}
                 title="Switch active role persona"
               >
@@ -126,11 +115,7 @@ export function Navbar() {
             </div>
 
             {/* Notification Bell */}
-            <Link
-              to="/notifications"
-              className="navbar-icon-btn"
-              title="Notifications"
-            >
+            <Link to="/notifications" className="navbar-icon-btn" title="Notifications">
               <Bell className="h-4 w-4" />
               <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
@@ -149,15 +134,13 @@ export function Navbar() {
                 className="navbar-profile-avatar"
               />
               <div className="text-left">
-                <p className="navbar-profile-name">
-                  {user?.name || 'Dr. Oliver Mitchell'}
-                </p>
+                <p className="navbar-profile-name">{user?.name || 'Dr. Oliver Mitchell'}</p>
                 <span className="navbar-profile-role capitalize">
                   {userRole === 'admin'
                     ? 'Clinical Director (Admin)'
                     : userRole === 'caregiver'
-                    ? 'Lead Caregiver'
-                    : 'Registered Patient'}
+                      ? 'Lead Caregiver'
+                      : 'Registered Patient'}
                 </span>
               </div>
             </div>

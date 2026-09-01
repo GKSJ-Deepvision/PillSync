@@ -3,7 +3,7 @@ import { reminderApi } from '../../../api/reminders';
 import { Layout } from '../../../components/layout';
 //import { Badge } from '../../../components/common/Badge';
 import { EmptyState, CardSkeleton, Alert } from '../../../components/common';
-import { Clock, CheckCircle,  Calendar } from 'lucide-react';
+import { Clock, CheckCircle, Calendar } from 'lucide-react';
 import './RemindersPage.css';
 
 export function RemindersPage() {
@@ -109,8 +109,7 @@ export function RemindersPage() {
   const totalReminders = reminders.length;
   const takenCount = groupedReminders.taken.length;
   const missedCount = groupedReminders.missed.length;
-  const completionRate =
-    totalReminders > 0 ? Math.round((takenCount / totalReminders) * 100) : 0;
+  const completionRate = totalReminders > 0 ? Math.round((takenCount / totalReminders) * 100) : 0;
 
   return (
     <Layout>
@@ -132,14 +131,14 @@ export function RemindersPage() {
           </div>
         </div>
 
-        {error && (
-          <Alert type="danger" message={error} onClose={() => setError('')} />
-        )}
+        {error && <Alert type="danger" message={error} onClose={() => setError('')} />}
 
         {/* 4 Stat KPI Cards */}
         <div className="reminders-stats-grid">
           <div className="reminders-stat-card">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Doses</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Total Doses
+            </p>
             <p className="text-2xl font-black text-slate-900 mt-1">{totalReminders}</p>
             <p className="text-[10px] font-semibold text-slate-500 mt-0.5">Scheduled for today</p>
           </div>
@@ -151,13 +150,17 @@ export function RemindersPage() {
           </div>
 
           <div className="reminders-stat-card">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Missed / Skipped</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Missed / Skipped
+            </p>
             <p className="text-2xl font-black text-rose-600 mt-1">{missedCount}</p>
             <p className="text-[10px] font-semibold text-rose-500 mt-0.5">Attention needed</p>
           </div>
 
           <div className="reminders-stat-card">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Completion Rate</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Completion Rate
+            </p>
             <p className="text-2xl font-black text-indigo-600 mt-1">{completionRate}%</p>
             <p className="text-[10px] font-semibold text-indigo-600 mt-0.5">Overall daily score</p>
           </div>
@@ -211,10 +214,10 @@ export function RemindersPage() {
                           reminder.status === 'taken'
                             ? 'bg-emerald-50 text-emerald-700'
                             : reminder.status === 'missed'
-                            ? 'bg-rose-50 text-rose-700'
-                            : reminder.status === 'snoozed'
-                            ? 'bg-amber-50 text-amber-700'
-                            : 'bg-slate-100 text-slate-700'
+                              ? 'bg-rose-50 text-rose-700'
+                              : reminder.status === 'snoozed'
+                                ? 'bg-amber-50 text-amber-700'
+                                : 'bg-slate-100 text-slate-700'
                         }`}
                       >
                         ● {reminder.status}

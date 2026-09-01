@@ -38,19 +38,17 @@ export function ForgotPasswordPage() {
   if (submitted) {
     return (
       <div className="forgot-page-wrapper">
-        <div className="forgot-card-container text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+        <div className="forgot-card-container forgot-card-center">
+          <div className="forgot-success-icon">
             <CheckCircle2 className="h-8 w-8" />
           </div>
           <h2 className="forgot-title">Check your email</h2>
           <p className="forgot-subtitle">
-            We've sent password reset instructions to <strong className="text-slate-900">{email}</strong>
+            We've sent password reset instructions to{' '}
+            <strong className="forgot-email-highlight">{email}</strong>
           </p>
 
-          <Link
-            to="/login"
-            className="forgot-submit-btn mt-6 inline-flex"
-          >
+          <Link to="/login" className="forgot-submit-btn forgot-back-btn">
             Back to Sign In
           </Link>
         </div>
@@ -92,16 +90,10 @@ export function ForgotPasswordPage() {
                 className={`forgot-input-field ${validationError ? 'forgot-input-error' : ''}`}
               />
             </div>
-            {validationError && (
-              <p className="forgot-input-error-msg">{validationError}</p>
-            )}
+            {validationError && <p className="forgot-input-error-msg">{validationError}</p>}
           </div>
 
-          <button
-            type="submit"
-            disabled={isAuthenticating}
-            className="forgot-submit-btn"
-          >
+          <button type="submit" disabled={isAuthenticating} className="forgot-submit-btn">
             {isAuthenticating ? (
               <span>Sending reset link...</span>
             ) : (

@@ -95,34 +95,47 @@ const mockAuthApi = {
       // Fallback: If user enters an email that is not yet registered,
       // create a session with the selected role or default based on email/role
       const role = inferRoleFromEmail(normalizedEmail, selectedRole);
-      const name = normalizedEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) || 'User';
-      
+      const name =
+        normalizedEmail
+          .split('@')[0]
+          .replace(/[._]/g, ' ')
+          .replace(/\b\w/g, (c) => c.toUpperCase()) || 'User';
+
       user = {
         id: 'u-' + Date.now(),
         email: normalizedEmail,
         password,
         name,
         role,
-        avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=4f46e5&color=fff',
+        avatar:
+          'https://ui-avatars.com/api/?name=' +
+          encodeURIComponent(name) +
+          '&background=4f46e5&color=fff',
       };
 
       saveUser(user);
     }
 
     // Generate real JWT tokens
-    const accessToken = generateJWT({
-      sub: user.id,
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-    }, 86400); // 24 hours
+    const accessToken = generateJWT(
+      {
+        sub: user.id,
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+      86400
+    ); // 24 hours
 
-    const refreshToken = generateJWT({
-      sub: user.id,
-      id: user.id,
-      type: 'refresh',
-    }, 604800); // 7 days
+    const refreshToken = generateJWT(
+      {
+        sub: user.id,
+        id: user.id,
+        type: 'refresh',
+      },
+      604800
+    ); // 7 days
 
     const sanitizedUser = {
       id: user.id,
@@ -155,24 +168,33 @@ const mockAuthApi = {
       password: data.password,
       name: data.name.trim(),
       role,
-      avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.name) + '&background=4f46e5&color=fff',
+      avatar:
+        'https://ui-avatars.com/api/?name=' +
+        encodeURIComponent(data.name) +
+        '&background=4f46e5&color=fff',
     };
 
     saveUser(newUser);
 
-    const accessToken = generateJWT({
-      sub: newUser.id,
-      id: newUser.id,
-      email: newUser.email,
-      name: newUser.name,
-      role: newUser.role,
-    }, 86400);
+    const accessToken = generateJWT(
+      {
+        sub: newUser.id,
+        id: newUser.id,
+        email: newUser.email,
+        name: newUser.name,
+        role: newUser.role,
+      },
+      86400
+    );
 
-    const refreshToken = generateJWT({
-      sub: newUser.id,
-      id: newUser.id,
-      type: 'refresh',
-    }, 604800);
+    const refreshToken = generateJWT(
+      {
+        sub: newUser.id,
+        id: newUser.id,
+        type: 'refresh',
+      },
+      604800
+    );
 
     return {
       accessToken,

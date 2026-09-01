@@ -1,22 +1,67 @@
-import { useState } from "react";
+import { useState } from 'react';
 import { Layout } from '../../../components/layout';
 import { Badge } from '../../../components/common/Badge';
 import { Button } from '../../../components/common/Button';
 import { Input } from '../../../components/common/Input';
 
-import {
-  Plus,
-Search
-} from "lucide-react";
+import { Plus, Search } from 'lucide-react';
 import './AdminUsersPage.css';
 
 const INITIAL_USERS = [
-  { id: 'u1', name: 'Ibrahim Kadri', email: 'patient@example.com', role: 'patient', status: 'Active', assignedCaregiver: 'Dr. Oliver Mitchell', joined: 'Jan 12, 2026' },
-  { id: 'u2', name: 'Dr. Oliver Mitchell', email: 'caregiver@example.com', role: 'caregiver', status: 'Active', assignedCaregiver: 'N/A (Caregiver)', joined: 'Dec 05, 2025' },
-  { id: 'u3', name: 'Sarah Jenkins', email: 'admin@example.com', role: 'admin', status: 'Active', assignedCaregiver: 'System Admin', joined: 'Nov 01, 2025' },
-  { id: 'u4', name: 'Sarah Connor', email: 'sarah.connor@example.com', role: 'patient', status: 'Active', assignedCaregiver: 'Dr. Oliver Mitchell', joined: 'Feb 03, 2026' },
-  { id: 'u5', name: 'Michael Chang', email: 'michael.c@example.com', role: 'patient', status: 'Active', assignedCaregiver: 'Dr. Oliver Mitchell', joined: 'Feb 15, 2026' },
-  { id: 'u6', name: 'Dr. Emily Watson', email: 'emily.w@clinic.com', role: 'caregiver', status: 'Pending Review', assignedCaregiver: 'N/A (Caregiver)', joined: 'Aug 28, 2026' },
+  {
+    id: 'u1',
+    name: 'Ibrahim Kadri',
+    email: 'patient@example.com',
+    role: 'patient',
+    status: 'Active',
+    assignedCaregiver: 'Dr. Oliver Mitchell',
+    joined: 'Jan 12, 2026',
+  },
+  {
+    id: 'u2',
+    name: 'Dr. Oliver Mitchell',
+    email: 'caregiver@example.com',
+    role: 'caregiver',
+    status: 'Active',
+    assignedCaregiver: 'N/A (Caregiver)',
+    joined: 'Dec 05, 2025',
+  },
+  {
+    id: 'u3',
+    name: 'Sarah Jenkins',
+    email: 'admin@example.com',
+    role: 'admin',
+    status: 'Active',
+    assignedCaregiver: 'System Admin',
+    joined: 'Nov 01, 2025',
+  },
+  {
+    id: 'u4',
+    name: 'Sarah Connor',
+    email: 'sarah.connor@example.com',
+    role: 'patient',
+    status: 'Active',
+    assignedCaregiver: 'Dr. Oliver Mitchell',
+    joined: 'Feb 03, 2026',
+  },
+  {
+    id: 'u5',
+    name: 'Michael Chang',
+    email: 'michael.c@example.com',
+    role: 'patient',
+    status: 'Active',
+    assignedCaregiver: 'Dr. Oliver Mitchell',
+    joined: 'Feb 15, 2026',
+  },
+  {
+    id: 'u6',
+    name: 'Dr. Emily Watson',
+    email: 'emily.w@clinic.com',
+    role: 'caregiver',
+    status: 'Pending Review',
+    assignedCaregiver: 'N/A (Caregiver)',
+    joined: 'Aug 28, 2026',
+  },
 ];
 
 export function AdminUsersPage() {
@@ -63,7 +108,11 @@ export function AdminUsersPage() {
           </div>
 
           <Button
-            onClick={() => alert('Invite User Modal: Enter name, email, and assign role (Patient / Caregiver / Admin)')}
+            onClick={() =>
+              alert(
+                'Invite User Modal: Enter name, email, and assign role (Patient / Caregiver / Admin)'
+              )
+            }
             className="flex items-center gap-2 text-xs font-semibold"
           >
             <Plus className="h-4 w-4" />
@@ -140,10 +189,7 @@ export function AdminUsersPage() {
                       </select>
                     </td>
                     <td className="py-3.5">
-                      <Badge
-                        variant={user.status === 'Active' ? 'success' : 'warning'}
-                        size="xs"
-                      >
+                      <Badge variant={user.status === 'Active' ? 'success' : 'warning'} size="xs">
                         {user.status}
                       </Badge>
                     </td>

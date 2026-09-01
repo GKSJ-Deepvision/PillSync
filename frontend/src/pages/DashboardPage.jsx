@@ -1,8 +1,8 @@
 //import React, { useState } from 'react';
-import { useState } from "react";
+import { useState } from 'react';
 import { useAuth } from '../context/useAuth';
 //import { useNavigate, Link } from 'react-router-dom';
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 import { Layout } from '../components/layout';
 import { Badge } from '../components/common/Badge';
 //import { Button } from '../components/common/Button';
@@ -12,33 +12,50 @@ import {
   TrendingUp,
   AlertTriangle,
   CheckCircle2,
-  
- 
   Phone,
-  
   Send,
   Sparkles,
   Users,
-  
   AlertCircle,
   Plus,
 } from 'lucide-react';
-import {
-  BarChart,
-  Bar,
-  
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import './DashboardPage.css';
 
 const PATIENTS = [
-  { id: 'p1', name: 'Ibrahim Kadri', age: 54, condition: 'Type 2 Diabetes & Hypertension', adherence: 94, totalMeds: 4, todayDoses: 6, avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80' },
-  { id: 'p2', name: 'Sarah Connor', age: 48, condition: 'Cardiac Arrhythmia & High Cholesterol', adherence: 64, totalMeds: 5, todayDoses: 8, avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80' },
-  { id: 'p3', name: 'Michael Chang', age: 62, condition: 'Hypothyroidism', adherence: 82, totalMeds: 3, todayDoses: 4, avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80' },
+  {
+    id: 'p1',
+    name: 'Ibrahim Kadri',
+    age: 54,
+    condition: 'Type 2 Diabetes & Hypertension',
+    adherence: 94,
+    totalMeds: 4,
+    todayDoses: 6,
+    avatar:
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'p2',
+    name: 'Sarah Connor',
+    age: 48,
+    condition: 'Cardiac Arrhythmia & High Cholesterol',
+    adherence: 64,
+    totalMeds: 5,
+    todayDoses: 8,
+    avatar:
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'p3',
+    name: 'Michael Chang',
+    age: 62,
+    condition: 'Hypothyroidism',
+    adherence: 82,
+    totalMeds: 3,
+    todayDoses: 4,
+    avatar:
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+  },
 ];
 
 const WEEKLY_ADHERENCE = [
@@ -52,11 +69,46 @@ const WEEKLY_ADHERENCE = [
 ];
 
 const INITIAL_DOSES = [
-  { id: 1, time: '08:00 AM', window: 'Morning', med: 'Metformin 500mg', instruction: '1 tablet after breakfast', status: 'taken' },
-  { id: 2, time: '08:00 AM', window: 'Morning', med: 'Lisinopril 10mg', instruction: '1 tablet with full glass of water', status: 'taken' },
-  { id: 3, time: '01:00 PM', window: 'Afternoon', med: 'Vitamin D3 2000 IU', instruction: '1 softgel with lunch', status: 'upcoming' },
-  { id: 4, time: '08:30 PM', window: 'Evening', med: 'Atorvastatin 20mg', instruction: '1 tablet before bed', status: 'upcoming' },
-  { id: 5, time: '10:00 PM', window: 'Night', med: 'Melatonin 3mg', instruction: '30 mins before sleep', status: 'upcoming' },
+  {
+    id: 1,
+    time: '08:00 AM',
+    window: 'Morning',
+    med: 'Metformin 500mg',
+    instruction: '1 tablet after breakfast',
+    status: 'taken',
+  },
+  {
+    id: 2,
+    time: '08:00 AM',
+    window: 'Morning',
+    med: 'Lisinopril 10mg',
+    instruction: '1 tablet with full glass of water',
+    status: 'taken',
+  },
+  {
+    id: 3,
+    time: '01:00 PM',
+    window: 'Afternoon',
+    med: 'Vitamin D3 2000 IU',
+    instruction: '1 softgel with lunch',
+    status: 'upcoming',
+  },
+  {
+    id: 4,
+    time: '08:30 PM',
+    window: 'Evening',
+    med: 'Atorvastatin 20mg',
+    instruction: '1 tablet before bed',
+    status: 'upcoming',
+  },
+  {
+    id: 5,
+    time: '10:00 PM',
+    window: 'Night',
+    med: 'Melatonin 3mg',
+    instruction: '30 mins before sleep',
+    status: 'upcoming',
+  },
 ];
 
 const INITIAL_TASKS = [
@@ -73,8 +125,16 @@ export function DashboardPage() {
   const [doses, setDoses] = useState(INITIAL_DOSES);
   const [tasks, setTasks] = useState(INITIAL_TASKS);
   const [chatMessages, setChatMessages] = useState([
-    { id: 1, sender: 'doctor', text: 'Good morning Ibrahim! Your adherence is at 94% this week. Keep up the morning routine!' },
-    { id: 2, sender: 'patient', text: 'Thank you Dr. Oliver. Just took my Metformin and Lisinopril on time.' },
+    {
+      id: 1,
+      sender: 'doctor',
+      text: 'Good morning Ibrahim! Your adherence is at 94% this week. Keep up the morning routine!',
+    },
+    {
+      id: 2,
+      sender: 'patient',
+      text: 'Thank you Dr. Oliver. Just took my Metformin and Lisinopril on time.',
+    },
   ]);
   const [inputMsg, setInputMsg] = useState('');
 
@@ -120,7 +180,9 @@ export function DashboardPage() {
               </div>
               <div>
                 <span className="text-xs font-bold text-indigo-950">Caregiver Oversight: </span>
-                <span className="text-xs font-medium text-slate-600">Monitoring cohort patient:</span>
+                <span className="text-xs font-medium text-slate-600">
+                  Monitoring cohort patient:
+                </span>
               </div>
               <select
                 value={selectedPatientIndex}
@@ -152,7 +214,12 @@ export function DashboardPage() {
                 Care Plan Active
               </span>
               <span className="text-xs font-semibold text-slate-400">
-                {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
+                {new Date().toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
               </span>
             </div>
             <h1 className="dashboard-greeting-title">
@@ -190,8 +257,12 @@ export function DashboardPage() {
           <div className="dashboard-kpi-card">
             <div>
               <p className="dashboard-kpi-label">Today's Doses</p>
-              <p className="dashboard-kpi-value">{takenCount} / {doses.length}</p>
-              <p className="dashboard-kpi-meta text-emerald-600 font-semibold">{doses.length - takenCount} remaining today</p>
+              <p className="dashboard-kpi-value">
+                {takenCount} / {doses.length}
+              </p>
+              <p className="dashboard-kpi-meta text-emerald-600 font-semibold">
+                {doses.length - takenCount} remaining today
+              </p>
             </div>
             <div className="dashboard-kpi-icon bg-emerald-50 text-emerald-600">
               <Clock className="h-6 w-6" />
@@ -213,7 +284,9 @@ export function DashboardPage() {
             <div>
               <p className="dashboard-kpi-label">Refill Status</p>
               <p className="dashboard-kpi-value text-amber-600">1 Low</p>
-              <p className="dashboard-kpi-meta text-amber-600 font-semibold">Metformin (4 days left)</p>
+              <p className="dashboard-kpi-meta text-amber-600 font-semibold">
+                Metformin (4 days left)
+              </p>
             </div>
             <div className="dashboard-kpi-icon bg-amber-50 text-amber-600">
               <AlertTriangle className="h-6 w-6" />
@@ -230,7 +303,9 @@ export function DashboardPage() {
               <div className="dashboard-panel-header">
                 <div>
                   <h2 className="dashboard-panel-title">Today's Medication Timeline</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">Log scheduled doses to maintain your verified clinical streak</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Log scheduled doses to maintain your verified clinical streak
+                  </p>
                 </div>
                 <Badge variant="primary" size="xs">
                   {takenCount} of {doses.length} Completed
@@ -273,10 +348,7 @@ export function DashboardPage() {
                         </span>
                       ) : (
                         <>
-                          <button
-                            onClick={() => handleTakeDose(dose.id)}
-                            className="dose-btn-take"
-                          >
+                          <button onClick={() => handleTakeDose(dose.id)} className="dose-btn-take">
                             <CheckCircle2 className="h-4 w-4" />
                             Take Dose
                           </button>
@@ -299,7 +371,9 @@ export function DashboardPage() {
               <div className="dashboard-panel-header">
                 <div>
                   <h2 className="dashboard-panel-title">Weekly Adherence Trend</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">Daily adherence performance vs 80% clinical baseline</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Daily adherence performance vs 80% clinical baseline
+                  </p>
                 </div>
                 <div className="flex items-center gap-3 text-xs font-semibold">
                   <span className="flex items-center gap-1.5 text-indigo-600">
@@ -313,10 +387,23 @@ export function DashboardPage() {
 
               <div className="h-56 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={WEEKLY_ADHERENCE} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                  <BarChart
+                    data={WEEKLY_ADHERENCE}
+                    margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }} />
-                    <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11 }} />
+                    <XAxis
+                      dataKey="day"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }}
+                    />
+                    <YAxis
+                      domain={[0, 100]}
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#94a3b8', fontSize: 11 }}
+                    />
                     <Tooltip
                       formatter={(val) => [`${val}%`, 'Adherence']}
                       contentStyle={{
@@ -346,11 +433,7 @@ export function DashboardPage() {
 
               <div className="task-checklist">
                 {tasks.map((task) => (
-                  <div
-                    key={task.id}
-                    onClick={() => toggleTask(task.id)}
-                    className="task-check-row"
-                  >
+                  <div key={task.id} onClick={() => toggleTask(task.id)} className="task-check-row">
                     <span
                       className={`task-check-text ${
                         task.done ? 'task-check-text-done' : 'task-check-text-pending'
@@ -375,7 +458,8 @@ export function DashboardPage() {
               <div>
                 <h3 className="text-xs font-bold text-rose-900">Prescription Refill Warning</h3>
                 <p className="text-xs text-rose-700 mt-0.5 leading-relaxed">
-                  <strong>Metformin 500mg</strong> has only 4 tablets remaining in your current supply.
+                  <strong>Metformin 500mg</strong> has only 4 tablets remaining in your current
+                  supply.
                 </p>
                 <button
                   onClick={() => alert('Refill request dispatched to City Health Pharmacy!')}
@@ -397,7 +481,9 @@ export function DashboardPage() {
                   />
                   <div>
                     <h3 className="text-xs font-bold text-slate-900">Dr. Oliver Mitchell</h3>
-                    <p className="text-[10px] text-emerald-600 font-semibold">Lead Caregiver · Online</p>
+                    <p className="text-[10px] text-emerald-600 font-semibold">
+                      Lead Caregiver · Online
+                    </p>
                   </div>
                 </div>
 
@@ -416,7 +502,9 @@ export function DashboardPage() {
                 {chatMessages.map((msg) => (
                   <div
                     key={msg.id}
-                    className={msg.sender === 'patient' ? 'care-bubble-patient' : 'care-bubble-doctor'}
+                    className={
+                      msg.sender === 'patient' ? 'care-bubble-patient' : 'care-bubble-doctor'
+                    }
                   >
                     {msg.text}
                   </div>
@@ -431,7 +519,10 @@ export function DashboardPage() {
                   onChange={(e) => setInputMsg(e.target.value)}
                   className="care-chat-input"
                 />
-                <button type="submit" className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transition shrink-0">
+                <button
+                  type="submit"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transition shrink-0"
+                >
                   <Send className="h-3.5 w-3.5" />
                 </button>
               </form>

@@ -34,7 +34,9 @@ function PlaceholderPage({ title }) {
       <div className="flex flex-col gap-4">
         <div>
           <h1 className="text-2xl font-black text-slate-900">{title}</h1>
-          <p className="text-xs text-slate-500 mt-1">Clinical module integration active and operational.</p>
+          <p className="text-xs text-slate-500 mt-1">
+            Clinical module integration active and operational.
+          </p>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-xs">
@@ -43,7 +45,8 @@ function PlaceholderPage({ title }) {
           </div>
           <h2 className="text-base font-bold text-slate-900">{title}</h2>
           <p className="text-xs text-slate-500 max-w-md mx-auto mt-1">
-            All systems normal. Push alerts, caregiver notifications, and compliance records are synced securely.
+            All systems normal. Push alerts, caregiver notifications, and compliance records are
+            synced securely.
           </p>
         </div>
       </div>

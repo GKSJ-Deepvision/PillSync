@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { medicationApi } from '../../../api/medications';
 import { Layout } from '../../../components/layout';
-import {  Alert } from '../../../components/common';
+import { Alert } from '../../../components/common';
 import { ArrowLeft, Save } from 'lucide-react';
 import './MedicationFormPage.css';
 
@@ -227,7 +227,9 @@ export function MedicationFormPage() {
               </div>
 
               <div className="med-form-full">
-                <label className="med-form-label">Daily Dose Schedule (comma-separated 24h or 12h times)</label>
+                <label className="med-form-label">
+                  Daily Dose Schedule (comma-separated 24h or 12h times)
+                </label>
                 <input
                   type="text"
                   name="schedule"

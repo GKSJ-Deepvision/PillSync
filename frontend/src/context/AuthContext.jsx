@@ -97,60 +97,75 @@ export function AuthProvider({ children }) {
 
   const forgotPassword = useCallback((email) => authApi.forgotPassword(email), []);
 
-  const resetPassword = useCallback((token, newPassword) => authApi.resetPassword(token, newPassword), []);
+  const resetPassword = useCallback(
+    (token, newPassword) => authApi.resetPassword(token, newPassword),
+    []
+  );
 
-  const switchRole = useCallback((role) => {
-    let updatedUser = { ...user };
-    if (role === 'patient') {
-      updatedUser = {
-        id: 'u-patient-1',
-        email: 'patient@example.com',
-        name: 'Ibrahim Kadri',
-        role: 'patient',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-      };
-    } else if (role === 'caregiver') {
-      updatedUser = {
-        id: 'u-caregiver-1',
-        email: 'caregiver@example.com',
-        name: 'Dr. Oliver Mitchell',
-        role: 'caregiver',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
-      };
-    } else if (role === 'admin') {
-      updatedUser = {
-        id: 'u-admin-1',
-        email: 'admin@example.com',
-        name: 'Sarah Jenkins',
-        role: 'admin',
-        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80',
-      };
-    }
+  const switchRole = useCallback(
+    (role) => {
+      let updatedUser = { ...user };
+      if (role === 'patient') {
+        updatedUser = {
+          id: 'u-patient-1',
+          email: 'patient@example.com',
+          name: 'Ibrahim Kadri',
+          role: 'patient',
+          avatar:
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+        };
+      } else if (role === 'caregiver') {
+        updatedUser = {
+          id: 'u-caregiver-1',
+          email: 'caregiver@example.com',
+          name: 'Dr. Oliver Mitchell',
+          role: 'caregiver',
+          avatar:
+            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+        };
+      } else if (role === 'admin') {
+        updatedUser = {
+          id: 'u-admin-1',
+          email: 'admin@example.com',
+          name: 'Sarah Jenkins',
+          role: 'admin',
+          avatar:
+            'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80',
+        };
+      }
 
-    const newToken = generateJWT({
-      sub: updatedUser.id,
-      id: updatedUser.id,
-      email: updatedUser.email,
-      name: updatedUser.name,
-      role: updatedUser.role,
-    }, 86400);
+      const newToken = generateJWT(
+        {
+          sub: updatedUser.id,
+          id: updatedUser.id,
+          email: updatedUser.email,
+          name: updatedUser.name,
+          role: updatedUser.role,
+        },
+        86400
+      );
 
-    localStorage.setItem('accessToken', newToken);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
-    setUser(updatedUser);
-  }, [user]);
+      localStorage.setItem('accessToken', newToken);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+    },
+    [user]
+  );
 
-  const value = useMemo(() => ({
-    user,
-    loading,
-    isAuthenticated: Boolean(user),
-    login,
-    register,
-    logout,
-    forgotPassword,
-    resetPassword,
-    switchRole,
-  }), [user, loading, login, register, logout, forgotPassword, resetPassword, switchRole]);
+  const value = useMemo(
+    () => ({
+      user,
+      loading,
+      isAuthenticated: Boolean(user),
+      login,
+      register,
+      logout,
+      forgotPassword,
+      resetPassword,
+      switchRole,
+    }),
+    [user, loading, login, register, logout, forgotPassword, resetPassword, switchRole]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

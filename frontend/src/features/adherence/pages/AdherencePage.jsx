@@ -10,21 +10,18 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  
   ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
-  
- 
 } from 'recharts';
-import { TrendingUp,  Flame, ShieldCheck } from 'lucide-react';
+import { TrendingUp, Flame, ShieldCheck } from 'lucide-react';
 import './AdherencePage.css';
 
 export function AdherencePage() {
   const [summary, setSummary] = useState(null);
   const [weeklyData, setWeeklyData] = useState([]);
-  const [ setMonthlyData] = useState([]);
+  const [setMonthlyData] = useState([]);
   const [medicationHistory, setMedicationHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -85,7 +82,8 @@ export function AdherencePage() {
           <div>
             <h1 className="adherence-title">Adherence & Compliance Dashboard</h1>
             <p className="adherence-subtitle">
-              Longitudinal tracking of medication intake consistency, streaks, and clinical adherence
+              Longitudinal tracking of medication intake consistency, streaks, and clinical
+              adherence
             </p>
           </div>
 
@@ -97,15 +95,15 @@ export function AdherencePage() {
           </div>
         </div>
 
-        {error && (
-          <Alert type="danger" message={error} onClose={() => setError('')} />
-        )}
+        {error && <Alert type="danger" message={error} onClose={() => setError('')} />}
 
         {/* Summary Stat KPI Cards */}
         {summary && (
           <div className="adherence-kpi-grid">
             <div className="adherence-kpi-card">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Overall Adherence</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Overall Adherence
+              </p>
               <div className="flex items-baseline gap-2 mt-1">
                 <p className="text-3xl font-black text-indigo-600">{summary.overallAdherence}%</p>
                 <span className="inline-flex items-center text-xs font-bold text-emerald-600">
@@ -116,19 +114,29 @@ export function AdherencePage() {
             </div>
 
             <div className="adherence-kpi-card">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Doses Taken</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Doses Taken
+              </p>
               <p className="text-3xl font-black text-emerald-600 mt-1">{summary.takenDoses}</p>
-              <p className="text-[10px] text-slate-500 mt-1">out of {summary.totalDoses} scheduled</p>
+              <p className="text-[10px] text-slate-500 mt-1">
+                out of {summary.totalDoses} scheduled
+              </p>
             </div>
 
             <div className="adherence-kpi-card">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Doses Missed</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Doses Missed
+              </p>
               <p className="text-3xl font-black text-rose-600 mt-1">{summary.missedDoses}</p>
-              <p className="text-[10px] text-slate-500 mt-1">out of {summary.totalDoses} scheduled</p>
+              <p className="text-[10px] text-slate-500 mt-1">
+                out of {summary.totalDoses} scheduled
+              </p>
             </div>
 
             <div className="adherence-kpi-card">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Current Streak</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Current Streak
+              </p>
               <div className="flex items-baseline gap-2 mt-1">
                 <p className="text-3xl font-black text-amber-500">{summary.streak} Days</p>
                 <Flame className="h-4 w-4 text-amber-500" />
@@ -145,7 +153,9 @@ export function AdherencePage() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="adherence-panel-title">Weekly Adherence Rate</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">Daily performance breakdown vs target</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Daily performance breakdown vs target
+                  </p>
                 </div>
               </div>
 
@@ -153,8 +163,18 @@ export function AdherencePage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={weeklyData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }} />
-                    <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11 }} />
+                    <XAxis
+                      dataKey="day"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }}
+                    />
+                    <YAxis
+                      domain={[0, 100]}
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#94a3b8', fontSize: 11 }}
+                    />
                     <Tooltip
                       formatter={(val) => [`${val}%`, 'Adherence']}
                       contentStyle={{
@@ -200,7 +220,10 @@ export function AdherencePage() {
               {adherenceData.map((item) => (
                 <div key={item.name} className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+                    <span
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{ backgroundColor: item.color }}
+                    />
                     <span className="font-semibold text-slate-600">{item.name} Doses</span>
                   </div>
                   <span className="font-bold text-slate-900">{item.value}</span>
@@ -214,7 +237,9 @@ export function AdherencePage() {
         {medicationHistory.length > 0 && (
           <div className="adherence-panel">
             <h2 className="adherence-panel-title mb-1">Adherence by Prescribed Medication</h2>
-            <p className="text-xs text-slate-500 mb-4">Compliance breakdown per active prescription regimen</p>
+            <p className="text-xs text-slate-500 mb-4">
+              Compliance breakdown per active prescription regimen
+            </p>
 
             <div className="overflow-x-auto">
               <table className="adherence-table">

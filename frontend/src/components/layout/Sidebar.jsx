@@ -77,9 +77,7 @@ export function Sidebar() {
                 key={item.href}
                 to={item.href}
                 className={`sidebar-nav-item ${
-                  isActive
-                    ? 'sidebar-nav-item-active'
-                    : 'sidebar-nav-item-inactive'
+                  isActive ? 'sidebar-nav-item-active' : 'sidebar-nav-item-inactive'
                 }`}
               >
                 <Icon
@@ -110,9 +108,7 @@ export function Sidebar() {
             <button
               key={role}
               onClick={() => switchRole?.(role)}
-              className={`sidebar-role-btn ${
-                userRole === role ? 'sidebar-role-btn-active' : ''
-              }`}
+              className={`sidebar-role-btn ${userRole === role ? 'sidebar-role-btn-active' : ''}`}
               title={`Switch view to ${role}`}
             >
               {role}

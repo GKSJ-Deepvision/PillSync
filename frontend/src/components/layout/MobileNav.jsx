@@ -20,7 +20,9 @@ export function MobileNav() {
   const { user } = useAuth();
   const location = useLocation();
 
-  const filteredNav = MOBILE_NAVIGATION.filter((item) => item.roles.includes(user?.role || 'patient'));
+  const filteredNav = MOBILE_NAVIGATION.filter((item) =>
+    item.roles.includes(user?.role || 'patient')
+  );
 
   return (
     <nav className="mobile-nav-bar">

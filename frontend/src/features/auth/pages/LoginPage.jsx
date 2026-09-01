@@ -22,7 +22,7 @@ import './LoginPage.css';
 export function LoginPage() {
   const navigate = useNavigate();
   const { login, error, setError, isAuthenticating } = useAuth();
-  
+
   // Clean empty inputs by default (no hardcoded prefill)
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [selectedRole, setSelectedRole] = useState('patient');
@@ -88,9 +88,7 @@ export function LoginPage() {
               <Sparkles className="h-3.5 w-3.5" />
               Role-Based HIPAA Platform
             </div>
-            <h2 className="login-hero-headline">
-              Medication care that feels easy and reliable.
-            </h2>
+            <h2 className="login-hero-headline">Medication care that feels easy and reliable.</h2>
             <p className="login-hero-description">
               Comprehensive role-based access for Patients, Caregivers, and Clinical Administrators.
             </p>
@@ -101,19 +99,25 @@ export function LoginPage() {
               <div className="login-hero-feature-icon">
                 <CheckCircle2 className="h-4 w-4" />
               </div>
-              <span className="login-hero-feature-text">Patient medication schedule & dose verification</span>
+              <span className="login-hero-feature-text">
+                Patient medication schedule & dose verification
+              </span>
             </div>
             <div className="login-hero-feature-item">
               <div className="login-hero-feature-icon">
                 <Activity className="h-4 w-4" />
               </div>
-              <span className="login-hero-feature-text">Caregiver cohort adherence monitoring & nudges</span>
+              <span className="login-hero-feature-text">
+                Caregiver cohort adherence monitoring & nudges
+              </span>
             </div>
             <div className="login-hero-feature-item">
               <div className="login-hero-feature-icon">
                 <HeartPulse className="h-4 w-4" />
               </div>
-              <span className="login-hero-feature-text">Admin platform metrics & compliance audit logs</span>
+              <span className="login-hero-feature-text">
+                Admin platform metrics & compliance audit logs
+              </span>
             </div>
           </div>
         </div>
@@ -159,12 +163,7 @@ export function LoginPage() {
           </div>
 
           {error && (
-            <Alert
-              type="danger"
-              message={error}
-              onClose={() => setError(null)}
-              className="mb-4"
-            />
+            <Alert type="danger" message={error} onClose={() => setError(null)} className="mb-4" />
           )}
 
           <form onSubmit={handleSubmit} className="login-form-body">
@@ -224,16 +223,14 @@ export function LoginPage() {
             </div>
 
             {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isAuthenticating}
-              className="login-submit-btn"
-            >
+            <button type="submit" disabled={isAuthenticating} className="login-submit-btn">
               {isAuthenticating ? (
                 <span>Authenticating with JWT...</span>
               ) : (
                 <>
-                  <span>Sign In as {selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}</span>
+                  <span>
+                    Sign In as {selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}
+                  </span>
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}

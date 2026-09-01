@@ -139,7 +139,10 @@ export function MedicationsPage() {
         ) : (
           <div className="meds-grid">
             {filteredMeds.map((medication) => {
-              const stockPercent = Math.min(100, Math.round(((medication.quantity || 10) / 30) * 100));
+              const stockPercent = Math.min(
+                100,
+                Math.round(((medication.quantity || 10) / 30) * 100)
+              );
               const isLowStock = stockPercent <= 25;
 
               return (
