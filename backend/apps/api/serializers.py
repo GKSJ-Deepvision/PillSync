@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
 from apps.accounts.models import User
+from apps.medicines.models import Medicine
+from apps.profiles.models import Profile
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -24,8 +26,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         return user
 
-from apps.profiles.models import Profile
-
 
 class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source="user.username", read_only=True)
@@ -43,8 +43,6 @@ class ProfileSerializer(serializers.ModelSerializer):
             "emergency_contact_name",
             "emergency_contact_phone",
         ]
-
-from apps.medicines.models import Medicine
 
 
 class MedicineSerializer(serializers.ModelSerializer):
@@ -65,4 +63,4 @@ class MedicineSerializer(serializers.ModelSerializer):
             "id",
             "created_at",
             "updated_at",
-        ]	
+        ]

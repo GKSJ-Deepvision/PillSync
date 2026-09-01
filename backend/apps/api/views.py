@@ -66,7 +66,7 @@ class MeView(APIView):
             "email": request.user.email,
             "role": request.user.role,
         })
-        
+
 class ProfileView(APIView):
     def get(self, request):
         profile = Profile.objects.get(user=request.user)
@@ -90,7 +90,7 @@ class ProfileView(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST,
         )
-        
+
 class MedicineListCreateView(APIView):
     def get(self, request):
         medicines = Medicine.objects.filter(
