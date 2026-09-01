@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { authApi } from '../api/auth';
 import { AuthContext } from './AuthContextValue';
 import { decodeJWT, isTokenExpired, generateJWT } from '../utils/jwt';
@@ -63,7 +63,7 @@ export function AuthProvider({ children }) {
     }
   }, [logout]);
 
-  const login = async (email, password, role = null) => {
+  const login = useCallback(async (email, password, role = null) => {
     setLoading(true);
     try {
       const data = await authApi.login(email, password, role);
@@ -77,9 +77,9 @@ export function AuthProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const register = async (data) => {
+  const register = useCallback(async (data) => {
     setLoading(true);
     try {
       const result = await authApi.register(data);
@@ -93,17 +93,13 @@ export function AuthProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const forgotPassword = async (email) => {
-    return authApi.forgotPassword(email);
-  };
+  const forgotPassword = useCallback((email) => authApi.forgotPassword(email), []);
 
-  const resetPassword = async (token, newPassword) => {
-    return authApi.resetPassword(token, newPassword);
-  };
+  const resetPassword = useCallback((token, newPassword) => authApi.resetPassword(token, newPassword), []);
 
-  const switchRole = (role) => {
+  const switchRole = useCallback((role) => {
     let updatedUser = { ...user };
     if (role === 'patient') {
       updatedUser = {
@@ -142,9 +138,9 @@ export function AuthProvider({ children }) {
     localStorage.setItem('accessToken', newToken);
     localStorage.setItem('user', JSON.stringify(updatedUser));
     setUser(updatedUser);
-  };
+  }, [user]);
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     loading,
     isAuthenticated: Boolean(user),
@@ -154,7 +150,7 @@ export function AuthProvider({ children }) {
     forgotPassword,
     resetPassword,
     switchRole,
-  };
+  }), [user, loading, login, register, logout, forgotPassword, resetPassword, switchRole]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

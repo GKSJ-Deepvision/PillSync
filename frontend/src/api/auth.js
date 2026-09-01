@@ -6,26 +6,20 @@ const INITIAL_USERS = [
   {
     id: 'u-patient-1',
     email: 'patient@example.com',
-    password: 'password',
-    name: 'swathi',
+    name: 'Ibrahim Kadri',
     role: 'patient',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
   },
   {
     id: 'u-caregiver-1',
     email: 'caregiver@example.com',
-    password: 'password',
     name: 'Dr. Oliver Mitchell',
     role: 'caregiver',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
   },
   {
     id: 'u-admin-1',
     email: 'admin@example.com',
-    password: 'password',
     name: 'Sarah Jenkins',
     role: 'admin',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80',
   },
 ];
 
