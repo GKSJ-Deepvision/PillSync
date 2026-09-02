@@ -1,40 +1,54 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { HeartPulse, Mail, Lock, ArrowRight, ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import {
+  HeartPulse,
+  Mail,
+  Lock,
+  ArrowRight,
+  ShieldCheck,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login, loginWithApi } = useAuth();
-  const [email, setEmail] = useState('alex.patient@pillsync.com');
-  const [password, setPassword] = useState('password123');
-  const [selectedRole, setSelectedRole] = useState('patient');
+  const [email, setEmail] = useState("alex.patient@pillsync.com");
+  const [password, setPassword] = useState("password123");
+  const [selectedRole, setSelectedRole] = useState("patient");
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMsg('');
+    setErrorMsg("");
     setLoading(true);
 
     try {
       if (loginWithApi) {
         await loginWithApi(email, password);
-        navigate('/');
+        navigate("/");
       } else {
         login({
-          id: 'usr-101',
-          name: selectedRole === 'caregiver' ? 'Dr. Sarah Jenkins' : selectedRole === 'admin' ? 'System Administrator' : 'Alex Morgan',
+          id: "usr-101",
+          name:
+            selectedRole === "caregiver"
+              ? "Dr. Sarah Jenkins"
+              : selectedRole === "admin"
+                ? "System Administrator"
+                : "Alex Morgan",
           email: email,
           role: selectedRole,
-          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+          avatar:
+            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
         });
-        navigate('/');
+        navigate("/");
       }
     } catch (err) {
-      console.warn('API error, executing demo login fallback:', err.message);
+      console.warn("API error, executing demo login fallback:", err.message);
       // If API fails or backend error, display error message to user
-      setErrorMsg(err.message || 'Authentication failed');
+      setErrorMsg(err.message || "Authentication failed");
     } finally {
       setLoading(false);
     }
@@ -42,13 +56,11 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-slate-950 to-brand-950 text-white relative overflow-hidden">
-      
       {/* Subtle background glow circles */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-600/20 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="w-full max-w-md rounded-3xl glass-card border border-white/10 p-8 shadow-2xl relative z-10">
-        
         {/* Brand Logo */}
         <div className="flex flex-col items-center text-center mb-6">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center shadow-glow mb-3">
@@ -77,9 +89,9 @@ export default function LoginPage() {
           </label>
           <div className="grid grid-cols-3 gap-2 p-1 bg-slate-900/80 rounded-2xl border border-white/10 text-xs">
             {[
-              { role: 'patient', email: 'alex.patient@pillsync.com' },
-              { role: 'caregiver', email: 'sarah.caregiver@pillsync.com' },
-              { role: 'admin', email: 'admin@pillsync.com' },
+              { role: "patient", email: "alex.patient@pillsync.com" },
+              { role: "caregiver", email: "sarah.caregiver@pillsync.com" },
+              { role: "admin", email: "admin@pillsync.com" },
             ].map((item) => (
               <button
                 key={item.role}
@@ -87,13 +99,13 @@ export default function LoginPage() {
                 onClick={() => {
                   setSelectedRole(item.role);
                   setEmail(item.email);
-                  setPassword('password123');
-                  setErrorMsg('');
+                  setPassword("password123");
+                  setErrorMsg("");
                 }}
                 className={`py-2 rounded-xl capitalize font-semibold transition-all ${
                   selectedRole === item.role
-                    ? 'bg-brand-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-white'
+                    ? "bg-brand-600 text-white shadow-md"
+                    : "text-slate-400 hover:text-white"
                 }`}
               >
                 {item.role}
@@ -105,7 +117,9 @@ export default function LoginPage() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">
+              Email Address
+            </label>
             <div className="relative">
               <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
               <input
@@ -119,7 +133,9 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">
+              Password
+            </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
               <input
@@ -149,14 +165,16 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-4 text-center text-xs text-slate-400">
-          Need an account? <Link to="/register" className="text-brand-400 font-bold underline">Create Account</Link>
+          Need an account?{" "}
+          <Link to="/register" className="text-brand-400 font-bold underline">
+            Create Account
+          </Link>
         </p>
 
         <div className="mt-6 pt-4 border-t border-white/10 text-center text-xs text-slate-400 flex items-center justify-center gap-1.5">
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
           <span>Secured with Django REST Framework & JWT</span>
         </div>
-
       </div>
     </div>
   );

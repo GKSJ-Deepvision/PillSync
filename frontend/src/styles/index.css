@@ -13,7 +13,7 @@
   }
 
   body {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
     background: var(--color-bg-gradient);
     min-height: 100vh;
   }
@@ -39,8 +39,15 @@
   }
 
   @keyframes pulse-subtle {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.92; transform: scale(1.01); }
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.92;
+      transform: scale(1.01);
+    }
   }
 }
 

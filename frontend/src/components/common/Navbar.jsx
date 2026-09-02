@@ -1,7 +1,16 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
-import { Sun, Moon, Bell, Shield, User, HeartPulse, LogOut, Menu, ChevronDown } from 'lucide-react';
+import React, { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
+import {
+  Sun,
+  Moon,
+  Bell,
+  Shield,
+  HeartPulse,
+  LogOut,
+  Menu,
+  ChevronDown,
+} from "lucide-react";
 
 export default function Navbar({ toggleMobileSidebar }) {
   const { user, logout, switchRole } = useAuth();
@@ -10,15 +19,29 @@ export default function Navbar({ toggleMobileSidebar }) {
   const [showNotifications, setShowNotifications] = useState(false);
 
   const notifications = [
-    { id: 1, text: 'Refill Warning: Metformin finishes in 4 days!', time: '10m ago', unread: true },
-    { id: 2, text: 'Dose Taken: Atorvastatin marked as taken at 08:00 AM', time: '1h ago', unread: false },
-    { id: 3, text: 'Caregiver Alert: Missed dose logged for Morning Schedule', time: 'Yesterday', unread: false },
+    {
+      id: 1,
+      text: "Refill Warning: Metformin finishes in 4 days!",
+      time: "10m ago",
+      unread: true,
+    },
+    {
+      id: 2,
+      text: "Dose Taken: Atorvastatin marked as taken at 08:00 AM",
+      time: "1h ago",
+      unread: false,
+    },
+    {
+      id: 3,
+      text: "Caregiver Alert: Missed dose logged for Morning Schedule",
+      time: "Yesterday",
+      unread: false,
+    },
   ];
 
   return (
     <header className="sticky top-0 z-30 w-full glass-card border-b border-slate-200/80 dark:border-slate-800/80 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        
         {/* Left Side: Mobile Menu Button & Brand */}
         <div className="flex items-center gap-3">
           <button
@@ -27,7 +50,7 @@ export default function Navbar({ toggleMobileSidebar }) {
           >
             <Menu className="w-5 h-5" />
           </button>
-          
+
           <div className="flex items-center gap-2.5 cursor-pointer select-none">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-400 flex items-center justify-center shadow-glow text-white font-bold">
               <HeartPulse className="w-5 h-5" />
@@ -45,35 +68,34 @@ export default function Navbar({ toggleMobileSidebar }) {
 
         {/* Right Side: Role Selector, Notifications, Theme Toggle & Profile */}
         <div className="flex items-center gap-2 sm:gap-4">
-          
           {/* Role Switcher Pill (Great for demonstrating Patient / Caregiver / Admin view) */}
           <div className="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-full border border-slate-200 dark:border-slate-700 text-xs">
             <button
-              onClick={() => switchRole('patient')}
+              onClick={() => switchRole("patient")}
               className={`px-3 py-1 rounded-full font-medium transition-all ${
-                user?.role === 'patient'
-                  ? 'bg-brand-600 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                user?.role === "patient"
+                  ? "bg-brand-600 text-white shadow-sm"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               Patient
             </button>
             <button
-              onClick={() => switchRole('caregiver')}
+              onClick={() => switchRole("caregiver")}
               className={`px-3 py-1 rounded-full font-medium transition-all ${
-                user?.role === 'caregiver'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                user?.role === "caregiver"
+                  ? "bg-emerald-600 text-white shadow-sm"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               Caregiver
             </button>
             <button
-              onClick={() => switchRole('admin')}
+              onClick={() => switchRole("admin")}
               className={`px-3 py-1 rounded-full font-medium transition-all ${
-                user?.role === 'admin'
-                  ? 'bg-purple-600 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                user?.role === "admin"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               Admin
@@ -86,7 +108,11 @@ export default function Navbar({ toggleMobileSidebar }) {
             className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             title="Toggle Dark / Light Mode"
           >
-            {darkMode ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-slate-600" />}
+            {darkMode ? (
+              <Sun className="w-5 h-5 text-amber-400" />
+            ) : (
+              <Moon className="w-5 h-5 text-slate-600" />
+            )}
           </button>
 
           {/* Notification Bell */}
@@ -103,14 +129,25 @@ export default function Navbar({ toggleMobileSidebar }) {
             {showNotifications && (
               <div className="absolute right-0 mt-2 w-80 rounded-2xl glass-card shadow-2xl border border-slate-200 dark:border-slate-800 py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
-                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">Smart Alerts</h4>
-                  <span className="text-xs text-brand-600 dark:text-brand-400 font-semibold cursor-pointer">Mark all as read</span>
+                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                    Smart Alerts
+                  </h4>
+                  <span className="text-xs text-brand-600 dark:text-brand-400 font-semibold cursor-pointer">
+                    Mark all as read
+                  </span>
                 </div>
                 <div className="divide-y divide-slate-100 dark:divide-slate-800/50 max-h-64 overflow-y-auto">
                   {notifications.map((n) => (
-                    <div key={n.id} className="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer">
-                      <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">{n.text}</p>
-                      <span className="text-[10px] text-slate-400 mt-1 block">{n.time}</span>
+                    <div
+                      key={n.id}
+                      className="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
+                    >
+                      <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+                        {n.text}
+                      </p>
+                      <span className="text-[10px] text-slate-400 mt-1 block">
+                        {n.time}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -125,13 +162,20 @@ export default function Navbar({ toggleMobileSidebar }) {
               className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
               <img
-                src={user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
+                src={
+                  user?.avatar ||
+                  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100"
+                }
                 alt={user?.name}
                 className="w-8 h-8 rounded-lg object-cover ring-2 ring-brand-500/30"
               />
               <div className="hidden lg:block text-left">
-                <p className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight">{user?.name}</p>
-                <p className="text-[10px] capitalize text-slate-500 dark:text-slate-400 font-medium">{user?.role}</p>
+                <p className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight">
+                  {user?.name}
+                </p>
+                <p className="text-[10px] capitalize text-slate-500 dark:text-slate-400 font-medium">
+                  {user?.role}
+                </p>
               </div>
               <ChevronDown className="w-4 h-4 text-slate-400 hidden sm:block" />
             </button>
@@ -140,14 +184,18 @@ export default function Navbar({ toggleMobileSidebar }) {
             {showUserMenu && (
               <div className="absolute right-0 mt-2 w-56 rounded-2xl glass-card shadow-2xl border border-slate-200 dark:border-slate-800 py-2 z-50">
                 <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800/80">
-                  <p className="text-xs font-bold text-slate-900 dark:text-white">{user?.name}</p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{user?.email}</p>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">
+                    {user?.name}
+                  </p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                    {user?.email}
+                  </p>
                   <div className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 border border-brand-200 dark:border-brand-800">
                     <Shield className="w-3 h-3" />
                     Role: <span className="capitalize">{user?.role}</span>
                   </div>
                 </div>
-                
+
                 <div className="py-1">
                   <button
                     onClick={logout}
@@ -160,9 +208,7 @@ export default function Navbar({ toggleMobileSidebar }) {
               </div>
             )}
           </div>
-
         </div>
-
       </div>
     </header>
   );

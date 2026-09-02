@@ -1,22 +1,24 @@
-import React, { useState } from 'react';
-import Modal from '../common/Modal';
+import React, { useState } from "react";
+import Modal from "../common/Modal";
 
 export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
   const [formData, setFormData] = useState({
-    name: '',
-    dosage: '1 Tablet',
+    name: "",
+    dosage: "1 Tablet",
     stock: 60,
-    frequency: '2 times daily',
-    diseaseCategory: 'Diabetes',
-    timesOfDay: ['Morning', 'Night'],
+    frequency: "2 times daily",
+    diseaseCategory: "Diabetes",
+    timesOfDay: ["Morning", "Night"],
     refillThreshold: 10,
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.name.trim()) return;
-    
-    const stockDays = Math.floor(formData.stock / (formData.timesOfDay.length || 1));
+
+    const stockDays = Math.floor(
+      formData.stock / (formData.timesOfDay.length || 1),
+    );
     onAddMedicine({
       ...formData,
       id: `med-${Date.now()}`,
@@ -60,7 +62,9 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
               type="text"
               placeholder="e.g. 500 mg"
               value={formData.dosage}
-              onChange={(e) => setFormData({ ...formData, dosage: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, dosage: e.target.value })
+              }
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
               required
             />
@@ -73,7 +77,12 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
             <input
               type="number"
               value={formData.stock}
-              onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  stock: parseInt(e.target.value) || 0,
+                })
+              }
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
               min="1"
               required
@@ -87,7 +96,9 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
           </label>
           <select
             value={formData.diseaseCategory}
-            onChange={(e) => setFormData({ ...formData, diseaseCategory: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, diseaseCategory: e.target.value })
+            }
             className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
           >
             <option value="Diabetes">Diabetes</option>
@@ -104,13 +115,13 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
             Schedule Timing
           </label>
           <div className="flex items-center gap-3">
-            {['Morning', 'Afternoon', 'Night'].map((time) => (
+            {["Morning", "Afternoon", "Night"].map((time) => (
               <label
                 key={time}
                 className={`flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition-all ${
                   formData.timesOfDay.includes(time)
-                    ? 'bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-300 border-brand-300 dark:border-brand-700'
-                    : 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800'
+                    ? "bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-300 border-brand-300 dark:border-brand-700"
+                    : "bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800"
                 }`}
               >
                 <input

@@ -1,22 +1,35 @@
-import React from 'react';
-import { Pill, Clock, AlertTriangle, CheckCircle2, XCircle, Tag } from 'lucide-react';
+import React from "react";
+import {
+  Pill,
+  Clock,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Tag,
+} from "lucide-react";
 
 export default function MedicineCard({ medicine, onTake, onMiss }) {
   const isLowStock = medicine.stock <= medicine.refillThreshold;
 
   const diseaseColors = {
-    'Diabetes': 'bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
-    'Blood Pressure': 'bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800',
-    'Thyroid': 'bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800',
-    'Antibiotics': 'bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800',
-    'Vitamins': 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+    Diabetes:
+      "bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800",
+    "Blood Pressure":
+      "bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800",
+    Thyroid:
+      "bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800",
+    Antibiotics:
+      "bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+    Vitamins:
+      "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
   };
 
-  const tagStyle = diseaseColors[medicine.diseaseCategory] || 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300';
+  const tagStyle =
+    diseaseColors[medicine.diseaseCategory] ||
+    "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
 
   return (
     <div className="group p-5 rounded-3xl glass-card border border-slate-200/80 dark:border-slate-800/80 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
-      
       {/* Top Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -34,9 +47,11 @@ export default function MedicineCard({ medicine, onTake, onMiss }) {
         </div>
 
         {/* Disease Tag */}
-        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${tagStyle} flex items-center gap-1 shrink-0`}>
+        <span
+          className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${tagStyle} flex items-center gap-1 shrink-0`}
+        >
           <Tag className="w-3 h-3" />
-          {medicine.diseaseCategory || 'General'}
+          {medicine.diseaseCategory || "General"}
         </span>
       </div>
 
@@ -44,12 +59,19 @@ export default function MedicineCard({ medicine, onTake, onMiss }) {
       <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 grid grid-cols-2 gap-2 text-xs">
         <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
           <Clock className="w-4 h-4 text-brand-500" />
-          <span>Timing: <strong className="text-slate-800 dark:text-slate-200">{medicine.timesOfDay.join(', ')}</strong></span>
+          <span>
+            Timing:{" "}
+            <strong className="text-slate-800 dark:text-slate-200">
+              {medicine.timesOfDay.join(", ")}
+            </strong>
+          </span>
         </div>
 
         <div className="flex items-center gap-2 justify-end">
           <span className="text-slate-500">Stock:</span>
-          <strong className={`font-bold ${isLowStock ? 'text-rose-600 dark:text-rose-400 animate-pulse' : 'text-slate-800 dark:text-slate-200'}`}>
+          <strong
+            className={`font-bold ${isLowStock ? "text-rose-600 dark:text-rose-400 animate-pulse" : "text-slate-800 dark:text-slate-200"}`}
+          >
             {medicine.stock} pills ({medicine.stockDays} days)
           </strong>
         </div>
@@ -81,7 +103,6 @@ export default function MedicineCard({ medicine, onTake, onMiss }) {
           Missed
         </button>
       </div>
-
     </div>
   );
 }

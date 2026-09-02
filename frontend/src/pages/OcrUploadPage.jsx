@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
-import { UploadCloud, ScanLine, Sparkles, CheckCircle2, FileText, ArrowRight, Loader2 } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  UploadCloud,
+  ScanLine,
+  Sparkles,
+  CheckCircle2,
+  ArrowRight,
+  Loader2,
+} from "lucide-react";
 
 export default function OcrUploadPage() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -20,20 +27,19 @@ export default function OcrUploadPage() {
     setTimeout(() => {
       setIsScanning(false);
       setOcrResult({
-        medicineName: 'Atorvastatin',
-        dosage: '20 mg',
+        medicineName: "Atorvastatin",
+        dosage: "20 mg",
         quantity: 30,
-        frequency: '1 tablet daily at night',
-        doctorName: 'Dr. Robert Vance, MD',
-        confidenceScore: '96.8%',
-        extractedDisease: 'Heart & Cholesterol Management',
+        frequency: "1 tablet daily at night",
+        doctorName: "Dr. Robert Vance, MD",
+        confidenceScore: "96.8%",
+        extractedDisease: "Heart & Cholesterol Management",
       });
     }, 2500);
   };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      
       {/* Page Title */}
       <div>
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-100 dark:bg-brand-950 text-xs font-bold text-brand-700 dark:text-brand-300 mb-2 border border-brand-200 dark:border-brand-800">
@@ -44,7 +50,8 @@ export default function OcrUploadPage() {
           Prescription Image OCR Extraction
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          Upload a handwritten or printed doctor prescription. Tesseract OCR & spaCy NLP will auto-extract medicine names, dosage, and frequency.
+          Upload a handwritten or printed doctor prescription. Tesseract OCR &
+          spaCy NLP will auto-extract medicine names, dosage, and frequency.
         </p>
       </div>
 
@@ -56,7 +63,9 @@ export default function OcrUploadPage() {
 
         <div>
           <h4 className="text-base font-bold text-slate-800 dark:text-slate-200">
-            {selectedFile ? selectedFile.name : 'Upload Doctor Prescription Image'}
+            {selectedFile
+              ? selectedFile.name
+              : "Upload Doctor Prescription Image"}
           </h4>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Supports PNG, JPG, JPEG or PDF files (Max 10MB)
@@ -118,29 +127,47 @@ export default function OcrUploadPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800">
-              <span className="text-slate-500 block font-semibold">Extracted Medicine</span>
-              <strong className="text-base text-slate-900 dark:text-white font-bold">{ocrResult.medicineName}</strong>
+              <span className="text-slate-500 block font-semibold">
+                Extracted Medicine
+              </span>
+              <strong className="text-base text-slate-900 dark:text-white font-bold">
+                {ocrResult.medicineName}
+              </strong>
             </div>
 
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800">
-              <span className="text-slate-500 block font-semibold">Dosage Strength</span>
-              <strong className="text-base text-slate-900 dark:text-white font-bold">{ocrResult.dosage}</strong>
+              <span className="text-slate-500 block font-semibold">
+                Dosage Strength
+              </span>
+              <strong className="text-base text-slate-900 dark:text-white font-bold">
+                {ocrResult.dosage}
+              </strong>
             </div>
 
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800">
-              <span className="text-slate-500 block font-semibold">Extracted Frequency</span>
-              <strong className="text-slate-800 dark:text-slate-200 font-semibold">{ocrResult.frequency}</strong>
+              <span className="text-slate-500 block font-semibold">
+                Extracted Frequency
+              </span>
+              <strong className="text-slate-800 dark:text-slate-200 font-semibold">
+                {ocrResult.frequency}
+              </strong>
             </div>
 
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800">
-              <span className="text-slate-500 block font-semibold">Inferred Category</span>
-              <strong className="text-slate-800 dark:text-slate-200 font-semibold">{ocrResult.extractedDisease}</strong>
+              <span className="text-slate-500 block font-semibold">
+                Inferred Category
+              </span>
+              <strong className="text-slate-800 dark:text-slate-200 font-semibold">
+                {ocrResult.extractedDisease}
+              </strong>
             </div>
           </div>
 
           <div className="pt-2 flex justify-end">
             <button
-              onClick={() => alert('Saved extracted medicine into active schedule!')}
+              onClick={() =>
+                alert("Saved extracted medicine into active schedule!")
+              }
               className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-md transition-all"
             >
               <span>Add to Active Schedules</span>
@@ -149,7 +176,6 @@ export default function OcrUploadPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

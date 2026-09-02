@@ -1,31 +1,88 @@
-import React, { useState } from 'react';
-import MedicineCard from '../components/medications/MedicineCard';
-import AddMedicineModal from '../components/medications/AddMedicineModal';
-import { Plus, Search, Filter } from 'lucide-react';
+import React, { useState } from "react";
+import MedicineCard from "../components/medications/MedicineCard";
+import AddMedicineModal from "../components/medications/AddMedicineModal";
+import { Plus, Search, Filter } from "lucide-react";
 
 const DEMO_MEDICINES = [
-  { id: '1', name: 'Metformin', dosage: '500 mg', stock: 8, totalStock: 60, frequency: '2 times daily', diseaseCategory: 'Diabetes', timesOfDay: ['Morning', 'Night'], stockDays: 4, refillThreshold: 10 },
-  { id: '2', name: 'Amlodipine', dosage: '5 mg', stock: 45, totalStock: 60, frequency: '1 time daily', diseaseCategory: 'Blood Pressure', timesOfDay: ['Morning'], stockDays: 45, refillThreshold: 10 },
-  { id: '3', name: 'Levothyroxine', dosage: '50 mcg', stock: 28, totalStock: 30, frequency: '1 time daily', diseaseCategory: 'Thyroid', timesOfDay: ['Morning'], stockDays: 28, refillThreshold: 7 },
-  { id: '4', name: 'Amoxicillin', dosage: '250 mg', stock: 12, totalStock: 20, frequency: '3 times daily', diseaseCategory: 'Antibiotics', timesOfDay: ['Morning', 'Afternoon', 'Night'], stockDays: 4, refillThreshold: 5 },
-  { id: '5', name: 'Vitamin D3', dosage: '1000 IU', stock: 50, totalStock: 60, frequency: '1 time daily', diseaseCategory: 'Vitamins', timesOfDay: ['Morning'], stockDays: 50, refillThreshold: 10 },
+  {
+    id: "1",
+    name: "Metformin",
+    dosage: "500 mg",
+    stock: 8,
+    totalStock: 60,
+    frequency: "2 times daily",
+    diseaseCategory: "Diabetes",
+    timesOfDay: ["Morning", "Night"],
+    stockDays: 4,
+    refillThreshold: 10,
+  },
+  {
+    id: "2",
+    name: "Amlodipine",
+    dosage: "5 mg",
+    stock: 45,
+    totalStock: 60,
+    frequency: "1 time daily",
+    diseaseCategory: "Blood Pressure",
+    timesOfDay: ["Morning"],
+    stockDays: 45,
+    refillThreshold: 10,
+  },
+  {
+    id: "3",
+    name: "Levothyroxine",
+    dosage: "50 mcg",
+    stock: 28,
+    totalStock: 30,
+    frequency: "1 time daily",
+    diseaseCategory: "Thyroid",
+    timesOfDay: ["Morning"],
+    stockDays: 28,
+    refillThreshold: 7,
+  },
+  {
+    id: "4",
+    name: "Amoxicillin",
+    dosage: "250 mg",
+    stock: 12,
+    totalStock: 20,
+    frequency: "3 times daily",
+    diseaseCategory: "Antibiotics",
+    timesOfDay: ["Morning", "Afternoon", "Night"],
+    stockDays: 4,
+    refillThreshold: 5,
+  },
+  {
+    id: "5",
+    name: "Vitamin D3",
+    dosage: "1000 IU",
+    stock: 50,
+    totalStock: 60,
+    frequency: "1 time daily",
+    diseaseCategory: "Vitamins",
+    timesOfDay: ["Morning"],
+    stockDays: 50,
+    refillThreshold: 10,
+  },
 ];
 
 export default function MedicationsPage() {
   const [medicines, setMedicines] = useState(DEMO_MEDICINES);
-  const [search, setSearch] = useState('');
-  const [selectedDisease, setSelectedDisease] = useState('All');
+  const [search, setSearch] = useState("");
+  const [selectedDisease, setSelectedDisease] = useState("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const filtered = medicines.filter((m) => {
-    const matchesSearch = m.name.toLowerCase().includes(search.toLowerCase()) || m.diseaseCategory.toLowerCase().includes(search.toLowerCase());
-    const matchesDisease = selectedDisease === 'All' || m.diseaseCategory === selectedDisease;
+    const matchesSearch =
+      m.name.toLowerCase().includes(search.toLowerCase()) ||
+      m.diseaseCategory.toLowerCase().includes(search.toLowerCase());
+    const matchesDisease =
+      selectedDisease === "All" || m.diseaseCategory === selectedDisease;
     return matchesSearch && matchesDisease;
   });
 
   return (
     <div className="space-y-6">
-      
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -48,7 +105,6 @@ export default function MedicationsPage() {
 
       {/* Search & Filters */}
       <div className="p-4 rounded-3xl glass-card border border-slate-200/80 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
-        
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
           <input
@@ -62,21 +118,27 @@ export default function MedicationsPage() {
 
         <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
           <Filter className="w-4 h-4 text-slate-400 shrink-0" />
-          {['All', 'Diabetes', 'Blood Pressure', 'Thyroid', 'Antibiotics', 'Vitamins'].map((cat) => (
+          {[
+            "All",
+            "Diabetes",
+            "Blood Pressure",
+            "Thyroid",
+            "Antibiotics",
+            "Vitamins",
+          ].map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedDisease(cat)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                 selectedDisease === cat
-                  ? 'bg-brand-600 text-white shadow-sm'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  ? "bg-brand-600 text-white shadow-sm"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               {cat}
             </button>
           ))}
         </div>
-
       </div>
 
       {/* Medicine Cards Grid */}
@@ -85,8 +147,14 @@ export default function MedicationsPage() {
           <MedicineCard
             key={med.id}
             medicine={med}
-            onTake={(id) => setMedicines((prev) => prev.map((m) => (m.id === id ? { ...m, stock: Math.max(0, m.stock - 1) } : m)))}
-            onMiss={() => alert('Missed dose logged.')}
+            onTake={(id) =>
+              setMedicines((prev) =>
+                prev.map((m) =>
+                  m.id === id ? { ...m, stock: Math.max(0, m.stock - 1) } : m,
+                ),
+              )
+            }
+            onMiss={() => alert("Missed dose logged.")}
           />
         ))}
       </div>
@@ -96,7 +164,6 @@ export default function MedicationsPage() {
         onClose={() => setIsModalOpen(false)}
         onAddMedicine={(newMed) => setMedicines([newMed, ...medicines])}
       />
-
     </div>
   );
 }
