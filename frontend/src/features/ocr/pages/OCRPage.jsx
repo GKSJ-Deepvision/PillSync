@@ -69,7 +69,14 @@ export function OCRPage() {
         <div className="ocr-layout">
           <div className="ocr-upload-panel">
             <label className="upload-box" htmlFor="ocr-file-input">
-              <input id="ocr-file-input" type="file" accept="image/*" ref={inputRef} hidden onChange={handleUpload} />
+              <input
+                id="ocr-file-input"
+                type="file"
+                accept="image/*"
+                ref={inputRef}
+                hidden
+                onChange={handleUpload}
+              />
               <UploadCloud className="h-9 w-9" />
               <h3>{selectedFile ? selectedFile.name : 'Upload medication image'}</h3>
               <p>PNG, JPG, or PDF prescription snapshots</p>
