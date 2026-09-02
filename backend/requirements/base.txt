@@ -35,3 +35,5 @@ psycopg[binary]==3.*
 # Utilities
 python-dotenv==1.*
 # pydantic==2.*
+
+pytest-django==4.*

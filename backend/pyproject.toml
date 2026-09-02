@@ -31,7 +31,8 @@ ignore = [
 [tool.pytest.ini_options]
 minversion = "7.0"
 testpaths = ["tests", "apps"]
-python_files = ["test_*.py", "*_test.py"]
+python_files = ["test_*.py", "*_test.py", "tests.py"]
+DJANGO_SETTINGS_MODULE = "config.settings.dev"
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-ra --strict-markers"
