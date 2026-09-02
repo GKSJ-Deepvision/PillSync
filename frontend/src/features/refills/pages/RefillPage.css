@@ -1,0 +1,237 @@
+.refill-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.refill-header {
+  background: linear-gradient(135deg, #eff6ff, #f8fafc);
+  border: 1px solid #e2e8f0;
+  border-radius: 1.5rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.refill-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #1e3a8a;
+  background: #dbeafe;
+  border: 1px solid #bfdbfe;
+  padding: 0.45rem 0.72rem;
+  border-radius: 999px;
+}
+
+.refill-header h1 {
+  margin: 0.75rem 0 0.4rem;
+  font-size: clamp(1.7rem, 2vw, 2.2rem);
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.refill-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.refill-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.refill-kpi-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.2rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.refill-kpi-card span {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  font-weight: 800;
+}
+
+.refill-kpi-card strong {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.refill-kpi-card small {
+  color: #64748b;
+  font-size: 0.7rem;
+}
+
+.refill-kpi-card.warning {
+  background: linear-gradient(135deg, #fff7ed, #ffffff);
+}
+
+.refill-kpi-card.success {
+  background: linear-gradient(135deg, #ecfdf5, #ffffff);
+}
+
+.refill-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.refill-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.2rem;
+  padding: 1rem;
+}
+
+.refill-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.refill-card h3 {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.refill-card p {
+  margin: 0.2rem 0 0;
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.risk-badge {
+  display: inline-flex;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.risk-high {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.risk-medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.risk-low {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.refill-progress-wrap {
+  margin-top: 1rem;
+}
+
+.refill-progress-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.45rem;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.refill-track {
+  height: 10px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.refill-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #6366f1, #14b8a6);
+}
+
+.refill-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  font-size: 0.72rem;
+}
+
+.status-pill,
+.refill-days {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.status-pill {
+  background: #eef2ff;
+  color: #4338ca;
+  border-radius: 999px;
+  padding: 0.35rem 0.6rem;
+  font-weight: 800;
+}
+
+.refill-days {
+  color: #64748b;
+}
+
+.refill-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.primary-btn,
+.secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 0;
+  border-radius: 0.8rem;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary-btn {
+  background: #312e81;
+  color: white;
+}
+
+.secondary-btn {
+  background: white;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+}
+
+@media (max-width: 640px) {
+  .refill-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .refill-footer,
+  .refill-actions,
+  .refill-card-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

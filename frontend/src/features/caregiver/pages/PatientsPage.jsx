@@ -3,8 +3,6 @@ import { useAuth } from '../../../context/useAuth';
 import { Layout } from '../../../components/layout';
 import { Badge } from '../../../components/common/Badge';
 import { Button } from '../../../components/common/Button';
-import { Input } from '../../../components/common/Input';
-import { Card } from '../../../components/common/Card';
 import {
   Search,
   Plus,
@@ -142,7 +140,7 @@ export function PatientsPage() {
         {/* Header */}
         <div className="patients-header">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="patients-title-row">
               <h1 className="patients-title">Assigned Patients Portal</h1>
               <Badge variant="primary" size="sm">
                 {patients.length} Monitored
@@ -171,70 +169,70 @@ export function PatientsPage() {
         </div>
 
         {/* Quick KPI Stats */}
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-          <Card className="p-4 rounded-2xl border border-slate-200">
-            <div className="flex items-center justify-between">
+        <div className="patients-kpi-grid">
+          <div className="patients-kpi-card">
+            <div className="patients-kpi-header">
               <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Cohort Adherence
-                </p>
-                <p className="text-2xl font-black text-indigo-700 mt-1">{avgAdherence}%</p>
+                <p className="patients-kpi-label">Cohort Adherence</p>
+                <p className="patients-kpi-value text-indigo-700">{avgAdherence}%</p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+              <div className="patients-kpi-icon-box icon-indigo">
                 <Activity className="h-5 w-5" />
               </div>
             </div>
-            <p className="text-xs text-emerald-600 font-semibold mt-2">
+            <p className="patients-kpi-subtext text-emerald-600">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
               +4.8% improvement this month
             </p>
-          </Card>
+          </div>
 
-          <Card className="p-4 rounded-2xl border border-slate-200">
-            <div className="flex items-center justify-between">
+          <div className="patients-kpi-card">
+            <div className="patients-kpi-header">
               <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Doses Taken Today
-                </p>
-                <p className="text-2xl font-black text-emerald-600 mt-1">18 / 22</p>
+                <p className="patients-kpi-label">Doses Taken Today</p>
+                <p className="patients-kpi-value text-emerald-600">18 / 22</p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+              <div className="patients-kpi-icon-box icon-emerald">
                 <CheckCircle2 className="h-5 w-5" />
               </div>
             </div>
-            <p className="text-xs text-slate-500 font-medium mt-2">4 upcoming evening doses</p>
-          </Card>
+            <p className="patients-kpi-subtext text-slate-500">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-400" />4 upcoming
+              evening doses
+            </p>
+          </div>
 
-          <Card className="p-4 rounded-2xl border border-slate-200">
-            <div className="flex items-center justify-between">
+          <div className="patients-kpi-card">
+            <div className="patients-kpi-header">
               <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Critical Risk Flag
-                </p>
-                <p className="text-2xl font-black text-rose-600 mt-1">{highRiskCount} Patients</p>
+                <p className="patients-kpi-label">Critical Risk Flag</p>
+                <p className="patients-kpi-value text-rose-600">{highRiskCount} Patients</p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
+              <div className="patients-kpi-icon-box icon-rose">
                 <AlertTriangle className="h-5 w-5" />
               </div>
             </div>
-            <p className="text-xs text-rose-600 font-semibold mt-2">
+            <p className="patients-kpi-subtext text-rose-600">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-rose-500" />
               Requires immediate dose follow-up
             </p>
-          </Card>
+          </div>
         </div>
 
-        {/* Filter and Search Bar */}
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div className="w-full sm:max-w-md">
-            <Input
-              icon={Search}
+        {/* Filter and Search Toolbar */}
+        <div className="patients-toolbar">
+          <div className="patients-search-wrapper">
+            <Search className="patients-search-icon" />
+            <input
+              type="text"
               placeholder="Search by patient name, diagnosis, or medication..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-white"
+              className="patients-search-input"
             />
           </div>
 
-          <div className="patients-filter-bar w-full sm:w-auto">
+          <div className="patients-filter-bar">
             {[
               { id: 'all', label: 'All Patients', count: patients.length },
               { id: 'high_risk', label: 'High Risk (<70%)', count: highRiskCount },
@@ -259,7 +257,7 @@ export function PatientsPage() {
                 }`}
               >
                 <span>{tab.label}</span>
-                <span className="ml-1 opacity-80 text-[10px]">({tab.count})</span>
+                <span className="opacity-80 text-[10px]">({tab.count})</span>
               </button>
             ))}
           </div>
@@ -297,17 +295,17 @@ export function PatientsPage() {
                 </div>
 
                 {/* Condition & Prescriptions Info */}
-                <div className="space-y-1.5 text-xs">
-                  <div className="flex items-center gap-1.5 text-slate-700 font-medium">
-                    <span className="font-bold text-slate-900">Diagnosis:</span>
+                <div className="patient-details-list">
+                  <div className="patient-detail-row">
+                    <span className="patient-detail-label">Diagnosis:</span>
                     <span>{patient.condition}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-slate-500">
-                    <Pill className="h-3.5 w-3.5 text-indigo-500" />
+                  <div className="patient-detail-row text-slate-500">
+                    <Pill className="h-3.5 w-3.5 text-indigo-500 shrink-0" />
                     <span>{patient.activePrescriptions} Active Prescriptions</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-slate-500">
-                    <Calendar className="h-3.5 w-3.5 text-amber-500" />
+                  <div className="patient-detail-row text-slate-500">
+                    <Calendar className="h-3.5 w-3.5 text-amber-500 shrink-0" />
                     <span>Next: {patient.nextDose}</span>
                   </div>
                 </div>
@@ -331,27 +329,24 @@ export function PatientsPage() {
                   <div className="patient-adherence-track">
                     <div
                       className={`patient-adherence-fill ${
-                        isHighRisk ? 'bg-rose-500' : isModerate ? 'bg-amber-500' : 'bg-emerald-500'
+                        isHighRisk ? 'fill-rose' : isModerate ? 'fill-amber' : 'fill-emerald'
                       }`}
                       style={{ width: patient.adherence + '%' }}
                     />
                   </div>
-                  <p className="text-[10px] text-slate-400 mt-1">Last log: {patient.lastTaken}</p>
+                  <p className="text-[10px] text-slate-400 mt-1.5">Last log: {patient.lastTaken}</p>
                 </div>
 
                 {/* Action Buttons */}
                 <div className="patient-actions-row">
-                  <button
-                    onClick={() => handleNudge(patient)}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 text-xs font-bold transition cursor-pointer border border-indigo-200/60"
-                  >
+                  <button onClick={() => handleNudge(patient)} className="patient-nudge-btn">
                     <Send className="h-3.5 w-3.5" />
                     <span>{nudgedPatientId === patient.id ? 'Nudge Sent! ✓' : 'Send Nudge'}</span>
                   </button>
 
                   <a
                     href={'tel:' + patient.phone}
-                    className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition"
+                    className="patient-action-icon-btn"
                     title={'Call ' + patient.name}
                   >
                     <Phone className="h-3.5 w-3.5" />
@@ -359,7 +354,7 @@ export function PatientsPage() {
 
                   <button
                     onClick={() => alert('Opening secure consultation chat with ' + patient.name)}
-                    className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition cursor-pointer"
+                    className="patient-action-icon-btn"
                     title="Send Direct Message"
                   >
                     <MessageSquare className="h-3.5 w-3.5" />

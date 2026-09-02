@@ -12,7 +12,6 @@ import {
   Phone,
   Send,
   Sparkles,
-  Users,
   AlertCircle,
   Plus,
 } from 'lucide-react';
@@ -118,7 +117,6 @@ const INITIAL_TASKS = [
 
 export function DashboardPage() {
   const { user } = useAuth();
-  const [selectedPatientIndex, setSelectedPatientIndex] = useState(0);
   const [doses, setDoses] = useState(INITIAL_DOSES);
   const [tasks, setTasks] = useState(INITIAL_TASKS);
   const [currentDateTime, setCurrentDateTime] = useState(() => new Date());
@@ -144,9 +142,8 @@ export function DashboardPage() {
     return () => clearInterval(timer);
   }, []);
 
-  const currentPatient = PATIENTS[selectedPatientIndex];
+  const currentPatient = PATIENTS[0];
   const userRole = user?.role || 'patient';
-  const isCaregiverOrAdmin = userRole === 'caregiver' || userRole === 'admin';
 
   const getDefaultName = () => {
     if (userRole === 'caregiver') return 'Dr. Oliver Mitchell';
@@ -213,40 +210,6 @@ export function DashboardPage() {
   return (
     <Layout>
       <div className="dashboard-root">
-        {/* Caregiver & Admin Patient Selector Bar */}
-        {isCaregiverOrAdmin && (
-          <div className="dashboard-patient-selector-bar">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
-                <Users className="h-4 w-4" />
-              </div>
-              <div>
-                <span className="text-xs font-bold text-indigo-950">Caregiver Oversight: </span>
-                <span className="text-xs font-medium text-slate-600">
-                  Monitoring cohort patient:
-                </span>
-              </div>
-              <select
-                value={selectedPatientIndex}
-                onChange={(e) => setSelectedPatientIndex(Number(e.target.value))}
-                className="rounded-xl border border-indigo-200 bg-white px-3 py-1 text-xs font-bold text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
-              >
-                {PATIENTS.map((p, idx) => (
-                  <option key={p.id} value={idx}>
-                    {p.name} · {p.condition} (Adherence: {p.adherence}%)
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="hidden sm:flex items-center gap-2">
-              <Badge variant="primary" size="xs">
-                Live Patient Feed
-              </Badge>
-            </div>
-          </div>
-        )}
-
         {/* 1. Header Banner */}
         <div className="dashboard-header-banner">
           <div>

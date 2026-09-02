@@ -26,35 +26,10 @@ import { AdherencePage } from '../features/adherence/pages/AdherencePage';
 import { PatientsPage } from '../features/caregiver/pages/PatientsPage';
 import { AnalyticsPage } from '../features/analytics/pages/AnalyticsPage';
 import { AdminUsersPage } from '../features/admin/pages/AdminUsersPage';
-
-import { Layout } from '../components/layout';
-
-// Placeholder pages for features
-function PlaceholderPage({ title }) {
-  return (
-    <Layout>
-      <div className="flex flex-col gap-4">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900">{title}</h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Clinical module integration active and operational.
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-xs">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 mb-3">
-            <span className="text-xl">📋</span>
-          </div>
-          <h2 className="text-base font-bold text-slate-900">{title}</h2>
-          <p className="text-xs text-slate-500 max-w-md mx-auto mt-1">
-            All systems normal. Push alerts, caregiver notifications, and compliance records are
-            synced securely.
-          </p>
-        </div>
-      </div>
-    </Layout>
-  );
-}
+import { NotificationsPage } from '../features/notifications/pages/NotificationsPage';
+import { OCRPage } from '../features/ocr/pages/OCRPage';
+import { RefillPage } from '../features/refills/pages/RefillPage';
+import { SettingsPage } from '../features/settings/pages/SettingsPage';
 
 export function AppRoutes() {
   return (
@@ -200,7 +175,25 @@ export function AppRoutes() {
           path="/notifications"
           element={
             <ProtectedRoute>
-              <PlaceholderPage title="Messages & Clinical Alerts" />
+              <NotificationsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/ocr"
+          element={
+            <ProtectedRoute>
+              <OCRPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/refills"
+          element={
+            <ProtectedRoute>
+              <RefillPage />
             </ProtectedRoute>
           }
         />
@@ -209,7 +202,7 @@ export function AppRoutes() {
           path="/settings"
           element={
             <ProtectedRoute>
-              <PlaceholderPage title="Account & Security Settings" />
+              <SettingsPage />
             </ProtectedRoute>
           }
         />

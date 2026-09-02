@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { adherenceApi, mockAdherenceData } from '../../../api/adherence';
 import { Layout } from '../../../components/layout';
 import { CardSkeleton, Alert } from '../../../components/common';
+import { Badge } from '../../../components/common/Badge';
 import {
   BarChart,
   Bar,
@@ -27,6 +28,9 @@ import {
   Download,
   CheckCircle2,
   Award,
+  Activity,
+  Droplets,
+  Pill,
 } from 'lucide-react';
 import './AdherencePage.css';
 
@@ -89,13 +93,16 @@ export function AdherencePage() {
         {/* Header Banner */}
         <div className="adherence-header">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
+            <div className="adherence-title-row">
+              <h1 className="adherence-title">Adherence & Health Analytics</h1>
+              <Badge variant="success" size="sm">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                Verified Clinical Protocol · 94% Target Exceeded
-              </span>
+                94% Target Exceeded
+              </Badge>
+              <Badge variant="primary" size="sm">
+                Verified Clinical Protocol
+              </Badge>
             </div>
-            <h1 className="adherence-title">Adherence & Health Analytics</h1>
             <p className="adherence-subtitle">
               Longitudinal tracking of medication intake consistency, streaks, and daily health
               improvement vitals
@@ -121,40 +128,70 @@ export function AdherencePage() {
         {/* 1. Summary Stat KPI Cards */}
         <div className="adherence-kpi-grid">
           <div className="adherence-kpi-card">
-            <p className="adherence-kpi-label">Overall Adherence</p>
-            <p className="adherence-kpi-value text-indigo-600">{summary.overallAdherence}%</p>
-            <div className="adherence-kpi-meta text-emerald-600 font-bold">
-              <TrendingUp className="h-3.5 w-3.5" />
+            <div className="adherence-kpi-header">
+              <div>
+                <p className="adherence-kpi-label">Overall Adherence</p>
+                <p className="adherence-kpi-value text-indigo-600">{summary.overallAdherence}%</p>
+              </div>
+              <div className="adherence-kpi-icon-box icon-indigo">
+                <TrendingUp className="h-5 w-5" />
+              </div>
+            </div>
+            <div className="adherence-kpi-meta text-emerald-600">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
               <span>+7.2% above clinical baseline</span>
             </div>
           </div>
 
           <div className="adherence-kpi-card">
-            <p className="adherence-kpi-label">Doses Completed</p>
-            <p className="adherence-kpi-value text-emerald-600">
-              {summary.takenDoses}{' '}
-              <span className="text-sm font-semibold text-slate-400">/ {summary.totalDoses}</span>
-            </p>
+            <div className="adherence-kpi-header">
+              <div>
+                <p className="adherence-kpi-label">Doses Completed</p>
+                <p className="adherence-kpi-value text-emerald-600">
+                  {summary.takenDoses}{' '}
+                  <span className="text-sm font-semibold text-slate-400">
+                    / {summary.totalDoses}
+                  </span>
+                </p>
+              </div>
+              <div className="adherence-kpi-icon-box icon-emerald">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+            </div>
             <div className="adherence-kpi-meta text-slate-500">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-400" />
               <span>94.8% on-schedule accuracy</span>
             </div>
           </div>
 
           <div className="adherence-kpi-card">
-            <p className="adherence-kpi-label">Intake Streak</p>
-            <p className="adherence-kpi-value text-amber-500">{summary.streak} Days</p>
-            <div className="adherence-kpi-meta text-amber-600 font-bold">
-              <Flame className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+            <div className="adherence-kpi-header">
+              <div>
+                <p className="adherence-kpi-label">Intake Streak</p>
+                <p className="adherence-kpi-value text-amber-600">{summary.streak} Days</p>
+              </div>
+              <div className="adherence-kpi-icon-box vital-icon-amber">
+                <Flame className="h-5 w-5" />
+              </div>
+            </div>
+            <div className="adherence-kpi-meta text-amber-600">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
               <span>Consecutive on-time intake</span>
             </div>
           </div>
 
           <div className="adherence-kpi-card">
-            <p className="adherence-kpi-label">Health Vitality Score</p>
-            <p className="adherence-kpi-value text-emerald-600">{summary.healthScore} / 100</p>
-            <div className="adherence-kpi-meta text-emerald-700 font-bold">
-              <Sparkles className="h-3.5 w-3.5 text-emerald-500" />
+            <div className="adherence-kpi-header">
+              <div>
+                <p className="adherence-kpi-label">Health Vitality Score</p>
+                <p className="adherence-kpi-value text-emerald-600">{summary.healthScore} / 100</p>
+              </div>
+              <div className="adherence-kpi-icon-box icon-emerald">
+                <Sparkles className="h-5 w-5" />
+              </div>
+            </div>
+            <div className="adherence-kpi-meta text-emerald-700">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
               <span>Optimal recovery state</span>
             </div>
           </div>
@@ -297,34 +334,35 @@ export function AdherencePage() {
             </ResponsiveContainer>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 pt-4 border-t border-indigo-100">
-            <div className="flex items-center gap-3 bg-white/70 rounded-xl p-2.5 border border-indigo-50">
-              <div className="h-8 w-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-xs">
-                BP
+          {/* 3 Vital Stats Summary Cards */}
+          <div className="adherence-vitals-summary-grid">
+            <div className="adherence-vital-stat-card">
+              <div className="vital-icon-box vital-icon-rose">
+                <Activity className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[11px] font-bold text-slate-800">Blood Pressure Stabilized</p>
-                <p className="text-[10px] text-slate-500">122/78 mmHg (Reduced by 16 mmHg)</p>
+                <p className="vital-stat-title">Blood Pressure Stabilized</p>
+                <p className="vital-stat-value">122/78 mmHg (Reduced by 16 mmHg)</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 bg-white/70 rounded-xl p-2.5 border border-indigo-50">
-              <div className="h-8 w-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs">
-                GLU
+            <div className="adherence-vital-stat-card">
+              <div className="vital-icon-box vital-icon-amber">
+                <Droplets className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[11px] font-bold text-slate-800">Fasting Glucose In Range</p>
-                <p className="text-[10px] text-slate-500">114 mg/dL (Reduced by 28 mg/dL)</p>
+                <p className="vital-stat-title">Fasting Glucose In Range</p>
+                <p className="vital-stat-value">114 mg/dL (Reduced by 28 mg/dL)</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 bg-white/70 rounded-xl p-2.5 border border-indigo-50">
-              <div className="h-8 w-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs">
-                RX
+            <div className="adherence-vital-stat-card">
+              <div className="vital-icon-box vital-icon-emerald">
+                <Pill className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[11px] font-bold text-slate-800">Care Plan Target</p>
-                <p className="text-[10px] text-emerald-700 font-semibold">
+                <p className="vital-stat-title">Care Plan Target</p>
+                <p className="vital-stat-value text-emerald-700 font-semibold">
                   100% Weekend On-Time Intake
                 </p>
               </div>
@@ -335,14 +373,14 @@ export function AdherencePage() {
         {/* 3. Weekly Bar Chart & Dose Ratio Donut */}
         <div className="adherence-charts-grid">
           <div className="adherence-panel">
-            <div className="flex items-center justify-between mb-4">
+            <div className="adherence-panel-header">
               <div>
                 <h2 className="adherence-panel-title">Weekly Intake Consistency</h2>
-                <p className="text-xs text-slate-500 mt-0.5">Daily doses completed vs scheduled</p>
+                <p className="adherence-panel-desc">Daily doses completed vs scheduled</p>
               </div>
-              <span className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg">
+              <Badge variant="primary" size="xs">
                 <Award className="h-3.5 w-3.5" /> 90% Target Met
-              </span>
+              </Badge>
             </div>
 
             <div className="h-56 w-full">

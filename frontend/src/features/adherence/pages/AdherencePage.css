@@ -1,29 +1,37 @@
-/* PillSync Adherence & Daily Health Improvement Styles */
+/* PillSync Adherence & Daily Health Improvement Styles - Modern Healthcare SaaS */
 
 .adherence-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  padding-bottom: 2rem;
+  gap: 1.75rem;
+  padding-bottom: 2.5rem;
 }
 
 /* Header */
 .adherence-header {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 @media (min-width: 768px) {
   .adherence-header {
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
+    justify-content: space-between;
   }
 }
 
+.adherence-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.375rem;
+}
+
 .adherence-title {
-  font-size: 1.5rem;
+  font-size: 1.625rem;
   font-weight: 800;
   color: #0f172a;
   letter-spacing: -0.025em;
@@ -32,17 +40,18 @@
 }
 
 .adherence-subtitle {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   color: #64748b;
   margin-top: 0.25rem;
   margin-bottom: 0;
+  line-height: 1.4;
 }
 
 /* KPI Summary Grid */
 .adherence-kpi-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 @media (min-width: 640px) {
@@ -61,9 +70,11 @@
   border-radius: 1.25rem;
   border: 1px solid #e2e8f0;
   background-color: #ffffff;
-  padding: 1.25rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s ease;
+  padding: 1.375rem;
+  box-shadow:
+    0 4px 20px -2px rgba(15, 23, 42, 0.04),
+    0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -71,15 +82,21 @@
 
 .adherence-kpi-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.08);
   border-color: #cbd5e1;
+}
+
+.adherence-kpi-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
 }
 
 .adherence-kpi-label {
   font-size: 0.6875rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.075em;
   color: #64748b;
   margin: 0;
 }
@@ -87,27 +104,42 @@
 .adherence-kpi-value {
   font-size: 1.875rem;
   font-weight: 900;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.025em;
   margin: 0.375rem 0 0 0;
   line-height: 1.1;
+  color: #0f172a;
+}
+
+.adherence-kpi-icon-box {
+  display: flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.875rem;
+  transition: transform 0.2s ease;
+}
+
+.adherence-kpi-card:hover .adherence-kpi-icon-box {
+  transform: scale(1.08);
 }
 
 .adherence-kpi-meta {
-  font-size: 0.6875rem;
-  color: #64748b;
-  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.375rem;
 }
 
 /* Health Improvement Highlight Panel */
 .adherence-health-banner {
   border-radius: 1.25rem;
-  border: 1px solid #c7d2fe;
-  background: linear-gradient(135deg, #eef2ff 0%, #ffffff 100%);
+  border: 1px solid #e0e7ff;
+  background: linear-gradient(135deg, #f8faff 0%, #ffffff 100%);
   padding: 1.5rem;
-  box-shadow: 0 4px 15px -2px rgba(79, 70, 229, 0.08);
+  box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.06);
 }
 
 .adherence-health-header {
@@ -136,8 +168,8 @@
 }
 
 .adherence-health-subtitle {
-  font-size: 0.75rem;
-  color: #4338ca;
+  font-size: 0.8125rem;
+  color: #6366f1;
   margin-top: 0.25rem;
   margin-bottom: 0;
 }
@@ -145,16 +177,17 @@
 .adherence-metric-tabs {
   display: flex;
   gap: 0.375rem;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: #ffffff;
   padding: 0.25rem;
-  border-radius: 0.75rem;
-  border: 1px solid #e0e7ff;
+  border-radius: 0.875rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .adherence-metric-tab-btn {
-  padding: 0.375rem 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.6875rem;
+  padding: 0.4375rem 0.875rem;
+  border-radius: 0.625rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #475569;
   border: none;
@@ -166,14 +199,91 @@
 .adherence-metric-tab-btn-active {
   background: #4f46e5;
   color: #ffffff;
-  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+/* 3-Column Daily Vitals Correlation Cards */
+.adherence-vitals-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e0e7ff;
+}
+
+@media (min-width: 768px) {
+  .adherence-vitals-summary-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.adherence-vital-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  transition: all 0.15s ease;
+}
+
+.adherence-vital-stat-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.vital-icon-box {
+  display: flex;
+  height: 2.5rem;
+  width: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  font-weight: 800;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.vital-icon-rose {
+  background: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fee2e2;
+}
+
+.vital-icon-amber {
+  background: #fffbeb;
+  color: #f59e0b;
+  border: 1px solid #fef3c7;
+}
+
+.vital-icon-emerald {
+  background: #ecfdf5;
+  color: #10b981;
+  border: 1px solid #d1fae5;
+}
+
+.vital-stat-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.vital-stat-value {
+  font-size: 0.8125rem;
+  color: #475569;
+  margin: 0.125rem 0 0 0;
+  font-weight: 500;
 }
 
 /* 2-Column Main Charts Grid */
 .adherence-charts-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
 
 @media (min-width: 1024px) {
@@ -187,7 +297,14 @@
   border: 1px solid #e2e8f0;
   background-color: #ffffff;
   padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
+}
+
+.adherence-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
 }
 
 .adherence-panel-title {
@@ -198,24 +315,33 @@
   margin: 0;
 }
 
+.adherence-panel-desc {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+}
+
 /* Caregiver Clinical Review Box */
 .adherence-clinical-note-box {
-  border-radius: 1rem;
+  border-radius: 1.25rem;
   border: 1px solid #a7f3d0;
   background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
-  padding: 1.25rem;
+  padding: 1.375rem;
   display: flex;
   gap: 1rem;
   align-items: flex-start;
+  box-shadow: 0 4px 16px -2px rgba(16, 185, 129, 0.06);
 }
 
 .adherence-clinical-avatar {
-  height: 2.75rem;
-  width: 2.75rem;
-  border-radius: 0.75rem;
+  height: 3rem;
+  width: 3rem;
+  border-radius: 0.875rem;
   object-fit: cover;
   border: 2px solid #34d399;
   flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
 }
 
 /* Regimen Table */
@@ -229,12 +355,12 @@
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
 }
 
 .adherence-table th {
   background-color: #f8fafc;
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1.125rem;
   font-size: 0.6875rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -244,7 +370,7 @@
 }
 
 .adherence-table td {
-  padding: 0.875rem 1rem;
+  padding: 1rem 1.125rem;
   border-bottom: 1px solid #f1f5f9;
   color: #334155;
 }

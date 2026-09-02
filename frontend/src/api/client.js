@@ -56,11 +56,11 @@ apiClient.interceptors.response.use(
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
         window.location.href = '/login';
-        return Promise.reject(refreshError);
+        throw refreshError;
       }
     }
 
-    return Promise.reject(error);
+    throw error;
   }
 );
 

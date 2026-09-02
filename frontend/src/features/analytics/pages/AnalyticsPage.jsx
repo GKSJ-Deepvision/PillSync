@@ -1,5 +1,4 @@
 import { Layout } from '../../../components/layout';
-import { Card } from '../../../components/common/Card';
 import { Badge } from '../../../components/common/Badge';
 import { Button } from '../../../components/common/Button';
 import {
@@ -90,7 +89,7 @@ export function AnalyticsPage() {
         {/* Header */}
         <div className="analytics-header">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="analytics-title-row">
               <h1 className="analytics-title">Clinical & Platform Analytics</h1>
               <Badge variant="primary" size="sm">
                 Live HIPAA Feed
@@ -115,79 +114,79 @@ export function AnalyticsPage() {
 
         {/* KPI Metrics */}
         <div className="analytics-kpi-grid">
-          <Card className="p-5 rounded-2xl border border-slate-200">
-            <div className="flex items-start justify-between">
+          <div className="analytics-kpi-card">
+            <div className="analytics-kpi-header">
               <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Total Patients
-                </p>
-                <p className="text-3xl font-black text-slate-900 mt-1">1,248</p>
+                <p className="analytics-kpi-label">Total Patients</p>
+                <p className="analytics-kpi-value text-slate-900">1,248</p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+              <div className="analytics-kpi-icon-box icon-indigo">
                 <Users className="h-5 w-5" />
               </div>
             </div>
-            <p className="text-xs text-emerald-600 font-semibold mt-2">+12.4% new registrations</p>
-          </Card>
+            <p className="analytics-kpi-subtext text-emerald-600">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              +12.4% new registrations
+            </p>
+          </div>
 
-          <Card className="p-5 rounded-2xl border border-slate-200">
-            <div className="flex items-start justify-between">
+          <div className="analytics-kpi-card">
+            <div className="analytics-kpi-header">
               <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Cohort Adherence
-                </p>
-                <p className="text-3xl font-black text-emerald-600 mt-1">88.4%</p>
+                <p className="analytics-kpi-label">Cohort Adherence</p>
+                <p className="analytics-kpi-value text-emerald-600">88.4%</p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+              <div className="analytics-kpi-icon-box icon-emerald">
                 <Activity className="h-5 w-5" />
               </div>
             </div>
-            <p className="text-xs text-emerald-600 font-semibold mt-2">
-              +8.4% above 80% clinical baseline
+            <p className="analytics-kpi-subtext text-emerald-600">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              +8.4% above 80% baseline
             </p>
-          </Card>
+          </div>
 
-          <Card className="p-5 rounded-2xl border border-slate-200">
-            <div className="flex items-start justify-between">
+          <div className="analytics-kpi-card">
+            <div className="analytics-kpi-header">
               <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Active Prescriptions
-                </p>
-                <p className="text-3xl font-black text-indigo-700 mt-1">3,890</p>
+                <p className="analytics-kpi-label">Active Prescriptions</p>
+                <p className="analytics-kpi-value text-indigo-700">3,890</p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700">
+              <div className="analytics-kpi-icon-box icon-violet">
                 <TrendingUp className="h-5 w-5" />
               </div>
             </div>
-            <p className="text-xs text-slate-500 font-medium mt-2">Avg 3.1 Rx per patient</p>
-          </Card>
+            <p className="analytics-kpi-subtext text-slate-500">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-400" />
+              Avg 3.1 Rx per patient
+            </p>
+          </div>
 
-          <Card className="p-5 rounded-2xl border border-slate-200">
-            <div className="flex items-start justify-between">
+          <div className="analytics-kpi-card">
+            <div className="analytics-kpi-header">
               <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Notification Delivery
-                </p>
-                <p className="text-3xl font-black text-sky-700 mt-1">99.2%</p>
+                <p className="analytics-kpi-label">Notification Delivery</p>
+                <p className="analytics-kpi-value text-sky-700">99.2%</p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-700">
+              <div className="analytics-kpi-icon-box icon-sky">
                 <ShieldCheck className="h-5 w-5" />
               </div>
             </div>
-            <p className="text-xs text-slate-500 font-medium mt-2">
-              SMS & Push channels operational
+            <p className="analytics-kpi-subtext text-slate-500">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-sky-500" />
+              SMS & Push channels active
             </p>
-          </Card>
+          </div>
         </div>
 
         {/* Charts Row */}
         <div className="analytics-charts-grid">
           {/* Chart 1: Longitudinal Trend */}
-          <Card className="p-5 rounded-3xl border border-slate-200">
-            <div className="flex items-center justify-between mb-4">
+          <div className="analytics-chart-card">
+            <div className="analytics-chart-header">
               <div>
-                <h3 className="text-sm font-bold text-slate-900">Population Adherence Trend</h3>
-                <p className="text-xs text-slate-400">
+                <h3 className="analytics-chart-title">Population Adherence Trend</h3>
+                <p className="analytics-chart-desc">
                   Monthly patient compliance percentage vs. 80% target
                 </p>
               </div>
@@ -234,14 +233,14 @@ export function AnalyticsPage() {
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-          </Card>
+          </div>
 
           {/* Chart 2: Cohort Risk Ratio */}
-          <Card className="p-5 rounded-3xl border border-slate-200 flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-2">
+          <div className="analytics-chart-card">
+            <div className="analytics-chart-header">
               <div>
-                <h3 className="text-sm font-bold text-slate-900">Risk Segmentation</h3>
-                <p className="text-xs text-slate-400">Cohort distribution by adherence risk</p>
+                <h3 className="analytics-chart-title">Risk Segmentation</h3>
+                <p className="analytics-chart-desc">Cohort distribution by adherence risk</p>
               </div>
             </div>
 
@@ -284,11 +283,11 @@ export function AnalyticsPage() {
                 </div>
               ))}
             </div>
-          </Card>
+          </div>
         </div>
 
         {/* Audit Log Table */}
-        <div className="audit-table-container p-5">
+        <div className="audit-table-card">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-bold text-slate-900">Security & Clinical Audit Trail</h3>
@@ -302,28 +301,28 @@ export function AnalyticsPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="audit-table">
               <thead>
-                <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
-                  <th className="pb-3 font-semibold">User</th>
-                  <th className="pb-3 font-semibold">Role</th>
-                  <th className="pb-3 font-semibold">Action / Event</th>
-                  <th className="pb-3 font-semibold">Time</th>
-                  <th className="pb-3 font-semibold text-right">Status</th>
+                <tr className="audit-table-head">
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Action / Event</th>
+                  <th>Time</th>
+                  <th className="text-right">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody>
                 {AUDIT_LOGS.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-50/60 transition">
-                    <td className="py-3 font-bold text-slate-900">{log.user}</td>
-                    <td className="py-3">
+                  <tr key={log.id} className="audit-table-row">
+                    <td className="font-bold text-slate-900">{log.user}</td>
+                    <td>
                       <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
                         {log.role}
                       </span>
                     </td>
-                    <td className="py-3 text-slate-600">{log.action}</td>
-                    <td className="py-3 text-slate-400 text-[11px]">{log.time}</td>
-                    <td className="py-3 text-right">
+                    <td className="text-slate-600">{log.action}</td>
+                    <td className="text-slate-400 text-[11px]">{log.time}</td>
+                    <td className="text-right">
                       <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 text-[11px]">
                         <CheckCircle2 className="h-3 w-3" />
                         {log.status}
