@@ -81,7 +81,8 @@ export function ProfilePage() {
 
   const validateProfileForm = () => {
     if (!formData.name.trim()) return 'Full name cannot be empty.';
-    if (formData.email && !isValidEmail(formData.email)) return 'Please enter a valid email address.';
+    if (formData.email && !isValidEmail(formData.email))
+      return 'Please enter a valid email address.';
     return null;
   };
 
@@ -683,7 +684,11 @@ export function ProfilePage() {
                         due.
                       </span>
                     </div>
-                    <label className="profile-switch-label" htmlFor="pref-push-dose" aria-label="Toggle push notifications">
+                    <label
+                      className="profile-switch-label"
+                      htmlFor="pref-push-dose"
+                      aria-label="Toggle push notifications"
+                    >
                       <input
                         id="pref-push-dose"
                         type="checkbox"
@@ -703,7 +708,11 @@ export function ProfilePage() {
                         medications.
                       </span>
                     </div>
-                    <label className="profile-switch-label" htmlFor="pref-sms-critical" aria-label="Toggle SMS dose alerts">
+                    <label
+                      className="profile-switch-label"
+                      htmlFor="pref-sms-critical"
+                      aria-label="Toggle SMS dose alerts"
+                    >
                       <input
                         id="pref-sms-critical"
                         type="checkbox"
@@ -722,7 +731,11 @@ export function ProfilePage() {
                         Play acoustic chime and vibrate when medication confirmation is required.
                       </span>
                     </div>
-                    <label className="profile-switch-label" htmlFor="pref-sound-alerts" aria-label="Toggle sound and haptic alerts">
+                    <label
+                      className="profile-switch-label"
+                      htmlFor="pref-sound-alerts"
+                      aria-label="Toggle sound and haptic alerts"
+                    >
                       <input
                         id="pref-sound-alerts"
                         type="checkbox"
@@ -742,7 +755,11 @@ export function ProfilePage() {
                         minutes.
                       </span>
                     </div>
-                    <label className="profile-switch-label" htmlFor="pref-caregiver-alerts" aria-label="Toggle caregiver escalation alerts">
+                    <label
+                      className="profile-switch-label"
+                      htmlFor="pref-caregiver-alerts"
+                      aria-label="Toggle caregiver escalation alerts"
+                    >
                       <input
                         id="pref-caregiver-alerts"
                         type="checkbox"
@@ -761,7 +778,11 @@ export function ProfilePage() {
                         Receive an automated PDF adherence progress report every Monday morning.
                       </span>
                     </div>
-                    <label className="profile-switch-label" htmlFor="pref-weekly-reports" aria-label="Toggle weekly adherence summary email">
+                    <label
+                      className="profile-switch-label"
+                      htmlFor="pref-weekly-reports"
+                      aria-label="Toggle weekly adherence summary email"
+                    >
                       <input
                         id="pref-weekly-reports"
                         type="checkbox"
