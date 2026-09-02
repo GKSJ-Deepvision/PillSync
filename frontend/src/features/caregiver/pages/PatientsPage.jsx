@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '../../../context/useAuth';
 import { Layout } from '../../../components/layout';
 import { Badge } from '../../../components/common/Badge';
 import { Button } from '../../../components/common/Button';
@@ -97,7 +98,17 @@ const INITIAL_PATIENTS = [
 ];
 
 export function PatientsPage() {
-  const [patients] = useState(INITIAL_PATIENTS);
+  const { user } = useAuth();
+  const [patients] = useState(() => {
+    let list = [...INITIAL_PATIENTS];
+    if (user?.role === 'patient' && user?.name) {
+      list[0] = {
+        ...list[0],
+        name: user.name,
+      };
+    }
+    return list;
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRisk, setSelectedRisk] = useState('all');
   const [nudgedPatientId, setNudgedPatientId] = useState(null);

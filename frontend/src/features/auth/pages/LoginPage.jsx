@@ -21,7 +21,9 @@ import './LoginPage.css';
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { login, error, setError, isAuthenticating } = useAuth();
+  const { login } = useAuth();
+  const [error, setError] = useState(null);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   // Clean empty inputs by default (no hardcoded prefill)
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -49,11 +51,15 @@ export function LoginPage() {
       return;
     }
 
+    setIsAuthenticating(true);
     try {
       await login(formData.email, formData.password, selectedRole);
-      navigate('/dashboard');
+      navigate('/profile');
     } catch (err) {
       console.error('Login failed:', err);
+      setError(err.message || 'Incorrect email or password. Please verify your credentials.');
+    } finally {
+      setIsAuthenticating(false);
     }
   };
 

@@ -1,0 +1,130 @@
+PILLSYNC KNOWLEDGE BASE
+
+PillSync is an intelligent medicine reminder and medication tracking
+platform designed to help patients manage their medicines and improve
+medication adherence.
+
+PillSync supports three user roles: Patient, Caregiver, and Admin.
+
+A Patient can manage personal medicines, view reminders, mark medicines
+as taken or missed, track adherence, view prescriptions, and communicate
+with caregivers.
+
+A Caregiver can monitor assigned patients, view medication adherence,
+check missed doses, monitor reminders, and communicate with patients.
+
+An Admin can manage users, monitor platform activity, manage system
+settings, and review reports.
+
+Medication reminders help patients remember when to take their
+prescribed medicines.
+
+Each medication can contain information such as medicine name, dosage,
+frequency, start date, end date, instructions, and prescription details.
+
+Patients can mark a reminder as Taken when they have successfully taken
+their medicine.
+
+Patients can mark a reminder as Missed when they did not take the
+medicine.
+
+Patients can select Snooze when they want the medication reminder to
+appear again after a short period.
+
+Medication adherence represents how consistently a patient follows the
+prescribed medication schedule.
+
+Adherence percentage is calculated based on completed medication doses
+compared with scheduled medication doses.
+
+A high adherence percentage indicates that the patient is following the
+medication schedule consistently.
+
+Missed medication alerts help patients and caregivers identify doses
+that were not taken.
+
+The dashboard displays medication summaries, upcoming reminders, missed
+doses, adherence information, and recent activity.
+
+The medication list displays all active and inactive medicines
+associated with a patient.
+
+Patients can search medicines by medicine name.
+
+Patients can filter medicines based on status, category, or other
+available medication information.
+
+Medication details provide information about dosage, frequency, reminder
+schedule, and prescription instructions.
+
+PillSync can support disease categorization to organize medicines based
+on medical conditions.
+
+The reminder system displays upcoming medication schedules.
+
+The reminder system can provide notifications for scheduled medicine
+doses.
+
+Notifications may be delivered through supported channels such as in-app
+notifications, email, push notifications, SMS, or other configured
+services.
+
+Caregivers can receive alerts when an assigned patient misses an
+important medication dose.
+
+Caregivers can monitor the adherence performance of assigned patients.
+
+The Caregiver Portal provides a view of assigned patients and their
+medication status.
+
+Caregivers can review patient medication history and reminder activity.
+
+Patients and caregivers can use the messaging feature to communicate
+about medication-related updates.
+
+Users can update their profile information through the Profile section.
+
+Users can view their recent medication activity and adherence history.
+
+The Analytics section provides medication adherence trends and other
+health-related activity insights.
+
+PillSync does not replace professional medical advice.
+
+Users should contact a doctor, pharmacist, or healthcare professional
+for medical advice regarding medicine dosage, side effects, drug
+interactions, or treatment changes.
+
+Users should not change or stop prescribed medication without consulting
+a qualified healthcare professional.
+
+If a patient experiences a medical emergency, they should contact local
+emergency services immediately.
+
+PillSync uses role-based access control to provide appropriate access
+for Patients, Caregivers, and Admins.
+
+Authentication is used to protect user accounts and application
+features.
+
+JWT tokens may be used to maintain authenticated user sessions.
+
+The system can provide secure access to role-specific dashboards and
+features.
+
+The chatbot can provide information about PillSync features, medication
+reminders, adherence tracking, and platform navigation.
+
+The chatbot should not diagnose diseases or prescribe medications.
+
+For specific medicine-related questions, the chatbot should encourage
+users to consult a qualified healthcare professional.
+
+EXAMPLE QUESTIONS
+
+What medicines do I need to take today? What is my adherence percentage?
+Did I miss any medication? When is my next reminder? How do I mark a
+medicine as taken? What happens when I snooze a reminder? Who is my
+caregiver? How can my caregiver monitor me? How do I add a new medicine?
+What does medication adherence mean? What should I do if I miss a dose?
+How do I contact my caregiver?

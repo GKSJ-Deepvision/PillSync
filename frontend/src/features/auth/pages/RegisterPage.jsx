@@ -8,7 +8,9 @@ import './RegisterPage.css';
 
 export function RegisterPage() {
   const navigate = useNavigate();
-  const { register, error, setError, isAuthenticating } = useAuth();
+  const { register } = useAuth();
+  const [error, setError] = useState(null);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   const [selectedRole, setSelectedRole] = useState('patient');
   const [formData, setFormData] = useState({
@@ -48,6 +50,7 @@ export function RegisterPage() {
       return;
     }
 
+    setIsAuthenticating(true);
     try {
       await register({
         name: formData.name,
@@ -55,9 +58,12 @@ export function RegisterPage() {
         password: formData.password,
         role: selectedRole,
       });
-      navigate('/dashboard');
+      navigate('/profile');
     } catch (err) {
       console.error('Registration failed:', err);
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setIsAuthenticating(false);
     }
   };
 

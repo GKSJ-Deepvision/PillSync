@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '../../../context/useAuth';
 import { Layout } from '../../../components/layout';
 import { Badge } from '../../../components/common/Badge';
 import { Button } from '../../../components/common/Button';
@@ -65,7 +66,35 @@ const INITIAL_USERS = [
 ];
 
 export function AdminUsersPage() {
-  const [users, setUsers] = useState(INITIAL_USERS);
+  const { user: currentUser } = useAuth();
+
+  const [users, setUsers] = useState(() => {
+    let list = [...INITIAL_USERS];
+    if (currentUser?.email) {
+      const existsIndex = list.findIndex(
+        (u) => u.email.toLowerCase() === currentUser.email.toLowerCase()
+      );
+      if (existsIndex >= 0) {
+        list[existsIndex] = {
+          ...list[existsIndex],
+          name: currentUser.name || list[existsIndex].name,
+          role: currentUser.role || list[existsIndex].role,
+        };
+      } else {
+        list.unshift({
+          id: currentUser.id || 'current-u',
+          name: currentUser.name || 'Current User',
+          email: currentUser.email,
+          role: currentUser.role || 'patient',
+          status: 'Active',
+          assignedCaregiver:
+            currentUser.role === 'patient' ? 'Dr. Oliver Mitchell' : 'System Admin',
+          joined: 'Today (Live)',
+        });
+      }
+    }
+    return list;
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
 

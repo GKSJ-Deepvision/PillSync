@@ -1,11 +1,8 @@
-//import React, { useState } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/useAuth';
-//import { useNavigate, Link } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { Layout } from '../components/layout';
 import { Badge } from '../components/common/Badge';
-//import { Button } from '../components/common/Button';
 import {
   Pill,
   Clock,
@@ -19,6 +16,7 @@ import {
   AlertCircle,
   Plus,
 } from 'lucide-react';
+import { getChatbotResponse } from '../utils/chatbotEngine';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import './DashboardPage.css';
 
@@ -120,26 +118,53 @@ const INITIAL_TASKS = [
 
 export function DashboardPage() {
   const { user } = useAuth();
-  // const navigate = useNavigate();
   const [selectedPatientIndex, setSelectedPatientIndex] = useState(0);
   const [doses, setDoses] = useState(INITIAL_DOSES);
   const [tasks, setTasks] = useState(INITIAL_TASKS);
+  const [currentDateTime, setCurrentDateTime] = useState(() => new Date());
   const [chatMessages, setChatMessages] = useState([
     {
       id: 1,
       sender: 'doctor',
-      text: 'Good morning Ibrahim! Your adherence is at 94% this week. Keep up the morning routine!',
+      text: 'Good morning! Your adherence is at 94% this week. Keep up the consistent morning routine!',
     },
     {
       id: 2,
       sender: 'patient',
-      text: 'Thank you Dr. Oliver. Just took my Metformin and Lisinopril on time.',
+      text: 'Thank you Dr. Oliver. Just took my Metformin and Lisinopril on schedule.',
     },
   ]);
   const [inputMsg, setInputMsg] = useState('');
 
+  // Live real-time clock ticker
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   const currentPatient = PATIENTS[selectedPatientIndex];
-  const isCaregiverOrAdmin = user?.role === 'caregiver' || user?.role === 'admin';
+  const userRole = user?.role || 'patient';
+  const isCaregiverOrAdmin = userRole === 'caregiver' || userRole === 'admin';
+
+  const getDefaultName = () => {
+    if (userRole === 'caregiver') return 'Dr. Oliver Mitchell';
+    if (userRole === 'admin') return 'Sarah Jenkins';
+    return 'Ibrahim Kadri';
+  };
+
+  const loggedInName = user?.name || getDefaultName();
+
+  const assignedCaregiver = 'Dr. Oliver Mitchell';
+  const assignedAdmin = 'Sarah Jenkins';
+
+  const getGreetingWord = () => {
+    const hr = currentDateTime.getHours();
+    if (hr < 12) return 'Good morning';
+    if (hr < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
 
   const handleTakeDose = (id) => {
     setDoses(doses.map((d) => (d.id === id ? { ...d, status: 'taken' } : d)));
@@ -157,13 +182,30 @@ export function DashboardPage() {
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!inputMsg.trim()) return;
+    const userText = inputMsg.trim();
+    const isCaregiverSender = userRole === 'caregiver' || userRole === 'admin';
     const newMsg = {
       id: Date.now(),
-      sender: user?.role === 'caregiver' || user?.role === 'admin' ? 'doctor' : 'patient',
-      text: inputMsg,
+      sender: isCaregiverSender ? 'doctor' : 'patient',
+      text: userText,
     };
-    setChatMessages([...chatMessages, newMsg]);
+    setChatMessages((prev) => [...prev, newMsg]);
     setInputMsg('');
+
+    // If patient asked a question, trigger intelligent care bot reply from knowledge base
+    if (!isCaregiverSender) {
+      setTimeout(() => {
+        const reply = getChatbotResponse(userText);
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            sender: 'doctor',
+            text: reply,
+          },
+        ]);
+      }, 500);
+    }
   };
 
   const takenCount = doses.filter((d) => d.status === 'taken').length;
@@ -208,25 +250,40 @@ export function DashboardPage() {
         {/* 1. Header Banner */}
         <div className="dashboard-header-banner">
           <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
-                <Sparkles className="h-3.5 w-3.5" />
-                Care Plan Active
+            <div className="dashboard-badge-container">
+              <span className="dashboard-care-plan-badge">
+                <Sparkles className="dashboard-badge-icon" />
+                <span>Care Plan Active</span>
               </span>
-              <span className="text-xs font-semibold text-slate-400">
-                {new Date().toLocaleDateString('en-US', {
+              <span className="dashboard-date-text">
+                {currentDateTime.toLocaleDateString('en-US', {
                   weekday: 'long',
                   month: 'short',
                   day: 'numeric',
                   year: 'numeric',
                 })}
               </span>
+              <span className="dashboard-live-clock-badge">
+                <span className="dashboard-live-dot" />
+                <span>
+                  {currentDateTime.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                  })}
+                </span>
+              </span>
             </div>
             <h1 className="dashboard-greeting-title">
-              Welcome back, {isCaregiverOrAdmin ? user?.name || 'Oliver' : currentPatient.name}
+              {getGreetingWord()}, {loggedInName}
             </h1>
             <p className="dashboard-greeting-subtitle">
-              Here is your daily medication schedule, clinical adherence progress, and health tasks.
+              {userRole === 'patient' &&
+                `Your Care Plan is managed by ${assignedCaregiver} · Platform Administrator: ${assignedAdmin}`}
+              {userRole === 'caregiver' &&
+                `Caregiver & Lead Clinician · Managing Cohort of 3 Patients · Supervised by ${assignedAdmin}`}
+              {userRole === 'admin' &&
+                `Platform Administrator & HIPAA Compliance Officer · Lead Caregiver: ${assignedCaregiver}`}
             </p>
           </div>
 
@@ -238,6 +295,51 @@ export function DashboardPage() {
               <Plus className="h-4 w-4" />
               Add Medication
             </Link>
+          </div>
+        </div>
+
+        {/* Clinical Care Team & Identity Directory Strip */}
+        <div className="dashboard-care-team-strip">
+          <div className="dashboard-team-card">
+            <img
+              src={
+                user?.avatar ||
+                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80'
+              }
+              alt={loggedInName}
+              className="dashboard-team-avatar"
+            />
+            <div>
+              <p className="dashboard-team-role-label text-indigo-600">Active User ({userRole})</p>
+              <p className="dashboard-team-name">{loggedInName}</p>
+              <p className="dashboard-team-meta">{user?.email || 'user@example.com'}</p>
+            </div>
+          </div>
+
+          <div className="dashboard-team-card">
+            <img
+              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+              alt="Caregiver"
+              className="dashboard-team-avatar"
+            />
+            <div>
+              <p className="dashboard-team-role-label text-emerald-600">Assigned Caregiver</p>
+              <p className="dashboard-team-name">{assignedCaregiver}</p>
+              <p className="dashboard-team-meta">caregiver@example.com · Lead Physician</p>
+            </div>
+          </div>
+
+          <div className="dashboard-team-card">
+            <img
+              src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80"
+              alt="Administrator"
+              className="dashboard-team-avatar"
+            />
+            <div>
+              <p className="dashboard-team-role-label text-violet-600">Platform Administrator</p>
+              <p className="dashboard-team-name">{assignedAdmin}</p>
+              <p className="dashboard-team-meta">admin@example.com · Compliance Officer</p>
+            </div>
           </div>
         </div>
 
@@ -433,7 +535,12 @@ export function DashboardPage() {
 
               <div className="task-checklist">
                 {tasks.map((task) => (
-                  <div key={task.id} onClick={() => toggleTask(task.id)} className="task-check-row">
+                  <button
+                    key={task.id}
+                    type="button"
+                    onClick={() => toggleTask(task.id)}
+                    className="task-check-row"
+                  >
                     <span
                       className={`task-check-text ${
                         task.done ? 'task-check-text-done' : 'task-check-text-pending'
@@ -447,7 +554,7 @@ export function DashboardPage() {
                     ) : (
                       <div className="h-4 w-4 rounded-full border-2 border-slate-300 shrink-0" />
                     )}
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>

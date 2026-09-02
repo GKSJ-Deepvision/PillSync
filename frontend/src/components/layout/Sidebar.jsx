@@ -1,5 +1,5 @@
 import { useAuth } from '../../context/useAuth';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import {
   LayoutGrid,
   Calendar,
@@ -11,6 +11,8 @@ import {
   Shield,
   Activity,
   UserCheck,
+  User,
+  LogOut,
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -20,6 +22,7 @@ const NAVIGATION_BY_ROLE = {
     { label: 'Prescriptions', href: '/medications', icon: Pill },
     { label: 'Dose Reminders', href: '/reminders', icon: Calendar },
     { label: 'Adherence Report', href: '/adherence', icon: BarChart2 },
+    { label: 'Profile & Health', href: '/profile', icon: User },
     { label: 'Care Messages', href: '/notifications', icon: MessageSquare },
     { label: 'Settings', href: '/settings', icon: Settings },
   ],
@@ -29,6 +32,7 @@ const NAVIGATION_BY_ROLE = {
     { label: 'Medications Oversight', href: '/medications', icon: Pill },
     { label: 'Dose Logs & Alerts', href: '/reminders', icon: Calendar },
     { label: 'Clinical Analytics', href: '/analytics', icon: Activity },
+    { label: 'Practitioner Profile', href: '/profile', icon: User },
     { label: 'Care Messages', href: '/notifications', icon: MessageSquare },
   ],
   admin: [
@@ -37,13 +41,20 @@ const NAVIGATION_BY_ROLE = {
     { label: 'Patient Cohorts', href: '/patients', icon: UserCheck },
     { label: 'Prescriptions Master', href: '/medications', icon: Pill },
     { label: 'System Analytics', href: '/analytics', icon: BarChart2 },
+    { label: 'Admin Profile', href: '/profile', icon: User },
     { label: 'Platform Settings', href: '/settings', icon: Settings },
   ],
 };
 
 export function Sidebar() {
-  const { user, switchRole } = useAuth();
+  const { user, switchRole, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   const userRole = user?.role || 'patient';
   const navItems = NAVIGATION_BY_ROLE[userRole] || NAVIGATION_BY_ROLE.patient;
@@ -53,14 +64,11 @@ export function Sidebar() {
       <div>
         {/* Brand Header */}
         <div className="sidebar-brand-header">
-          <Link to="/dashboard" className="flex items-center gap-3 text-decoration-none">
+          <Link to="/dashboard" className="sidebar-brand-link">
             <div className="sidebar-logo-icon-box">
               <Pill className="h-5 w-5" />
             </div>
-            <div>
-              <h2 className="sidebar-brand-title">PillSync</h2>
-              <p className="sidebar-brand-subtitle">Smart Medication SaaS</p>
-            </div>
+            <h2 className="sidebar-brand-title">PillSync</h2>
           </Link>
         </div>
 
@@ -92,28 +100,56 @@ export function Sidebar() {
         </nav>
       </div>
 
-      {/* Role Badge & Quick Switcher Card */}
-      <div className="sidebar-role-card">
-        <div className="sidebar-role-header">
-          <span className="sidebar-role-title">Active Persona</span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
-            <Shield className="h-3 w-3" />
-            {userRole}
-          </span>
+      <div className="sidebar-bottom-section">
+        {/* Role Badge & Quick Switcher Card */}
+        <div className="sidebar-role-card">
+          <div className="sidebar-role-header">
+            <span className="sidebar-role-title">Active Persona</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
+              <Shield className="h-3 w-3" />
+              {userRole}
+            </span>
+          </div>
+
+          {/* 1-Click Role Switcher */}
+          <div className="sidebar-role-pill-group">
+            {['patient', 'caregiver', 'admin'].map((role) => (
+              <button
+                key={role}
+                onClick={() => switchRole?.(role)}
+                className={`sidebar-role-btn ${userRole === role ? 'sidebar-role-btn-active' : ''}`}
+                title={`Switch view to ${role}`}
+              >
+                {role}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* 1-Click Role Switcher */}
-        <div className="sidebar-role-pill-group">
-          {['patient', 'caregiver', 'admin'].map((role) => (
-            <button
-              key={role}
-              onClick={() => switchRole?.(role)}
-              className={`sidebar-role-btn ${userRole === role ? 'sidebar-role-btn-active' : ''}`}
-              title={`Switch view to ${role}`}
-            >
-              {role}
-            </button>
-          ))}
+        {/* User Card & Sign Out Button */}
+        <div className="sidebar-user-footer">
+          <Link to="/profile" className="sidebar-user-card" title="Manage Profile">
+            <img
+              src={
+                user?.avatar ||
+                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'
+              }
+              alt="Avatar"
+              className="sidebar-user-avatar"
+            />
+            <div className="sidebar-user-meta">
+              <p className="sidebar-user-name truncate">{user?.name || 'User Profile'}</p>
+              <span className="sidebar-user-email truncate">{user?.email || 'Active Session'}</span>
+            </div>
+          </Link>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="sidebar-logout-btn"
+            title="Sign out of PillSync"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
         </div>
       </div>
     </aside>

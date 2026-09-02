@@ -7,10 +7,12 @@ import { isValidEmail } from '../../../utils/validation';
 import './ForgotPasswordPage.css';
 
 export function ForgotPasswordPage() {
-  const { forgotPassword, error, setError, isAuthenticating } = useAuth();
+  const { forgotPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [validationError, setValidationError] = useState('');
+  const [error, setError] = useState(null);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,11 +29,15 @@ export function ForgotPasswordPage() {
       return;
     }
 
+    setIsAuthenticating(true);
     try {
       await forgotPassword(email);
       setSubmitted(true);
     } catch (err) {
       console.error('Forgot password failed:', err);
+      setError(err.message || 'Failed to send reset link. Please try again.');
+    } finally {
+      setIsAuthenticating(false);
     }
   };
 
