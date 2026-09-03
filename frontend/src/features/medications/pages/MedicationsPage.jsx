@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/useAuth';
 import { medicationApi } from '../../../api/medications';
 import { Layout } from '../../../components/layout';
-//import { Badge } from '../../../components/common/Badge';
+import { Badge } from '../../../components/common/Badge';
 import { EmptyState, CardSkeleton } from '../../../components/common';
-import { Search, Plus, Pill, Clock, ChevronRight } from 'lucide-react';
+import { Search, Plus, Pill, Clock, ChevronRight, Users, ShieldCheck } from 'lucide-react';
 import './MedicationsPage.css';
 
 const DISEASE_CATEGORIES = [
@@ -17,13 +18,119 @@ const DISEASE_CATEGORIES = [
   'Heart Medications',
 ];
 
+const COHORT_PATIENT_FILTERS = ['All Patients', 'Ibrahim Kadri', 'Sarah Connor', 'Michael Chang'];
+
+const COHORT_MEDICATIONS = [
+  {
+    id: 'cm1',
+    name: 'Metformin',
+    dosage: '500mg',
+    disease: 'Diabetes',
+    frequency: 'Twice daily',
+    schedule: ['08:00 AM', '08:00 PM'],
+    quantity: 14,
+    status: 'active',
+    patient: 'Ibrahim Kadri',
+    patientAge: 54,
+    patientAvatar:
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    adherence: 96,
+    prescribedBy: 'Dr. Oliver Mitchell',
+  },
+  {
+    id: 'cm2',
+    name: 'Lisinopril',
+    dosage: '10mg',
+    disease: 'Blood Pressure',
+    frequency: 'Once daily',
+    schedule: ['08:00 AM'],
+    quantity: 22,
+    status: 'active',
+    patient: 'Ibrahim Kadri',
+    patientAge: 54,
+    patientAvatar:
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    adherence: 94,
+    prescribedBy: 'Dr. Oliver Mitchell',
+  },
+  {
+    id: 'cm3',
+    name: 'Lisinopril',
+    dosage: '20mg',
+    disease: 'Blood Pressure',
+    frequency: 'Once daily',
+    schedule: ['08:00 AM'],
+    quantity: 8,
+    status: 'active',
+    patient: 'Sarah Connor',
+    patientAge: 48,
+    patientAvatar:
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
+    adherence: 64,
+    prescribedBy: 'Dr. Oliver Mitchell',
+  },
+  {
+    id: 'cm4',
+    name: 'Atorvastatin',
+    dosage: '20mg',
+    disease: 'Heart Medications',
+    frequency: 'Once daily',
+    schedule: ['08:30 PM'],
+    quantity: 18,
+    status: 'active',
+    patient: 'Sarah Connor',
+    patientAge: 48,
+    patientAvatar:
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
+    adherence: 70,
+    prescribedBy: 'Dr. Oliver Mitchell',
+  },
+  {
+    id: 'cm5',
+    name: 'Levothyroxine',
+    dosage: '50mcg',
+    disease: 'Thyroid',
+    frequency: 'Once daily',
+    schedule: ['07:00 AM'],
+    quantity: 4,
+    status: 'active',
+    patient: 'Michael Chang',
+    patientAge: 62,
+    patientAvatar:
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+    adherence: 82,
+    prescribedBy: 'Dr. Oliver Mitchell',
+  },
+  {
+    id: 'cm6',
+    name: 'Vitamin D3',
+    dosage: '2000 IU',
+    disease: 'Vitamins',
+    frequency: 'Once daily',
+    schedule: ['01:00 PM'],
+    quantity: 30,
+    status: 'active',
+    patient: 'Ibrahim Kadri',
+    patientAge: 54,
+    patientAvatar:
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    adherence: 98,
+    prescribedBy: 'Dr. Oliver Mitchell',
+  },
+];
+
 export function MedicationsPage() {
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [medications, setMedications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDisease, setSelectedDisease] = useState('All');
+  const [selectedPatient, setSelectedPatient] = useState('All Patients');
+
+  const userRole = user?.role || 'patient';
+  const isCaregiver = userRole === 'caregiver' || userRole === 'admin';
 
   useEffect(() => {
     let cancelled = false;
@@ -50,16 +157,21 @@ export function MedicationsPage() {
     };
   }, []);
 
-  const filteredMeds = medications.filter((med) => {
+  const displayedList = isCaregiver ? COHORT_MEDICATIONS : medications;
+
+  const filteredMeds = displayedList.filter((med) => {
     const query = searchQuery.toLowerCase();
     const matchesSearch =
       !searchQuery ||
       med.name.toLowerCase().includes(query) ||
-      med.disease.toLowerCase().includes(query);
+      med.disease?.toLowerCase().includes(query) ||
+      (med.patient && med.patient.toLowerCase().includes(query));
 
     const matchesDisease = selectedDisease === 'All' || med.disease === selectedDisease;
+    const matchesPatient =
+      !isCaregiver || selectedPatient === 'All Patients' || med.patient === selectedPatient;
 
-    return matchesSearch && matchesDisease;
+    return matchesSearch && matchesDisease && matchesPatient;
   });
 
   return (
@@ -68,32 +180,82 @@ export function MedicationsPage() {
         {/* Header */}
         <div className="meds-header">
           <div>
-            <h1 className="meds-title">Prescriptions & Medications</h1>
+            <div className="flex items-center gap-2 mb-1">
+              <Badge variant="primary" size="sm">
+                {isCaregiver ? (
+                  <>
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    Caregiver Clinical Oversight
+                  </>
+                ) : (
+                  'Prescription Records'
+                )}
+              </Badge>
+              {isCaregiver && (
+                <Badge variant="success" size="sm">
+                  {COHORT_PATIENT_FILTERS.length - 1} Assigned Patients
+                </Badge>
+              )}
+            </div>
+            <h1 className="meds-title">
+              {isCaregiver ? 'Medications Oversight' : 'Prescriptions & Medications'}
+            </h1>
             <p className="meds-subtitle">
-              Manage your verified clinical prescriptions, dose schedules, and supply levels
+              {isCaregiver
+                ? 'Supervise, adjust, and track active drug regimens and refill schedules across your assigned cohort'
+                : 'Manage your verified clinical prescriptions, dose schedules, and supply levels'}
             </p>
           </div>
 
           <button
+            type="button"
             onClick={() => navigate('/medications/new')}
-            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 transition cursor-pointer"
+            className="meds-add-btn"
           >
             <Plus className="h-4 w-4" />
-            Add Medication
+            {isCaregiver ? 'Prescribe Medication' : 'Add Medication'}
           </button>
         </div>
+
+        {/* Caregiver Patient Selector Chips */}
+        {isCaregiver && (
+          <div className="meds-cohort-bar">
+            <span className="meds-cohort-label">
+              <Users className="h-4 w-4 text-indigo-600" />
+              Patient Roster:
+            </span>
+            <div className="meds-cohort-chips">
+              {COHORT_PATIENT_FILTERS.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setSelectedPatient(p)}
+                  className={`meds-cohort-chip ${
+                    selectedPatient === p ? 'meds-cohort-chip-active' : 'meds-cohort-chip-inactive'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Filter & Search Bar */}
         <div className="meds-filter-bar">
           <div className="meds-search-box">
-            <div className="relative w-full">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <div className="meds-search-wrapper">
+              <Search className="meds-search-icon" />
               <input
                 type="text"
-                placeholder="Search prescription name or condition..."
+                placeholder={
+                  isCaregiver
+                    ? 'Search by medicine, condition, or patient name...'
+                    : 'Search prescription name or condition...'
+                }
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-4 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 shadow-xs"
+                className="meds-search-input"
               />
             </div>
           </div>
@@ -102,6 +264,7 @@ export function MedicationsPage() {
             {DISEASE_CATEGORIES.map((disease) => (
               <button
                 key={disease}
+                type="button"
                 onClick={() => setSelectedDisease(disease)}
                 className={`meds-category-chip ${
                   selectedDisease === disease ? 'meds-category-chip-active' : ''
@@ -114,7 +277,7 @@ export function MedicationsPage() {
         </div>
 
         {/* Medication Grid */}
-        {loading ? (
+        {loading && !isCaregiver ? (
           <CardSkeleton count={3} />
         ) : filteredMeds.length === 0 ? (
           <EmptyState
@@ -123,11 +286,12 @@ export function MedicationsPage() {
             message={
               searchQuery
                 ? 'Try adjusting your search criteria or filter category'
-                : 'Add your first medication to get started'
+                : 'Add a medication to get started'
             }
             action={
               !searchQuery && (
                 <button
+                  type="button"
                   onClick={() => navigate('/medications/new')}
                   className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-700"
                 >
@@ -152,6 +316,37 @@ export function MedicationsPage() {
                   className="med-card cursor-pointer"
                 >
                   <div>
+                    {/* Patient identity bar for caregiver */}
+                    {isCaregiver && medication.patient && (
+                      <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-100">
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={medication.patientAvatar}
+                            alt={medication.patient}
+                            className="h-6 w-6 rounded-full object-cover border border-slate-200"
+                          />
+                          <span className="text-xs font-bold text-slate-900">
+                            {medication.patient}
+                          </span>
+                          <span className="text-[10px] text-slate-400">
+                            ({medication.patientAge}y)
+                          </span>
+                        </div>
+                        <Badge
+                          variant={
+                            medication.adherence >= 85
+                              ? 'success'
+                              : medication.adherence >= 70
+                                ? 'warning'
+                                : 'danger'
+                          }
+                          size="xs"
+                        >
+                          {medication.adherence}% Adherence
+                        </Badge>
+                      </div>
+                    )}
+
                     <div className="med-card-header">
                       <div className="flex items-start gap-3">
                         <div className="med-icon-box">
@@ -204,7 +399,8 @@ export function MedicationsPage() {
                     </span>
 
                     <span className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-700">
-                      View Details <ChevronRight className="h-3.5 w-3.5" />
+                      {isCaregiver ? 'Clinical Review' : 'View Details'}{' '}
+                      <ChevronRight className="h-3.5 w-3.5" />
                     </span>
                   </div>
                 </div>

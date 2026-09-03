@@ -201,9 +201,9 @@ export function AppRoutes() {
         <Route
           path="/settings"
           element={
-            <ProtectedRoute>
+            <RoleBasedRoute allowedRoles={['admin']}>
               <SettingsPage />
-            </ProtectedRoute>
+            </RoleBasedRoute>
           }
         />
 

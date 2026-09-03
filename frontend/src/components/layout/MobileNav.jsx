@@ -1,19 +1,22 @@
 import { useAuth } from '../../context/useAuth';
 import { useLocation, Link } from 'react-router-dom';
-import { Pill, Clock, TrendingUp, BarChart3, Users } from 'lucide-react';
+import { LayoutGrid, Pill, Calendar, Bell, Users, BarChart3, Settings } from 'lucide-react';
 import './MobileNav.css';
 
 const MOBILE_NAVIGATION = [
   {
-    label: 'Medications',
-    href: '/medications',
-    icon: Pill,
+    label: 'Dashboard',
+    href: '/dashboard',
+    icon: LayoutGrid,
     roles: ['patient', 'caregiver', 'admin'],
   },
-  { label: 'Reminders', href: '/reminders', icon: Clock, roles: ['patient', 'caregiver'] },
-  { label: 'Adherence', href: '/adherence', icon: TrendingUp, roles: ['patient', 'caregiver'] },
-  { label: 'Analytics', href: '/analytics', icon: BarChart3, roles: ['admin', 'caregiver'] },
-  { label: 'Patients', href: '/patients', icon: Users, roles: ['admin', 'caregiver'] },
+  { label: 'Prescriptions', href: '/medications', icon: Pill, roles: ['patient'] },
+  { label: 'Reminders', href: '/reminders', icon: Calendar, roles: ['patient', 'caregiver'] },
+  { label: 'Patients', href: '/patients', icon: Users, roles: ['caregiver'] },
+  { label: 'Users', href: '/admin/users', icon: Users, roles: ['admin'] },
+  { label: 'Analytics', href: '/analytics', icon: BarChart3, roles: ['admin'] },
+  { label: 'Notifications', href: '/notifications', icon: Bell, roles: ['patient', 'caregiver'] },
+  { label: 'Settings', href: '/settings', icon: Settings, roles: ['admin'] },
 ];
 
 export function MobileNav() {
