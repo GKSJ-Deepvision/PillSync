@@ -1,5 +1,5 @@
 // import api from './api'; // Will be used when Django backend is connected
-import { MOCK_PATIENTS, MOCK_USERS, MOCK_ACTIVITY_LOGS } from '../data/mockData';
+import { MOCK_PATIENTS, MOCK_USERS, MOCK_ACTIVITY_LOGS, MOCK_MEDICATION_HISTORY } from '../data/mockData';
 
 const delay = (ms = 500) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -36,5 +36,13 @@ export const patientService = {
     // return response.data;
     await delay();
     return MOCK_ACTIVITY_LOGS;
+  },
+
+  fetchMedicationHistory: async (patientId) => {
+    // Future Integration:
+    // const response = await api.get(`/patients/${patientId}/medication-history/`);
+    // return response.data;
+    await delay();
+    return MOCK_MEDICATION_HISTORY.filter((record) => record.patientId === patientId);
   }
 };

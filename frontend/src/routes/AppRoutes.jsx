@@ -25,6 +25,7 @@ import Medicines from '../pages/patient/Medicines';
 import Schedule from '../pages/patient/Schedule';
 import Adherence from '../pages/patient/Adherence';
 import Notifications from '../pages/patient/Notifications';
+import MedicationHistory from '../pages/patient/MedicationHistory';
 
 // Caregiver Pages
 import CaregiverDashboard from '../pages/caregiver/CaregiverDashboard';
@@ -84,6 +85,7 @@ const AppRoutes = () => {
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/adherence" element={<Adherence />} />
             <Route path="/notifications" element={<Notifications />} />
+            <Route path="/medication-history" element={<MedicationHistory />} />
             <Route path="/profile/edit" element={<EditProfile />} />
           </Route>
 

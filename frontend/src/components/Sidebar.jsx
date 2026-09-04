@@ -25,6 +25,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       { name: 'Profile', path: '/profile', icon: User },
       { name: 'Medicines', path: '/medicines', icon: Pill },
       { name: 'Schedule', path: '/schedule', icon: Calendar },
+      { name: 'Medication History', path: '/medication-history', icon: History },
       { name: 'Adherence', path: '/adherence', icon: Activity },
       { name: 'Notifications', path: '/notifications', icon: Bell },
       { name: 'Settings', path: '/settings', icon: Settings }

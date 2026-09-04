@@ -120,6 +120,17 @@ export const MOCK_NOTIFICATIONS = [
   { id: 'not_3', title: 'Caregiver Update', message: 'Sarah Smith viewed your adherence report.', time: 'Yesterday', read: true }
 ];
 
+export const MOCK_MEDICATION_HISTORY = [
+  { id: 'hist_1', patientId: 'pat_1', medicationName: 'Metformin', dosage: '500mg', date: '2026-08-31', time: '08:00 AM', status: 'Taken', notes: 'Taken with breakfast.' },
+  { id: 'hist_2', patientId: 'pat_1', medicationName: 'Lisinopril', dosage: '10mg', date: '2026-08-31', time: '08:00 AM', status: 'Taken', notes: 'No issues reported.' },
+  { id: 'hist_3', patientId: 'pat_1', medicationName: 'Metformin', dosage: '500mg', date: '2026-08-30', time: '08:00 PM', status: 'Missed', notes: 'Evening dose was not recorded.' },
+  { id: 'hist_4', patientId: 'pat_1', medicationName: 'Atorvastatin', dosage: '20mg', date: '2026-08-30', time: '09:00 PM', status: 'Skipped', notes: 'Skipped due to a late dinner.' },
+  { id: 'hist_5', patientId: 'pat_1', medicationName: 'Metformin', dosage: '500mg', date: '2026-08-29', time: '08:00 AM', status: 'Taken', notes: 'Taken as scheduled.' },
+  { id: 'hist_6', patientId: 'pat_2', medicationName: 'Amlodipine', dosage: '5mg', date: '2026-08-31', time: '09:00 AM', status: 'Taken', notes: 'Taken with water.' },
+  { id: 'hist_7', patientId: 'pat_2', medicationName: 'Albuterol Inhaler', dosage: '2 puffs', date: '2026-08-30', time: '12:00 PM', status: 'Missed', notes: 'Dose was not recorded.' },
+  { id: 'hist_8', patientId: 'pat_3', medicationName: 'Levothyroxine', dosage: '100mcg', date: '2026-08-31', time: '07:00 AM', status: 'Skipped', notes: 'Skipped before a fasting appointment.' }
+];
+
 export const MOCK_ACTIVITY_LOGS = [
   { id: 'act_1', user: 'Sarah Smith', role: 'caregiver', action: 'Viewed John Doe dashboard', time: '2026-08-31T18:45:00Z', status: 'Success' },
   { id: 'act_2', user: 'John Doe', role: 'patient', action: 'Logged Metformin (Morning dose)', time: '2026-08-31T18:00:00Z', status: 'Success' },
