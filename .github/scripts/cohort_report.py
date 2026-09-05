@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -29,7 +30,15 @@ REPO = os.environ.get("GITHUB_REPOSITORY", "")
 TOKEN = os.environ.get("GITHUB_TOKEN", "")
 
 
+#: Returned when the API could not answer. Distinct from None, which means the
+#: resource genuinely does not exist - reporting an outage as "no branch" would
+#: tell a mentor an intern has done nothing when in fact we simply could not
+#: look.
+UNKNOWN = object()
+
+
 def api_get(path: str, params: dict[str, str] | None = None):
+    """Fetch from the API. Returns the payload, None for 404, UNKNOWN on error."""
     url = f"{API}{path}"
     if params:
         url += "?" + urllib.parse.urlencode(params)
@@ -38,17 +47,27 @@ def api_get(path: str, params: dict[str, str] | None = None):
     request.add_header("X-GitHub-Api-Version", "2022-11-28")
     if TOKEN:
         request.add_header("Authorization", f"Bearer {TOKEN}")
-    try:
-        with urllib.request.urlopen(request, timeout=30) as response:
-            return json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as exc:
-        if exc.code == 404:
-            return None
-        warn(f"GitHub API {exc.code} for {path}")
-        return None
-    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
-        warn(f"GitHub API call failed for {path}: {exc}")
-        return None
+
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                return None
+            # Rate limiting and 5xx are worth one more try; 401/403 are not.
+            if exc.code in {429, 500, 502, 503, 504} and attempt < 2:
+                time.sleep(2 * (attempt + 1))
+                continue
+            warn(f"GitHub API {exc.code} for {path}")
+            return UNKNOWN
+        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
+            if attempt < 2:
+                time.sleep(2 * (attempt + 1))
+                continue
+            warn(f"GitHub API call failed for {path}: {exc}")
+            return UNKNOWN
+    return UNKNOWN
 
 
 def days_since(iso: str | None) -> str:
@@ -69,6 +88,8 @@ def days_since(iso: str | None) -> str:
 def branch_status(branch: str) -> dict[str, str]:
     encoded = urllib.parse.quote(branch, safe="")
     info = api_get(f"/repos/{REPO}/branches/{encoded}")
+    if info is UNKNOWN:
+        return {"exists": "unknown", "last_commit": "-", "author": "-", "commits": "-", "ci": "-"}
     if info is None:
         return {"exists": "no", "last_commit": "-", "author": "-", "commits": "-", "ci": "-"}
 
@@ -78,14 +99,14 @@ def branch_status(branch: str) -> dict[str, str]:
 
     # Commit count ahead of main, which is what the intern has actually added.
     comparison = api_get(f"/repos/{REPO}/compare/main...{encoded}")
-    ahead = str(comparison.get("ahead_by", "-")) if comparison else "-"
+    ahead = str(comparison.get("ahead_by", "-")) if isinstance(comparison, dict) else "-"
 
     runs = api_get(
         f"/repos/{REPO}/actions/runs",
         {"branch": branch, "per_page": "1", "event": "push"},
     )
     ci = "-"
-    if runs and runs.get("workflow_runs"):
+    if isinstance(runs, dict) and runs.get("workflow_runs"):
         run = runs["workflow_runs"][0]
         ci = run.get("conclusion") or run.get("status") or "-"
 
@@ -110,12 +131,15 @@ def main() -> int:
     ]
 
     not_started: list[str] = []
+    unknown: list[str] = []
     failing: list[str] = []
     stale: list[str] = []
 
     for intern in data.interns:
         status = branch_status(intern.branch)
-        if status["exists"] == "no":
+        if status["exists"] == "unknown":
+            unknown.append(intern.name)
+        elif status["exists"] == "no":
             not_started.append(intern.name)
         if status["ci"] == "failure":
             failing.append(intern.name)
@@ -144,6 +168,13 @@ def main() -> int:
         f"- **No push in 7+ days ({len(stale)}):** " + (", ".join(stale) if stale else "none"),
         "",
     ]
+    if unknown:
+        lines += [
+            f"> **{len(unknown)} branch(es) could not be checked** because the GitHub API did "
+            "not answer: " + ", ".join(unknown) + ". Re-run the report before drawing any "
+            "conclusion about them.",
+            "",
+        ]
     summary("\n".join(lines))
     return 0
 
