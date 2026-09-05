@@ -49,6 +49,16 @@ PRODUCT_FILE = RAW_DIR / "product.txt"
 # derivatives and cellular therapies are not what this platform tracks.
 KEPT_PRODUCT_TYPES = {"HUMAN PRESCRIPTION DRUG", "HUMAN OTC DRUG"}
 
+# Homeopathic preparations are ~13,700 of the directory. They carry ingredient
+# names that match our category rules (vitamins, thyroid extracts) but they are
+# not medicines a reminder and refill platform should be suggesting, and their
+# multi-ingredient names crowd out the real drugs in search results.
+EXCLUDED_MARKETING_CATEGORIES = ("HOMEOPATHIC",)
+
+# A name listing this many active ingredients is a combination product whose
+# label runs to several lines - unusable in a picker.
+MAX_INGREDIENTS_IN_NAME = 3
+
 # Dosage forms a patient can be reminded to take at home.
 KEPT_FORM_PATTERNS = (
     "TABLET",
@@ -290,11 +300,28 @@ def clean(value: str) -> str:
     return _WS.sub(" ", (value or "").strip())
 
 
+# The directory writes Greek-letter chemical prefixes as ".alpha.-tocopherol".
+_GREEK_PREFIX = re.compile(r"^\.([a-z]+)\.-", re.I)
+_INGREDIENT_SPLIT = re.compile(r",|\s+-\s+|\band\b", re.I)
+
+
+def count_ingredients(name: str) -> int:
+    """How many active ingredients a generic name lists.
+
+    The directory separates them with commas, " - " or the word "and", so all
+    three count. Used to drop combination products whose name cannot be shown
+    in a picker.
+    """
+    parts = [part for part in _INGREDIENT_SPLIT.split(name) if part.strip()]
+    return len(parts)
+
+
 def title_case(value: str) -> str:
     """Title-case a drug name without mangling things like 'HCl' or 'XR'."""
     value = clean(value)
     if not value:
         return ""
+    value = _GREEK_PREFIX.sub(lambda m: f"{m.group(1).capitalize()}-", value)
     words = []
     for word in value.split(" "):
         if len(word) <= 3 and word.isupper():
@@ -304,6 +331,19 @@ def title_case(value: str) -> str:
         else:
             words.append(word)
     return " ".join(words)
+
+
+def normalise_generic(name: str) -> str:
+    """One spelling per combination product.
+
+    The directory writes the same three-ingredient painkiller as
+    "ACETAMINOPHEN, ASPIRIN AND CAFFEINE", "ACETAMINOPHEN AND ASPIRIN AND
+    CAFFEINE" and "ACETAMINOPHEN ASPIRIN CAFFEINE". Splitting on every
+    separator and rejoining with one collapses those into a single catalogue
+    entry instead of three near-duplicates.
+    """
+    parts = [title_case(part) for part in _INGREDIENT_SPLIT.split(name) if part.strip()]
+    return " / ".join(parts)
 
 
 def download(force: bool = False) -> None:
@@ -363,6 +403,10 @@ def build() -> dict[str, int]:
             if clean(record.get("NDC_EXCLUDE_FLAG", "")).upper() == "E":
                 continue
 
+            marketing = clean(record.get("MARKETINGCATEGORYNAME", "")).upper()
+            if any(term in marketing for term in EXCLUDED_MARKETING_CATEGORIES):
+                continue
+
             dosage_form = clean(record.get("DOSAGEFORMNAME", ""))
             if not keep_form(dosage_form):
                 continue
@@ -381,7 +425,15 @@ def build() -> dict[str, int]:
             strength = clean(record.get("ACTIVE_NUMERATOR_STRENGTH", "")).split(";")[0]
             unit = clean(record.get("ACTIVE_INGRED_UNIT", "")).split(";")[0]
 
-            generic_display = title_case(generic.split(",")[0])
+            # Keep the whole ingredient list, never just the part before the
+            # first comma: truncating turns "Acetaminophen, Aspirin, and
+            # Caffeine" into plain "Acetaminophen", which is a different drug.
+            # Products with more ingredients than we can label are dropped -
+            # a 17-ingredient multivitamin has no usable generic name, and it
+            # is the brand name people recognise on the bottle anyway.
+            if count_ingredients(generic) > MAX_INGREDIENTS_IN_NAME:
+                continue
+            generic_display = normalise_generic(generic)
             key = (generic_display.lower(), dosage_form.lower(), f"{strength} {unit}".lower())
             if key in seen:
                 continue

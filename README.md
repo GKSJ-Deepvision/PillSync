@@ -104,7 +104,7 @@ Report templates are in [`docs/milestones/`](docs/milestones/).
 authentication with JWT and Google OAuth2, role-based access for
 patient / caregiver / admin, patient and family profiles, the finalised database
 schema, and a medicine catalogue seeded from the FDA National Drug Code
-Directory (1,764 presentations across 313 generics, in the six condition groups
+Directory (1,742 presentations across 369 generics, in the six condition groups
 the specification names).
 
 108 backend tests (87% coverage), 43 frontend tests, 22 dataset tests.

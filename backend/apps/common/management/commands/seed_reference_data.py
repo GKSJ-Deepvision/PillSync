@@ -179,6 +179,12 @@ class Command(BaseCommand):
                 else:
                     to_update.append(MedicineReference(id=pk, **fields))
 
+        # Rows that were in a previous CSV but are not in this one. Rebuilding
+        # the catalogue with a stricter filter must not leave the dropped
+        # products lingering in search results. They are deactivated rather
+        # than deleted, because a patient's medicine may already point at one.
+        retired_ids = [pk for key, pk in existing.items() if key not in seen]
+
         with transaction.atomic():
             if to_create:
                 MedicineReference.objects.bulk_create(to_create, batch_size=BATCH_SIZE)
@@ -197,8 +203,11 @@ class Command(BaseCommand):
                     ],
                     batch_size=BATCH_SIZE,
                 )
+            if retired_ids:
+                MedicineReference.objects.filter(id__in=retired_ids).update(is_active=False)
 
         self.stdout.write(
-            f"  medicines: {len(to_create)} created, {len(to_update)} updated, {skipped} skipped"
+            f"  medicines: {len(to_create)} created, {len(to_update)} updated, "
+            f"{len(retired_ids)} retired, {skipped} skipped"
         )
         return len(to_create) + len(to_update)

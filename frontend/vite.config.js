@@ -7,8 +7,11 @@ export default defineConfig({
   server: {
     port: 5173,
     // Talk to the Django dev server without CORS in development.
+    // 127.0.0.1, not localhost: Node resolves "localhost" to IPv6 ::1 first,
+    // while Django's runserver binds IPv4 only - so the proxy would silently
+    // miss it (and can land on whatever else holds the IPv6 port).
     proxy: {
-      '/api': { target: 'http://localhost:8000', changeOrigin: true },
+      '/api': { target: 'http://127.0.0.1:8000', changeOrigin: true },
     },
   },
   test: {

@@ -44,8 +44,9 @@ by role in the router and again by the API.
 
 **Datasets.** ~116,000 FDA National Drug Code products downloaded, filtered to
 home-administered human medicines, and categorised into the six condition
-groups the specification names. 2,731 categorised presentations, of which 1,764
-across 313 generics are committed as the seed catalogue, plus 20 conditions.
+groups the specification names. 2,562 categorised presentations, of which
+1,742 across 369 generics are committed as the seed catalogue, plus 20
+conditions.
 
 ## Database design
 
@@ -70,20 +71,26 @@ patient at most one primary emergency contact.
 | Output | Rows | Tracked? |
 |---|---|---|
 | `ml/data/raw/product.txt` | 115,981 | No — rebuildable |
-| `ml/data/processed/medicines_catalogue.csv` | 2,731 | No |
-| `backend/apps/common/data/medicines_seed.csv` | 1,764 | Yes (293 KB) |
+| `ml/data/processed/medicines_catalogue.csv` | 2,562 | No |
+| `backend/apps/common/data/medicines_seed.csv` | 1,742 | Yes (288 KB) |
 | `backend/apps/common/data/conditions_seed.json` | 20 | Yes |
 | `ml/data/samples/medicines_sample.csv` | 120 | Yes |
 
 Source: the FDA National Drug Code Directory, public domain. No patient data of
 any kind is committed.
 
-Category coverage: Blood Pressure 658 · Diabetes 246 · Thyroid 115 ·
-Antibiotics 761 · Vitamins 504 · Heart Medications 447 (before the per-category
+Category coverage: Blood Pressure 658 · Diabetes 246 · Thyroid 103 ·
+Antibiotics 757 · Vitamins 334 · Heart Medications 464 (before the per-category
 seed cap). The seed keeps the most widely marketed generics in each category
 with all their strengths — ranking by how many NDC products carry a name, rather
 than slicing alphabetically, which would have dropped everyday drugs like
 metoprolol.
+
+Homeopathic preparations (~13,700 of the directory) are excluded: their
+ingredient names match the category rules but they are not medicines this
+platform should suggest, and their names crowd out real drugs in search.
+Combination products keep their full ingredient list under one normalised
+spelling, so the same painkiller does not appear three times.
 
 ## How to run and verify it
 

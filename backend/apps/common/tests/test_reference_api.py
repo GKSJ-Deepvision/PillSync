@@ -146,3 +146,68 @@ class TestPagination:
         assert response.status_code == 200
         # Requesting an enormous page must not return the whole table.
         assert len(response.data["results"]) <= 500
+
+
+class TestSeedRetirement:
+    """A rebuilt catalogue must not leave dropped products in search results."""
+
+    def test_rows_missing_from_the_csv_are_deactivated(self, tmp_path):
+        stale = MedicineReference.objects.create(
+            generic_name="Withdrawn Compound",
+            dosage_form="Tablet",
+            strength="10",
+            strength_unit="mg/1",
+            category=MedicineCategory.OTHER,
+        )
+
+        csv_path = tmp_path / "medicines.csv"
+        with open(csv_path, "w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(
+                handle,
+                fieldnames=[
+                    "product_ndc",
+                    "generic_name",
+                    "brand_name",
+                    "dosage_form",
+                    "route",
+                    "strength",
+                    "strength_unit",
+                    "category",
+                    "categories",
+                    "pharm_class",
+                    "product_type",
+                    "requires_prescription",
+                ],
+            )
+            writer.writeheader()
+            writer.writerow(
+                {
+                    "product_ndc": "0001-0001",
+                    "generic_name": "Kept Compound",
+                    "brand_name": "",
+                    "dosage_form": "Tablet",
+                    "route": "Oral",
+                    "strength": "5",
+                    "strength_unit": "mg/1",
+                    "category": "DIABETES",
+                    "categories": "DIABETES",
+                    "pharm_class": "",
+                    "product_type": "HUMAN PRESCRIPTION DRUG",
+                    "requires_prescription": "true",
+                }
+            )
+
+        call_command("seed_reference_data", medicines=csv_path, stdout=StringIO())
+
+        stale.refresh_from_db()
+        assert stale.is_active is False, "a product no longer in the CSV must be retired"
+        assert MedicineReference.objects.get(generic_name="Kept Compound").is_active is True
+
+    def test_retired_rows_disappear_from_the_api(self, patient_client, medicine):
+        medicine.is_active = False
+        medicine.save(update_fields=["is_active"])
+
+        response = patient_client.get(
+            reverse("v1:medicine-reference-list"), {"search": "metformin"}
+        )
+        assert response.data["count"] == 0
