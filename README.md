@@ -98,6 +98,20 @@ Report templates are in [`docs/milestones/`](docs/milestones/).
 
 ---
 
+## Current state
+
+**Milestone 1 is complete on `main`** and serves as the reference implementation:
+authentication with JWT and Google OAuth2, role-based access for
+patient / caregiver / admin, patient and family profiles, the finalised database
+schema, and a medicine catalogue seeded from the FDA National Drug Code
+Directory (1,764 presentations across 313 generics, in the six condition groups
+the specification names).
+
+108 backend tests (87% coverage), 43 frontend tests, 22 dataset tests.
+See [`docs/milestones/milestone-1.md`](docs/milestones/milestone-1.md).
+
+Milestones 2–4 are not started: those app folders hold only their README.
+
 ## Quick start
 
 ```bash
@@ -108,12 +122,33 @@ git checkout -b intern/NN-firstname-lastname origin/main
 
 Then follow [INTERN_GUIDE.md](INTERN_GUIDE.md).
 
+Run it locally:
+
+```bash
+# Backend
+cd backend
+python -m venv .venv
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
+pip install -r requirements/dev.txt
+cp .env.example .env
+python manage.py migrate
+python manage.py seed_reference_data                # loads the medicine catalogue
+python manage.py runserver                          # http://localhost:8000
+
+# Frontend, in a second terminal
+cd frontend
+npm install && cp .env.example .env
+npm run dev                                         # http://localhost:5173
+```
+
 Everything at once, with Docker:
 
 ```bash
 cp backend/.env.example backend/.env
 docker compose up --build
 ```
+
+API documentation: `http://localhost:8000/api/docs/`
 
 ---
 

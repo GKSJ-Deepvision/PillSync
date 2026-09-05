@@ -7,32 +7,38 @@ Context API, Firebase Cloud Messaging for push, Jest + React Testing Library.
 
 ## Layout
 
-| Path | Purpose |
-|---|---|
-| `src/api/` | Axios instance, interceptors, one module per backend resource |
-| `src/features/` | One folder per spec module (auth, medications, ocr, reminders, adherence, refills, notifications, analytics, caregiver, admin) |
-| `src/components/` | Reusable UI — `common/`, `layout/`, `charts/` |
-| `src/pages/` | Route-level screens composed from features |
-| `src/routes/` | Router setup and role-protected routes |
-| `src/store/` | Redux store and slices (skip if you use Context) |
-| `src/context/` | React contexts (auth, theme, notifications) |
-| `src/hooks/` | Shared custom hooks |
-| `src/utils/` | Formatters, date helpers, validators |
-| `src/styles/` | Tailwind entry CSS and design tokens |
-| `tests/` | Cross-cutting `unit/` and `integration/` tests |
+| Path              | Purpose                                                                                                                        |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `src/api/`        | Axios instance, interceptors, one module per backend resource                                                                  |
+| `src/features/`   | One folder per spec module (auth, medications, ocr, reminders, adherence, refills, notifications, analytics, caregiver, admin) |
+| `src/components/` | Reusable UI — `common/`, `layout/`, `charts/`                                                                                  |
+| `src/pages/`      | Route-level screens composed from features                                                                                     |
+| `src/routes/`     | Router setup and role-protected routes                                                                                         |
+| `src/store/`      | Redux store and slices (skip if you use Context)                                                                               |
+| `src/context/`    | React contexts (auth, theme, notifications)                                                                                    |
+| `src/hooks/`      | Shared custom hooks                                                                                                            |
+| `src/utils/`      | Formatters, date helpers, validators                                                                                           |
+| `src/styles/`     | Tailwind entry CSS and design tokens                                                                                           |
+| `tests/`          | Cross-cutting `unit/` and `integration/` tests                                                                                 |
 
-## Scaffolding (do this once, on your own branch)
+## Running it
+
+The app is already scaffolded - Vite, React 19, Tailwind 4, Redux Toolkit,
+React Router, Axios and Vitest are installed and wired.
 
 ```bash
 cd frontend
-npm create vite@latest . -- --template react
 npm install
-npm install axios react-router-dom @reduxjs/toolkit react-redux
-npm install -D tailwindcss postcss autoprefixer eslint prettier vitest @testing-library/react @testing-library/jest-dom jsdom
+cp .env.example .env
+npm run dev            # http://localhost:5173
 ```
 
-Keep the folders above — move the generated files into them rather than starting
-a new layout.
+The dev server proxies `/api` to `http://localhost:8000`, so run the backend in
+another terminal and there is no CORS to configure.
+
+Add new UI inside the folders above. Feature components live under
+`src/features/<module>/`; a page in `src/pages/` should stay a thin route
+wrapper that composes them.
 
 ## Checks CI will run on your branch
 

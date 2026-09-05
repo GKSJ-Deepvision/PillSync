@@ -1,11 +1,13 @@
 # Shared tooling configuration for the PillSync backend.
+#
+# pytest is configured in pytest.ini, not here - see the note at the top of that file.
 # CI runs ruff, black, isort and pytest against these settings — keep them as-is
 # so every intern's branch is checked identically.
 
 [tool.black]
 line-length = 100
-target-version = ["py311"]
-extend-exclude = "/(migrations|\.venv|node_modules)/"
+target-version = ["py312"]
+extend-exclude = '/(migrations|\.venv|node_modules)/'
 
 [tool.isort]
 profile = "black"
@@ -14,7 +16,7 @@ skip_glob = ["*/migrations/*", "*/.venv/*"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py312"
 exclude = ["migrations", ".venv", "node_modules", "build", "dist"]
 
 [tool.ruff.lint]
@@ -27,19 +29,6 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 "tests/*" = ["B011"]
-
-[tool.pytest.ini_options]
-minversion = "7.0"
-testpaths = ["tests", "apps"]
-python_files = ["test_*.py", "*_test.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
-addopts = "-ra --strict-markers"
-markers = [
-    "unit: fast tests with no external dependencies",
-    "integration: tests that touch the database or the API layer",
-    "slow: long-running tests",
-]
 
 [tool.coverage.run]
 branch = true

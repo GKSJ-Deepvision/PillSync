@@ -1,0 +1,121 @@
+product_ndc,generic_name,brand_name,dosage_form,route,strength,strength_unit,category,categories,pharm_class,product_type,requires_prescription
+0093-2267,Amoxicillin,Amoxicillin,"Tablet, Chewable",Oral,125,mg/1,ANTIBIOTICS,ANTIBIOTICS,Penicillin-class Antibacterial,HUMAN PRESCRIPTION DRUG,true
+80425-0180,Amoxicillin And Clavulanate Potassium,Amoxicillin And Clavulanate Potassium,"Tablet, Film Coated",Oral,125,mg/1,ANTIBIOTICS,ANTIBIOTICS,"Penicillin-class Antibacterial, beta Lactamase Inhibitor",HUMAN PRESCRIPTION DRUG,true
+67296-1921,Amoxicillin And Clavulanate Potassium,Amoxicillin AND Clavulanate Potassium,FOR Suspension,Oral,600,mg/5mL,ANTIBIOTICS,ANTIBIOTICS,"Penicillin-class Antibacterial, beta Lactamase Inhibitor",HUMAN PRESCRIPTION DRUG,true
+0781-3409,Ampicillin Sodium,Ampicillin,"Injection, Powder, FOR Solution",Intravenous,10,g/1,ANTIBIOTICS,ANTIBIOTICS,Penicillin-class Antibacterial,HUMAN PRESCRIPTION DRUG,true
+62756-512,Azithromycin,Azithromycin,"Injection, Powder, Lyophilized, FOR Solution",Intravenous,500,mg/5mL,ANTIBIOTICS,ANTIBIOTICS,Macrolide Antimicrobial,HUMAN PRESCRIPTION DRUG,true
+0143-9665,Cefazolin,Cefazolin,"Injection, Powder, FOR Solution",Intravenous,20,g/1,ANTIBIOTICS,ANTIBIOTICS,Cephalosporin Antibacterial,HUMAN PRESCRIPTION DRUG,true
+0338-0096,Cefazolin Sodium,Cefazolin,"Injection, Solution",Intravenous,3,g/150mL,ANTIBIOTICS,ANTIBIOTICS,Cephalosporin Antibacterial,HUMAN PRESCRIPTION DRUG,true
+66288-6100,Ceftriaxone Sodium,Ceftriaxone,"Injection, Powder, FOR Solution",Intravenous,100,g/1,ANTIBIOTICS,ANTIBIOTICS,Cephalosporin Antibacterial,HUMAN PRESCRIPTION DRUG,true
+0093-3147,Cephalexin,Cephalexin,Capsule,Oral,500,mg/1,ANTIBIOTICS,ANTIBIOTICS,Cephalosporin Antibacterial,HUMAN PRESCRIPTION DRUG,true
+0143-9929,Ciprofloxacin,Ciprofloxacin,"Tablet, Film Coated",Oral,750,mg/1,ANTIBIOTICS,ANTIBIOTICS,Fluoroquinolone Antibacterial,HUMAN PRESCRIPTION DRUG,true
+0299-3822,Doxycycline,Oracea,Capsule,Oral,40,mg/1,ANTIBIOTICS,ANTIBIOTICS,Tetracycline-class Drug,HUMAN PRESCRIPTION DRUG,true
+27241-154,Doxycycline Hyclate,Doxycycline Hyclate,Tablet,Oral,150,mg/1,ANTIBIOTICS,ANTIBIOTICS,Tetracycline-class Drug,HUMAN PRESCRIPTION DRUG,true
+46708-387,Doxycycline Hyclate,Doxycycline Hyclate,"Tablet, Film Coated",Oral,75,mg/1,ANTIBIOTICS,ANTIBIOTICS,Tetracycline-class Drug,HUMAN PRESCRIPTION DRUG,true
+0338-0511,Gentamicin Sulfate,Gentamicin Sulfate In Sodium Chloride,"Injection, Solution",Intravenous,100,mg/50mL,ANTIBIOTICS,ANTIBIOTICS,Aminoglycoside Antibacterial,HUMAN PRESCRIPTION DRUG,true
+63323-355,Levofloxacin,Levofloxacin,Injection,Intravenous,5,mg/mL,ANTIBIOTICS,ANTIBIOTICS,,HUMAN PRESCRIPTION DRUG,true
+0781-3431,Linezolid,Linezolid,"Injection, Solution",Intravenous,200,mg/100mL,ANTIBIOTICS,ANTIBIOTICS,Oxazolidinone Antibacterial,HUMAN PRESCRIPTION DRUG,true
+0143-9485,Meropenem,Meropenem,"Injection, Powder, FOR Solution",Intravenous,500,mg/10mL,ANTIBIOTICS,ANTIBIOTICS,Penem Antibacterial,HUMAN PRESCRIPTION DRUG,true
+0591-5695,Minocycline Hydrochloride,Minocycline Hydrochloride,Capsule,Oral,100,mg/1,ANTIBIOTICS,ANTIBIOTICS,Tetracycline-class Drug,HUMAN PRESCRIPTION DRUG,true
+59651-337,Minocycline Hydrochloride,Minocycline Hydrochloride,"Tablet, Film Coated",Oral,50,mg/1,ANTIBIOTICS,ANTIBIOTICS,Tetracycline-class Drug,HUMAN PRESCRIPTION DRUG,true
+87879-003,Neomycin Sulfate,Neomycin Sulfate,Granule,Topical,100,kg/100kg,ANTIBIOTICS,ANTIBIOTICS,Aminoglycoside Antibacterial,HUMAN OTC DRUG,false
+65219-256,Piperacillin And Tazobactam,Piperacillin And Tazobactam,"Injection, Powder, FOR Solution",Intravenous,36,g/180mL,ANTIBIOTICS,ANTIBIOTICS,"Penicillin-class Antibacterial, beta Lactamase Inhibitor",HUMAN PRESCRIPTION DRUG,true
+63323-304,Piperacillin Sodium And Tazobactam Sodium,Piperacillin And Tazobactam,"Injection, Powder, FOR Solution",Intravenous,36,g/180mL,ANTIBIOTICS,ANTIBIOTICS,"Penicillin-class Antibacterial, beta Lactamase Inhibitor",HUMAN PRESCRIPTION DRUG,true
+0409-3578,Tobramycin,Tobramycin,"Injection, Solution",Intramuscular,40,mg/mL,ANTIBIOTICS,ANTIBIOTICS,Aminoglycoside Antibacterial,HUMAN PRESCRIPTION DRUG,true
+72078-065,Vancomycin Hydrochloride,Vancomycin Hydrochloride,"Injection, Powder, Lyophilized, FOR Solution",Intravenous,1.75,g/35mL,ANTIBIOTICS,ANTIBIOTICS,Glycopeptide Antibacterial,HUMAN PRESCRIPTION DRUG,true
+69238-2261,Vancomycin Hydrochloride,Vancomycin Hydrochloride,Solution,Oral,250,mg/5mL,ANTIBIOTICS,ANTIBIOTICS,Glycopeptide Antibacterial,HUMAN PRESCRIPTION DRUG,true
+83634-114,Vancomycin Hydrochloride,Vancomycin Hydrochloride,"Injection, Powder, FOR Solution",Intravenous,750,mg/1,ANTIBIOTICS,ANTIBIOTICS,Glycopeptide Antibacterial,HUMAN PRESCRIPTION DRUG,true
+66993-266,Amlodipine And Atorvastatin,Amlodipine And Atorvastatin,"Tablet, Coated",Oral,5,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE|HEART,"Calcium Channel Blocker, Dihydropyridine Calcium Channel Blocker, HMG-CoA Reductase Inhibitor",HUMAN PRESCRIPTION DRUG,true
+0185-0211,Benazepril Hydrochloride And Hydrochlorothiazide,Benazepril Hydrochloride And Hydrochlorothiazide,"Tablet, Film Coated",Oral,20,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,"Angiotensin Converting Enzyme Inhibitor, Thiazide Diuretic",HUMAN PRESCRIPTION DRUG,true
+10135-741,Bisoprolol Fumarate And Hydrochlorothiazide,Bisoprolol Fumarate And Hydrochlorothiazide,Tablet,Oral,5,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,"Thiazide Diuretic, beta-Adrenergic Blocker",HUMAN PRESCRIPTION DRUG,true
+0228-2129,Clonidine Hydrochloride,Clonidine Hydrochloride,Tablet,Oral,.3,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,Central alpha-2 Adrenergic Agonist,HUMAN PRESCRIPTION DRUG,true
+0187-0797,Diltiazem Hydrochloride,Cardizem CD,"Capsule, Coated, Extended Release",Oral,240,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,Calcium Channel Blocker,HUMAN PRESCRIPTION DRUG,true
+0641-6013,Diltiazem Hydrochloride,Diltiazem Hydrochloride,Injection,Intravenous,5,mg/mL,BLOOD_PRESSURE,BLOOD_PRESSURE,Calcium Channel Blocker,HUMAN PRESCRIPTION DRUG,true
+68682-709,Diltiazem Hydrochloride Extended-Release Tablets,Diltiazem Hydrochloride,"Tablet, Extended Release",Oral,420,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,Calcium Channel Blocker,HUMAN PRESCRIPTION DRUG,true
+42291-454,Eplerenone,Eplerenone,"Tablet, Coated",Oral,25,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,Aldosterone Antagonist,HUMAN PRESCRIPTION DRUG,true
+61442-431,Felodipine,Felodipine,"Tablet, Film Coated",Oral,2.5,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,Dihydropyridine Calcium Channel Blocker,HUMAN PRESCRIPTION DRUG,true
+0054-4299,Furosemide,Furosemide,Tablet,Oral,40,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,Loop Diuretic,HUMAN PRESCRIPTION DRUG,true
+0024-5852,Irbesartan,Avapro,"Tablet, Film Coated",Oral,300,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,Angiotensin 2 Receptor Blocker,HUMAN PRESCRIPTION DRUG,true
+70377-063,Labetalol Hydrochloride,Labetalol Hydrochloride,"Tablet, Film Coated",Oral,400,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,beta-Adrenergic Blocker,HUMAN PRESCRIPTION DRUG,true
+11788-100,Losartan Potassium,Losartan Potassium,Tablet,Oral,25,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,Angiotensin 2 Receptor Blocker,HUMAN PRESCRIPTION DRUG,true
+31722-592,Metoprolol Succinate,Metoprolol Succinate,"Tablet, Film Coated, Extended Release",Oral,200,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,beta-Adrenergic Blocker,HUMAN PRESCRIPTION DRUG,true
+0378-4593,Metoprolol Tartrate,Metoprolol Tartrate,"Tablet, Film Coated",Oral,37.5,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,beta-Adrenergic Blocker,HUMAN PRESCRIPTION DRUG,true
+43066-029,Nicardipine Hydrochloride,Cardene IV,"Injection, Solution",Intravenous,2.5,mg/10mL,BLOOD_PRESSURE,BLOOD_PRESSURE,Dihydropyridine Calcium Channel Blocker,HUMAN PRESCRIPTION DRUG,true
+33342-179,Olmesartan Medoxomil,Olmesartan Medoxomil,Tablet,Oral,20,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,Angiotensin 2 Receptor Blocker,HUMAN PRESCRIPTION DRUG,true
+0378-0183,Propranolol Hydrochloride,Propranolol Hydrochloride,Tablet,Oral,20,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,beta-Adrenergic Blocker,HUMAN PRESCRIPTION DRUG,true
+43547-410,Quinapril,Quinapril,Tablet,Oral,5,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,Angiotensin Converting Enzyme Inhibitor,HUMAN PRESCRIPTION DRUG,true
+0615-8451,Spironolactone,Spironolactone,Tablet,Oral,25,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,Aldosterone Antagonist,HUMAN PRESCRIPTION DRUG,true
+16571-225,Timolol Maleate,Timolol Maleate,Tablet,Oral,20,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,beta-Adrenergic Blocker,HUMAN PRESCRIPTION DRUG,true
+0078-0359,Valsartan,Diovan,Tablet,Oral,160,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,Angiotensin 2 Receptor Blocker,HUMAN PRESCRIPTION DRUG,true
+0078-0314,Valsartan And Hydrochlorothiazide,Diovan HCT,"Tablet, Film Coated",Oral,80,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,"Angiotensin 2 Receptor Blocker, Thiazide Diuretic",HUMAN PRESCRIPTION DRUG,true
+71209-047,Verapamil Hydrochloride,Verapamil Hydrochloride,"Tablet, Extended Release",Oral,180,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,Calcium Channel Blocker,HUMAN PRESCRIPTION DRUG,true
+0591-0343,Verapamil Hydrochloride,Verapamil Hydrochloride,"Tablet, Film Coated",Oral,80,mg/1,BLOOD_PRESSURE,BLOOD_PRESSURE,Calcium Channel Blocker,HUMAN PRESCRIPTION DRUG,true
+51407-918,Bexagliflozin,Bexagliflozin,Tablet,Oral,20,mg/1,DIABETES,DIABETES,Sodium-Glucose Cotransporter 2 Inhibitor,HUMAN PRESCRIPTION DRUG,true
+0310-6225,Dapagliflozin And Metformin Hydrochloride,Xigduo,"Tablet, Film Coated, Extended Release",Oral,2.5,mg/1,DIABETES,DIABETES,"Biguanide, Sodium-Glucose Cotransporter 2 Inhibitor",HUMAN PRESCRIPTION DRUG,true
+0597-0182,Empagliflozin And Linagliptin,Glyxambi,"Tablet, Film Coated",Oral,10,mg/1,DIABETES,DIABETES,"Dipeptidyl Peptidase 4 Inhibitor, Sodium-Glucose Cotransporter 2 Inhibitor",HUMAN PRESCRIPTION DRUG,true
+42571-105,Glimepiride,Glimepiride,Tablet,Oral,8,mg/1,DIABETES,DIABETES,Sulfonylurea,HUMAN PRESCRIPTION DRUG,true
+0093-7457,Glipizide And Metformin Hydrochloride,Glipizide And Metformin Hydrochloride,"Tablet, Film Coated",Oral,5,mg/1,DIABETES,DIABETES,"Biguanide, Sulfonylurea",HUMAN PRESCRIPTION DRUG,true
+23155-234,Glyburide-metformin Hydrochloride,Glyburide-metformin Hydrochloride,Tablet,Oral,2.5,mg/1,DIABETES,DIABETES,"Biguanide, Sulfonylurea",HUMAN PRESCRIPTION DRUG,true
+0002-7715,Insulin Glargine,Basaglar,"Injection, Solution",Subcutaneous,100,[iU]/mL,DIABETES,DIABETES,Insulin Analog,HUMAN PRESCRIPTION DRUG,true
+47918-878,Insulin Human,Afrezza,"Powder, Metered",Respiratory (inhalation),8,[arb'U]/1,DIABETES,DIABETES,Insulin,HUMAN PRESCRIPTION DRUG,true
+14403-3400,Liraglutide,Liraglutide,"Injection, Solution",Subcutaneous,18,mg/3mL,DIABETES,DIABETES,GLP-1 Receptor Agonist,HUMAN PRESCRIPTION DRUG,true
+49483-622,Metformin HCl,Metformin HCl,"Tablet, Film Coated",Oral,500,mg/1,DIABETES,DIABETES,Biguanide,HUMAN PRESCRIPTION DRUG,true
+50228-588,Metformin Hydrochloride,Metformin Hydrochloride,Tablet,Oral,625,mg/1,DIABETES,DIABETES,Biguanide,HUMAN PRESCRIPTION DRUG,true
+69367-303,Miglitol,Miglitol,"Tablet, Coated",Oral,25,mg/1,DIABETES,DIABETES,alpha-Glucosidase Inhibitor,HUMAN PRESCRIPTION DRUG,true
+72162-2497,Pioglitazole And Metformin Hydrochloride,Pioglitazole And Metformin Hydrochloride,Tablet,Oral,15,mg/1,DIABETES,DIABETES,"Biguanide, Peroxisome Proliferator Receptor alpha Agonist, Peroxisome Proliferator Receptor gamma Agonist, Thiazolidinedione",HUMAN PRESCRIPTION DRUG,true
+57237-217,Pioglitazone Hydrochloride And Metformin Hydrochloride,Pioglitazone Hydrochloride And Metformin Hydrochloride,"Tablet, Film Coated",Oral,15,mg/1,DIABETES,DIABETES,"Biguanide, Peroxisome Proliferator Receptor alpha Agonist, Peroxisome Proliferator Receptor gamma Agonist, Thiazolidinedione",HUMAN PRESCRIPTION DRUG,true
+0169-4517,Semaglutide,Wegovy,"Injection, Solution",Subcutaneous,1.7,mg/.75mL,DIABETES,DIABETES,GLP-1 Receptor Agonist,HUMAN PRESCRIPTION DRUG,true
+0006-0081,Sitagliptin And Metformin Hydrochloride,Janumet,"Tablet, Film Coated, Extended Release",Oral,100,mg/1,DIABETES,DIABETES,"Biguanide, Dipeptidyl Peptidase 4 Inhibitor",HUMAN PRESCRIPTION DRUG,true
+0002-3444,Tirzepatide,Mounjaro,"Injection, Solution",Subcutaneous,12.5,mg/mL,DIABETES,DIABETES,"GLP-1 Receptor Agonist, Glucose-dependent Insulinotropic Polypeptide Receptor Agonist",HUMAN PRESCRIPTION DRUG,true
+73598-1372,Acetaminophen,Extra Strength Pain Reliever,"Capsule, Coated",Oral,250,mg/1,HEART,HEART,"Central Nervous System Stimulant, Methylxanthine, Nonsteroidal Anti-inflammatory Drug, Platelet Aggregation Inhibitor",HUMAN OTC DRUG,false
+55150-180,Amiodarone Hydrochloride,Amiodarone Hydrochloride,"Injection, Solution",Intravenous,150,mg/3mL,HEART,HEART,Antiarrhythmic,HUMAN PRESCRIPTION DRUG,true
+0003-0894,Apixaban,Eliquis,"Tablet, Film Coated",Oral,5,mg/1,HEART,HEART,Factor Xa Inhibitor,HUMAN PRESCRIPTION DRUG,true
+11822-3343,Aspirin,Headache Relief,"Tablet, Film Coated",Oral,250,mg/1,HEART,HEART,"Central Nervous System Stimulant, Methylxanthine, Nonsteroidal Anti-inflammatory Drug, Platelet Aggregation Inhibitor",HUMAN OTC DRUG,false
+63029-203,Aspirin,BC MAX,Powder,Oral,500,mg/1,HEART,HEART,"Central Nervous System Stimulant, Methylxanthine, Nonsteroidal Anti-inflammatory Drug, Platelet Aggregation Inhibitor",HUMAN OTC DRUG,false
+16103-351,Aspirin 81mg,Adult Low Dose Aspirin Enteric Coated,"Tablet, Delayed Release",Oral,81,mg/1,HEART,HEART,"Nonsteroidal Anti-inflammatory Drug, Platelet Aggregation Inhibitor",HUMAN OTC DRUG,false
+71209-090,Atorvastatin Calcium,Atorvastatin Calcium,"Tablet, Coated",Oral,10,mg/1,HEART,HEART,HMG-CoA Reductase Inhibitor,HUMAN PRESCRIPTION DRUG,true
+42023-622,Bivalirudin,Bivalirudin,"Injection, Solution",Intravenous,250,mg/1,HEART,HEART,"Anti-coagulant, Direct Thrombin Inhibitor",HUMAN PRESCRIPTION DRUG,true
+0378-0265,Dabigatran Etexilate,Dabigatran Etexilate,Capsule,Oral,75,mg/1,HEART,HEART,Direct Thrombin Inhibitor,HUMAN PRESCRIPTION DRUG,true
+0115-9822,Digoxin,Digoxin,Tablet,Oral,250,ug/1,HEART,HEART,Cardiac Glycoside,HUMAN PRESCRIPTION DRUG,true
+0069-5810,Dofetilide,Tikosyn,Capsule,Oral,.25,mg/1,HEART,HEART,Antiarrhythmic,HUMAN PRESCRIPTION DRUG,true
+0338-9558,Eptifibatide,Eptifibatide,Injection,Intravenous,75,mg/100mL,HEART,HEART,Platelet Aggregation Inhibitor,HUMAN PRESCRIPTION DRUG,true
+11797-154,Fondaparinux Sodium,Fondaparinux Sodium,"Injection, Solution",Subcutaneous,2.5,mg/.5mL,HEART,HEART,Factor Xa Inhibitor,HUMAN PRESCRIPTION DRUG,true
+0228-2631,Isosorbide Mononitrate,Isosorbide Mononitrate,Tablet,Oral,10,mg/1,HEART,HEART,Nitrate Vasodilator,HUMAN PRESCRIPTION DRUG,true
+51662-1553,Lidocaine HCl,Lidocaine HCl,Solution,Topical,40,mg/mL,HEART,HEART,"Amide Local Anesthetic, Antiarrhythmic",HUMAN PRESCRIPTION DRUG,true
+0404-9792,Lidocaine Hydrochloride And Epinephrine,Lidocaine Hydrochloride And Epinephrine,"Injection, Solution",Infiltration,10,mg/mL,HEART,HEART,"Amide Local Anesthetic, Antiarrhythmic, Catecholamine, alpha-Adrenergic Agonist, beta-Adrenergic Agonist",HUMAN PRESCRIPTION DRUG,true
+49483-221,Nitroglycerin,Nitro-time,Capsule,Oral,2.5,mg/1,HEART,HEART,Nitrate Vasodilator,HUMAN PRESCRIPTION DRUG,true
+0480-3631,Pitavastatin Calcium,Pitavastatin,"Tablet, Film Coated",Oral,1.045,mg/1,HEART,HEART,HMG-CoA Reductase Inhibitor,HUMAN PRESCRIPTION DRUG,true
+62135-850,Pravastatin Sodium,Pravastatin Sodium,"Tablet, Film Coated",Oral,80,mg/1,HEART,HEART,HMG-CoA Reductase Inhibitor,HUMAN PRESCRIPTION DRUG,true
+59651-258,Propafenone Hydrochloride,Propafenone Hydrochloride,"Tablet, Film Coated",Oral,300,mg/1,HEART,HEART,Antiarrhythmic,HUMAN PRESCRIPTION DRUG,true
+0310-7570,Rosuvastatin,Crestor,"Tablet, Film Coated",Oral,10,mg/1,HEART,HEART,HMG-CoA Reductase Inhibitor,HUMAN PRESCRIPTION DRUG,true
+13668-721,Rosuvastatin Calcium,Rosuvastatin Calcium,Tablet,Oral,10,mg/1,HEART,HEART,HMG-CoA Reductase Inhibitor,HUMAN PRESCRIPTION DRUG,true
+0615-7992,Simvastatin,Simvastatin,"Tablet, Film Coated",Oral,10,mg/1,HEART,HEART,HMG-CoA Reductase Inhibitor,HUMAN PRESCRIPTION DRUG,true
+0378-2215,Ticagrelor,Ticagrelor,"Tablet, Film Coated",Oral,90,mg/1,HEART,HEART,P2Y12 Platelet Inhibitor,HUMAN PRESCRIPTION DRUG,true
+0093-1720,Warfarin Sodium,Warfarin Sodium,Tablet,Oral,10,mg/1,HEART,HEART|VITAMINS,Vitamin K Antagonist,HUMAN PRESCRIPTION DRUG,true
+63479-1806,Adenosine Triphosphate,R06,Solution/ Drops,Sublingual,6,[hp_C]/mL,THYROID,THYROID,"l-Thyroxine, l-Triiodothyronine",HUMAN OTC DRUG,false
+64950-172,Levothyroxine And Liothyronine,RenThyroid,Tablet,Oral,38,ug/1,THYROID,THYROID,"l-Thyroxine, l-Triiodothyronine",HUMAN PRESCRIPTION DRUG,true
+0615-8650,Levothyroxine Sodium,Levothyroxine Sodium,Tablet,Oral,.15,mg/1,THYROID,THYROID,l-Thyroxine,HUMAN PRESCRIPTION DRUG,true
+0074-7068,Levothyroxine Sodium,Synthroid,Tablet,Oral,125,ug/1,THYROID,THYROID,l-Thyroxine,HUMAN PRESCRIPTION DRUG,true
+63323-885,Levothyroxine Sodium,Levothyroxine Sodium,"Injection, Solution",Intravenous,20,ug/mL,THYROID,THYROID,l-Thyroxine,HUMAN PRESCRIPTION DRUG,true
+0074-4552,Levothyroxine Sodium,Synthroid,Tablet,Oral,50,ug/1,THYROID,THYROID,l-Thyroxine,HUMAN PRESCRIPTION DRUG,true
+25021-469,Levothyroxine Sodium Anhydrous,Levothyroxine Sodium,"Injection, Powder, Lyophilized, FOR Solution",Intravenous,200,ug/5mL,THYROID,THYROID,l-Thyroxine,HUMAN PRESCRIPTION DRUG,true
+82576-080,Resmetirom,Rezdiffra,"Tablet, Coated",Oral,80,mg/1,THYROID,THYROID,Thyroid Hormone Receptor beta Agonist,HUMAN PRESCRIPTION DRUG,true
+17089-304,.alpha.-ketoglutaric Acid - Alpha Lipoic Acid - Ascorbic Acid - Barium Oxalosuccinate - Black Cohosh - Bryonia Alba Root - Calcitonin Human - Chlorine - Colchicum Autumnale Bulb - Nadide -,Guna-arthro,Solution/ Drops,Oral,6,[hp_X]/30mL,VITAMINS,VITAMINS,"Melanin Synthesis Inhibitor, Vitamin C",HUMAN OTC DRUG,false
+17089-470,Activated Charcoal - Aloe - Aluminum Oxide - Bryonia Alba Root - Chelidonium Majus - Collinsonia - Frangula Alnus Bark - Lycopodium Clavatum Spore - Potassium Carbonate- Rhubarb - Strychnos NUX Vomica Seed - Silybum Marianum Seed - Skatole - Sodium Carbonate - SUS Scrofa Pancreas - Taraxacum Officinale - Thiamine -,Guna Bowel Plus,Solution/ Drops,Oral,4,[hp_X]/30mL,VITAMINS,VITAMINS,"Non-Standardized Food Allergenic Extract, Non-Standardized Plant Allergenic Extract, Non-Standardized Plant Allergenic Extract",HUMAN OTC DRUG,false
+71399-9939,Antacid Calcium Carbonate,Regular Strength,"Tablet, Chewable",Oral,500,mg/1,VITAMINS,VITAMINS,"Blood Coagulation Factor, Phosphate Binder",HUMAN OTC DRUG,false
+0220-9073,Arnica Montana,Arnicare Leg Cramps,Tablet,Oral,9,[hp_C]/1,VITAMINS,VITAMINS,,HUMAN OTC DRUG,false
+84020-0001,Ascorbic Acid,Vita Soluball,Powder,Topical,40,mg/1000mg,VITAMINS,VITAMINS,Vitamin C,HUMAN OTC DRUG,false
+44911-0500,Calcarea Carbonica,Melatonin Pro,Tablet,Oral,12,[hp_X]/1,VITAMINS,VITAMINS,"Non-Standardized Food Allergenic Extract, Non-Standardized Plant Allergenic Extract, Non-Standardized Plant Allergenic Extract",HUMAN OTC DRUG,false
+69842-171,Calcium Antacid,Ultra Strength Antacid,"Tablet, Chewable",Oral,1000,mg/1,VITAMINS,VITAMINS,Blood Coagulation Factor,HUMAN OTC DRUG,false
+84126-343,Calcium Carbonate,Rolaids Heartburn Plus Gas,"Tablet, Chewable",Oral,40,mg/1,VITAMINS,VITAMINS,"Blood Coagulation Factor, Calculi Dissolution Agent, Osmotic Laxative, Phosphate Binder",HUMAN OTC DRUG,false
+0135-0074,Calcium Carbonate,Tums,Tablet,Oral,750,mg/1,VITAMINS,VITAMINS,"Blood Coagulation Factor, Phosphate Binder",HUMAN OTC DRUG,false
+83173-126,Cough Drops Assorted Citrus Vitamin C,MGC Health,Lozenge,Oral,2.7,mg/1,VITAMINS,VITAMINS,,HUMAN OTC DRUG,false
+55494-120,Doxylamine Succinate And Pyridoxine Hydrochloride,Bonjesta,"Tablet, Extended Release",Oral,20,mg/1,VITAMINS,VITAMINS,"Antihistamine, Vitamin B6 Analog",HUMAN PRESCRIPTION DRUG,true
+59088-165,Ferrous Fumarate,Vitrexyl Plus Iron,Tablet,Oral,35,ug/1,VITAMINS,VITAMINS,"Blood Coagulation Factor, Calculi Dissolution Agent, Copper Absorption Inhibitor, Osmotic Laxative, Paramagnetic Contrast Agent, Vitamin A, Vitamin B12, Vitamin B6 Analog, Vitamin C, Vitamin D",HUMAN PRESCRIPTION DRUG,true
+39822-1100,Folic Acid,Folic Acid,"Injection, Solution",Intramuscular,5,mg/mL,VITAMINS,VITAMINS,,HUMAN PRESCRIPTION DRUG,true
+85304-029,Minoxidil,Agikenb 5% Minoxidil With Biotin Topical Solution,Solution,Topical,.005,g/mL,VITAMINS,VITAMINS,Arteriolar Vasodilator,HUMAN OTC DRUG,false
+59088-191,Multivitamin,Inflamex,Capsule,Oral,5,mg/1,VITAMINS,VITAMINS,"Folate Analog, Non-Standardized Food Allergenic Extract, Non-Standardized Food Allergenic Extract",HUMAN PRESCRIPTION DRUG,true
+14141-382,Octinoxate,Lbel Divine Double USE Longwear 36H SPF 15 Creme 110,Powder,Topical,30,mg/g,VITAMINS,VITAMINS,,HUMAN OTC DRUG,false
+0143-9625,Paricalcitol,Paricalcitol,Injection,Intravenous,2,ug/mL,VITAMINS,VITAMINS,Vitamin D3 Analog,HUMAN PRESCRIPTION DRUG,true
+79481-0250,Polyethylene Glycol 400,Meijer Multi-Symptom Relief,Solution/ Drops,Ophthalmic,.05,g/100mL,VITAMINS,VITAMINS,Copper Absorption Inhibitor,HUMAN OTC DRUG,false
+69968-0360,Tetrahydrozoline Hydrochloride,Visine Red Eye Total Comfort Multi-Symptom,Solution/ Drops,Ophthalmic,.5,mg/mL,VITAMINS,VITAMINS,Copper Absorption Inhibitor,HUMAN OTC DRUG,false

@@ -17,7 +17,7 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -58,7 +58,7 @@ def days_since(iso: str | None) -> str:
         when = datetime.fromisoformat(iso.replace("Z", "+00:00"))
     except ValueError:
         return "-"
-    delta = datetime.now(timezone.utc) - when
+    delta = datetime.now(UTC) - when
     if delta.days == 0:
         return "today"
     if delta.days == 1:

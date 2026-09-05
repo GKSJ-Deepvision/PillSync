@@ -61,7 +61,7 @@ That means:
 | Tool | Version | Check with |
 |---|---|---|
 | Git | 2.40+ | `git --version` |
-| Python | 3.11 | `python --version` |
+| Python | 3.12 | `python --version` |
 | Node.js | 20 LTS | `node --version` |
 | Docker Desktop | current | `docker --version` |
 | PostgreSQL | 16 (or use Docker) | `psql --version` |
@@ -216,7 +216,7 @@ python .github/scripts/scan_secrets.py
 python .github/scripts/check_structure.py
 ```
 
-These need nothing installed beyond Python 3.11 and run in about a second.
+These need nothing installed beyond Python 3.12 and run in about a second.
 
 ---
 

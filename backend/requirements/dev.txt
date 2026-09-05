@@ -1,15 +1,11 @@
 -r base.txt
 
-# Tooling that CI runs on every push — keep these installed locally too.
-ruff==0.8.6
-black==24.10.0
-isort==5.13.2
-pytest==8.3.4
-pytest-cov==6.0.0
-
-# Uncomment as you need them
-# pytest-django==4.9.0
-# pytest-asyncio==0.25.0
-# factory-boy==3.3.1
-# faker==33.1.0
-# httpx==0.28.1
+# Tooling CI runs on every push - keep these installed locally too.
+ruff==0.16.6
+black==26.5.1
+isort==9.0.1
+pytest==9.1.1
+pytest-django==4.14.0
+pytest-cov==7.1.0
+factory-boy==3.3.3
+Faker==40.38.0
