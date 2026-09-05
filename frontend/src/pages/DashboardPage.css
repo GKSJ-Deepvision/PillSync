@@ -1,4 +1,4 @@
-/* PillSync Dashboard Styles */
+/* PillSync Healthcare SaaS - Dashboard Styles */
 .dashboard-root {
   display: flex;
   flex-direction: column;
@@ -74,14 +74,13 @@
   background-color: #ffffff;
   padding: 1.25rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-  transition:
-    transform 150ms ease,
-    box-shadow 150ms ease;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .dashboard-kpi-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05);
 }
 
 .dashboard-kpi-label {
@@ -117,6 +116,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 1rem;
+  flex-shrink: 0;
 }
 
 /* 2-Column Main Dashboard Grid */
@@ -132,7 +132,7 @@
   }
 }
 
-/* Left Column: Dose Timeline & Weekly Chart */
+/* Section Column Container */
 .dashboard-card-section {
   display: flex;
   flex-direction: column;
@@ -233,8 +233,8 @@
   border: none;
   background-color: #10b981;
   color: #ffffff;
-  padding: 0.375rem 0.75rem;
-  border-radius: 0.625rem;
+  padding: 0.4375rem 0.875rem;
+  border-radius: 0.75rem;
   font-size: 0.75rem;
   font-weight: 700;
   cursor: pointer;
@@ -243,14 +243,15 @@
 
 .dose-btn-take:hover {
   background-color: #059669;
+  transform: translateY(-1px);
 }
 
 .dose-btn-snooze {
   border: 1px solid #e2e8f0;
   background-color: #ffffff;
   color: #64748b;
-  padding: 0.375rem 0.625rem;
-  border-radius: 0.625rem;
+  padding: 0.4375rem 0.75rem;
+  border-radius: 0.75rem;
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
@@ -260,6 +261,106 @@
 .dose-btn-snooze:hover {
   background-color: #f1f5f9;
   color: #0f172a;
+}
+
+/* Prescription Supply & Stock Progress Meter */
+.supply-meter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.supply-meter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.supply-meter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+}
+
+.supply-meter-name {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.supply-meter-count {
+  font-weight: 700;
+  color: #64748b;
+}
+
+.supply-track {
+  height: 0.5rem;
+  width: 100%;
+  border-radius: 9999px;
+  background-color: #f1f5f9;
+  overflow: hidden;
+}
+
+.supply-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+}
+
+.supply-fill-healthy {
+  background-color: #10b981;
+}
+
+.supply-fill-moderate {
+  background-color: #6366f1;
+}
+
+.supply-fill-low {
+  background-color: #f59e0b;
+}
+
+.supply-fill-critical {
+  background-color: #ef4444;
+}
+
+/* Vital Health Indicators */
+.vitals-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.vital-tile {
+  border-radius: 1rem;
+  border: 1px solid #f1f5f9;
+  background-color: #f8fafc;
+  padding: 0.875rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.vital-tile-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.vital-tile-value {
+  font-size: 1.125rem;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0;
+}
+
+.vital-tile-status {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #10b981;
+  margin: 0;
 }
 
 /* Tasks Checklist */
@@ -310,7 +411,114 @@
   gap: 0.875rem;
 }
 
-/* Care Team Messenger */
+/* Caregiver Recent Patient Inquiries */
+.caregiver-inquiry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.caregiver-inquiry-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  padding: 1rem 1.125rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: all 0.15s ease;
+}
+
+.caregiver-inquiry-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+  transform: translateY(-1px);
+}
+
+.caregiver-inquiry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.caregiver-inquiry-user {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.caregiver-inquiry-avatar {
+  height: 2.25rem;
+  width: 2.25rem;
+  border-radius: 9999px;
+  object-fit: cover;
+  border: 1.5px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.caregiver-inquiry-name {
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.caregiver-inquiry-condition {
+  font-size: 0.6875rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.caregiver-inquiry-time {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.caregiver-inquiry-quote-box {
+  background-color: #f8fafc;
+  border-left: 3px solid #6366f1;
+  border-radius: 0 0.625rem 0.625rem 0;
+  padding: 0.625rem 0.875rem;
+}
+
+.caregiver-inquiry-text {
+  font-size: 0.75rem;
+  color: #334155;
+  line-height: 1.45;
+  margin: 0;
+  font-style: italic;
+}
+
+.caregiver-inquiry-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.125rem;
+}
+
+.caregiver-inquiry-reply-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4f46e5;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  transition: all 0.12s ease;
+}
+
+.caregiver-inquiry-reply-btn:hover {
+  background-color: #eef2ff;
+  color: #4338ca;
+}
+
+/* Care Team Messenger & AI Assistant */
 .care-chat-box {
   display: flex;
   flex-direction: column;

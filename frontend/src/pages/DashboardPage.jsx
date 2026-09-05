@@ -16,11 +16,9 @@ import {
   Users,
   Shield,
   Activity,
-  Server,
-  Database,
-  Eye,
-  Bell,
   ArrowRight,
+  Bell,
+  Server,
 } from 'lucide-react';
 import { getChatbotResponse } from '../utils/chatbotEngine';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -158,17 +156,9 @@ const INITIAL_DOSES = [
   },
 ];
 
-const INITIAL_TASKS = [
-  { id: 1, text: 'Log Blood Pressure Reading (Morning)', done: true },
-  { id: 2, text: 'Post-Lunch 20-min Light Walk', done: true },
-  { id: 3, text: 'Hydration Check: 2.5L Water Target', done: false },
-  { id: 4, text: 'Log Evening Glucose Level', done: false },
-];
-
 export function DashboardPage() {
   const { user } = useAuth();
   const [doses, setDoses] = useState(INITIAL_DOSES);
-  const [tasks, setTasks] = useState(INITIAL_TASKS);
   const [currentDateTime, setCurrentDateTime] = useState(() => new Date());
   const [chatMessages, setChatMessages] = useState([
     {
@@ -220,10 +210,6 @@ export function DashboardPage() {
     setDoses((prev) =>
       prev.map((dose) => (dose.id === id ? { ...dose, status: 'snoozed' } : dose))
     );
-  };
-
-  const toggleTask = (id) => {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
   };
 
   const handleSendMessage = (e) => {
@@ -677,7 +663,7 @@ export function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Patient Inquiries */}
+                {/* Recent Patient Inquiries */}
                 <div className="dashboard-panel">
                   <div className="dashboard-panel-header">
                     <div>
@@ -690,27 +676,29 @@ export function DashboardPage() {
                       to="/notifications"
                       className="text-xs font-bold text-indigo-600 hover:text-indigo-700"
                     >
-                      Notifications ({PATIENTS.length})
+                      Notifications ({PATIENTS.length}) →
                     </Link>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="caregiver-inquiry-list">
                     {PATIENTS.map((p) => (
-                      <div
-                        key={p.id}
-                        className="p-3 rounded-xl border border-slate-100 bg-slate-50 hover:bg-white transition"
-                      >
-                        <div className="flex items-center justify-between mb-1.5">
-                          <div className="flex items-center gap-2">
-                            <span className="h-2 w-2 rounded-full bg-indigo-600" />
-                            <span className="text-xs font-bold text-slate-900">{p.name}</span>
+                      <div key={p.id} className="caregiver-inquiry-card">
+                        <div className="caregiver-inquiry-header">
+                          <div className="caregiver-inquiry-user">
+                            <img src={p.avatar} alt={p.name} className="caregiver-inquiry-avatar" />
+                            <div>
+                              <p className="caregiver-inquiry-name">{p.name}</p>
+                              <p className="caregiver-inquiry-condition">{p.condition}</p>
+                            </div>
                           </div>
-                          <span className="text-[10px] text-slate-400">{p.lastTime}</span>
+                          <span className="caregiver-inquiry-time">{p.lastTime}</span>
                         </div>
-                        <p className="text-xs text-slate-700 m-0 line-clamp-2 leading-relaxed">
-                          "{p.lastMessage}"
-                        </p>
-                        <div className="mt-2.5 flex items-center justify-between">
+
+                        <div className="caregiver-inquiry-quote-box">
+                          <p className="caregiver-inquiry-text">"{p.lastMessage}"</p>
+                        </div>
+
+                        <div className="caregiver-inquiry-footer">
                           <Badge
                             variant={
                               p.status === 'Stable'
@@ -723,70 +711,12 @@ export function DashboardPage() {
                           >
                             {p.status}
                           </Badge>
-                          <Link
-                            to="/notifications"
-                            className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-700"
-                          >
+                          <Link to="/notifications" className="caregiver-inquiry-reply-btn">
                             Reply <ArrowRight className="h-3 w-3" />
                           </Link>
                         </div>
                       </div>
                     ))}
-                  </div>
-                </div>
-
-                {/* Quick Caregiver Actions */}
-                <div className="dashboard-panel">
-                  <h2 className="dashboard-panel-title mb-3">Clinical Oversight Tools</h2>
-                  <div className="space-y-2">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        alert(
-                          'Broadcasting morning adherence reminder to all 3 monitored patients...'
-                        )
-                      }
-                      className="w-full flex items-center justify-between p-3 rounded-xl border border-indigo-100 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-900 font-bold text-xs transition cursor-pointer text-left"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Bell className="h-4 w-4 text-indigo-600" />
-                        Broadcast Cohort Dose Reminder
-                      </span>
-                      <ArrowRight className="h-3.5 w-3.5 text-indigo-600" />
-                    </button>
-
-                    <Link
-                      to="/patients"
-                      className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs transition cursor-pointer text-left"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-indigo-600" />
-                        Assigned Patients Directory
-                      </span>
-                      <ArrowRight className="h-3.5 w-3.5 text-slate-400" />
-                    </Link>
-
-                    <Link
-                      to="/reminders"
-                      className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs transition cursor-pointer text-left"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-amber-600" />
-                        View Live Dose Compliance Logs
-                      </span>
-                      <ArrowRight className="h-3.5 w-3.5 text-slate-400" />
-                    </Link>
-
-                    <Link
-                      to="/notifications"
-                      className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs transition cursor-pointer text-left"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Bell className="h-4 w-4 text-violet-600" />
-                        Open Notifications Center
-                      </span>
-                      <ArrowRight className="h-3.5 w-3.5 text-slate-400" />
-                    </Link>
                   </div>
                 </div>
               </div>
@@ -917,72 +847,83 @@ export function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Infrastructure Status */}
+                {/* Recent User Registrations & Platform Activity */}
                 <div className="dashboard-panel">
-                  <h2 className="dashboard-panel-title mb-3">Microservice Health Status</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="dashboard-panel-header">
+                    <div>
+                      <h2 className="dashboard-panel-title">
+                        Recent User Registrations & Activity
+                      </h2>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Newly onboarded patients and verified healthcare practitioners
+                      </p>
+                    </div>
+                    <Link
+                      to="/admin/users"
+                      className="text-xs font-bold text-indigo-600 hover:text-indigo-700"
+                    >
+                      All Users (1,480) →
+                    </Link>
+                  </div>
+
+                  <div className="space-y-2.5">
                     <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50">
-                      <div className="flex items-center gap-2.5">
-                        <Database className="h-4 w-4 text-indigo-600" />
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs">
+                          IK
+                        </div>
                         <div>
-                          <p className="text-xs font-bold text-slate-900 m-0">
-                            PostgreSQL Cloud DB
+                          <p className="text-xs font-bold text-slate-900 m-0">Ibrahim Kadri</p>
+                          <p className="text-[11px] text-slate-500 m-0">
+                            patient@example.com · Assigned to Dr. Oliver Mitchell
                           </p>
-                          <p className="text-[10px] text-slate-500 m-0">12ms response latency</p>
                         </div>
                       </div>
-                      <Badge variant="success" size="xs">
-                        Operational
+                      <Badge variant="primary" size="xs">
+                        Patient
                       </Badge>
                     </div>
 
                     <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50">
-                      <div className="flex items-center gap-2.5">
-                        <Shield className="h-4 w-4 text-emerald-600" />
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-xs">
+                          OM
+                        </div>
                         <div>
-                          <p className="text-xs font-bold text-slate-900 m-0">Auth & JWT Gateway</p>
-                          <p className="text-[10px] text-slate-500 m-0">99.99% uptime</p>
+                          <p className="text-xs font-bold text-slate-900 m-0">
+                            Dr. Oliver Mitchell
+                          </p>
+                          <p className="text-[11px] text-slate-500 m-0">
+                            caregiver@example.com · 3 Patients Assigned
+                          </p>
                         </div>
                       </div>
                       <Badge variant="success" size="xs">
-                        Operational
+                        Caregiver
                       </Badge>
                     </div>
 
                     <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50">
-                      <div className="flex items-center gap-2.5">
-                        <Eye className="h-4 w-4 text-violet-600" />
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs">
+                          SC
+                        </div>
                         <div>
-                          <p className="text-xs font-bold text-slate-900 m-0">
-                            Computer Vision OCR
+                          <p className="text-xs font-bold text-slate-900 m-0">Sarah Connor</p>
+                          <p className="text-[11px] text-slate-500 m-0">
+                            sarah.connor@example.com · Cardiac Care
                           </p>
-                          <p className="text-[10px] text-slate-500 m-0">Average scan 1.2s</p>
                         </div>
                       </div>
-                      <Badge variant="success" size="xs">
-                        Operational
-                      </Badge>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50">
-                      <div className="flex items-center gap-2.5">
-                        <Bell className="h-4 w-4 text-amber-600" />
-                        <div>
-                          <p className="text-xs font-bold text-slate-900 m-0">
-                            SMS / Push Dispatcher
-                          </p>
-                          <p className="text-[10px] text-slate-500 m-0">Queue: 0 pending</p>
-                        </div>
-                      </div>
-                      <Badge variant="success" size="xs">
-                        Operational
+                      <Badge variant="primary" size="xs">
+                        Patient
                       </Badge>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Right Column: Security Audit Trail & Fast Admin Links */}
+              {/* Right Column: Security Audit Trail & Platform Telemetry */}
               <div className="dashboard-card-section">
                 {/* Security Audit Log */}
                 <div className="dashboard-panel">
@@ -1002,7 +943,7 @@ export function DashboardPage() {
                   </div>
 
                   <div className="space-y-2.5">
-                    <div className="p-2.5 rounded-xl border border-slate-100 bg-slate-50 text-xs">
+                    <div className="p-3 rounded-xl border border-slate-100 bg-slate-50 text-xs">
                       <div className="flex items-center justify-between font-bold text-slate-900 mb-1">
                         <span>Role Elevation Approved</span>
                         <span className="text-[10px] text-slate-400">12m ago</span>
@@ -1012,19 +953,19 @@ export function DashboardPage() {
                       </p>
                     </div>
 
-                    <div className="p-2.5 rounded-xl border border-slate-100 bg-slate-50 text-xs">
+                    <div className="p-3 rounded-xl border border-slate-100 bg-slate-50 text-xs">
                       <div className="flex items-center justify-between font-bold text-slate-900 mb-1">
-                        <span>Automated Backup Snapshot</span>
+                        <span>Automated Database Backup</span>
                         <span className="text-[10px] text-slate-400">1h ago</span>
                       </div>
                       <p className="text-slate-600 m-0 text-[11px]">
-                        Encrypted database replica backup generated and stored.
+                        Encrypted replica backup generated and archived.
                       </p>
                     </div>
 
-                    <div className="p-2.5 rounded-xl border border-slate-100 bg-slate-50 text-xs">
+                    <div className="p-3 rounded-xl border border-slate-100 bg-slate-50 text-xs">
                       <div className="flex items-center justify-between font-bold text-slate-900 mb-1">
-                        <span>Security Audit Check Passed</span>
+                        <span>Security Audit Scan Passed</span>
                         <span className="text-[10px] text-slate-400">3h ago</span>
                       </div>
                       <p className="text-slate-600 m-0 text-[11px]">
@@ -1034,42 +975,41 @@ export function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Administration Quick Access */}
+                {/* System Platform Telemetry Card */}
                 <div className="dashboard-panel">
-                  <h2 className="dashboard-panel-title mb-3">Administration Modules</h2>
-                  <div className="space-y-2">
-                    <Link
-                      to="/admin/users"
-                      className="w-full flex items-center justify-between p-3 rounded-xl border border-indigo-100 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-900 font-bold text-xs transition cursor-pointer"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-indigo-600" />
-                        User Directory & RBAC Roles
-                      </span>
-                      <ArrowRight className="h-3.5 w-3.5 text-indigo-600" />
-                    </Link>
+                  <h2 className="dashboard-panel-title mb-3">Platform Health & Encryption</h2>
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50">
+                      <div className="flex items-center gap-2.5">
+                        <Shield className="h-4 w-4 text-emerald-600" />
+                        <div>
+                          <p className="text-xs font-bold text-slate-900 m-0">
+                            End-to-End Encryption
+                          </p>
+                          <p className="text-[10px] text-slate-500 m-0">
+                            AES-256 at Rest / TLS 1.3 in Transit
+                          </p>
+                        </div>
+                      </div>
+                      <Badge variant="success" size="xs">
+                        Active
+                      </Badge>
+                    </div>
 
-                    <Link
-                      to="/analytics"
-                      className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs transition cursor-pointer"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Activity className="h-4 w-4 text-emerald-600" />
-                        System Analytics & Reports
-                      </span>
-                      <ArrowRight className="h-3.5 w-3.5 text-slate-400" />
-                    </Link>
-
-                    <Link
-                      to="/settings"
-                      className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs transition cursor-pointer"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Shield className="h-4 w-4 text-violet-600" />
-                        Platform Security & Settings
-                      </span>
-                      <ArrowRight className="h-3.5 w-3.5 text-slate-400" />
-                    </Link>
+                    <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50">
+                      <div className="flex items-center gap-2.5">
+                        <Activity className="h-4 w-4 text-indigo-600" />
+                        <div>
+                          <p className="text-xs font-bold text-slate-900 m-0">
+                            Auth & Token Gateway
+                          </p>
+                          <p className="text-[10px] text-slate-500 m-0">JWT RS256 Silent Refresh</p>
+                        </div>
+                      </div>
+                      <Badge variant="success" size="xs">
+                        99.99%
+                      </Badge>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1086,10 +1026,10 @@ export function DashboardPage() {
             <div className="dashboard-kpi-grid">
               <div className="dashboard-kpi-card">
                 <div>
-                  <p className="dashboard-kpi-label">Total Prescriptions</p>
+                  <p className="dashboard-kpi-label">Active Regimens</p>
                   <p className="dashboard-kpi-value">{currentPatient.totalMeds}</p>
                   <p className="dashboard-kpi-meta text-indigo-600 font-semibold">
-                    4 active regimens
+                    4 active prescriptions
                   </p>
                 </div>
                 <div className="dashboard-kpi-icon bg-indigo-50 text-indigo-600">
@@ -1127,7 +1067,7 @@ export function DashboardPage() {
 
               <div className="dashboard-kpi-card">
                 <div>
-                  <p className="dashboard-kpi-label">Refill Status</p>
+                  <p className="dashboard-kpi-label">Refill Watchlist</p>
                   <p className="dashboard-kpi-value text-amber-600">1 Low</p>
                   <p className="dashboard-kpi-meta text-amber-600 font-semibold">
                     Metformin (4 days left)
@@ -1147,7 +1087,7 @@ export function DashboardPage() {
                 <div className="dashboard-panel">
                   <div className="dashboard-panel-header">
                     <div>
-                      <h2 className="dashboard-panel-title">Today's Medication Timeline</h2>
+                      <h2 className="dashboard-panel-title">Today's Medication Schedule</h2>
                       <p className="text-xs text-slate-500 mt-0.5">
                         Log scheduled doses to maintain your verified clinical streak
                       </p>
@@ -1228,7 +1168,7 @@ export function DashboardPage() {
                         <span className="h-2 w-2 rounded-full bg-indigo-600" /> Adherence %
                       </span>
                       <span className="flex items-center gap-1.5 text-slate-400">
-                        <span className="h-2 w-2 rounded-full bg-slate-300" /> Baseline
+                        <span className="h-2 w-2 rounded-full bg-slate-300" /> Baseline (80%)
                       </span>
                     </div>
                   </div>
@@ -1268,40 +1208,88 @@ export function DashboardPage() {
                 </div>
               </div>
 
-              {/* Right Column: Tasks, Refill Alert & Care Team Messenger */}
+              {/* Right Column: Prescription Stock, Biomarkers, Refill Alert & Care Team Messenger */}
               <div className="dashboard-card-section">
-                {/* Daily Tasks Checklist */}
+                {/* Prescription Supply & Stock Progress Meter */}
                 <div className="dashboard-panel">
                   <div className="dashboard-panel-header">
-                    <h2 className="dashboard-panel-title">Daily Health Tasks</h2>
-                    <span className="text-xs font-bold text-indigo-600">
-                      {tasks.filter((t) => t.done).length}/{tasks.length} Done
-                    </span>
+                    <div>
+                      <h2 className="dashboard-panel-title">Prescription Supply & Stock</h2>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Track remaining tablet counts & auto-refill triggers
+                      </p>
+                    </div>
+                    <Link
+                      to="/medications"
+                      className="text-xs font-bold text-indigo-600 hover:text-indigo-700"
+                    >
+                      View All →
+                    </Link>
                   </div>
 
-                  <div className="task-checklist">
-                    {tasks.map((task) => (
-                      <button
-                        key={task.id}
-                        type="button"
-                        onClick={() => toggleTask(task.id)}
-                        className="task-check-row"
-                      >
-                        <span
-                          className={`task-check-text ${
-                            task.done ? 'task-check-text-done' : 'task-check-text-pending'
-                          }`}
-                        >
-                          {task.text}
+                  <div className="supply-meter-list">
+                    <div className="supply-meter-item">
+                      <div className="supply-meter-header">
+                        <span className="supply-meter-name">Metformin 500mg</span>
+                        <span className="supply-meter-count text-amber-600 font-bold">
+                          4 / 60 tabs (7%)
                         </span>
+                      </div>
+                      <div className="supply-track">
+                        <div className="supply-fill supply-fill-critical" style={{ width: '7%' }} />
+                      </div>
+                    </div>
 
-                        {task.done ? (
-                          <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                        ) : (
-                          <div className="h-4 w-4 rounded-full border-2 border-slate-300 shrink-0" />
-                        )}
-                      </button>
-                    ))}
+                    <div className="supply-meter-item">
+                      <div className="supply-meter-header">
+                        <span className="supply-meter-name">Lisinopril 10mg</span>
+                        <span className="supply-meter-count">24 / 30 tabs (80%)</span>
+                      </div>
+                      <div className="supply-track">
+                        <div className="supply-fill supply-fill-healthy" style={{ width: '80%' }} />
+                      </div>
+                    </div>
+
+                    <div className="supply-meter-item">
+                      <div className="supply-meter-header">
+                        <span className="supply-meter-name">Atorvastatin 20mg</span>
+                        <span className="supply-meter-count">28 / 30 tabs (93%)</span>
+                      </div>
+                      <div className="supply-track">
+                        <div className="supply-fill supply-fill-healthy" style={{ width: '93%' }} />
+                      </div>
+                    </div>
+
+                    <div className="supply-meter-item">
+                      <div className="supply-meter-header">
+                        <span className="supply-meter-name">Vitamin D3 1000IU</span>
+                        <span className="supply-meter-count">30 / 30 tabs (100%)</span>
+                      </div>
+                      <div className="supply-track">
+                        <div
+                          className="supply-fill supply-fill-healthy"
+                          style={{ width: '100%' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Vital Health Biomarkers */}
+                <div className="dashboard-panel">
+                  <h2 className="dashboard-panel-title mb-3">Vital Health Biomarkers</h2>
+                  <div className="vitals-card-grid">
+                    <div className="vital-tile">
+                      <p className="vital-tile-label">Fasting Glucose</p>
+                      <p className="vital-tile-value">114 mg/dL</p>
+                      <p className="vital-tile-status">✓ In Target Range</p>
+                    </div>
+
+                    <div className="vital-tile">
+                      <p className="vital-tile-label">Blood Pressure</p>
+                      <p className="vital-tile-value">122/78</p>
+                      <p className="vital-tile-status">✓ Optimal Target</p>
+                    </div>
                   </div>
                 </div>
 

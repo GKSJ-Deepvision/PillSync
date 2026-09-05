@@ -1,17 +1,17 @@
 import './Skeleton.css';
 
-export function Skeleton({ width = 'w-full', height = 'h-4', className = '' }) {
-  return <div className={`${width} ${height} ${className} bg-gray-200 rounded animate-pulse`} />;
+export function Skeleton({ width = '100%', height = '1rem', className = '', style = {} }) {
+  return <div className={`skeleton-pulse ${className}`} style={{ width, height, ...style }} />;
 }
 
 export function CardSkeleton({ count = 3 }) {
   return (
-    <div className="space-y-3">
+    <div className="skeleton-card-list">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="bg-white rounded-lg p-4 border border-gray-200">
-          <Skeleton height="h-6" className="mb-3" />
-          <Skeleton height="h-4" width="w-3/4" className="mb-2" />
-          <Skeleton height="h-4" width="w-1/2" />
+        <div key={i} className="skeleton-card">
+          <Skeleton height="1.5rem" width="40%" />
+          <Skeleton height="1rem" width="75%" />
+          <Skeleton height="1rem" width="55%" />
         </div>
       ))}
     </div>

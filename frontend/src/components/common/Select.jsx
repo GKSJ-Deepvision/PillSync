@@ -2,21 +2,15 @@ import './Select.css';
 
 export function Select({ label, error, options = [], required = false, className = '', ...props }) {
   return (
-    <div className="w-full">
+    <div className="select-group">
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="select-label">
           {label}
-          {required && <span className="text-danger-500 ml-1">*</span>}
+          {required && <span className="select-required-star">*</span>}
         </label>
       )}
       <select
-        className={`
-          w-full px-4 py-2.5 rounded-lg border border-gray-300 text-gray-900 bg-white
-          focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500
-          disabled:bg-gray-100 disabled:text-gray-600 disabled:cursor-not-allowed
-          ${error ? 'border-danger-500 focus:border-danger-500 focus:ring-danger-500' : ''}
-          ${className}
-        `}
+        className={`select-field ${error ? 'select-field-error' : ''} ${className}`}
         {...props}
       >
         <option value="">Select an option</option>
@@ -26,7 +20,7 @@ export function Select({ label, error, options = [], required = false, className
           </option>
         ))}
       </select>
-      {error && <p className="text-sm text-danger-500 mt-1">{error}</p>}
+      {error && <p className="select-error-msg">{error}</p>}
     </div>
   );
 }
