@@ -7,12 +7,7 @@ from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 from apps.medicines.models import Medicine, MedicineSchedule
 
-from .serializers import (
-    MedicineScheduleSerializer,
-    MedicineSerializer,
-    ProfileSerializer,
-    UserRegistrationSerializer,
-)
+from .serializers import MedicineScheduleSerializer
 
 User = get_user_model()
 TEST_PASSWORD = "test-password-123"
