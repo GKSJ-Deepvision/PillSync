@@ -20,6 +20,10 @@ api_v1 = [
     path("", include("apps.accounts.urls")),
     path("profiles/", include("apps.profiles.urls")),
     path("reference/", include("apps.common.urls")),
+    path("", include("apps.medications.urls")),
+    path("", include("apps.prescriptions.urls")),
+    path("", include("apps.reminders.urls")),
+    path("notifications/", include("apps.notifications.urls")),
 ]
 
 urlpatterns = [

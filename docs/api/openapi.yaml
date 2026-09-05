@@ -679,6 +679,1284 @@ paths:
               schema:
                 $ref: '#/components/schemas/CaregiverAssignment'
           description: ''
+  /api/v1/doses/:
+    get:
+      operationId: doses_list
+      description: |-
+        Scheduled doses: what is due, and what happened to what was due.
+
+        Read-only apart from the four actions. A dose never changes state by having
+        its fields written directly — every transition goes through the service
+        layer, so stock decrements and caregiver alerts cannot be bypassed.
+      parameters:
+      - in: query
+        name: medicine
+        schema:
+          type: string
+          format: uuid
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: patient
+        schema:
+          type: string
+          format: uuid
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: slot
+        schema:
+          type: string
+          enum:
+          - AFTERNOON
+          - EVENING
+          - MORNING
+          - NIGHT
+        description: |-
+          * `MORNING` - Morning
+          * `AFTERNOON` - Afternoon
+          * `EVENING` - Evening
+          * `NIGHT` - Night
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - MISSED
+          - PENDING
+          - SKIPPED
+          - SNOOZED
+          - TAKEN
+        description: |-
+          * `PENDING` - Due
+          * `TAKEN` - Taken
+          * `MISSED` - Missed
+          * `SNOOZED` - Snoozed
+          * `SKIPPED` - Skipped on purpose
+      tags:
+      - reminders
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDoseEventList'
+          description: ''
+  /api/v1/doses/{id}/:
+    get:
+      operationId: doses_retrieve
+      description: |-
+        Scheduled doses: what is due, and what happened to what was due.
+
+        Read-only apart from the four actions. A dose never changes state by having
+        its fields written directly — every transition goes through the service
+        layer, so stock decrements and caregiver alerts cannot be bypassed.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this dose event.
+        required: true
+      tags:
+      - reminders
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoseEvent'
+          description: ''
+  /api/v1/doses/{id}/miss/:
+    post:
+      operationId: doses_miss_create
+      description: Record the dose as missed. Caregivers who opted in are alerted.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this dose event.
+        required: true
+      tags:
+      - reminders
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoseEvent'
+          description: ''
+  /api/v1/doses/{id}/skip/:
+    post:
+      operationId: doses_skip_create
+      description: Deliberately skip a dose — not counted as an adherence failure.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this dose event.
+        required: true
+      tags:
+      - reminders
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoseEvent'
+          description: ''
+  /api/v1/doses/{id}/snooze/:
+    post:
+      operationId: doses_snooze_create
+      description: Postpone the reminder.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this dose event.
+        required: true
+      tags:
+      - reminders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SnoozeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SnoozeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SnoozeRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoseEvent'
+          description: ''
+  /api/v1/doses/{id}/take/:
+    post:
+      operationId: doses_take_create
+      description: Record the dose as taken and decrement stock.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this dose event.
+        required: true
+      tags:
+      - reminders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TakeDoseRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TakeDoseRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TakeDoseRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoseEvent'
+          description: ''
+  /api/v1/doses/history/:
+    get:
+      operationId: doses_history_retrieve
+      description: |-
+        Medication history: one row per day, with the doses of each.
+
+        This is the Milestone 2 deliverable that Milestone 3's adherence
+        analytics builds on — the daily counts here are exactly what the
+        percentage, streak and trend calculations will aggregate.
+      parameters:
+      - in: query
+        name: days
+        schema:
+          type: integer
+        description: Look back N days, max 92.
+      - in: query
+        name: patient
+        schema:
+          type: string
+        description: Limit to one patient profile.
+      tags:
+      - reminders
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/doses/today/:
+    get:
+      operationId: doses_today_retrieve
+      description: Today's doses, grouped into morning / afternoon / evening / night.
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+        description: ISO date. Defaults to today.
+      - in: query
+        name: patient
+        schema:
+          type: string
+        description: Limit to one patient profile.
+      tags:
+      - reminders
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/doses/upcoming/:
+    get:
+      operationId: doses_upcoming_list
+      description: Doses still to come.
+      parameters:
+      - in: query
+        name: days
+        schema:
+          type: integer
+        description: How many days ahead. Default 7.
+      - in: query
+        name: medicine
+        schema:
+          type: string
+          format: uuid
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: patient
+        schema:
+          type: string
+        description: Limit to one patient profile.
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: slot
+        schema:
+          type: string
+          enum:
+          - AFTERNOON
+          - EVENING
+          - MORNING
+          - NIGHT
+        description: |-
+          * `MORNING` - Morning
+          * `AFTERNOON` - Afternoon
+          * `EVENING` - Evening
+          * `NIGHT` - Night
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - MISSED
+          - PENDING
+          - SKIPPED
+          - SNOOZED
+          - TAKEN
+        description: |-
+          * `PENDING` - Due
+          * `TAKEN` - Taken
+          * `MISSED` - Missed
+          * `SNOOZED` - Snoozed
+          * `SKIPPED` - Skipped on purpose
+      tags:
+      - reminders
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDoseEventList'
+          description: ''
+  /api/v1/medicines/:
+    get:
+      operationId: medicines_list
+      description: |-
+        A patient's medicines.
+
+        As everywhere else, the queryset is the access boundary: it only ever
+        contains medicines belonging to profiles the caller may see.
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+          enum:
+          - ANTIBIOTICS
+          - BLOOD_PRESSURE
+          - DIABETES
+          - HEART
+          - OTHER
+          - THYROID
+          - VITAMINS
+        description: |-
+          Disease-based grouping, from the reference entry when there is one.
+
+          * `BLOOD_PRESSURE` - Blood Pressure
+          * `DIABETES` - Diabetes
+          * `THYROID` - Thyroid
+          * `ANTIBIOTICS` - Antibiotics
+          * `VITAMINS` - Vitamins
+          * `HEART` - Heart Medications
+          * `OTHER` - Other
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: patient
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: prescription
+        schema:
+          type: string
+          format: uuid
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - medications
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMedicineList'
+          description: ''
+    post:
+      operationId: medicines_create
+      description: |-
+        A patient's medicines.
+
+        As everywhere else, the queryset is the access boundary: it only ever
+        contains medicines belonging to profiles the caller may see.
+      tags:
+      - medications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicineCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MedicineCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MedicineCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicineCreate'
+          description: ''
+  /api/v1/medicines/{id}/:
+    get:
+      operationId: medicines_retrieve
+      description: |-
+        A patient's medicines.
+
+        As everywhere else, the queryset is the access boundary: it only ever
+        contains medicines belonging to profiles the caller may see.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this medicine.
+        required: true
+      tags:
+      - medications
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Medicine'
+          description: ''
+    put:
+      operationId: medicines_update
+      description: |-
+        A patient's medicines.
+
+        As everywhere else, the queryset is the access boundary: it only ever
+        contains medicines belonging to profiles the caller may see.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this medicine.
+        required: true
+      tags:
+      - medications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicineRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MedicineRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MedicineRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Medicine'
+          description: ''
+    patch:
+      operationId: medicines_partial_update
+      description: |-
+        A patient's medicines.
+
+        As everywhere else, the queryset is the access boundary: it only ever
+        contains medicines belonging to profiles the caller may see.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this medicine.
+        required: true
+      tags:
+      - medications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMedicineRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMedicineRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMedicineRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Medicine'
+          description: ''
+    delete:
+      operationId: medicines_destroy
+      description: |-
+        A patient's medicines.
+
+        As everywhere else, the queryset is the access boundary: it only ever
+        contains medicines belonging to profiles the caller may see.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this medicine.
+        required: true
+      tags:
+      - medications
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/medicines/{id}/refill/:
+    post:
+      operationId: medicines_refill_create
+      description: Top the medicine back up after a pharmacy visit.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this medicine.
+        required: true
+      tags:
+      - medications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefillRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RefillRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RefillRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Medicine'
+          description: ''
+  /api/v1/medicines/by-condition/:
+    get:
+      operationId: medicines_by_condition_retrieve
+      description: |-
+        Medicines grouped by disease category.
+
+        This is the specification's disease-based organisation: a patient with
+        four conditions wants to see their diabetes medicines together, not one
+        undifferentiated list of fourteen boxes.
+      tags:
+      - medications
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/medicines/low-stock/:
+    get:
+      operationId: medicines_low_stock_list
+      description: Medicines at or below their low-stock threshold.
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+          enum:
+          - ANTIBIOTICS
+          - BLOOD_PRESSURE
+          - DIABETES
+          - HEART
+          - OTHER
+          - THYROID
+          - VITAMINS
+        description: |-
+          Disease-based grouping, from the reference entry when there is one.
+
+          * `BLOOD_PRESSURE` - Blood Pressure
+          * `DIABETES` - Diabetes
+          * `THYROID` - Thyroid
+          * `ANTIBIOTICS` - Antibiotics
+          * `VITAMINS` - Vitamins
+          * `HEART` - Heart Medications
+          * `OTHER` - Other
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: patient
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: prescription
+        schema:
+          type: string
+          format: uuid
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - medications
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMedicineList'
+          description: ''
+  /api/v1/notifications/devices/:
+    get:
+      operationId: notifications_devices_list
+      description: Firebase Cloud Messaging registrations for this user's devices.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDeviceTokenList'
+          description: ''
+    post:
+      operationId: notifications_devices_create
+      description: Firebase Cloud Messaging registrations for this user's devices.
+      tags:
+      - notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceTokenRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DeviceTokenRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DeviceTokenRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceToken'
+          description: ''
+  /api/v1/notifications/devices/{id}/:
+    delete:
+      operationId: notifications_devices_destroy
+      description: Firebase Cloud Messaging registrations for this user's devices.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this device token.
+        required: true
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/notifications/log/:
+    get:
+      operationId: notifications_log_list
+      description: What the platform sent this user, and whether it arrived.
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+          enum:
+          - CAREGIVER_ALERT
+          - DOSE_MISSED
+          - DOSE_REMINDER
+          - LOW_STOCK
+          - PRESCRIPTION_EXPIRY
+          - REFILL_DUE
+        description: |-
+          * `DOSE_REMINDER` - Medicine reminder
+          * `DOSE_MISSED` - Missed dose
+          * `CAREGIVER_ALERT` - Caregiver alert
+          * `LOW_STOCK` - Low stock
+          * `REFILL_DUE` - Refill due
+          * `PRESCRIPTION_EXPIRY` - Prescription expiring
+      - in: query
+        name: channel
+        schema:
+          type: string
+          enum:
+          - EMAIL
+          - PUSH
+          - SMS
+        description: |-
+          * `PUSH` - Push notification
+          * `EMAIL` - Email
+          * `SMS` - SMS
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - FAILED
+          - QUEUED
+          - SENT
+          - SKIPPED
+        description: |-
+          * `QUEUED` - Queued
+          * `SENT` - Sent
+          * `FAILED` - Failed
+          * `SKIPPED` - Skipped
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationLogList'
+          description: ''
+  /api/v1/notifications/log/{id}/:
+    get:
+      operationId: notifications_log_retrieve
+      description: What the platform sent this user, and whether it arrived.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this notification.
+        required: true
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationLog'
+          description: ''
+  /api/v1/notifications/log/delivery_stats/:
+    get:
+      operationId: notifications_log_delivery_stats_retrieve
+      description: Delivery success rate — a graded performance metric in Milestone
+        4.
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/notifications/preferences/:
+    get:
+      operationId: notifications_preferences_retrieve
+      description: The signed-in user's delivery settings.
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreference'
+          description: ''
+    put:
+      operationId: notifications_preferences_update
+      description: The signed-in user's delivery settings.
+      tags:
+      - notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationPreferenceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationPreferenceRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationPreferenceRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreference'
+          description: ''
+    patch:
+      operationId: notifications_preferences_partial_update
+      description: The signed-in user's delivery settings.
+      tags:
+      - notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationPreferenceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationPreferenceRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationPreferenceRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreference'
+          description: ''
+  /api/v1/prescriptions/:
+    get:
+      operationId: prescriptions_list
+      description: Prescriptions, uploaded by hand in Milestone 2 and by OCR in Milestone
+        3.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: patient
+        schema:
+          type: string
+          format: uuid
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - ACTIVE
+          - ARCHIVED
+          - EXPIRED
+        description: |-
+          * `ACTIVE` - Active
+          * `EXPIRED` - Expired
+          * `ARCHIVED` - Archived
+      tags:
+      - prescriptions
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPrescriptionList'
+          description: ''
+    post:
+      operationId: prescriptions_create
+      description: Prescriptions, uploaded by hand in Milestone 2 and by OCR in Milestone
+        3.
+      tags:
+      - prescriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrescriptionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PrescriptionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PrescriptionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescription'
+          description: ''
+  /api/v1/prescriptions/{id}/:
+    get:
+      operationId: prescriptions_retrieve
+      description: Prescriptions, uploaded by hand in Milestone 2 and by OCR in Milestone
+        3.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this prescription.
+        required: true
+      tags:
+      - prescriptions
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescription'
+          description: ''
+    put:
+      operationId: prescriptions_update
+      description: Prescriptions, uploaded by hand in Milestone 2 and by OCR in Milestone
+        3.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this prescription.
+        required: true
+      tags:
+      - prescriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrescriptionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PrescriptionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PrescriptionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescription'
+          description: ''
+    patch:
+      operationId: prescriptions_partial_update
+      description: Prescriptions, uploaded by hand in Milestone 2 and by OCR in Milestone
+        3.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this prescription.
+        required: true
+      tags:
+      - prescriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPrescriptionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPrescriptionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPrescriptionRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescription'
+          description: ''
+    delete:
+      operationId: prescriptions_destroy
+      description: Prescriptions, uploaded by hand in Milestone 2 and by OCR in Milestone
+        3.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this prescription.
+        required: true
+      tags:
+      - prescriptions
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/prescriptions/expiring/:
+    get:
+      operationId: prescriptions_expiring_list
+      description: Prescriptions running out within the next 30 days.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: patient
+        schema:
+          type: string
+          format: uuid
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - ACTIVE
+          - ARCHIVED
+          - EXPIRED
+        description: |-
+          * `ACTIVE` - Active
+          * `EXPIRED` - Expired
+          * `ARCHIVED` - Archived
+      tags:
+      - prescriptions
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPrescriptionList'
+          description: ''
   /api/v1/profiles/caregivers/:
     get:
       operationId: profiles_caregivers_list
@@ -1675,6 +2953,285 @@ paths:
               schema:
                 $ref: '#/components/schemas/MedicineReference'
           description: ''
+  /api/v1/schedules/:
+    get:
+      operationId: schedules_list
+      description: |-
+        Dosage schedules.
+
+        Every write regenerates the affected future dose events, so a patient who
+        moves their evening dose from 21:00 to 22:00 sees tomorrow's reminder at
+        the new time rather than the old one.
+      parameters:
+      - in: query
+        name: frequency
+        schema:
+          type: string
+          enum:
+          - DAILY
+          - INTERVAL
+          - SPECIFIC_DAYS
+        description: |-
+          * `DAILY` - Every day
+          * `SPECIFIC_DAYS` - On chosen days
+          * `INTERVAL` - Every N days
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - in: query
+        name: medicine
+        schema:
+          type: string
+          format: uuid
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: slot
+        schema:
+          type: string
+          enum:
+          - AFTERNOON
+          - EVENING
+          - MORNING
+          - NIGHT
+        description: |-
+          The part of the day this dose belongs to, as the specification groups them.
+
+          * `MORNING` - Morning
+          * `AFTERNOON` - Afternoon
+          * `EVENING` - Evening
+          * `NIGHT` - Night
+      tags:
+      - medications
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMedicationScheduleList'
+          description: ''
+    post:
+      operationId: schedules_create
+      description: |-
+        Dosage schedules.
+
+        Every write regenerates the affected future dose events, so a patient who
+        moves their evening dose from 21:00 to 22:00 sees tomorrow's reminder at
+        the new time rather than the old one.
+      tags:
+      - medications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicationScheduleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MedicationScheduleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MedicationScheduleRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicationSchedule'
+          description: ''
+  /api/v1/schedules/{id}/:
+    get:
+      operationId: schedules_retrieve
+      description: |-
+        Dosage schedules.
+
+        Every write regenerates the affected future dose events, so a patient who
+        moves their evening dose from 21:00 to 22:00 sees tomorrow's reminder at
+        the new time rather than the old one.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this medication schedule.
+        required: true
+      tags:
+      - medications
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicationSchedule'
+          description: ''
+    put:
+      operationId: schedules_update
+      description: |-
+        Dosage schedules.
+
+        Every write regenerates the affected future dose events, so a patient who
+        moves their evening dose from 21:00 to 22:00 sees tomorrow's reminder at
+        the new time rather than the old one.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this medication schedule.
+        required: true
+      tags:
+      - medications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicationScheduleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MedicationScheduleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MedicationScheduleRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicationSchedule'
+          description: ''
+    patch:
+      operationId: schedules_partial_update
+      description: |-
+        Dosage schedules.
+
+        Every write regenerates the affected future dose events, so a patient who
+        moves their evening dose from 21:00 to 22:00 sees tomorrow's reminder at
+        the new time rather than the old one.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this medication schedule.
+        required: true
+      tags:
+      - medications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMedicationScheduleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMedicationScheduleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMedicationScheduleRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicationSchedule'
+          description: ''
+    delete:
+      operationId: schedules_destroy
+      description: |-
+        Dosage schedules.
+
+        Every write regenerates the affected future dose events, so a patient who
+        moves their evening dose from 21:00 to 22:00 sees tomorrow's reminder at
+        the new time rather than the old one.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this medication schedule.
+        required: true
+      tags:
+      - medications
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/schedules/{id}/regenerate/:
+    post:
+      operationId: schedules_regenerate_create
+      description: Rebuild this schedule's upcoming doses.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this medication schedule.
+        required: true
+      tags:
+      - medications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicationScheduleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MedicationScheduleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MedicationScheduleRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
   /api/v1/users/me/:
     get:
       operationId: users_me_retrieve
@@ -2074,6 +3631,199 @@ components:
       - code
       - label
       - medicine_count
+    ChannelEnum:
+      enum:
+      - PUSH
+      - EMAIL
+      - SMS
+      type: string
+      description: |-
+        * `PUSH` - Push notification
+        * `EMAIL` - Email
+        * `SMS` - SMS
+    DeviceToken:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        platform:
+          $ref: '#/components/schemas/PlatformEnum'
+        device_name:
+          type: string
+          maxLength: 120
+        is_active:
+          type: boolean
+          readOnly: true
+        last_used_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - is_active
+      - last_used_at
+    DeviceTokenRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 512
+        platform:
+          $ref: '#/components/schemas/PlatformEnum'
+        device_name:
+          type: string
+          maxLength: 120
+      required:
+      - token
+    DoseEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        schedule:
+          type: string
+          format: uuid
+          readOnly: true
+        medicine:
+          type: string
+          format: uuid
+          readOnly: true
+        medicine_name:
+          type: string
+          readOnly: true
+        medicine_strength:
+          type: string
+          readOnly: true
+        medicine_category:
+          type: string
+          readOnly: true
+        instructions:
+          type: string
+          readOnly: true
+        patient:
+          type: string
+          format: uuid
+          readOnly: true
+        patient_name:
+          type: string
+          readOnly: true
+        scheduled_for:
+          type: string
+          format: date-time
+          readOnly: true
+        effective_time:
+          type: string
+          format: date-time
+          readOnly: true
+        slot:
+          allOf:
+          - $ref: '#/components/schemas/SlotEnum'
+          readOnly: true
+        slot_display:
+          type: string
+          readOnly: true
+        quantity_expected:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          readOnly: true
+        quantity_taken:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/DoseEventStatusEnum'
+          readOnly: true
+        status_display:
+          type: string
+          readOnly: true
+        is_overdue:
+          type: boolean
+          readOnly: true
+        can_snooze:
+          type: boolean
+          readOnly: true
+        snooze_until:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        snooze_count:
+          type: integer
+          readOnly: true
+        responded_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        reminder_sent_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        caregiver_alerted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        notes:
+          type: string
+          readOnly: true
+      required:
+      - can_snooze
+      - caregiver_alerted_at
+      - effective_time
+      - id
+      - instructions
+      - is_overdue
+      - medicine
+      - medicine_category
+      - medicine_name
+      - medicine_strength
+      - notes
+      - patient
+      - patient_name
+      - quantity_expected
+      - quantity_taken
+      - reminder_sent_at
+      - responded_at
+      - schedule
+      - scheduled_for
+      - slot
+      - slot_display
+      - snooze_count
+      - snooze_until
+      - status
+      - status_display
+    DoseEventStatusEnum:
+      enum:
+      - PENDING
+      - TAKEN
+      - MISSED
+      - SNOOZED
+      - SKIPPED
+      type: string
+      description: |-
+        * `PENDING` - Due
+        * `TAKEN` - Taken
+        * `MISSED` - Missed
+        * `SNOOZED` - Snoozed
+        * `SKIPPED` - Skipped on purpose
     EmergencyContact:
       type: object
       properties:
@@ -2195,6 +3945,16 @@ components:
       - genders
       - medicine_categories
       - roles
+    FrequencyEnum:
+      enum:
+      - DAILY
+      - SPECIFIC_DAYS
+      - INTERVAL
+      type: string
+      description: |-
+        * `DAILY` - Every day
+        * `SPECIFIC_DAYS` - On chosen days
+        * `INTERVAL` - Every N days
     GenderEnum:
       enum:
       - FEMALE
@@ -2288,6 +4048,275 @@ components:
       - code
       - id
       - name
+    MedicationSchedule:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        medicine:
+          type: string
+          format: uuid
+        slot:
+          allOf:
+          - $ref: '#/components/schemas/SlotEnum'
+          default: MORNING
+          description: |-
+            The part of the day this dose belongs to, as the specification groups them.
+
+            * `MORNING` - Morning
+            * `AFTERNOON` - Afternoon
+            * `EVENING` - Evening
+            * `NIGHT` - Night
+        slot_display:
+          type: string
+          readOnly: true
+        time_of_day:
+          type: string
+          format: time
+          description: Local time in the patient's timezone, not the server's.
+        quantity_per_dose:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        frequency:
+          $ref: '#/components/schemas/FrequencyEnum'
+        frequency_display:
+          type: string
+          readOnly: true
+        days_of_week:
+          description: 'For SPECIFIC_DAYS: ISO weekday numbers, Monday=1 … Sunday=7.'
+        interval_days:
+          type: integer
+          maximum: 365
+          minimum: 1
+          description: 'For INTERVAL: take every N days, counted from start_date.'
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        is_active:
+          type: boolean
+        reminder_enabled:
+          type: boolean
+        remind_minutes_before:
+          type: integer
+          maximum: 180
+          minimum: 0
+          description: Send the reminder this many minutes ahead of the dose time.
+        doses_per_day:
+          type: number
+          format: double
+          readOnly: true
+        next_due_on:
+          type: string
+          format: date
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - doses_per_day
+      - frequency_display
+      - id
+      - medicine
+      - next_due_on
+      - slot_display
+      - time_of_day
+    MedicationScheduleRequest:
+      type: object
+      properties:
+        medicine:
+          type: string
+          format: uuid
+        slot:
+          allOf:
+          - $ref: '#/components/schemas/SlotEnum'
+          default: MORNING
+          description: |-
+            The part of the day this dose belongs to, as the specification groups them.
+
+            * `MORNING` - Morning
+            * `AFTERNOON` - Afternoon
+            * `EVENING` - Evening
+            * `NIGHT` - Night
+        time_of_day:
+          type: string
+          format: time
+          description: Local time in the patient's timezone, not the server's.
+        quantity_per_dose:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        frequency:
+          $ref: '#/components/schemas/FrequencyEnum'
+        days_of_week:
+          description: 'For SPECIFIC_DAYS: ISO weekday numbers, Monday=1 … Sunday=7.'
+        interval_days:
+          type: integer
+          maximum: 365
+          minimum: 1
+          description: 'For INTERVAL: take every N days, counted from start_date.'
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        is_active:
+          type: boolean
+        reminder_enabled:
+          type: boolean
+        remind_minutes_before:
+          type: integer
+          maximum: 180
+          minimum: 0
+          description: Send the reminder this many minutes ahead of the dose time.
+      required:
+      - medicine
+      - time_of_day
+    Medicine:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        patient:
+          type: string
+          format: uuid
+        patient_name:
+          type: string
+          readOnly: true
+        reference:
+          type: string
+          format: uuid
+          nullable: true
+          description: Catalogue entry this medicine matches, when there is one.
+        prescription:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          description: Optional when a catalogue reference is given; it is copied
+            from there.
+          maxLength: 255
+        brand_name:
+          type: string
+          maxLength: 255
+        display_name:
+          type: string
+          readOnly: true
+        dosage_form:
+          type: string
+          maxLength: 128
+        strength:
+          type: string
+          maxLength: 64
+        strength_unit:
+          type: string
+          maxLength: 64
+        category:
+          allOf:
+          - $ref: '#/components/schemas/MedicineCategoryEnum'
+          description: |-
+            Disease-based grouping, from the reference entry when there is one.
+
+            * `BLOOD_PRESSURE` - Blood Pressure
+            * `DIABETES` - Diabetes
+            * `THYROID` - Thyroid
+            * `ANTIBIOTICS` - Antibiotics
+            * `VITAMINS` - Vitamins
+            * `HEART` - Heart Medications
+            * `OTHER` - Other
+        category_display:
+          type: string
+          readOnly: true
+        instructions:
+          type: string
+          description: How to take it, e.g. 'after food'. Shown on every reminder.
+          maxLength: 255
+        quantity_remaining:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          description: Units left in the patient's possession. Decremented when a
+            dose is taken.
+        quantity_per_refill:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+          description: Pack size, so a refill can restore stock in one action.
+        low_stock_threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          description: Warn at or below this many units remaining.
+        is_low_stock:
+          type: boolean
+          readOnly: true
+        is_out_of_stock:
+          type: boolean
+          readOnly: true
+        daily_consumption:
+          type: number
+          format: double
+          readOnly: true
+          description: Units per day across all active schedules; feeds refill prediction.
+        days_of_stock_left:
+          type: integer
+          nullable: true
+          description: A first approximation of the refill date, refined in Milestone
+            3.
+          readOnly: true
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          description: Last day of the course. Empty for an ongoing medicine.
+        is_active:
+          type: boolean
+        notes:
+          type: string
+        schedules:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicationSchedule'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - category_display
+      - created_at
+      - daily_consumption
+      - days_of_stock_left
+      - display_name
+      - id
+      - is_low_stock
+      - is_out_of_stock
+      - patient
+      - patient_name
+      - schedules
+      - updated_at
     MedicineCategoryEnum:
       enum:
       - BLOOD_PRESSURE
@@ -2306,6 +4335,234 @@ components:
         * `VITAMINS` - Vitamins
         * `HEART` - Heart Medications
         * `OTHER` - Other
+    MedicineCreate:
+      type: object
+      description: |-
+        Create a medicine and its first schedules in one request.
+
+        Two round trips - medicine, then schedule - leaves a medicine with no doses
+        if the second call fails, which looks to the patient like a medicine that
+        silently never reminds them.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        patient:
+          type: string
+          format: uuid
+        patient_name:
+          type: string
+          readOnly: true
+        reference:
+          type: string
+          format: uuid
+          nullable: true
+          description: Catalogue entry this medicine matches, when there is one.
+        prescription:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          description: Optional when a catalogue reference is given; it is copied
+            from there.
+          maxLength: 255
+        brand_name:
+          type: string
+          maxLength: 255
+        display_name:
+          type: string
+          readOnly: true
+        dosage_form:
+          type: string
+          maxLength: 128
+        strength:
+          type: string
+          maxLength: 64
+        strength_unit:
+          type: string
+          maxLength: 64
+        category:
+          allOf:
+          - $ref: '#/components/schemas/MedicineCategoryEnum'
+          description: |-
+            Disease-based grouping, from the reference entry when there is one.
+
+            * `BLOOD_PRESSURE` - Blood Pressure
+            * `DIABETES` - Diabetes
+            * `THYROID` - Thyroid
+            * `ANTIBIOTICS` - Antibiotics
+            * `VITAMINS` - Vitamins
+            * `HEART` - Heart Medications
+            * `OTHER` - Other
+        category_display:
+          type: string
+          readOnly: true
+        instructions:
+          type: string
+          description: How to take it, e.g. 'after food'. Shown on every reminder.
+          maxLength: 255
+        quantity_remaining:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          description: Units left in the patient's possession. Decremented when a
+            dose is taken.
+        quantity_per_refill:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+          description: Pack size, so a refill can restore stock in one action.
+        low_stock_threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          description: Warn at or below this many units remaining.
+        is_low_stock:
+          type: boolean
+          readOnly: true
+        is_out_of_stock:
+          type: boolean
+          readOnly: true
+        daily_consumption:
+          type: number
+          format: double
+          readOnly: true
+          description: Units per day across all active schedules; feeds refill prediction.
+        days_of_stock_left:
+          type: integer
+          nullable: true
+          description: A first approximation of the refill date, refined in Milestone
+            3.
+          readOnly: true
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          description: Last day of the course. Empty for an ongoing medicine.
+        is_active:
+          type: boolean
+        notes:
+          type: string
+        schedules:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedSchedule'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - category_display
+      - created_at
+      - daily_consumption
+      - days_of_stock_left
+      - display_name
+      - id
+      - is_low_stock
+      - is_out_of_stock
+      - patient
+      - patient_name
+      - updated_at
+    MedicineCreateRequest:
+      type: object
+      description: |-
+        Create a medicine and its first schedules in one request.
+
+        Two round trips - medicine, then schedule - leaves a medicine with no doses
+        if the second call fails, which looks to the patient like a medicine that
+        silently never reminds them.
+      properties:
+        patient:
+          type: string
+          format: uuid
+        reference:
+          type: string
+          format: uuid
+          nullable: true
+          description: Catalogue entry this medicine matches, when there is one.
+        prescription:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          description: Optional when a catalogue reference is given; it is copied
+            from there.
+          maxLength: 255
+        brand_name:
+          type: string
+          maxLength: 255
+        dosage_form:
+          type: string
+          maxLength: 128
+        strength:
+          type: string
+          maxLength: 64
+        strength_unit:
+          type: string
+          maxLength: 64
+        category:
+          allOf:
+          - $ref: '#/components/schemas/MedicineCategoryEnum'
+          description: |-
+            Disease-based grouping, from the reference entry when there is one.
+
+            * `BLOOD_PRESSURE` - Blood Pressure
+            * `DIABETES` - Diabetes
+            * `THYROID` - Thyroid
+            * `ANTIBIOTICS` - Antibiotics
+            * `VITAMINS` - Vitamins
+            * `HEART` - Heart Medications
+            * `OTHER` - Other
+        instructions:
+          type: string
+          description: How to take it, e.g. 'after food'. Shown on every reminder.
+          maxLength: 255
+        quantity_remaining:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          description: Units left in the patient's possession. Decremented when a
+            dose is taken.
+        quantity_per_refill:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+          description: Pack size, so a refill can restore stock in one action.
+        low_stock_threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          description: Warn at or below this many units remaining.
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          description: Last day of the course. Empty for an ongoing medicine.
+        is_active:
+          type: boolean
+        notes:
+          type: string
+        schedules:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedScheduleRequest'
+      required:
+      - patient
     MedicineReference:
       type: object
       properties:
@@ -2365,6 +4622,374 @@ components:
       - label
       - strength
       - strength_unit
+    MedicineRequest:
+      type: object
+      properties:
+        patient:
+          type: string
+          format: uuid
+        reference:
+          type: string
+          format: uuid
+          nullable: true
+          description: Catalogue entry this medicine matches, when there is one.
+        prescription:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          description: Optional when a catalogue reference is given; it is copied
+            from there.
+          maxLength: 255
+        brand_name:
+          type: string
+          maxLength: 255
+        dosage_form:
+          type: string
+          maxLength: 128
+        strength:
+          type: string
+          maxLength: 64
+        strength_unit:
+          type: string
+          maxLength: 64
+        category:
+          allOf:
+          - $ref: '#/components/schemas/MedicineCategoryEnum'
+          description: |-
+            Disease-based grouping, from the reference entry when there is one.
+
+            * `BLOOD_PRESSURE` - Blood Pressure
+            * `DIABETES` - Diabetes
+            * `THYROID` - Thyroid
+            * `ANTIBIOTICS` - Antibiotics
+            * `VITAMINS` - Vitamins
+            * `HEART` - Heart Medications
+            * `OTHER` - Other
+        instructions:
+          type: string
+          description: How to take it, e.g. 'after food'. Shown on every reminder.
+          maxLength: 255
+        quantity_remaining:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          description: Units left in the patient's possession. Decremented when a
+            dose is taken.
+        quantity_per_refill:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+          description: Pack size, so a refill can restore stock in one action.
+        low_stock_threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          description: Warn at or below this many units remaining.
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          description: Last day of the course. Empty for an ongoing medicine.
+        is_active:
+          type: boolean
+        notes:
+          type: string
+      required:
+      - patient
+    NestedSchedule:
+      type: object
+      description: |-
+        Schedules supplied inside a medicine payload.
+
+        `medicine` is dropped: the medicine is the one being created, and asking a
+        client to name it inside its own payload invites a mismatch.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slot:
+          allOf:
+          - $ref: '#/components/schemas/SlotEnum'
+          description: |-
+            The part of the day this dose belongs to, as the specification groups them.
+
+            * `MORNING` - Morning
+            * `AFTERNOON` - Afternoon
+            * `EVENING` - Evening
+            * `NIGHT` - Night
+        slot_display:
+          type: string
+          readOnly: true
+        time_of_day:
+          type: string
+          format: time
+          description: Local time in the patient's timezone, not the server's.
+        quantity_per_dose:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        frequency:
+          $ref: '#/components/schemas/FrequencyEnum'
+        frequency_display:
+          type: string
+          readOnly: true
+        days_of_week:
+          description: 'For SPECIFIC_DAYS: ISO weekday numbers, Monday=1 … Sunday=7.'
+        interval_days:
+          type: integer
+          maximum: 365
+          minimum: 1
+          description: 'For INTERVAL: take every N days, counted from start_date.'
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        is_active:
+          type: boolean
+        reminder_enabled:
+          type: boolean
+        remind_minutes_before:
+          type: integer
+          maximum: 180
+          minimum: 0
+          description: Send the reminder this many minutes ahead of the dose time.
+        doses_per_day:
+          type: number
+          format: double
+          readOnly: true
+        next_due_on:
+          type: string
+          format: date
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - doses_per_day
+      - frequency_display
+      - id
+      - next_due_on
+      - slot_display
+      - time_of_day
+    NestedScheduleRequest:
+      type: object
+      description: |-
+        Schedules supplied inside a medicine payload.
+
+        `medicine` is dropped: the medicine is the one being created, and asking a
+        client to name it inside its own payload invites a mismatch.
+      properties:
+        slot:
+          allOf:
+          - $ref: '#/components/schemas/SlotEnum'
+          description: |-
+            The part of the day this dose belongs to, as the specification groups them.
+
+            * `MORNING` - Morning
+            * `AFTERNOON` - Afternoon
+            * `EVENING` - Evening
+            * `NIGHT` - Night
+        time_of_day:
+          type: string
+          format: time
+          description: Local time in the patient's timezone, not the server's.
+        quantity_per_dose:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        frequency:
+          $ref: '#/components/schemas/FrequencyEnum'
+        days_of_week:
+          description: 'For SPECIFIC_DAYS: ISO weekday numbers, Monday=1 … Sunday=7.'
+        interval_days:
+          type: integer
+          maximum: 365
+          minimum: 1
+          description: 'For INTERVAL: take every N days, counted from start_date.'
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        is_active:
+          type: boolean
+        reminder_enabled:
+          type: boolean
+        remind_minutes_before:
+          type: integer
+          maximum: 180
+          minimum: 0
+          description: Send the reminder this many minutes ahead of the dose time.
+      required:
+      - time_of_day
+    NotificationLog:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        category:
+          allOf:
+          - $ref: '#/components/schemas/NotificationLogCategoryEnum'
+          readOnly: true
+        category_display:
+          type: string
+          readOnly: true
+        channel:
+          allOf:
+          - $ref: '#/components/schemas/ChannelEnum'
+          readOnly: true
+        channel_display:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/NotificationLogStatusEnum'
+          readOnly: true
+        status_display:
+          type: string
+          readOnly: true
+        subject:
+          type: string
+          readOnly: true
+        body:
+          type: string
+          readOnly: true
+        payload:
+          readOnly: true
+          description: Deep-link data the client app acts on.
+        dose_event:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        error:
+          type: string
+          readOnly: true
+        sent_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - body
+      - category
+      - category_display
+      - channel
+      - channel_display
+      - created_at
+      - dose_event
+      - error
+      - id
+      - payload
+      - sent_at
+      - status
+      - status_display
+      - subject
+    NotificationLogCategoryEnum:
+      enum:
+      - DOSE_REMINDER
+      - DOSE_MISSED
+      - CAREGIVER_ALERT
+      - LOW_STOCK
+      - REFILL_DUE
+      - PRESCRIPTION_EXPIRY
+      type: string
+      description: |-
+        * `DOSE_REMINDER` - Medicine reminder
+        * `DOSE_MISSED` - Missed dose
+        * `CAREGIVER_ALERT` - Caregiver alert
+        * `LOW_STOCK` - Low stock
+        * `REFILL_DUE` - Refill due
+        * `PRESCRIPTION_EXPIRY` - Prescription expiring
+    NotificationLogStatusEnum:
+      enum:
+      - QUEUED
+      - SENT
+      - FAILED
+      - SKIPPED
+      type: string
+      description: |-
+        * `QUEUED` - Queued
+        * `SENT` - Sent
+        * `FAILED` - Failed
+        * `SKIPPED` - Skipped
+    NotificationPreference:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        push_enabled:
+          type: boolean
+        email_enabled:
+          type: boolean
+        sms_enabled:
+          type: boolean
+        dose_reminders:
+          type: boolean
+        missed_dose_alerts:
+          type: boolean
+        refill_alerts:
+          type: boolean
+        caregiver_alerts:
+          type: boolean
+        quiet_hours_start:
+          type: string
+          format: time
+          nullable: true
+        quiet_hours_end:
+          type: string
+          format: time
+          nullable: true
+      required:
+      - id
+    NotificationPreferenceRequest:
+      type: object
+      properties:
+        push_enabled:
+          type: boolean
+        email_enabled:
+          type: boolean
+        sms_enabled:
+          type: boolean
+        dose_reminders:
+          type: boolean
+        missed_dose_alerts:
+          type: boolean
+        refill_alerts:
+          type: boolean
+        caregiver_alerts:
+          type: boolean
+        quiet_hours_start:
+          type: string
+          format: time
+          nullable: true
+        quiet_hours_end:
+          type: string
+          format: time
+          nullable: true
     PaginatedAdminUserList:
       type: object
       required:
@@ -2434,6 +5059,52 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CaregiverProfile'
+    PaginatedDeviceTokenList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceToken'
+    PaginatedDoseEventList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DoseEvent'
     PaginatedEmergencyContactList:
       type: object
       required:
@@ -2480,6 +5151,52 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MedicalCondition'
+    PaginatedMedicationScheduleList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicationSchedule'
+    PaginatedMedicineList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Medicine'
     PaginatedMedicineReferenceList:
       type: object
       required:
@@ -2503,6 +5220,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MedicineReference'
+    PaginatedNotificationLogList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationLog'
     PaginatedPatientConditionList:
       type: object
       required:
@@ -2549,6 +5289,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PatientProfile'
+    PaginatedPrescriptionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Prescription'
     PasswordChangeRequest:
       type: object
       properties:
@@ -2711,6 +5474,159 @@ components:
             maxLength: 0
         is_primary:
           type: boolean
+    PatchedMedicationScheduleRequest:
+      type: object
+      properties:
+        medicine:
+          type: string
+          format: uuid
+        slot:
+          allOf:
+          - $ref: '#/components/schemas/SlotEnum'
+          default: MORNING
+          description: |-
+            The part of the day this dose belongs to, as the specification groups them.
+
+            * `MORNING` - Morning
+            * `AFTERNOON` - Afternoon
+            * `EVENING` - Evening
+            * `NIGHT` - Night
+        time_of_day:
+          type: string
+          format: time
+          description: Local time in the patient's timezone, not the server's.
+        quantity_per_dose:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        frequency:
+          $ref: '#/components/schemas/FrequencyEnum'
+        days_of_week:
+          description: 'For SPECIFIC_DAYS: ISO weekday numbers, Monday=1 … Sunday=7.'
+        interval_days:
+          type: integer
+          maximum: 365
+          minimum: 1
+          description: 'For INTERVAL: take every N days, counted from start_date.'
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        is_active:
+          type: boolean
+        reminder_enabled:
+          type: boolean
+        remind_minutes_before:
+          type: integer
+          maximum: 180
+          minimum: 0
+          description: Send the reminder this many minutes ahead of the dose time.
+    PatchedMedicineRequest:
+      type: object
+      properties:
+        patient:
+          type: string
+          format: uuid
+        reference:
+          type: string
+          format: uuid
+          nullable: true
+          description: Catalogue entry this medicine matches, when there is one.
+        prescription:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          description: Optional when a catalogue reference is given; it is copied
+            from there.
+          maxLength: 255
+        brand_name:
+          type: string
+          maxLength: 255
+        dosage_form:
+          type: string
+          maxLength: 128
+        strength:
+          type: string
+          maxLength: 64
+        strength_unit:
+          type: string
+          maxLength: 64
+        category:
+          allOf:
+          - $ref: '#/components/schemas/MedicineCategoryEnum'
+          description: |-
+            Disease-based grouping, from the reference entry when there is one.
+
+            * `BLOOD_PRESSURE` - Blood Pressure
+            * `DIABETES` - Diabetes
+            * `THYROID` - Thyroid
+            * `ANTIBIOTICS` - Antibiotics
+            * `VITAMINS` - Vitamins
+            * `HEART` - Heart Medications
+            * `OTHER` - Other
+        instructions:
+          type: string
+          description: How to take it, e.g. 'after food'. Shown on every reminder.
+          maxLength: 255
+        quantity_remaining:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          description: Units left in the patient's possession. Decremented when a
+            dose is taken.
+        quantity_per_refill:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+          description: Pack size, so a refill can restore stock in one action.
+        low_stock_threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          description: Warn at or below this many units remaining.
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          description: Last day of the course. Empty for an ongoing medicine.
+        is_active:
+          type: boolean
+        notes:
+          type: string
+    PatchedNotificationPreferenceRequest:
+      type: object
+      properties:
+        push_enabled:
+          type: boolean
+        email_enabled:
+          type: boolean
+        sms_enabled:
+          type: boolean
+        dose_reminders:
+          type: boolean
+        missed_dose_alerts:
+          type: boolean
+        refill_alerts:
+          type: boolean
+        caregiver_alerts:
+          type: boolean
+        quiet_hours_start:
+          type: string
+          format: time
+          nullable: true
+        quiet_hours_end:
+          type: string
+          format: time
+          nullable: true
     PatchedPatientConditionRequest:
       type: object
       properties:
@@ -2786,6 +5702,39 @@ components:
           $ref: '#/components/schemas/PreferredReminderChannelEnum'
         is_active:
           type: boolean
+    PatchedPrescriptionRequest:
+      type: object
+      properties:
+        patient:
+          type: string
+          format: uuid
+        doctor_name:
+          type: string
+          maxLength: 150
+        clinic_name:
+          type: string
+          maxLength: 200
+        reference_number:
+          type: string
+          maxLength: 64
+        issued_on:
+          type: string
+          format: date
+          nullable: true
+        expires_on:
+          type: string
+          format: date
+          nullable: true
+          description: Repeat prescriptions run out; the patient is reminded before
+            they do.
+        image:
+          type: string
+          format: binary
+          nullable: true
+        notes:
+          type: string
+        status:
+          $ref: '#/components/schemas/PrescriptionStatusEnum'
     PatchedUserRequest:
       type: object
       description: The authenticated user as the frontend sees them.
@@ -3243,6 +6192,16 @@ components:
       required:
       - email
       - password
+    PlatformEnum:
+      enum:
+      - WEB
+      - ANDROID
+      - IOS
+      type: string
+      description: |-
+        * `WEB` - Web
+        * `ANDROID` - Android
+        * `IOS` - iOS
     PreferredReminderChannelEnum:
       enum:
       - PUSH
@@ -3253,6 +6212,137 @@ components:
         * `PUSH` - Push
         * `EMAIL` - Email
         * `SMS` - SMS
+    Prescription:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        patient:
+          type: string
+          format: uuid
+        patient_name:
+          type: string
+          readOnly: true
+        doctor_name:
+          type: string
+          maxLength: 150
+        clinic_name:
+          type: string
+          maxLength: 200
+        reference_number:
+          type: string
+          maxLength: 64
+        issued_on:
+          type: string
+          format: date
+          nullable: true
+        expires_on:
+          type: string
+          format: date
+          nullable: true
+          description: Repeat prescriptions run out; the patient is reminded before
+            they do.
+        days_until_expiry:
+          type: integer
+          nullable: true
+          readOnly: true
+        is_expired:
+          type: boolean
+          readOnly: true
+        image:
+          type: string
+          format: uri
+          nullable: true
+        notes:
+          type: string
+        status:
+          $ref: '#/components/schemas/PrescriptionStatusEnum'
+        status_display:
+          type: string
+          readOnly: true
+        ocr_extracted:
+          type: boolean
+          readOnly: true
+        ocr_confidence:
+          type: number
+          format: double
+          readOnly: true
+          nullable: true
+          description: 0-1. Low confidence means a human should check the extracted
+            fields.
+        medicine_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - days_until_expiry
+      - id
+      - is_expired
+      - medicine_count
+      - ocr_confidence
+      - ocr_extracted
+      - patient
+      - patient_name
+      - status_display
+    PrescriptionRequest:
+      type: object
+      properties:
+        patient:
+          type: string
+          format: uuid
+        doctor_name:
+          type: string
+          maxLength: 150
+        clinic_name:
+          type: string
+          maxLength: 200
+        reference_number:
+          type: string
+          maxLength: 64
+        issued_on:
+          type: string
+          format: date
+          nullable: true
+        expires_on:
+          type: string
+          format: date
+          nullable: true
+          description: Repeat prescriptions run out; the patient is reminded before
+            they do.
+        image:
+          type: string
+          format: binary
+          nullable: true
+        notes:
+          type: string
+        status:
+          $ref: '#/components/schemas/PrescriptionStatusEnum'
+      required:
+      - patient
+    PrescriptionStatusEnum:
+      enum:
+      - ACTIVE
+      - EXPIRED
+      - ARCHIVED
+      type: string
+      description: |-
+        * `ACTIVE` - Active
+        * `EXPIRED` - Expired
+        * `ARCHIVED` - Archived
+    RefillRequest:
+      type: object
+      description: Record that the patient collected more of a medicine.
+      properties:
+        quantity:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
     Register:
       type: object
       description: |-
@@ -3352,6 +6442,40 @@ components:
       description: |-
         * `PATIENT` - Patient
         * `CAREGIVER` - Caregiver
+    SlotEnum:
+      enum:
+      - MORNING
+      - AFTERNOON
+      - EVENING
+      - NIGHT
+      type: string
+      description: |-
+        * `MORNING` - Morning
+        * `AFTERNOON` - Afternoon
+        * `EVENING` - Evening
+        * `NIGHT` - Night
+    SnoozeRequest:
+      type: object
+      properties:
+        minutes:
+          type: integer
+          maximum: 240
+          minimum: 1
+          default: 15
+          description: How long to postpone. A dose can be snoozed at most 3 times.
+    TakeDoseRequest:
+      type: object
+      description: Payload shared by the take / miss / skip actions.
+      properties:
+        notes:
+          type: string
+          maxLength: 255
+        quantity_taken:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          description: Defaults to the scheduled quantity. Set it when a partial dose
+            was taken.
     TokenRefresh:
       type: object
       properties:

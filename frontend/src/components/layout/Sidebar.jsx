@@ -6,11 +6,15 @@ import { selectRole } from '../../store/authSlice.js';
 /** Navigation is filtered by role, mirroring what the API will actually allow. */
 const LINKS = [
   { to: '/', label: 'Dashboard', roles: ['PATIENT', 'CAREGIVER', 'ADMIN'], end: true },
-  { to: '/profile', label: 'My profile', roles: ['PATIENT', 'CAREGIVER', 'ADMIN'] },
+  { to: '/today', label: "Today's medicines", roles: ['PATIENT', 'CAREGIVER', 'ADMIN'] },
+  { to: '/medications', label: 'My medicines', roles: ['PATIENT', 'CAREGIVER', 'ADMIN'] },
+  { to: '/history', label: 'History', roles: ['PATIENT', 'CAREGIVER', 'ADMIN'] },
   { to: '/family', label: 'Family profiles', roles: ['PATIENT', 'ADMIN'] },
   { to: '/caregivers', label: 'Caregivers', roles: ['PATIENT'] },
   { to: '/patients', label: 'My patients', roles: ['CAREGIVER'] },
   { to: '/medicines', label: 'Medicine catalogue', roles: ['PATIENT', 'CAREGIVER', 'ADMIN'] },
+  { to: '/notifications', label: 'Notifications', roles: ['PATIENT', 'CAREGIVER', 'ADMIN'] },
+  { to: '/profile', label: 'My profile', roles: ['PATIENT', 'CAREGIVER', 'ADMIN'] },
   { to: '/admin/users', label: 'User management', roles: ['ADMIN'] },
 ];
 

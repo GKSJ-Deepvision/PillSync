@@ -99,10 +99,23 @@ class IsProfileOwnerOrAssignedCaregiver(BasePermission):
 
     @staticmethod
     def _resolve_profile(obj):
-        """Accept either a PatientProfile or anything with a `patient` FK."""
+        """Find the patient profile an object belongs to.
+
+        Objects reach this permission at three removes from the profile: the
+        profile itself, something with a `patient` FK (a medicine, a dose, a
+        prescription), or something one step further out like a schedule, which
+        only knows its medicine. Returning None denies access, so a model added
+        later without one of these paths fails closed rather than open.
+        """
         if hasattr(obj, "is_visible_to_caregiver"):
             return obj
-        return getattr(obj, "patient", None)
+
+        patient = getattr(obj, "patient", None)
+        if patient is not None:
+            return patient
+
+        medicine = getattr(obj, "medicine", None)
+        return getattr(medicine, "patient", None) if medicine is not None else None
 
 
 class ReadOnly(BasePermission):

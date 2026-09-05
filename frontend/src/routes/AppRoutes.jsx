@@ -5,13 +5,17 @@ import AdminUsersPage from '../pages/AdminUsersPage.jsx';
 import CaregiversPage from '../pages/CaregiversPage.jsx';
 import DashboardPage from '../pages/DashboardPage.jsx';
 import FamilyPage from '../pages/FamilyPage.jsx';
+import HistoryPage from '../pages/HistoryPage.jsx';
 import ForbiddenPage from '../pages/ForbiddenPage.jsx';
 import LoginPage from '../pages/LoginPage.jsx';
+import MedicationsPage from '../pages/MedicationsPage.jsx';
 import MedicinesPage from '../pages/MedicinesPage.jsx';
 import MyPatientsPage from '../pages/MyPatientsPage.jsx';
+import NotificationsPage from '../pages/NotificationsPage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
 import ProfilePage from '../pages/ProfilePage.jsx';
 import RegisterPage from '../pages/RegisterPage.jsx';
+import TodayPage from '../pages/TodayPage.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
 
 export default function AppRoutes() {
@@ -29,6 +33,10 @@ export default function AppRoutes() {
         }
       >
         <Route index element={<DashboardPage />} />
+        <Route path="today" element={<TodayPage />} />
+        <Route path="history" element={<HistoryPage />} />
+        <Route path="medications" element={<MedicationsPage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="medicines" element={<MedicinesPage />} />
         <Route

@@ -184,8 +184,113 @@ Patients link to these rows rather than typing free text, so "diabetes",
 "Diabetes Type 2" and "T2DM" do not become three conditions the analytics
 cannot group.
 
-## What Milestone 2 adds
+## Milestone 2 tables
 
-`Medicine` (a patient's own medicine, pointing at a `MedicineReference`),
-`MedicationSchedule`, `Reminder` and `DoseEvent`. The tables above are designed
-to take those foreign keys without migration surgery.
+```mermaid
+erDiagram
+    PATIENT_PROFILE ||--o{ MEDICINE : takes
+    PATIENT_PROFILE ||--o{ PRESCRIPTION : "was given"
+    MEDICINE_REFERENCE ||--o{ MEDICINE : "catalogued as"
+    PRESCRIPTION ||--o{ MEDICINE : prescribes
+    MEDICINE ||--o{ MEDICATION_SCHEDULE : "taken on"
+    MEDICATION_SCHEDULE ||--o{ DOSE_EVENT : "materialises into"
+    DOSE_EVENT ||--o{ NOTIFICATION_LOG : "reminded by"
+    USER ||--o{ DEVICE_TOKEN : registers
+    USER ||--|| NOTIFICATION_PREFERENCE : configures
+    USER ||--o{ NOTIFICATION_LOG : receives
+
+    MEDICINE {
+        uuid id PK
+        uuid patient_id FK
+        uuid reference_id FK "catalogue entry, optional"
+        uuid prescription_id FK
+        varchar name
+        varchar category "disease-based grouping"
+        varchar instructions "shown on every reminder"
+        decimal quantity_remaining "decremented on TAKEN"
+        decimal quantity_per_refill "pack size"
+        decimal low_stock_threshold
+        date start_date
+        date end_date
+        bool is_active
+    }
+
+    MEDICATION_SCHEDULE {
+        uuid id PK
+        uuid medicine_id FK
+        varchar slot "MORNING | AFTERNOON | EVENING | NIGHT"
+        time time_of_day "local to the patient"
+        decimal quantity_per_dose
+        varchar frequency "DAILY | SPECIFIC_DAYS | INTERVAL"
+        jsonb days_of_week "ISO weekdays for SPECIFIC_DAYS"
+        smallint interval_days
+        bool reminder_enabled
+        bool is_active
+    }
+
+    DOSE_EVENT {
+        uuid id PK
+        uuid schedule_id FK
+        uuid medicine_id FK "denormalised"
+        uuid patient_id FK "denormalised"
+        timestamptz scheduled_for
+        varchar slot
+        decimal quantity_expected
+        varchar status "PENDING | TAKEN | MISSED | SNOOZED | SKIPPED"
+        decimal quantity_taken
+        timestamptz responded_at
+        timestamptz snooze_until
+        smallint snooze_count "capped at 3"
+        timestamptz reminder_sent_at
+        timestamptz caregiver_alerted_at
+    }
+
+    PRESCRIPTION {
+        uuid id PK
+        uuid patient_id FK
+        varchar doctor_name
+        date issued_on
+        date expires_on
+        image image "per-patient upload directory"
+        varchar status "ACTIVE | EXPIRED | ARCHIVED"
+        bool ocr_extracted "written by Milestone 3"
+        float ocr_confidence
+        timestamptz expiry_reminded_at
+    }
+
+    NOTIFICATION_LOG {
+        uuid id PK
+        uuid recipient_id FK
+        uuid dose_event_id FK
+        varchar category
+        varchar channel "PUSH | EMAIL | SMS"
+        varchar status "QUEUED | SENT | FAILED | SKIPPED"
+        varchar subject
+        text body
+        jsonb payload "deep-link data"
+        text error
+    }
+```
+
+### Decisions
+
+**`DoseEvent` is both the reminder and the history record.** One row per
+scheduled dose means "what did the patient do about Tuesday's 08:00 dose" has
+exactly one answer. Splitting them would leave the two to drift.
+
+**`patient_id` and `medicine_id` are denormalised onto `DoseEvent`.** The
+history of a patient survives a schedule being deleted, and today's doses need
+no joins.
+
+**Unique `(schedule, scheduled_for)`.** Regenerating the horizon, or two workers
+generating at once, cannot produce a doubled dose.
+
+**Nothing is deleted here either.** Stopping a medicine deactivates it and drops
+only its untouched future doses; a prescription is archived so the medicines
+pointing at it keep their link.
+
+## What Milestone 3 adds
+
+`RefillPrediction` alongside `Medicine`, and OCR extraction results against
+`Prescription`. Adherence analytics aggregate `DOSE_EVENT` and need no new
+tables.

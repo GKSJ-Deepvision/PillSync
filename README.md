@@ -100,17 +100,27 @@ Report templates are in [`docs/milestones/`](docs/milestones/).
 
 ## Current state
 
-**Milestone 1 is complete on `main`** and serves as the reference implementation:
-authentication with JWT and Google OAuth2, role-based access for
-patient / caregiver / admin, patient and family profiles, the finalised database
-schema, and a medicine catalogue seeded from the FDA National Drug Code
+**Milestones 1 and 2 are complete on `main`** and serve as the reference
+implementation.
+
+**Milestone 1** — authentication with JWT and Google OAuth2, role-based access
+for patient / caregiver / admin, patient and family profiles, the finalised
+database schema, and a medicine catalogue seeded from the FDA National Drug Code
 Directory (1,742 presentations across 369 generics, in the six condition groups
 the specification names).
+[Report](docs/milestones/milestone-1.md)
 
-108 backend tests (87% coverage), 43 frontend tests, 22 dataset tests.
-See [`docs/milestones/milestone-1.md`](docs/milestones/milestone-1.md).
+**Milestone 2** — medicines with stock and disease grouping, dosage scheduling
+(daily, chosen weekdays, every N days), the reminder pipeline with
+Taken / Missed / Snooze, medication history, and notification delivery across
+push, email and SMS with per-user preferences.
+[Report](docs/milestones/milestone-2.md) ·
+[Pipeline design](docs/architecture/reminder-pipeline.md)
 
-Milestones 2–4 are not started: those app folders hold only their README.
+245 backend tests (89% coverage), 56 frontend tests, 22 dataset tests.
+
+Milestones 3 and 4 are not started: the `ocr`, `adherence`, `refills` and
+`analytics` app folders hold only their README.
 
 ## Quick start
 
@@ -134,6 +144,10 @@ cp .env.example .env
 python manage.py migrate
 python manage.py seed_reference_data                # loads the medicine catalogue
 python manage.py runserver                          # http://localhost:8000
+
+# Optional: the reminder worker, in a third terminal (needs Redis)
+celery -A config worker -l info
+celery -A config beat -l info
 
 # Frontend, in a second terminal
 cd frontend

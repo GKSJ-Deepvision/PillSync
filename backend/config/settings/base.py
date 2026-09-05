@@ -12,6 +12,7 @@ from datetime import timedelta
 from pathlib import Path
 
 import dj_database_url
+from celery.schedules import crontab
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -71,6 +72,10 @@ INSTALLED_APPS = [
     "apps.common",
     "apps.accounts",
     "apps.profiles",
+    "apps.medications",
+    "apps.prescriptions",
+    "apps.reminders",
+    "apps.notifications",
 ]
 
 MIDDLEWARE = [
@@ -293,6 +298,22 @@ FRONTEND_BASE_URL = env("FRONTEND_BASE_URL", "http://localhost:5173")
 PASSWORD_RESET_TIMEOUT = env_int("PASSWORD_RESET_TIMEOUT_SECONDS", 60 * 60 * 2)
 
 # ---------------------------------------------------------------------------
+# Notification providers
+# ---------------------------------------------------------------------------
+# Each is optional. Without credentials the corresponding provider falls back
+# to logging the message, so the whole reminder pipeline runs in development
+# and in CI without any third-party account.
+
+FIREBASE_CREDENTIALS_PATH = env("FIREBASE_CREDENTIALS_PATH")
+TWILIO_ACCOUNT_SID = env("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = env("TWILIO_AUTH_TOKEN")
+TWILIO_FROM_NUMBER = env("TWILIO_FROM_NUMBER")
+SENDGRID_API_KEY = env("SENDGRID_API_KEY")
+
+# How far ahead dose events are materialised from schedules.
+DOSE_HORIZON_DAYS = env_int("DOSE_HORIZON_DAYS", 14)
+
+# ---------------------------------------------------------------------------
 # Celery
 # ---------------------------------------------------------------------------
 
@@ -303,6 +324,28 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_ALWAYS_EAGER = env_bool("CELERY_TASK_ALWAYS_EAGER", False)
+
+# The reminder loop. Cadence matters: a dose reminder that arrives ten minutes
+# late is a dose taken ten minutes late, so dispatch runs every minute, while
+# generation and sweeping are cheap to do far less often.
+CELERY_BEAT_SCHEDULE = {
+    "dispatch-due-reminders": {
+        "task": "reminders.dispatch_due_reminders",
+        "schedule": crontab(minute="*"),
+    },
+    "sweep-overdue-doses": {
+        "task": "reminders.sweep_overdue_doses",
+        "schedule": crontab(minute="*/15"),
+    },
+    "generate-dose-events": {
+        "task": "reminders.generate_dose_events",
+        "schedule": crontab(hour=2, minute=0),
+    },
+    "notify-expiring-prescriptions": {
+        "task": "reminders.notify_expiring_prescriptions",
+        "schedule": crontab(hour=8, minute=0),
+    },
+}
 
 # ---------------------------------------------------------------------------
 # Logging

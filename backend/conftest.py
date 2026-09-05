@@ -151,3 +151,20 @@ def _reset_throttle_cache():
     cache.clear()
     yield
     cache.clear()
+
+
+@pytest.fixture
+def medicine_reference(db) -> MedicineReference:
+    """A catalogue entry a patient can pick a medicine from."""
+    return MedicineReference.objects.create(
+        product_ndc="0378-0208",
+        generic_name="Amlodipine Besylate",
+        brand_name="Norvasc",
+        dosage_form="Tablet",
+        route="Oral",
+        strength="5",
+        strength_unit="mg/1",
+        category="BLOOD_PRESSURE",
+        pharm_class="Calcium Channel Blocker [EPC]",
+        requires_prescription=True,
+    )

@@ -83,3 +83,76 @@ class ConditionSeverity(models.TextChoices):
     MODERATE = "MODERATE", "Moderate"
     SEVERE = "SEVERE", "Severe"
     UNKNOWN = "UNKNOWN", "Not assessed"
+
+
+class DoseSlot(models.TextChoices):
+    """The parts of the day the specification groups reminders into."""
+
+    MORNING = "MORNING", "Morning"
+    AFTERNOON = "AFTERNOON", "Afternoon"
+    EVENING = "EVENING", "Evening"
+    NIGHT = "NIGHT", "Night"
+
+
+class ScheduleFrequency(models.TextChoices):
+    DAILY = "DAILY", "Every day"
+    SPECIFIC_DAYS = "SPECIFIC_DAYS", "On chosen days"
+    INTERVAL = "INTERVAL", "Every N days"
+
+
+class Weekday(models.IntegerChoices):
+    """ISO weekday numbers, so `date.isoweekday()` can be compared directly."""
+
+    MONDAY = 1, "Monday"
+    TUESDAY = 2, "Tuesday"
+    WEDNESDAY = 3, "Wednesday"
+    THURSDAY = 4, "Thursday"
+    FRIDAY = 5, "Friday"
+    SATURDAY = 6, "Saturday"
+    SUNDAY = 7, "Sunday"
+
+
+class DoseStatus(models.TextChoices):
+    """Lifecycle of a single scheduled dose - the medication history record."""
+
+    PENDING = "PENDING", "Due"
+    TAKEN = "TAKEN", "Taken"
+    MISSED = "MISSED", "Missed"
+    SNOOZED = "SNOOZED", "Snoozed"
+    SKIPPED = "SKIPPED", "Skipped on purpose"
+
+
+class PrescriptionStatus(models.TextChoices):
+    ACTIVE = "ACTIVE", "Active"
+    EXPIRED = "EXPIRED", "Expired"
+    ARCHIVED = "ARCHIVED", "Archived"
+
+
+class NotificationChannel(models.TextChoices):
+    PUSH = "PUSH", "Push notification"
+    EMAIL = "EMAIL", "Email"
+    SMS = "SMS", "SMS"
+
+
+class NotificationCategory(models.TextChoices):
+    """What a notification is about. Drives templates and per-category opt-out."""
+
+    DOSE_REMINDER = "DOSE_REMINDER", "Medicine reminder"
+    DOSE_MISSED = "DOSE_MISSED", "Missed dose"
+    CAREGIVER_ALERT = "CAREGIVER_ALERT", "Caregiver alert"
+    LOW_STOCK = "LOW_STOCK", "Low stock"
+    REFILL_DUE = "REFILL_DUE", "Refill due"
+    PRESCRIPTION_EXPIRY = "PRESCRIPTION_EXPIRY", "Prescription expiring"
+
+
+class NotificationStatus(models.TextChoices):
+    QUEUED = "QUEUED", "Queued"
+    SENT = "SENT", "Sent"
+    FAILED = "FAILED", "Failed"
+    SKIPPED = "SKIPPED", "Skipped"
+
+
+class DevicePlatform(models.TextChoices):
+    WEB = "WEB", "Web"
+    ANDROID = "ANDROID", "Android"
+    IOS = "IOS", "iOS"
