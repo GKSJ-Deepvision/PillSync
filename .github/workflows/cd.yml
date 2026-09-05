@@ -46,6 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       image_tag: ${{ steps.slug.outputs.image_tag }}
+      image_base: ${{ steps.slug.outputs.image_base }}
     steps:
       - uses: actions/checkout@v4
 
@@ -64,16 +65,23 @@ jobs:
       - name: Release checklist
         run: python .github/scripts/release_check.py
 
-      - name: Build the image tag
+      - name: Build the image name and tag
         id: slug
         shell: bash
         env:
           BRANCH: ${{ github.ref_name }}
+          REPOSITORY: ${{ github.repository }}
+          REGISTRY: ${{ env.REGISTRY }}
         run: |
-          # Image tags cannot contain "/" and must be lower case.
+          # Both halves must be lower case: OCI rejects an image whose
+          # repository path has capitals, and "GKSJ-Deepvision/PillSync" does.
+          # Tags additionally cannot contain "/".
           tag=$(echo "$BRANCH" | tr '[:upper:]/' '[:lower:]-' | tr -cd 'a-z0-9._-')
+          base="$REGISTRY/$(echo "$REPOSITORY" | tr '[:upper:]' '[:lower:]')"
+
           echo "image_tag=${tag:-unknown}" >> "$GITHUB_OUTPUT"
-          echo "Image tag: ${tag:-unknown}"
+          echo "image_base=$base" >> "$GITHUB_OUTPUT"
+          echo "Images will be tagged $base/pillsync-*:${tag:-unknown}"
 
   images:
     name: Build and publish images
@@ -118,7 +126,7 @@ jobs:
         with:
           context: ./backend
           push: ${{ inputs.publish_images }}
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}/pillsync-backend:${{ needs.readiness.outputs.image_tag }}
+          tags: ${{ needs.readiness.outputs.image_base }}/pillsync-backend:${{ needs.readiness.outputs.image_tag }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
@@ -129,7 +137,7 @@ jobs:
         with:
           context: ./frontend
           push: ${{ inputs.publish_images }}
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}/pillsync-frontend:${{ needs.readiness.outputs.image_tag }}
+          tags: ${{ needs.readiness.outputs.image_base }}/pillsync-frontend:${{ needs.readiness.outputs.image_tag }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
@@ -141,6 +149,7 @@ jobs:
           PUBLISHED: ${{ inputs.publish_images }}
           TARGET: ${{ inputs.target }}
           TAG: ${{ needs.readiness.outputs.image_tag }}
+          BASE: ${{ needs.readiness.outputs.image_base }}
           BACKEND: ${{ steps.check.outputs.backend }}
           FRONTEND: ${{ steps.check.outputs.frontend }}
         run: |
@@ -160,8 +169,8 @@ jobs:
               echo "Pull with:"
               echo ""
               echo '```bash'
-              echo "docker pull ${{ env.REGISTRY }}/${{ github.repository }}/pillsync-backend:$TAG"
-              echo "docker pull ${{ env.REGISTRY }}/${{ github.repository }}/pillsync-frontend:$TAG"
+              echo "docker pull $BASE/pillsync-backend:$TAG"
+              echo "docker pull $BASE/pillsync-frontend:$TAG"
               echo '```'
             else
               echo "Dry run - nothing was published. Re-run with **publish images** enabled when you are ready."
