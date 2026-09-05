@@ -5,6 +5,7 @@ from django.test import TestCase
 # from rest_framework.test import APITestCase
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from apps.medicines.models import Medicine, MedicineSchedule
 
 from .serializers import MedicineScheduleSerializer
