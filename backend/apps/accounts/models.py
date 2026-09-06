@@ -1,42 +1,77 @@
-from enum import Enum
-
-from sqlalchemy import String, Text
-from sqlalchemy.orm import Mapped, mapped_column
-
-from config.database import Base
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.db import models
 
 
-class UserRole(str, Enum):
-    PATIENT = "PATIENT"
-    CAREGIVER = "CAREGIVER"
-    ADMIN = "ADMIN"
+class UserRole(models.TextChoices):
+    PATIENT = "PATIENT", "Patient"
+    CAREGIVER = "CAREGIVER", "Caregiver"
+    ADMIN = "ADMIN", "Admin"
 
 
-class User(Base):
-    __tablename__ = "users"
+class UserManager(BaseUserManager):
+    def create_user(
+        self,
+        email,
+        full_name,
+        password=None,
+        role=UserRole.PATIENT,
+        **extra_fields,
+    ):
+        if not email:
+            raise ValueError("Email is required")
 
-    id: Mapped[int] = mapped_column(
-        "user_id",
-        primary_key=True,
-        index=True,
-    )
+        email = self.normalize_email(email)
 
-    full_name: Mapped[str] = mapped_column(
-        "name",
-        String(100),
-    )
+        user = self.model(
+            email=email,
+            full_name=full_name,
+            role=role,
+            **extra_fields,
+        )
 
-    email: Mapped[str] = mapped_column(
-        String(150),
-        unique=True,
-        index=True,
-    )
+        user.set_password(password)
+        user.save(using=self._db)
 
-    hashed_password: Mapped[str] = mapped_column(
-        "password_hash",
-        Text,
-    )
+        return user
 
-    role: Mapped[UserRole] = mapped_column(
+    def create_superuser(
+        self,
+        email,
+        full_name,
+        password=None,
+        **extra_fields,
+    ):
+        user = self.create_user(
+            email=email,
+            full_name=full_name,
+            password=password,
+            role=UserRole.ADMIN,
+            **extra_fields,
+        )
+
+        user.is_staff = True
+        user.is_superuser = True
+        user.save(using=self._db)
+
+        return user
+
+
+class User(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(unique=True)
+    full_name = models.CharField(max_length=100)
+    role = models.CharField(
+        max_length=20,
+        choices=UserRole.choices,
         default=UserRole.PATIENT,
     )
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    date_joined = models.DateTimeField(auto_now_add=True)
+
+    objects = UserManager()
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["full_name"]
+
+    def __str__(self):
+        return self.email

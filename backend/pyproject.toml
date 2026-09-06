@@ -34,6 +34,7 @@ testpaths = ["tests", "apps"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+DJANGO_SETTINGS_MODULE = "config.settings.dev"
 addopts = "-ra --strict-markers"
 markers = [
     "unit: fast tests with no external dependencies",

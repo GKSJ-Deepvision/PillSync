@@ -1,35 +1,52 @@
-from enum import Enum
+from rest_framework import serializers
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
-
-
-class UserRole(str, Enum):
-    PATIENT = "PATIENT"
-    CAREGIVER = "CAREGIVER"
-    ADMIN = "ADMIN"
+from apps.accounts.models import User, UserRole
 
 
-class UserRegister(BaseModel):
-    email: EmailStr
-    full_name: str = Field(min_length=2, max_length=100)
-    password: str = Field(min_length=8, max_length=128)
-    role: UserRole = UserRole.PATIENT
+class UserRegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(
+        write_only=True,
+        min_length=8,
+        max_length=128,
+    )
+
+    class Meta:
+        model = User
+        fields = ("email", "full_name", "password", "role")
+
+    def create(self, validated_data):
+        password = validated_data.pop("password")
+
+        return User.objects.create_user(
+            password=password,
+            **validated_data,
+        )
 
 
-class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
 
 
-class TokenResponse(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
+class TokenResponseSerializer(serializers.Serializer):
+    access_token = serializers.CharField()
+    refresh_token = serializers.CharField()
+    token_type = serializers.CharField(default="bearer")
 
 
-class UserResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+class UserResponseSerializer(serializers.ModelSerializer):
+    role = serializers.ChoiceField(choices=UserRole.choices)
 
-    id: int
-    email: EmailStr
-    full_name: str
-    role: UserRole
+    class Meta:
+        model = User
+        fields = ("id", "email", "full_name", "role")
+
+
+class RoleAccessResponseSerializer(serializers.Serializer):
+    message = serializers.CharField()
+    user = serializers.CharField()
+    role = serializers.ChoiceField(choices=UserRole.choices)
+
+
+class HealthResponseSerializer(serializers.Serializer):
+    status = serializers.CharField()

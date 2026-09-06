@@ -1,17 +1,18 @@
 # Runtime dependencies for the PillSync backend.
 # Pin a version when you add a package so every branch installs the same thing.
-#
-# Web framework
-fastapi==0.115.6
-uvicorn[standard]==0.32.1
 
-# Auth
-python-jose==3.3.0
-pwdlib[argon2]
+# Web framework
+Django==5.2.17
+djangorestframework==3.18.0
+
+# Authentication / JWT
+djangorestframework-simplejwt==5.5.1
+
+# API documentation
+drf-spectacular==0.28.0
 
 # Database
-sqlalchemy==2.0.36
-psycopg[binary]==3.*
+psycopg[binary]==3.2.3
 
 # Background jobs / scheduling
 # celery==5.*
@@ -31,11 +32,8 @@ psycopg[binary]==3.*
 # sendgrid==6.*
 
 # Utilities
-# python-dotenv==1.*
+python-dotenv==1.0.1
 email-validator==2.2.0
-
-# Pydantic
-# pydantic==2.*
 
 # HTTP
 httpx==0.28.1

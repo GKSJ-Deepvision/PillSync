@@ -1,115 +1,154 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from drf_spectacular.utils import extend_schema
+from rest_framework import status
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.accounts.dependencies import get_current_user
 from apps.accounts.models import User
-from apps.accounts.permissions import require_admin, require_caregiver, require_patient
-from apps.accounts.schemas import LoginRequest, TokenResponse, UserRegister, UserResponse
-from apps.accounts.services.auth import create_access_token, hash_password, verify_password
-from config.database import get_db
-
-router = APIRouter(prefix="/auth", tags=["Authentication"])
-
-
-@router.post(
-    "/register",
-    response_model=UserResponse,
-    status_code=status.HTTP_201_CREATED,
+from apps.accounts.permissions import IsAdmin, IsCaregiver, IsPatient
+from apps.accounts.schemas import (
+    LoginSerializer,
+    RoleAccessResponseSerializer,
+    TokenResponseSerializer,
+    UserRegisterSerializer,
+    UserResponseSerializer,
 )
-def register(
-    user_data: UserRegister,
-    db: Session = Depends(get_db),
-):
-    existing_user = db.query(User).filter(User.email == user_data.email).first()
 
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered",
+
+@extend_schema(
+    tags=["Authentication"],
+    request=UserRegisterSerializer,
+    responses={201: UserResponseSerializer},
+    summary="Register a new user",
+    description="Creates a new PillSync user with a Patient, Caregiver, or Admin role.",
+)
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = UserRegisterSerializer(data=request.data)
+
+        if serializer.is_valid():
+            user = serializer.save()
+
+            return Response(
+                UserResponseSerializer(user).data,
+                status=status.HTTP_201_CREATED,
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
-    user = User(
-        email=user_data.email,
-        full_name=user_data.full_name,
-        hashed_password=hash_password(user_data.password),
-        role=user_data.role,
-    )
 
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    return user
-
-
-@router.post(
-    "/login",
-    response_model=TokenResponse,
+@extend_schema(
+    tags=["Authentication"],
+    request=LoginSerializer,
+    responses={200: TokenResponseSerializer},
+    summary="Login",
+    description="Authenticates a user and returns JWT access and refresh tokens.",
 )
-def login(
-    login_data: LoginRequest,
-    db: Session = Depends(get_db),
-):
-    user = db.query(User).filter(User.email == login_data.email).first()
+class LoginView(APIView):
+    permission_classes = [AllowAny]
 
-    if not user or not verify_password(
-        login_data.password,
-        user.hashed_password,
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+        password = serializer.validated_data["password"]
+
+        user = User.objects.filter(email=email).first()
+
+        if user is None or not user.check_password(password):
+            return Response(
+                {"detail": "Invalid email or password"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        refresh = RefreshToken.for_user(user)
+        refresh["role"] = user.role
+
+        return Response(
+            {
+                "access_token": str(refresh.access_token),
+                "refresh_token": str(refresh),
+                "token_type": "bearer",
+            },
+            status=status.HTTP_200_OK,
         )
 
-    token = create_access_token(
-        user.id,
-        user.role.value,
-    )
 
-    return {
-        "access_token": token,
-        "token_type": "bearer",
-    }
-
-
-@router.get("/patient-only")
-def patient_only(
-    current_user: User = Depends(require_patient),
-):
-    return {
-        "message": "Patient access granted",
-        "user": current_user.full_name,
-        "role": current_user.role.value,
-    }
-
-
-@router.get("/caregiver-only")
-def caregiver_only(
-    current_user: User = Depends(require_caregiver),
-):
-    return {
-        "message": "Caregiver access granted",
-        "user": current_user.full_name,
-        "role": current_user.role.value,
-    }
-
-
-@router.get("/admin-only")
-def admin_only(
-    current_user: User = Depends(require_admin),
-):
-    return {
-        "message": "Admin access granted",
-        "user": current_user.full_name,
-        "role": current_user.role.value,
-    }
-
-
-@router.get(
-    "/me",
-    response_model=UserResponse,
+@extend_schema(
+    tags=["Authentication"],
+    responses={200: UserResponseSerializer},
+    summary="Get current user",
+    description="Returns the currently authenticated user's details.",
 )
-def get_me(
-    current_user: User = Depends(get_current_user),
-):
-    return current_user
+class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response(
+            UserResponseSerializer(request.user).data,
+            status=status.HTTP_200_OK,
+        )
+
+
+@extend_schema(
+    tags=["Role Based Access"],
+    responses={200: RoleAccessResponseSerializer},
+    summary="Patient-only endpoint",
+    description="Accessible only to authenticated Patient users.",
+)
+class PatientOnlyView(APIView):
+    permission_classes = [IsPatient]
+
+    def get(self, request):
+        return Response(
+            {
+                "message": "Patient access granted",
+                "user": request.user.full_name,
+                "role": request.user.role,
+            }
+        )
+
+
+@extend_schema(
+    tags=["Role Based Access"],
+    responses={200: RoleAccessResponseSerializer},
+    summary="Caregiver-only endpoint",
+    description="Accessible only to authenticated Caregiver users.",
+)
+class CaregiverOnlyView(APIView):
+    permission_classes = [IsCaregiver]
+
+    def get(self, request):
+        return Response(
+            {
+                "message": "Caregiver access granted",
+                "user": request.user.full_name,
+                "role": request.user.role,
+            }
+        )
+
+
+@extend_schema(
+    tags=["Role Based Access"],
+    responses={200: RoleAccessResponseSerializer},
+    summary="Admin-only endpoint",
+    description="Accessible only to authenticated Admin users.",
+)
+class AdminOnlyView(APIView):
+    permission_classes = [IsAdmin]
+
+    def get(self, request):
+        return Response(
+            {
+                "message": "Admin access granted",
+                "user": request.user.full_name,
+                "role": request.user.role,
+            }
+        )
