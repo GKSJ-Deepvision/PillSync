@@ -20,16 +20,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     "rest_framework",
     "rest_framework_simplejwt",
-
     "apps.accounts",
     "apps.profiles",
     "apps.medications",
     "apps.reminders",
     "apps.notifications",
-
     "drf_spectacular",
 ]
 
