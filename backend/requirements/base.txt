@@ -36,3 +36,4 @@ djangorestframework==3.15.*
 # python-dotenv==1.*
 # pydantic==2.*
 python-dotenv
+djangorestframework-simplejwt
