@@ -14,51 +14,31 @@ export default function PatientDashboard() {
   };
 
   return (
-    <DashboardLayout
-      eyebrow="Patient"
-      title={`${label}, ${firstName}`}
-    >
+    <DashboardLayout eyebrow="Patient" title={`${label}, ${firstName}`}>
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-
         {/* Dose Summary */}
         <div className="card flex flex-col items-center gap-4 text-center">
-          <DoseRing
-            size={180}
-            taken={taken}
-          />
+          <DoseRing size={180} taken={taken} />
 
           <div>
-            <p className="font-display text-2xl font-semibold text-ink">
-              0 / 4
-            </p>
+            <p className="font-display text-2xl font-semibold text-ink">0 / 4</p>
 
-            <p className="font-body text-[13px] text-ink-fog">
-              doses logged today
-            </p>
+            <p className="font-body text-[13px] text-ink-fog">doses logged today</p>
           </div>
         </div>
 
         {/* Main Content */}
         <div className="space-y-6">
-
           {/* Profile Information */}
           <div className="card">
-
-            <h2 className="font-display text-base font-semibold text-ink">
-              Your profile
-            </h2>
+            <h2 className="font-display text-base font-semibold text-ink">Your profile</h2>
 
             <dl className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-
               {/* Role */}
               <div>
-                <dt className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">
-                  Role
-                </dt>
+                <dt className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">Role</dt>
 
-                <dd className="mt-1 font-body text-sm font-semibold text-ink">
-                  Patient
-                </dd>
+                <dd className="mt-1 font-body text-sm font-semibold text-ink">Patient</dd>
               </div>
 
               {/* Blood Group */}
@@ -90,12 +70,9 @@ export default function PatientDashboard() {
                 </dt>
 
                 <dd className="mt-1 font-body text-sm font-semibold text-ink">
-                  {profile?.conditions?.length
-                    ? profile.conditions.join(", ")
-                    : "None added"}
+                  {profile?.conditions?.length ? profile.conditions.join(", ") : "None added"}
                 </dd>
               </div>
-
             </dl>
 
             {/* Profile Link */}
@@ -105,53 +82,37 @@ export default function PatientDashboard() {
             >
               Complete your profile →
             </a>
-
           </div>
 
           {/* Feature Cards */}
           <div className="grid gap-4 sm:grid-cols-3">
-
             {/* Medications */}
             <div className="rounded-2xl border border-ink/15 bg-white/60 p-4">
-
-              <h3 className="font-display text-sm font-semibold text-ink">
-                Medications
-              </h3>
+              <h3 className="font-display text-sm font-semibold text-ink">Medications</h3>
 
               <p className="mt-1 font-body text-[13px] text-ink-fog">
                 Add medicines and dosage schedules.
               </p>
-
             </div>
 
             {/* Smart Reminders */}
             <div className="rounded-2xl border border-ink/15 bg-white/60 p-4">
-
-              <h3 className="font-display text-sm font-semibold text-ink">
-                Smart reminders
-              </h3>
+              <h3 className="font-display text-sm font-semibold text-ink">Smart reminders</h3>
 
               <p className="mt-1 font-body text-[13px] text-ink-fog">
                 Morning, afternoon and night reminders.
               </p>
-
             </div>
 
             {/* Refill Prediction */}
             <div className="rounded-2xl border border-ink/15 bg-white/60 p-4">
-
-              <h3 className="font-display text-sm font-semibold text-ink">
-                Refill prediction
-              </h3>
+              <h3 className="font-display text-sm font-semibold text-ink">Refill prediction</h3>
 
               <p className="mt-1 font-body text-[13px] text-ink-fog">
                 AI-estimated days until refill.
               </p>
-
             </div>
-
           </div>
-
         </div>
       </div>
     </DashboardLayout>

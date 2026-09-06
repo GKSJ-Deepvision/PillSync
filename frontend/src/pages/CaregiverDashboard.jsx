@@ -43,9 +43,8 @@ export default function CaregiverDashboard() {
         ) : links.length === 0 ? (
           <div className="mt-6 rounded-xl border border-dashed border-ink/15 bg-porcelain-dim px-5 py-8 text-center">
             <p className="font-body text-sm text-ink-fog">
-              No patients linked yet. Ask the patient to share their PillSync email with
-              an admin, who can connect your accounts from{" "}
-              <span className="font-mono">caregiver_links</span>.
+              No patients linked yet. Ask the patient to share their PillSync email with an admin,
+              who can connect your accounts from <span className="font-mono">caregiver_links</span>.
             </p>
           </div>
         ) : (
@@ -61,8 +60,6 @@ export default function CaregiverDashboard() {
           </ul>
         )}
       </div>
-
-      
     </DashboardLayout>
   );
 }

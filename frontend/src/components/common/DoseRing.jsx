@@ -28,12 +28,7 @@ function arcPath(cx, cy, r, startAngle, endAngle) {
   return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 1 ${stop.x} ${stop.y}`;
 }
 
-export default function DoseRing({
-  size = 220,
-  taken = {},
-  ambient = false,
-  className = "",
-}) {
+export default function DoseRing({ size = 220, taken = {}, ambient = false, className = "" }) {
   const cx = 110;
   const cy = 110;
   const r = 84;
@@ -47,7 +42,15 @@ export default function DoseRing({
       role="img"
       aria-label="Today's dosing windows"
     >
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="currentColor" strokeOpacity="0.08" strokeWidth="14" />
+      <circle
+        cx={cx}
+        cy={cy}
+        r={r}
+        fill="none"
+        stroke="currentColor"
+        strokeOpacity="0.08"
+        strokeWidth="14"
+      />
 
       <g className={ambient ? "origin-center animate-ring-rotate" : ""}>
         {WINDOWS.map((w) => (

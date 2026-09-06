@@ -22,16 +22,23 @@ export default function AuthLayout({ children, eyebrow, title, subtitle }) {
         </div>
 
         <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-8 py-10">
-          <DoseRing size={260} ambient className="text-porcelain drop-shadow-[0_0_40px_rgba(91,95,239,0.25)]" />
+          <DoseRing
+            size={260}
+            ambient
+            className="text-porcelain drop-shadow-[0_0_40px_rgba(91,95,239,0.25)]"
+          />
           <p className="max-w-xs text-center font-body text-sm leading-relaxed text-porcelain/60">
-            One ring, four windows, every day. PillSync tracks morning, afternoon,
-            evening and night doses so nothing quietly gets missed.
+            One ring, four windows, every day. PillSync tracks morning, afternoon, evening and night
+            doses so nothing quietly gets missed.
           </p>
         </div>
 
         <div className="relative z-10 space-y-3">
           {QUOTES.map((q) => (
-            <div key={q.time} className="flex items-start gap-3 rounded-xl bg-white/5 px-4 py-3 backdrop-blur-sm">
+            <div
+              key={q.time}
+              className="flex items-start gap-3 rounded-xl bg-white/5 px-4 py-3 backdrop-blur-sm"
+            >
               <span className="mt-0.5 font-mono text-[11px] text-mint">{q.time}</span>
               <span className="font-body text-[13px] text-porcelain/70">{q.text}</span>
             </div>
@@ -46,12 +53,12 @@ export default function AuthLayout({ children, eyebrow, title, subtitle }) {
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink font-display text-sm font-bold text-porcelain">
               P
             </span>
-            <span className="font-display text-lg font-semibold tracking-tight text-ink">PillSync</span>
+            <span className="font-display text-lg font-semibold tracking-tight text-ink">
+              PillSync
+            </span>
           </div>
 
-          {eyebrow && (
-            <span className="badge mb-4 bg-indigo-soft text-indigo-deep">{eyebrow}</span>
-          )}
+          {eyebrow && <span className="badge mb-4 bg-indigo-soft text-indigo-deep">{eyebrow}</span>}
           <h1 className="font-display text-[28px] font-semibold leading-tight tracking-tight text-ink">
             {title}
           </h1>

@@ -32,8 +32,8 @@ export default function ForgotPasswordPage() {
       {sent ? (
         <div className="card">
           <p className="font-body text-[15px] text-ink">
-            If an account exists for <span className="font-semibold">{email}</span>, a reset link
-            is on its way.
+            If an account exists for <span className="font-semibold">{email}</span>, a reset link is
+            on its way.
           </p>
           <Link to="/login" className="btn-primary mt-6 w-full">
             Back to sign in

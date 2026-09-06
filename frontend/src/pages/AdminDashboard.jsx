@@ -22,9 +22,7 @@ export default function AdminDashboard() {
       });
       setCounts(next);
       setRecent(
-        [...data]
-          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-          .slice(0, 5)
+        [...data].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5)
       );
     }
     loadStats();
@@ -55,8 +53,12 @@ export default function AdminDashboard() {
           <ul className="mt-4 divide-y divide-ink/5">
             {recent.map((p) => (
               <li key={p.id} className="flex items-center justify-between py-3">
-                <span className="font-body text-sm font-medium text-ink">{p.full_name || "Unnamed"}</span>
-                <span className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">{p.role}</span>
+                <span className="font-body text-sm font-medium text-ink">
+                  {p.full_name || "Unnamed"}
+                </span>
+                <span className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">
+                  {p.role}
+                </span>
               </li>
             ))}
           </ul>
@@ -64,9 +66,9 @@ export default function AdminDashboard() {
       </div>
 
       <p className="mt-6 font-body text-[13px] text-ink-fog">
-        Full activity auditing, caregiver↔patient assignment tools and platform-wide
-        analytics are scoped for later milestones — this view proves role-gated admin
-        access and read access across every profile via Row Level Security.
+        Full activity auditing, caregiver↔patient assignment tools and platform-wide analytics are
+        scoped for later milestones — this view proves role-gated admin access and read access
+        across every profile via Row Level Security.
       </p>
     </DashboardLayout>
   );
