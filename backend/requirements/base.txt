@@ -35,3 +35,4 @@ djangorestframework==3.15.*
 # Utilities
 # python-dotenv==1.*
 # pydantic==2.*
+python-dotenv
