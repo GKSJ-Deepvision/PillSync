@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "apps.profiles",
     "apps.medications",
+    "apps.reminders",
 ]
 
 MIDDLEWARE = [
