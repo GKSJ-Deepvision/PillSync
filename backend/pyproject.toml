@@ -29,6 +29,8 @@ ignore = [
 "tests/*" = ["B011"]
 
 [tool.pytest.ini_options]
+pythonpath = ['.']
+DJANGO_SETTINGS_MODULE = 'config.settings.dev'
 minversion = "7.0"
 testpaths = ["tests", "apps"]
 python_files = ["test_*.py", "*_test.py"]
@@ -55,3 +57,4 @@ omit = [
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
+
