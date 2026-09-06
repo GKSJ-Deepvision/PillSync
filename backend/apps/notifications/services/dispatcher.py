@@ -1,5 +1,5 @@
-from apps.notifications.providers.fcm import send_push_notification
 from apps.notifications.models import DeviceToken
+from apps.notifications.providers.fcm import send_push_notification
 
 
 def send_user_notification(user, title, body):
