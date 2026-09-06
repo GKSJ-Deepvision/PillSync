@@ -85,3 +85,5 @@ temp/
 # The intern roster spreadsheet carries 26 people's personal email addresses.
 # Branch assignments live in .github/interns.yml instead, without the emails.
 *.xlsx
+backend/firebase-service-account.json
+backend/firebase-service-account.json
