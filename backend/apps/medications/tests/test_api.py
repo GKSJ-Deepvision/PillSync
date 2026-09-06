@@ -1,9 +1,13 @@
+from secrets import token_urlsafe
+
 import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
 
 from apps.accounts.models import User, UserRole
 from apps.medications.models import Medicine
+
+TEST_PASSWORD = token_urlsafe(24)
 
 
 @pytest.fixture
@@ -16,7 +20,7 @@ def patient():
     return User.objects.create_user(
         email="patient1@example.com",
         full_name="Patient One",
-        password="TestPassword123!",
+        password=TEST_PASSWORD,
         role=UserRole.PATIENT,
     )
 
@@ -26,7 +30,7 @@ def second_patient():
     return User.objects.create_user(
         email="patient2@example.com",
         full_name="Patient Two",
-        password="TestPassword123!",
+        password=TEST_PASSWORD,
         role=UserRole.PATIENT,
     )
 
@@ -36,7 +40,7 @@ def caregiver():
     return User.objects.create_user(
         email="caregiver@example.com",
         full_name="Caregiver",
-        password="TestPassword123!",
+        password=TEST_PASSWORD,
         role=UserRole.CAREGIVER,
     )
 
