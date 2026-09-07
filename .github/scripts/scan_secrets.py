@@ -156,7 +156,7 @@ def main() -> int:
     lines = ["### Secret scan", "", f"Scanned **{scanned}** text files.", ""]
 
     if findings:
-        for posix, lineno, label, excerpt in findings:
+        for posix, lineno, label, _excerpt in findings:
             error(
                 f"Possible {label} committed here. Remove it, rotate the credential, "
                 "and read it from an environment variable instead.",

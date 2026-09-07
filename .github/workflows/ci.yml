@@ -19,7 +19,7 @@ permissions:
   contents: read
 
 env:
-  PYTHON_VERSION: "3.11"
+  PYTHON_VERSION: "3.12"
   NODE_VERSION: "20"
 
 jobs:
@@ -115,7 +115,11 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install checker dependencies
-        run: pip install --quiet pyyaml
+        run: pip install --quiet pyyaml ruff
+
+      # The pipeline's own tooling is held to the same standard as the project.
+      - name: Lint the check scripts
+        run: ruff check .github/scripts --output-format=github
 
       - name: File hygiene
         run: python .github/scripts/check_files.py
