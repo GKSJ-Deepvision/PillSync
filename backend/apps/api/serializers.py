@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from apps.accounts.models import User
-from apps.medicines.models import Medicine, MedicineSchedule
+from apps.medicines.models import MedicationHistory, Medicine, MedicineSchedule
 from apps.profiles.models import Profile
 
 
@@ -119,5 +119,83 @@ class MedicineScheduleSerializer(serializers.ModelSerializer):
 
         if end_date is not None and start_date is not None and end_date < start_date:
             raise serializers.ValidationError({"end_date": "End date cannot be before start date."})
+
+        return attrs
+
+
+class MedicationHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MedicationHistory
+        fields = [
+            "id",
+            "schedule",
+            "medicine",
+            "dose",
+            "scheduled_at",
+            "status",
+            "taken_at",
+            "notes",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "id",
+            "medicine",
+            "dose",
+            "created_at",
+            "updated_at",
+        ]
+
+    def validate(self, attrs):
+        schedule = attrs.get(
+            "schedule",
+            getattr(self.instance, "schedule", None),
+        )
+
+        scheduled_at = attrs.get(
+            "scheduled_at",
+            getattr(self.instance, "scheduled_at", None),
+        )
+
+        taken_at = attrs.get(
+            "taken_at",
+            getattr(self.instance, "taken_at", None),
+        )
+
+        status = attrs.get(
+            "status",
+            getattr(self.instance, "status", None),
+        )
+
+        if schedule is None:
+            raise serializers.ValidationError({"schedule": "Schedule is required."})
+
+        if not schedule.is_active:
+            raise serializers.ValidationError(
+                {"schedule": "Cannot create history for an inactive schedule."}
+            )
+
+        if scheduled_at is not None:
+            scheduled_date = scheduled_at.date()
+
+            if scheduled_date < schedule.start_date:
+                raise serializers.ValidationError(
+                    {"scheduled_at": ("Scheduled time cannot be before the schedule start date.")}
+                )
+
+            if schedule.end_date is not None and scheduled_date > schedule.end_date:
+                raise serializers.ValidationError(
+                    {"scheduled_at": ("Scheduled time cannot be after the schedule end date.")}
+                )
+
+        if status == MedicationHistory.Status.TAKEN and taken_at is None:
+            raise serializers.ValidationError(
+                {"taken_at": "Taken time is required when status is taken."}
+            )
+
+        if status != MedicationHistory.Status.TAKEN and taken_at is not None:
+            raise serializers.ValidationError(
+                {"taken_at": ("Taken time must be empty unless status is taken.")}
+            )
 
         return attrs

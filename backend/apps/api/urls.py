@@ -3,6 +3,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from .views import (
     HealthCheckView,
+    MedicationHistoryDetailView,
+    MedicationHistoryListCreateView,
     MedicineListCreateView,
     MedicineScheduleDetailView,
     MedicineScheduleListCreateView,
@@ -28,5 +30,15 @@ urlpatterns = [
         "schedules/<int:pk>/",
         MedicineScheduleDetailView.as_view(),
         name="medicine-schedule-detail",
+    ),
+    path(
+        "medicines/<int:medicine_id>/history/",
+        MedicationHistoryListCreateView.as_view(),
+        name="medication-history",
+    ),
+    path(
+        "medication-history/<int:pk>/",
+        MedicationHistoryDetailView.as_view(),
+        name="medication-history-detail",
     ),
 ]

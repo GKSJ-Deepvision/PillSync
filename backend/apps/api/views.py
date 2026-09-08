@@ -8,10 +8,11 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.medicines.models import Medicine, MedicineSchedule
+from apps.medicines.models import MedicationHistory, Medicine, MedicineSchedule
 from apps.profiles.models import Profile
 
 from .serializers import (
+    MedicationHistorySerializer,
     MedicineScheduleSerializer,
     MedicineSerializer,
     ProfileSerializer,
@@ -243,3 +244,146 @@ class MedicineScheduleDetailView(APIView):
         schedule.save(update_fields=["is_active", "updated_at"])
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class MedicationHistoryListCreateView(APIView):
+    def get(self, request, medicine_id):
+        medicine = Medicine.objects.filter(
+            id=medicine_id,
+            user=request.user,
+            is_active=True,
+        ).first()
+
+        if medicine is None:
+            return Response(
+                {"detail": "Medicine not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        history = (
+            MedicationHistory.objects.filter(
+                medicine=medicine,
+            )
+            .select_related(
+                "schedule",
+                "medicine",
+            )
+            .order_by("-scheduled_at")
+        )
+
+        serializer = MedicationHistorySerializer(history, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, medicine_id):
+        medicine = Medicine.objects.filter(
+            id=medicine_id,
+            user=request.user,
+            is_active=True,
+        ).first()
+
+        if medicine is None:
+            return Response(
+                {"detail": "Medicine not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = MedicationHistorySerializer(data=request.data)
+
+        if serializer.is_valid():
+            schedule = serializer.validated_data["schedule"]
+
+            if schedule.medicine_id != medicine.id:
+                return Response(
+                    {"detail": ("Schedule does not belong to this medicine.")},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            history = serializer.save(
+                medicine=medicine,
+                dose=schedule.dose,
+            )
+
+            return Response(
+                MedicationHistorySerializer(history).data,
+                status=status.HTTP_201_CREATED,
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
+class MedicationHistoryDetailView(APIView):
+    def get_history(self, request, pk):
+        return (
+            MedicationHistory.objects.filter(
+                id=pk,
+                medicine__user=request.user,
+                medicine__is_active=True,
+            )
+            .select_related(
+                "schedule",
+                "medicine",
+            )
+            .first()
+        )
+
+    def get(self, request, pk):
+        history = self.get_history(request, pk)
+
+        if history is None:
+            return Response(
+                {"detail": "Medication history not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = MedicationHistorySerializer(history)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        history = self.get_history(request, pk)
+
+        if history is None:
+            return Response(
+                {"detail": "Medication history not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = MedicationHistorySerializer(
+            history,
+            data=request.data,
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    def patch(self, request, pk):
+        history = self.get_history(request, pk)
+
+        if history is None:
+            return Response(
+                {"detail": "Medication history not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = MedicationHistorySerializer(
+            history,
+            data=request.data,
+            partial=True,
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )

@@ -3,10 +3,10 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 # from rest_framework.test import APITestCase
-from rest_framework.test import APITestCase
+from rest_framework.test import APIClient, APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.medicines.models import Medicine, MedicineSchedule
+from apps.medicines.models import MedicationHistory, Medicine, MedicineSchedule
 
 from .serializers import MedicineScheduleSerializer
 
@@ -435,3 +435,184 @@ class MedicineScheduleAPITests(APITestCase):
 
         schedule.refresh_from_db()
         self.assertTrue(schedule.is_active)
+
+
+class MedicationHistoryAPITests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        self.user = User.objects.create_user(
+            username="historyuser",
+            email="history@example.com",
+            password=TEST_PASSWORD,
+        )
+
+        self.other_user = User.objects.create_user(
+            username="otherhistoryuser",
+            email="otherhistory@example.com",
+            password=TEST_PASSWORD,
+        )
+
+        self.medicine = Medicine.objects.create(
+            user=self.user,
+            name="Paracetamol",
+            dosage="500mg",
+        )
+
+        self.other_medicine = Medicine.objects.create(
+            user=self.other_user,
+            name="Ibuprofen",
+            dosage="200mg",
+        )
+
+        self.schedule = MedicineSchedule.objects.create(
+            medicine=self.medicine,
+            dose="1 tablet",
+            time="08:00:00",
+            frequency=MedicineSchedule.Frequency.DAILY,
+            start_date="2026-09-01",
+        )
+
+        self.other_schedule = MedicineSchedule.objects.create(
+            medicine=self.other_medicine,
+            dose="2 tablets",
+            time="09:00:00",
+            frequency=MedicineSchedule.Frequency.DAILY,
+            start_date="2026-09-01",
+        )
+
+        self.history = MedicationHistory.objects.create(
+            schedule=self.schedule,
+            medicine=self.medicine,
+            dose="1 tablet",
+            scheduled_at="2026-09-05T08:00:00Z",
+            status=MedicationHistory.Status.TAKEN,
+            taken_at="2026-09-05T08:10:00Z",
+        )
+
+    def authenticate(self, user):
+        self.client.force_authenticate(user=user)
+
+    def test_unauthenticated_history_request_gets_401(self):
+        response = self.client.get(f"/api/medicines/{self.medicine.id}/history/")
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_authenticated_user_can_list_history(self):
+        self.authenticate(self.user)
+
+        response = self.client.get(f"/api/medicines/{self.medicine.id}/history/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["medicine"], self.medicine.id)
+
+    def test_user_cannot_see_other_users_history(self):
+        other_history = MedicationHistory.objects.create(
+            schedule=self.other_schedule,
+            medicine=self.other_medicine,
+            dose="2 tablets",
+            scheduled_at="2026-09-05T09:00:00Z",
+            status=MedicationHistory.Status.MISSED,
+        )
+
+        self.authenticate(self.user)
+
+        response = self.client.get(f"/api/medicines/{self.other_medicine.id}/history/")
+
+        self.assertEqual(response.status_code, 404)
+        self.assertNotEqual(
+            response.status_code,
+            200,
+        )
+
+    def test_authenticated_user_can_create_history(self):
+        self.authenticate(self.user)
+
+        response = self.client.post(
+            f"/api/medicines/{self.medicine.id}/history/",
+            {
+                "schedule": self.schedule.id,
+                "scheduled_at": "2026-09-06T08:00:00Z",
+                "status": "taken",
+                "taken_at": "2026-09-06T08:05:00Z",
+                "notes": "Taken after breakfast.",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["medicine"], self.medicine.id)
+        self.assertEqual(response.data["dose"], "1 tablet")
+        self.assertEqual(response.data["status"], "taken")
+
+    def test_history_uses_schedule_dose(self):
+        self.authenticate(self.user)
+
+        response = self.client.post(
+            f"/api/medicines/{self.medicine.id}/history/",
+            {
+                "schedule": self.schedule.id,
+                "dose": "100 tablets",
+                "scheduled_at": "2026-09-07T08:00:00Z",
+                "status": "missed",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["dose"], "1 tablet")
+
+    def test_history_rejects_schedule_from_another_medicine(self):
+        self.authenticate(self.user)
+
+        response = self.client.post(
+            f"/api/medicines/{self.medicine.id}/history/",
+            {
+                "schedule": self.other_schedule.id,
+                "scheduled_at": "2026-09-05T09:00:00Z",
+                "status": "missed",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_user_can_update_history_status(self):
+        self.authenticate(self.user)
+
+        response = self.client.patch(
+            f"/api/medication-history/{self.history.id}/",
+            {
+                "status": "missed",
+                "taken_at": None,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["status"], "missed")
+        self.assertIsNone(response.data["taken_at"])
+
+    def test_user_can_get_history_detail(self):
+        self.authenticate(self.user)
+
+        response = self.client.get(f"/api/medication-history/{self.history.id}/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["id"], self.history.id)
+
+    def test_user_cannot_access_other_users_history_detail(self):
+        other_history = MedicationHistory.objects.create(
+            schedule=self.other_schedule,
+            medicine=self.other_medicine,
+            dose="2 tablets",
+            scheduled_at="2026-09-06T09:00:00Z",
+            status=MedicationHistory.Status.SKIPPED,
+        )
+
+        self.authenticate(self.user)
+
+        response = self.client.get(f"/api/medication-history/{other_history.id}/")
+
+        self.assertEqual(response.status_code, 404)
