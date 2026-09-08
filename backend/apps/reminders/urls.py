@@ -1,4 +1,5 @@
 from django.urls import path
+
 from .views import reminder_list_create, update_reminder_status
 
 urlpatterns = [

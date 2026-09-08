@@ -49,7 +49,8 @@ export default function MedicationsPage() {
   const filtered = medicines.filter((m) => {
     const matchesSearch =
       m.name.toLowerCase().includes(search.toLowerCase()) ||
-      (m.diseaseCategory && m.diseaseCategory.toLowerCase().includes(search.toLowerCase()));
+      (m.diseaseCategory &&
+        m.diseaseCategory.toLowerCase().includes(search.toLowerCase()));
     const matchesDisease =
       selectedDisease === "All" || m.diseaseCategory === selectedDisease;
     return matchesSearch && matchesDisease;
@@ -59,7 +60,9 @@ export default function MedicationsPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px] text-slate-500 gap-2">
         <RefreshCw className="w-5 h-5 animate-spin text-brand-600" />
-        <span className="font-semibold text-sm">Loading medications inventory from DB...</span>
+        <span className="font-semibold text-sm">
+          Loading medications inventory from DB...
+        </span>
       </div>
     );
   }

@@ -119,9 +119,12 @@ export async function addMedication(medData) {
 }
 
 export async function takeDoseApi(medId) {
-  const response = await fetch(`${API_BASE_URL}/medications/${medId}/take-dose/`, {
-    method: "POST",
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/medications/${medId}/take-dose/`,
+    {
+      method: "POST",
+    },
+  );
   if (!response.ok) throw new Error("Failed to record dose intake.");
   const med = await response.json();
   return {
@@ -140,7 +143,9 @@ export async function takeDoseApi(medId) {
 
 export async function searchFdaDrugs(query) {
   if (!query) return [];
-  const response = await fetch(`${API_BASE_URL}/medications/fda-search/?q=${encodeURIComponent(query)}`);
+  const response = await fetch(
+    `${API_BASE_URL}/medications/fda-search/?q=${encodeURIComponent(query)}`,
+  );
   if (!response.ok) return [];
   const data = await response.json();
   return data.results || [];
@@ -163,11 +168,14 @@ export async function fetchReminders() {
 }
 
 export async function updateReminderStatusApi(reminderId, status) {
-  const response = await fetch(`${API_BASE_URL}/reminders/${reminderId}/status/`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status }),
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/reminders/${reminderId}/status/`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    },
+  );
   if (!response.ok) throw new Error("Failed to update reminder status.");
   const r = await response.json();
   return {

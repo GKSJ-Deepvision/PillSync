@@ -1,7 +1,9 @@
-from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
+from django.core.management.base import BaseCommand
+
 from apps.medications.models import Medication
 from apps.reminders.models import Reminder
+
 
 class Command(BaseCommand):
     help = "Seed database with initial real patient medication and reminder schedules"
@@ -14,9 +16,9 @@ class Command(BaseCommand):
             User.objects.create_user(
                 username="patient@pillsync.com",
                 email="patient@pillsync.com",
-                password="password123",
+                password="password123",  # pragma: allowlist secret
                 first_name="Sarah",
-                last_name="Jenkins"
+                last_name="Jenkins",
             )
             self.stdout.write(self.style.SUCCESS("Created demo patient user."))
 
@@ -33,7 +35,7 @@ class Command(BaseCommand):
                 "refill_threshold": 10,
                 "active_ingredient": "Metformin Hydrochloride",
                 "manufacturer": "Sun Pharma / Teva",
-                "fda_ndc": "60505-0024"
+                "fda_ndc": "60505-0024",
             },
             {
                 "name": "Amlodipine",
@@ -46,7 +48,7 @@ class Command(BaseCommand):
                 "refill_threshold": 10,
                 "active_ingredient": "Amlodipine Besylate",
                 "manufacturer": "Pfizer / Lupin",
-                "fda_ndc": "0069-1530"
+                "fda_ndc": "0069-1530",
             },
             {
                 "name": "Levothyroxine",
@@ -59,7 +61,7 @@ class Command(BaseCommand):
                 "refill_threshold": 7,
                 "active_ingredient": "Levothyroxine Sodium",
                 "manufacturer": "AbbVie / Mylan",
-                "fda_ndc": "0074-4552"
+                "fda_ndc": "0074-4552",
             },
             {
                 "name": "Atorvastatin",
@@ -72,7 +74,7 @@ class Command(BaseCommand):
                 "refill_threshold": 10,
                 "active_ingredient": "Atorvastatin Calcium",
                 "manufacturer": "Viatris / Sandoz",
-                "fda_ndc": "0093-7554"
+                "fda_ndc": "0093-7554",
             },
             {
                 "name": "Amoxicillin",
@@ -85,16 +87,13 @@ class Command(BaseCommand):
                 "refill_threshold": 5,
                 "active_ingredient": "Amoxicillin Trihydrate",
                 "manufacturer": "GlaxoSmithKline",
-                "fda_ndc": "0029-6008"
-            }
+                "fda_ndc": "0029-6008",
+            },
         ]
 
         created_meds = []
         for m_data in med_records:
-            med, created = Medication.objects.get_or_create(
-                name=m_data["name"],
-                defaults=m_data
-            )
+            med, created = Medication.objects.get_or_create(name=m_data["name"], defaults=m_data)
             med.update_stock_days()
             med.save()
             created_meds.append(med)
@@ -109,7 +108,7 @@ class Command(BaseCommand):
                 "time": "08:00 AM",
                 "period": "Morning",
                 "status": "taken",
-                "disease": "Diabetes"
+                "disease": "Diabetes",
             },
             {
                 "med_name": "Amlodipine",
@@ -117,7 +116,7 @@ class Command(BaseCommand):
                 "time": "08:00 AM",
                 "period": "Morning",
                 "status": "taken",
-                "disease": "Blood Pressure"
+                "disease": "Blood Pressure",
             },
             {
                 "med_name": "Levothyroxine",
@@ -125,7 +124,7 @@ class Command(BaseCommand):
                 "time": "08:30 AM",
                 "period": "Morning",
                 "status": "taken",
-                "disease": "Thyroid"
+                "disease": "Thyroid",
             },
             {
                 "med_name": "Amoxicillin",
@@ -133,7 +132,7 @@ class Command(BaseCommand):
                 "time": "01:30 PM",
                 "period": "Afternoon",
                 "status": "pending",
-                "disease": "Antibiotics"
+                "disease": "Antibiotics",
             },
             {
                 "med_name": "Metformin",
@@ -141,7 +140,7 @@ class Command(BaseCommand):
                 "time": "09:00 PM",
                 "period": "Night",
                 "status": "pending",
-                "disease": "Diabetes"
+                "disease": "Diabetes",
             },
             {
                 "med_name": "Atorvastatin",
@@ -149,8 +148,8 @@ class Command(BaseCommand):
                 "time": "09:30 PM",
                 "period": "Night",
                 "status": "pending",
-                "disease": "Heart"
-            }
+                "disease": "Heart",
+            },
         ]
 
         for r_data in reminder_records:
@@ -162,8 +161,8 @@ class Command(BaseCommand):
                     "medication": med_obj,
                     "period": r_data["period"],
                     "status": r_data["status"],
-                    "disease": r_data["disease"]
-                }
+                    "disease": r_data["disease"],
+                },
             )
 
         self.stdout.write(self.style.SUCCESS("Database seeding completed successfully!"))

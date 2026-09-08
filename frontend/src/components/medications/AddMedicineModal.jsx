@@ -62,7 +62,7 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
 
     const totalStock = Number(formData.stock) || 60;
     const stockDays = Math.floor(
-      totalStock / (formData.timesOfDay.length || 1)
+      totalStock / (formData.timesOfDay.length || 1),
     );
 
     onAddMedicine({
@@ -107,7 +107,8 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
               Medicine Name
             </label>
             <span className="text-[11px] font-semibold text-brand-600 dark:text-brand-400 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-amber-400" /> OpenFDA Live API Connected
+              <Sparkles className="w-3 h-3 text-amber-400" /> OpenFDA Live API
+              Connected
             </span>
           </div>
 
@@ -116,7 +117,9 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
               type="text"
               placeholder="e.g. Metformin, Lipitor, Amoxicillin"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
               required
             />
@@ -148,7 +151,8 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
                       {drug.genericName} • {drug.dosage} • {drug.dosageForm}
                     </p>
                     <span className="text-[10px] text-slate-400 block mt-0.5">
-                      Mfg: {drug.manufacturer || "FDA Registered"} | NDC: {drug.ndc}
+                      Mfg: {drug.manufacturer || "FDA Registered"} | NDC:{" "}
+                      {drug.ndc}
                     </span>
                   </div>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300">
@@ -165,7 +169,8 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
           <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-300 flex items-center justify-between">
             <span className="flex items-center gap-1.5">
               <Check className="w-3.5 h-3.5 text-emerald-500" />
-              <strong>FDA Verified:</strong> {formData.manufacturer} ({formData.fdaNdc})
+              <strong>FDA Verified:</strong> {formData.manufacturer} (
+              {formData.fdaNdc})
             </span>
           </div>
         )}

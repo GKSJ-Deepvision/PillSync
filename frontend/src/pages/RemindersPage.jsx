@@ -36,9 +36,7 @@ export default function RemindersPage() {
   const markStatus = async (id, newStatus) => {
     try {
       const updated = await updateReminderStatusApi(id, newStatus);
-      setReminders((prev) =>
-        prev.map((r) => (r.id === id ? updated : r))
-      );
+      setReminders((prev) => prev.map((r) => (r.id === id ? updated : r)));
     } catch (err) {
       console.error("Failed to update status", err);
       alert("Failed to update status in database.");
@@ -53,7 +51,9 @@ export default function RemindersPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px] text-slate-500 gap-2">
         <RefreshCw className="w-5 h-5 animate-spin text-brand-600" />
-        <span className="font-semibold text-sm">Loading reminder schedules from DB...</span>
+        <span className="font-semibold text-sm">
+          Loading reminder schedules from DB...
+        </span>
       </div>
     );
   }
@@ -67,7 +67,8 @@ export default function RemindersPage() {
             Smart Reminder System
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Real-time dosage notifications, daily timeslot schedules, and database dose logging.
+            Real-time dosage notifications, daily timeslot schedules, and
+            database dose logging.
           </p>
         </div>
 

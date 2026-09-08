@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import medication_list_create, medication_detail, take_dose, fda_drug_search
+
+from .views import fda_drug_search, medication_detail, medication_list_create, take_dose
 
 urlpatterns = [
     path("", medication_list_create, name="medication-list-create"),

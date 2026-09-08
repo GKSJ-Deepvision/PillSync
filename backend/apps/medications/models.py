@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Medication(models.Model):
     name = models.CharField(max_length=255)
     dosage = models.CharField(max_length=100, default="500 mg")

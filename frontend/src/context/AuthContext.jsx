@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
   });
 
   const [token, setToken] = useState(
-    () => localStorage.getItem("pillsync_token") || "mock-jwt-token-xyz",
+    () => localStorage.getItem("pillsync_token") || "dummy-jwt-token-xyz",
   );
 
   const saveAuthSession = (userData, authToken) => {
@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("pillsync_token", authToken);
   };
 
-  const login = (userData, authToken = "mock-jwt-token-xyz") => {
+  const login = (userData, authToken = "dummy-jwt-token-xyz") => {
     saveAuthSession(userData, authToken);
   };
 
@@ -119,4 +119,5 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);

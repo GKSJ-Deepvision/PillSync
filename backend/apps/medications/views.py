@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from .models import Medication
 from .serializers import MedicationSerializer
 
+
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def medication_list_create(request):
@@ -23,6 +24,7 @@ def medication_list_create(request):
             med.save()
             return Response(MedicationSerializer(med).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(["GET", "PUT", "DELETE"])
 @permission_classes([AllowAny])
@@ -48,6 +50,7 @@ def medication_detail(request, pk):
         med.delete()
         return Response({"status": "deleted"}, status=status.HTTP_204_NO_CONTENT)
 
+
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def take_dose(request, pk):
@@ -60,6 +63,7 @@ def take_dose(request, pk):
     med.update_stock_days()
     med.save()
     return Response(MedicationSerializer(med).data)
+
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
@@ -88,16 +92,18 @@ def fda_drug_search(request):
                 if active_ingredients and len(active_ingredients) > 0:
                     strength = active_ingredients[0].get("strength", "")
 
-                results.append({
-                    "id": f"fda-{ndc}",
-                    "name": brand_name or generic_name,
-                    "genericName": generic_name,
-                    "dosage": strength or "Standard Dose",
-                    "dosageForm": dosage_form,
-                    "manufacturer": labeler,
-                    "ndc": ndc,
-                    "source": "OpenFDA National Drug Code Database"
-                })
+                results.append(
+                    {
+                        "id": f"fda-{ndc}",
+                        "name": brand_name or generic_name,
+                        "genericName": generic_name,
+                        "dosage": strength or "Standard Dose",
+                        "dosageForm": dosage_form,
+                        "manufacturer": labeler,
+                        "ndc": ndc,
+                        "source": "OpenFDA National Drug Code Database",
+                    }
+                )
     except Exception as e:
         print("OpenFDA fetch error:", e)
 
@@ -114,16 +120,18 @@ def fda_drug_search(request):
                         name = concept.get("name", "")
                         rxcui = concept.get("rxcui", "")
                         if not any(r["name"].lower() == name.lower() for r in results):
-                            results.append({
-                                "id": f"rxcui-{rxcui}",
-                                "name": name,
-                                "genericName": name,
-                                "dosage": "Standard Rx Dose",
-                                "dosageForm": "Tablet / Capsule",
-                                "manufacturer": "RxNorm Verified Drug",
-                                "ndc": rxcui,
-                                "source": "NIH RxNorm Database"
-                            })
+                            results.append(
+                                {
+                                    "id": f"rxcui-{rxcui}",
+                                    "name": name,
+                                    "genericName": name,
+                                    "dosage": "Standard Rx Dose",
+                                    "dosageForm": "Tablet / Capsule",
+                                    "manufacturer": "RxNorm Verified Drug",
+                                    "ndc": rxcui,
+                                    "source": "NIH RxNorm Database",
+                                }
+                            )
         except Exception as e:
             print("RxNorm fetch error:", e)
 

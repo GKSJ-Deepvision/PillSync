@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { fetchAnalyticsOverview } from "../services/api";
-import { Users, AlertTriangle, CheckCircle2, PhoneCall, RefreshCw } from "lucide-react";
+import {
+  Users,
+  AlertTriangle,
+  CheckCircle2,
+  PhoneCall,
+  RefreshCw,
+} from "lucide-react";
 
 export default function CaregiverPage() {
   const [analytics, setAnalytics] = useState(null);
@@ -22,19 +28,25 @@ export default function CaregiverPage() {
   }, []);
 
   const notifyEmergency = (patientName) => {
-    alert(`Emergency notification sent to caregiver hotline for ${patientName}!`);
+    alert(
+      `Emergency notification sent to caregiver hotline for ${patientName}!`,
+    );
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px] text-slate-500 gap-2">
         <RefreshCw className="w-5 h-5 animate-spin text-brand-600" />
-        <span className="font-semibold text-sm">Loading caregiver monitoring feed...</span>
+        <span className="font-semibold text-sm">
+          Loading caregiver monitoring feed...
+        </span>
       </div>
     );
   }
 
-  const primaryAdherence = analytics?.adherenceRate ? `${analytics.adherenceRate}%` : "92%";
+  const primaryAdherence = analytics?.adherenceRate
+    ? `${analytics.adherenceRate}%`
+    : "92%";
   const primaryMissed = analytics?.missedDoses ?? 0;
 
   const patients = [
@@ -82,7 +94,8 @@ export default function CaregiverPage() {
           Assigned Patient Profiles & Emergency Alert Feed
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          Monitor multi-patient adherence, receive instant missed-dose push alerts, and manage family profiles.
+          Monitor multi-patient adherence, receive instant missed-dose push
+          alerts, and manage family profiles.
         </p>
       </div>
 

@@ -23,14 +23,18 @@ export default function RefillsPage() {
   }, []);
 
   const handleOrderRefill = (name) => {
-    alert(`Refill request order placed for ${name}! Caregiver & Pharmacy notified.`);
+    alert(
+      `Refill request order placed for ${name}! Caregiver & Pharmacy notified.`,
+    );
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px] text-slate-500 gap-2">
         <RefreshCw className="w-5 h-5 animate-spin text-brand-600" />
-        <span className="font-semibold text-sm">Calculating real stock depletion...</span>
+        <span className="font-semibold text-sm">
+          Calculating real stock depletion...
+        </span>
       </div>
     );
   }
@@ -47,7 +51,8 @@ export default function RefillsPage() {
           Automated Stock Depletion & Refill Predictions
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          Calculates real-time daily dosage consumption rate and predicts exact exhaustion dates from database stock levels.
+          Calculates real-time daily dosage consumption rate and predicts exact
+          exhaustion dates from database stock levels.
         </p>
       </div>
 

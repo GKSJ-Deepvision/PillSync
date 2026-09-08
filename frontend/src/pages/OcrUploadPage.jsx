@@ -94,7 +94,8 @@ export default function OcrUploadPage() {
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
           Upload a handwritten or printed doctor prescription. Tesseract OCR &
-          OpenFDA live API will auto-extract and verify medicine names, dosage, and frequency.
+          OpenFDA live API will auto-extract and verify medicine names, dosage,
+          and frequency.
         </p>
       </div>
 

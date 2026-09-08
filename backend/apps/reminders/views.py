@@ -2,9 +2,10 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+
 from .models import Reminder
 from .serializers import ReminderSerializer
-from apps.medications.models import Medication
+
 
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
@@ -20,6 +21,7 @@ def reminder_list_create(request):
             reminder = serializer.save()
             return Response(ReminderSerializer(reminder).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(["PATCH", "PUT"])
 @permission_classes([AllowAny])

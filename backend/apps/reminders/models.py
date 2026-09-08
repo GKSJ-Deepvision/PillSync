@@ -1,5 +1,7 @@
 from django.db import models
+
 from apps.medications.models import Medication
+
 
 class Reminder(models.Model):
     STATUS_CHOICES = (
@@ -13,7 +15,9 @@ class Reminder(models.Model):
         ("Night", "Night"),
     )
 
-    medication = models.ForeignKey(Medication, on_delete=models.CASCADE, related_name="reminders", null=True, blank=True)
+    medication = models.ForeignKey(
+        Medication, on_delete=models.CASCADE, related_name="reminders", null=True, blank=True
+    )
     name = models.CharField(max_length=255)
     time = models.CharField(max_length=50, default="08:00 AM")
     period = models.CharField(max_length=50, choices=PERIOD_CHOICES, default="Morning")

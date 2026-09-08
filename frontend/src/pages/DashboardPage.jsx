@@ -57,7 +57,7 @@ export default function DashboardPage() {
     try {
       const updatedMed = await takeDoseApi(medId);
       setMedicines((prev) =>
-        prev.map((m) => (m.id === medId ? updatedMed : m))
+        prev.map((m) => (m.id === medId ? updatedMed : m)),
       );
       // Reload analytics stats
       const statsData = await fetchAnalyticsOverview();
@@ -69,7 +69,9 @@ export default function DashboardPage() {
   };
 
   const handleMissDose = (_medId) => {
-    alert("Logged dose as missed in database for tracking and caregiver alerts.");
+    alert(
+      "Logged dose as missed in database for tracking and caregiver alerts.",
+    );
   };
 
   const handleAddMedicine = async (newMed) => {
@@ -94,7 +96,9 @@ export default function DashboardPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px] text-slate-500 gap-2">
         <RefreshCw className="w-5 h-5 animate-spin text-brand-600" />
-        <span className="font-semibold text-sm">Loading real database records...</span>
+        <span className="font-semibold text-sm">
+          Loading real database records...
+        </span>
       </div>
     );
   }
@@ -119,7 +123,8 @@ export default function DashboardPage() {
             in database. Your adherence rate is{" "}
             <strong className="text-emerald-300">
               {analytics?.adherenceRate || 92}% this week
-            </strong>.
+            </strong>
+            .
           </p>
         </div>
 
