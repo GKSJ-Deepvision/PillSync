@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -77,6 +77,7 @@ def register_user(
     response_model=Token,
 )
 def login_user(
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
 ):
@@ -110,6 +111,10 @@ def login_user(
             "role": user.role,
         }
     )
+
+    # Create server-side session
+    request.session["user_id"] = user.id
+    request.session["username"] = user.username
 
     return {
         "access_token": access_token,
@@ -156,3 +161,28 @@ def read_current_user(
     current_user: User = Depends(get_current_user),
 ):
     return current_user
+
+
+@router.get("/session")
+def read_session(request: Request):
+    user_id = request.session.get("user_id")
+
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="No active session",
+        )
+
+    return {
+        "user_id": user_id,
+        "username": request.session.get("username"),
+    }
+
+
+@router.post("/logout")
+def logout_user(request: Request):
+    request.session.clear()
+
+    return {
+        "message": "Successfully logged out",
+    }
