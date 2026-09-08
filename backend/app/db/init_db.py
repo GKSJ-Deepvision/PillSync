@@ -1,5 +1,14 @@
 from app.db.session import Base, engine
-from app.models.user import User
+from app.models import (
+    CaregiverPatient,
+    DosageSchedule,
+    MedicalCondition,
+    MedicationHistory,
+    Medicine,
+    PatientProfile,
+    Prescription,
+    User,
+)
 
 
 def init_db():
