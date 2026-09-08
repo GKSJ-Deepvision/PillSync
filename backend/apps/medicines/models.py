@@ -99,4 +99,3 @@ class MedicationHistory(models.Model):
 
     def __str__(self):
         return f"{self.medicine.name} - {self.scheduled_at}"
-

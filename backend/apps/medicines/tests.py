@@ -2,7 +2,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from .models import Medicine, MedicineSchedule, MedicationHistory
+from .models import MedicationHistory, Medicine, MedicineSchedule
 
 User = get_user_model()
 TEST_PASSWORD = "test-password-123"
