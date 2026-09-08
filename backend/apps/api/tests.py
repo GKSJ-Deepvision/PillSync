@@ -508,7 +508,7 @@ class MedicationHistoryAPITests(TestCase):
         self.assertEqual(response.data[0]["medicine"], self.medicine.id)
 
     def test_user_cannot_see_other_users_history(self):
-        other_history = MedicationHistory.objects.create(
+        MedicationHistory.objects.create(
             schedule=self.other_schedule,
             medicine=self.other_medicine,
             dose="2 tablets",
