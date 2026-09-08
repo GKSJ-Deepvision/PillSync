@@ -60,3 +60,43 @@ class MedicineSchedule(models.Model):
 
     def __str__(self):
         return f"{self.medicine.name} - {self.time}"
+
+
+class MedicationHistory(models.Model):
+    class Status(models.TextChoices):
+        TAKEN = "taken", "Taken"
+        MISSED = "missed", "Missed"
+        SKIPPED = "skipped", "Skipped"
+
+    schedule = models.ForeignKey(
+        MedicineSchedule,
+        on_delete=models.CASCADE,
+        related_name="history",
+    )
+    medicine = models.ForeignKey(
+        Medicine,
+        on_delete=models.CASCADE,
+        related_name="medication_history",
+    )
+    dose = models.CharField(max_length=100)
+    scheduled_at = models.DateTimeField()
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+    )
+    taken_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["schedule", "scheduled_at"],
+                name="unique_schedule_occurrence",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.medicine.name} - {self.scheduled_at}"
+
