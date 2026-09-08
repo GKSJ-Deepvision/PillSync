@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Pill, Bell, ShieldCheck } from 'lucide-react';
+import FamilyProfileSelector from '../../features/profile/FamilyProfileSelector';
 
 export default function Navbar({ currentUser, setRole }) {
   const navigate = useNavigate();
@@ -44,6 +45,10 @@ export default function Navbar({ currentUser, setRole }) {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {!isPublic && (
+          <FamilyProfileSelector />
+        )}
+
         <button 
           onClick={() => navigate('/')} 
           style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, color: '#475569' }}

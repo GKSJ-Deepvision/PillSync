@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, CheckCircle2, Calendar, Plus } from 'lucide-react';
+import { recordIntakeLog } from '../../features/adherence/historyService';
+import { getActiveProfile } from '../../features/profile/familyProfileService';
 
 export default function MedicineSchedulePage() {
   const navigate = useNavigate();
@@ -10,6 +12,19 @@ export default function MedicineSchedulePage() {
 
   const setStatus = (id, newStatus) => {
     setSchedule(schedule.map(s => s.id === id ? { ...s, status: newStatus } : s));
+    const target = schedule.find(s => s.id === id);
+    if (target) {
+      const active = getActiveProfile();
+      recordIntakeLog({
+        profileId: active?.id || 1,
+        profileName: active ? `${active.name} (${active.relationship})` : 'Self',
+        date: new Date().toISOString().split('T')[0],
+        time: target.time || '08:00 AM',
+        med: `${target.med} (${target.dosage || '1 Tablet'})`,
+        status: newStatus,
+        notes: `Marked ${newStatus} in Medicine Schedule`
+      });
+    }
   };
 
   return (

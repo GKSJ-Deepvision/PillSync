@@ -1,8 +1,24 @@
 import React from 'react';
-import { Pill, CheckCircle, XCircle, Clock, BellRing } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, BellRing } from 'lucide-react';
+import { recordIntakeLog } from '../../features/adherence/historyService';
+import { getActiveProfile } from '../../features/profile/familyProfileService';
 
 export default function ReminderModal({ isOpen, onClose, medicineName = 'Metformin', dosage = '500 mg', time = '08:00 AM' }) {
   if (!isOpen) return null;
+
+  const handleAction = (status) => {
+    const active = getActiveProfile();
+    recordIntakeLog({
+      profileId: active?.id || 1,
+      profileName: active ? `${active.name} (${active.relationship})` : 'Self',
+      date: new Date().toISOString().split('T')[0],
+      time: time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      med: `${medicineName} (${dosage})`,
+      status: status,
+      notes: `Recorded via Smart Reminder Popup for ${active?.name || 'Patient'}`
+    });
+    onClose();
+  };
 
   return (
     <div style={{
@@ -46,13 +62,13 @@ export default function ReminderModal({ isOpen, onClose, medicineName = 'Metform
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <button onClick={onClose} className="btn-primary" style={{ padding: '12px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <button onClick={() => handleAction('Taken')} className="btn-primary" style={{ padding: '12px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
             <CheckCircle size={18} /> ✓ Medicine Taken
           </button>
-          <button onClick={onClose} style={{ border: '1px solid #dc2626', color: '#dc2626', background: '#fef2f2', padding: '10px', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <button onClick={() => handleAction('Missed')} style={{ border: '1px solid #dc2626', color: '#dc2626', background: '#fef2f2', padding: '10px', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
             <XCircle size={18} /> ✕ Medicine Missed
           </button>
-          <button onClick={onClose} style={{ border: '1px solid #d97706', color: '#d97706', background: '#fffbeb', padding: '10px', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem' }}>
+          <button onClick={() => handleAction('Snoozed')} style={{ border: '1px solid #d97706', color: '#d97706', background: '#fffbeb', padding: '10px', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem' }}>
             ⏰ Snooze (15 Mins)
           </button>
         </div>

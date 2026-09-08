@@ -1,0 +1,1 @@
+"""Medications app package."""

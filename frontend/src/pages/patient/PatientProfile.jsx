@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { 
-  User, HeartPulse, Pill, Plus, Calendar, Clock, BarChart3, RefreshCw, 
-  Tag, Bell, History, Key, Shield, LogOut, Trash2, Edit3, Camera, CheckCircle2, 
-  XCircle, AlertTriangle, AlertOctagon, PhoneCall, Check, FileText
+  User, HeartPulse, Pill, Plus, Calendar, BarChart3, RefreshCw, 
+  Tag, Bell, History, Shield, Edit3, Trash2, Camera, Users
 } from 'lucide-react';
 import ReminderModal from './ReminderModal';
+import FamilyProfileManager from '../../features/profile/FamilyProfileManager';
+import HistoryTable from '../../features/adherence/HistoryTable';
 
 export default function PatientProfile({ currentUser, setActiveTab, onLogout }) {
   const [activeSection, setActiveSection] = useState('personal');
@@ -148,6 +149,7 @@ export default function PatientProfile({ currentUser, setActiveTab, onLogout }) 
       {/* Patient Profile Navigation Sub-tabs */}
       <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', borderBottom: '2px solid #fee2e2' }}>
         {[
+          { id: 'family-profiles', label: '👨‍👩‍👧 Family Profiles', icon: Users },
           { id: 'personal', label: '👤 Personal & Healthcare', icon: User },
           { id: 'medicines', label: '💊 My Medicines', icon: Pill },
           { id: 'add-medicine', label: '➕ Add Medicine', icon: Plus },
@@ -184,6 +186,11 @@ export default function PatientProfile({ currentUser, setActiveTab, onLogout }) 
           );
         })}
       </div>
+
+      {/* SECTION 0: Family Profiles Manager */}
+      {activeSection === 'family-profiles' && (
+        <FamilyProfileManager />
+      )}
 
       {/* SECTION 1: Personal & Healthcare Information (Editable) */}
       {activeSection === 'personal' && (
@@ -623,42 +630,7 @@ export default function PatientProfile({ currentUser, setActiveTab, onLogout }) 
 
       {/* SECTION 9: Intake History Logs */}
       {activeSection === 'history' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>📜 Medication Intake History</h3>
-
-          {historyLogs.length === 0 ? (
-            <div className="glass-card" style={{ padding: '28px', textAlign: 'center', color: '#94a3b8' }}>
-              No intake logs recorded yet. Take or miss doses in your Schedule to generate history logs.
-            </div>
-          ) : (
-            <div className="glass-card" style={{ padding: '20px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
-                <thead>
-                  <tr style={{ borderBottom: '2px solid #fee2e2', color: '#64748b' }}>
-                    <th style={{ padding: '8px' }}>Date</th>
-                    <th style={{ padding: '8px' }}>Time</th>
-                    <th style={{ padding: '8px' }}>Medicine</th>
-                    <th style={{ padding: '8px' }}>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {historyLogs.map(log => (
-                    <tr key={log.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '10px 8px', fontWeight: 600 }}>{log.date}</td>
-                      <td style={{ padding: '10px 8px', color: '#64748b' }}>{log.time}</td>
-                      <td style={{ padding: '10px 8px', fontWeight: 700 }}>💊 {log.med}</td>
-                      <td style={{ padding: '10px 8px' }}>
-                        <span className={log.status === 'Taken' ? 'badge-taken' : 'badge-missed'}>
-                          {log.status === 'Taken' ? '✓ Taken' : '✕ Missed'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+        <HistoryTable />
       )}
 
       {/* SECTION 10: Account & Security */}

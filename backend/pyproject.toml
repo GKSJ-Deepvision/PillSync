@@ -5,7 +5,7 @@
 [tool.black]
 line-length = 100
 target-version = ["py311"]
-extend-exclude = "/(migrations|\.venv|node_modules)/"
+extend-exclude = '/(migrations|\.venv|node_modules)/'
 
 [tool.isort]
 profile = "black"
@@ -34,6 +34,7 @@ testpaths = ["tests", "apps"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+DJANGO_SETTINGS_MODULE = "config.settings.dev"
 addopts = "-ra --strict-markers"
 markers = [
     "unit: fast tests with no external dependencies",
@@ -48,10 +49,10 @@ omit = [
     "*/tests/*",
     "*/.venv/*",
     "manage.py",
-    "config/asgi.py",
     "config/wsgi.py",
+    "config/asgi.py",
 ]
 
 [tool.coverage.report]
 show_missing = true
-skip_covered = true
+skip_covered = false
