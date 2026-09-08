@@ -9,7 +9,8 @@ from apps.profiles.models import PatientProfile
 
 @pytest.mark.django_db
 def test_full_family_medication_history_workflow():
-    user = User.objects.create_user(username="family_admin", password="password")
+    dummy_password = "dummy_test_password_123"  # pragma: allowlist secret
+    user = User.objects.create_user(username="family_admin", password=dummy_password)
     parent_profile = PatientProfile.objects.create(
         user=user,
         name="Grandpa Arthur",
