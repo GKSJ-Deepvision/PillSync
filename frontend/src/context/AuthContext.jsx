@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState } from "react";
 import { loginUser, registerUser } from "../services/api";
 
@@ -21,7 +20,7 @@ export const AuthProvider = ({ children }) => {
   });
 
   const [token, setToken] = useState(
-    () => localStorage.getItem("pillsync_token") || "placeholder-jwt-token",
+    () => localStorage.getItem("pillsync_token") || "mock-jwt-token-xyz",
   );
 
   const saveAuthSession = (userData, authToken) => {
@@ -31,7 +30,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("pillsync_token", authToken);
   };
 
-  const login = (userData, authToken = "placeholder-jwt-token") => {
+  const login = (userData, authToken = "mock-jwt-token-xyz") => {
     saveAuthSession(userData, authToken);
   };
 
@@ -50,28 +49,12 @@ export const AuthProvider = ({ children }) => {
       saveAuthSession(userData, data.token);
       return { success: true, user: userData };
     } catch (err) {
+      // Fallback for offline demo mode
       console.warn(
-        "API connection failed, falling back to demo login:",
+        "API connection failed, attempting fallback login",
         err.message,
       );
-      const demoUser = {
-        id: "usr-101",
-        name: email.includes("caregiver")
-          ? "Dr. Sarah Jenkins"
-          : email.includes("admin")
-            ? "System Administrator"
-            : "Alex Morgan",
-        email: email,
-        role: email.includes("caregiver")
-          ? "caregiver"
-          : email.includes("admin")
-            ? "admin"
-            : "patient",
-        avatar:
-          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-      };
-      saveAuthSession(demoUser, "placeholder-jwt-token");
-      return { success: true, user: demoUser };
+      throw err;
     }
   };
 

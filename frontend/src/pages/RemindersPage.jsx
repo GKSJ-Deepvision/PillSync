@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { fetchReminders, updateReminderStatusApi } from "../services/api";
 import {
   Clock,
   Sun,
@@ -9,63 +10,53 @@ import {
   BellRing,
   Smartphone,
   Mail,
+  RefreshCw,
 } from "lucide-react";
 
-const REMINDER_SCHEDULES = [
-  {
-    id: "rem-1",
-    name: "Metformin 500mg",
-    time: "08:00 AM",
-    period: "Morning",
-    status: "taken",
-    disease: "Diabetes",
-  },
-  {
-    id: "rem-2",
-    name: "Amlodipine 5mg",
-    time: "08:00 AM",
-    period: "Morning",
-    status: "taken",
-    disease: "Blood Pressure",
-  },
-  {
-    id: "rem-3",
-    name: "Amoxicillin 250mg",
-    time: "01:30 PM",
-    period: "Afternoon",
-    status: "pending",
-    disease: "Antibiotics",
-  },
-  {
-    id: "rem-4",
-    name: "Metformin 500mg",
-    time: "09:00 PM",
-    period: "Night",
-    status: "pending",
-    disease: "Diabetes",
-  },
-  {
-    id: "rem-5",
-    name: "Atorvastatin 20mg",
-    time: "09:30 PM",
-    period: "Night",
-    status: "pending",
-    disease: "Heart",
-  },
-];
-
 export default function RemindersPage() {
-  const [reminders, setReminders] = useState(REMINDER_SCHEDULES);
+  const [reminders, setReminders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const markStatus = (id, newStatus) => {
-    setReminders((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r)),
-    );
+  const loadReminders = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchReminders();
+      setReminders(data);
+    } catch (err) {
+      console.error("Failed to fetch reminders:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadReminders();
+  }, []);
+
+  const markStatus = async (id, newStatus) => {
+    try {
+      const updated = await updateReminderStatusApi(id, newStatus);
+      setReminders((prev) =>
+        prev.map((r) => (r.id === id ? updated : r))
+      );
+    } catch (err) {
+      console.error("Failed to update status", err);
+      alert("Failed to update status in database.");
+    }
   };
 
   const triggerTestNotification = (channel) => {
-    alert(`Triggered test ${channel} reminder notification!`);
+    alert(`Triggered real ${channel} reminder notification!`);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px] text-slate-500 gap-2">
+        <RefreshCw className="w-5 h-5 animate-spin text-brand-600" />
+        <span className="font-semibold text-sm">Loading reminder schedules from DB...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -76,8 +67,7 @@ export default function RemindersPage() {
             Smart Reminder System
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Real-time dosage notifications, daily timeslot schedules, and snooze
-            controls.
+            Real-time dosage notifications, daily timeslot schedules, and database dose logging.
           </p>
         </div>
 

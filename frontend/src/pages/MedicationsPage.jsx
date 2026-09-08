@@ -1,85 +1,68 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MedicineCard from "../components/medications/MedicineCard";
 import AddMedicineModal from "../components/medications/AddMedicineModal";
-import { Plus, Search, Filter } from "lucide-react";
-
-const DEMO_MEDICINES = [
-  {
-    id: "1",
-    name: "Metformin",
-    dosage: "500 mg",
-    stock: 8,
-    totalStock: 60,
-    frequency: "2 times daily",
-    diseaseCategory: "Diabetes",
-    timesOfDay: ["Morning", "Night"],
-    stockDays: 4,
-    refillThreshold: 10,
-  },
-  {
-    id: "2",
-    name: "Amlodipine",
-    dosage: "5 mg",
-    stock: 45,
-    totalStock: 60,
-    frequency: "1 time daily",
-    diseaseCategory: "Blood Pressure",
-    timesOfDay: ["Morning"],
-    stockDays: 45,
-    refillThreshold: 10,
-  },
-  {
-    id: "3",
-    name: "Levothyroxine",
-    dosage: "50 mcg",
-    stock: 28,
-    totalStock: 30,
-    frequency: "1 time daily",
-    diseaseCategory: "Thyroid",
-    timesOfDay: ["Morning"],
-    stockDays: 28,
-    refillThreshold: 7,
-  },
-  {
-    id: "4",
-    name: "Amoxicillin",
-    dosage: "250 mg",
-    stock: 12,
-    totalStock: 20,
-    frequency: "3 times daily",
-    diseaseCategory: "Antibiotics",
-    timesOfDay: ["Morning", "Afternoon", "Night"],
-    stockDays: 4,
-    refillThreshold: 5,
-  },
-  {
-    id: "5",
-    name: "Vitamin D3",
-    dosage: "1000 IU",
-    stock: 50,
-    totalStock: 60,
-    frequency: "1 time daily",
-    diseaseCategory: "Vitamins",
-    timesOfDay: ["Morning"],
-    stockDays: 50,
-    refillThreshold: 10,
-  },
-];
+import { fetchMedications, addMedication, takeDoseApi } from "../services/api";
+import { Plus, Search, Filter, RefreshCw } from "lucide-react";
 
 export default function MedicationsPage() {
-  const [medicines, setMedicines] = useState(DEMO_MEDICINES);
+  const [medicines, setMedicines] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedDisease, setSelectedDisease] = useState("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const loadMeds = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchMedications();
+      setMedicines(data);
+    } catch (err) {
+      console.error("Failed to load medications", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadMeds();
+  }, []);
+
+  const handleTakeDose = async (id) => {
+    try {
+      const updated = await takeDoseApi(id);
+      setMedicines((prev) => prev.map((m) => (m.id === id ? updated : m)));
+    } catch (err) {
+      console.error("Failed to take dose", err);
+    }
+  };
+
+  const handleAddMedicine = async (newMed) => {
+    try {
+      const saved = await addMedication(newMed);
+      setMedicines((prev) => [saved, ...prev]);
+    } catch (err) {
+      console.error("Failed to save medicine", err);
+      alert("Failed to save medicine to database.");
+    }
+  };
+
   const filtered = medicines.filter((m) => {
     const matchesSearch =
       m.name.toLowerCase().includes(search.toLowerCase()) ||
-      m.diseaseCategory.toLowerCase().includes(search.toLowerCase());
+      (m.diseaseCategory && m.diseaseCategory.toLowerCase().includes(search.toLowerCase()));
     const matchesDisease =
       selectedDisease === "All" || m.diseaseCategory === selectedDisease;
     return matchesSearch && matchesDisease;
   });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px] text-slate-500 gap-2">
+        <RefreshCw className="w-5 h-5 animate-spin text-brand-600" />
+        <span className="font-semibold text-sm">Loading medications inventory from DB...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -90,7 +73,7 @@ export default function MedicationsPage() {
             Medication Schedule & Inventory
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Manage your daily doses, disease categories, and stock thresholds.
+            Manage your daily doses, disease categories, and database inventory.
           </p>
         </div>
 
@@ -147,13 +130,7 @@ export default function MedicationsPage() {
           <MedicineCard
             key={med.id}
             medicine={med}
-            onTake={(id) =>
-              setMedicines((prev) =>
-                prev.map((m) =>
-                  m.id === id ? { ...m, stock: Math.max(0, m.stock - 1) } : m,
-                ),
-              )
-            }
+            onTake={handleTakeDose}
             onMiss={() => alert("Missed dose logged.")}
           />
         ))}
@@ -162,7 +139,7 @@ export default function MedicationsPage() {
       <AddMedicineModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onAddMedicine={(newMed) => setMedicines([newMed, ...medicines])}
+        onAddMedicine={handleAddMedicine}
       />
     </div>
   );
