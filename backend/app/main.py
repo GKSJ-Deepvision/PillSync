@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from app.api.auth import router as auth_router
 from app.core.config import settings
 
 
@@ -8,6 +9,9 @@ app = FastAPI(
     description="Backend API for the PillSync healthcare workflow platform.",
     version=settings.app_version,
 )
+
+
+app.include_router(auth_router)
 
 
 @app.get("/")
