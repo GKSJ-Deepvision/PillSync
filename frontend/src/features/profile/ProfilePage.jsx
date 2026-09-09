@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { UserIcon } from "../../components/icons";
 
 export default function ProfilePage() {
   const { profile, role, updateProfile } = useAuth();
@@ -48,8 +49,15 @@ export default function ProfilePage() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-lg mx-auto p-6 space-y-4">
-      <h1 className="text-xl font-semibold">Profile</h1>
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-teal-50">
+      <div className="max-w-lg mx-auto p-6 space-y-4">
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-teal-600 text-white flex items-center justify-center shadow-lg shadow-violet-200">
+          <UserIcon className="w-6 h-6" />
+        </div>
+        <h1 className="heading text-2xl font-bold text-gray-900">Profile</h1>
+      </div>
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
 
       <label className="block">
         <span className="text-sm text-gray-600">Full name</span>
@@ -57,7 +65,7 @@ export default function ProfilePage() {
           name="full_name"
           value={form.full_name}
           onChange={handleChange}
-          className="mt-1 w-full border rounded px-3 py-2"
+          className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
         />
       </label>
 
@@ -67,7 +75,7 @@ export default function ProfilePage() {
           name="phone"
           value={form.phone}
           onChange={handleChange}
-          className="mt-1 w-full border rounded px-3 py-2"
+          className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
         />
       </label>
 
@@ -78,7 +86,7 @@ export default function ProfilePage() {
           name="date_of_birth"
           value={form.date_of_birth ?? ""}
           onChange={handleChange}
-          className="mt-1 w-full border rounded px-3 py-2"
+          className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
         />
       </label>
 
@@ -90,7 +98,7 @@ export default function ProfilePage() {
               name="blood_group"
               value={form.blood_group}
               onChange={handleChange}
-              className="mt-1 w-full border rounded px-3 py-2"
+              className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
             />
           </label>
 
@@ -102,11 +110,11 @@ export default function ProfilePage() {
               name="conditions"
               value={form.conditions}
               onChange={handleChange}
-              className="mt-1 w-full border rounded px-3 py-2"
+              className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
             />
           </label>
 
-          <fieldset className="border rounded p-3 space-y-3">
+          <fieldset className="border border-gray-200 rounded-lg p-3 space-y-3">
             <legend className="text-sm text-gray-600 px-1">
               Emergency contact
             </legend>
@@ -115,21 +123,21 @@ export default function ProfilePage() {
               placeholder="Name"
               value={form.emergency_contact_name}
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
             />
             <input
               name="emergency_contact_phone"
               placeholder="Phone"
               value={form.emergency_contact_phone}
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
             />
             <input
               name="emergency_contact_relation"
               placeholder="Relation"
               value={form.emergency_contact_relation}
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
             />
           </fieldset>
         </>
@@ -137,19 +145,21 @@ export default function ProfilePage() {
 
       <button
         type="submit"
-        className="bg-blue-600 text-white px-4 py-2 rounded"
+        className="w-full bg-gradient-to-br from-violet-500 to-teal-600 text-white font-medium px-4 py-2.5 rounded-lg shadow-sm hover:shadow-md transition-shadow"
       >
         Save profile
       </button>
 
       {status === "saved" && (
-        <p className="text-green-600 text-sm">Profile saved.</p>
+        <p className="text-emerald-600 text-sm font-medium">Profile saved.</p>
       )}
       {status === "error" && (
         <p className="text-red-600 text-sm">
           Something went wrong saving your profile.
         </p>
       )}
-    </form>
+      </form>
+      </div>
+    </div>
   );
 }

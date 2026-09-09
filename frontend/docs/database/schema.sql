@@ -6,6 +6,9 @@
 
 create extension if not exists "pgcrypto";
 
+-- ---------------------------------------------------------------------
+-- 1. Role enum
+-- ---------------------------------------------------------------------
 do $$
 begin
   if not exists (select 1 from pg_type where typname = 'user_role') then
@@ -13,6 +16,10 @@ begin
   end if;
 end$$;
 
+-- ---------------------------------------------------------------------
+-- 2. profiles
+--    One row per auth.users row, same UUID as auth.users.id.
+-- ---------------------------------------------------------------------
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   role user_role not null default 'patient',
@@ -20,15 +27,22 @@ create table if not exists public.profiles (
   phone text,
   date_of_birth date,
   avatar_url text,
+
+  -- patient-only fields (left empty for caregiver / admin rows)
   blood_group text,
   conditions text[] default '{}',
   emergency_contact_name text,
   emergency_contact_phone text,
   emergency_contact_relation text,
+
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
+-- ---------------------------------------------------------------------
+-- 3. caregiver_links
+--    Many-to-many join: which caregiver may see which patient.
+-- ---------------------------------------------------------------------
 create table if not exists public.caregiver_links (
   id uuid primary key default gen_random_uuid(),
   caregiver_id uuid not null references public.profiles (id) on delete cascade,
@@ -39,6 +53,12 @@ create table if not exists public.caregiver_links (
   unique (caregiver_id, patient_id)
 );
 
+-- ---------------------------------------------------------------------
+-- 4. Triggers
+-- ---------------------------------------------------------------------
+
+-- auto-create a profiles row on signup, pulling role/full_name out of
+-- the metadata the client passed to supabase.auth.signUp()
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -60,6 +80,7 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
+-- keep updated_at current on both tables
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
@@ -80,9 +101,13 @@ create trigger set_links_updated_at
   before update on public.caregiver_links
   for each row execute function public.set_updated_at();
 
+-- ---------------------------------------------------------------------
+-- 5. Row Level Security
+-- ---------------------------------------------------------------------
 alter table public.profiles enable row level security;
 alter table public.caregiver_links enable row level security;
 
+-- every user can read/edit their own profile row, and no one else's
 drop policy if exists profiles_select_own on public.profiles;
 create policy profiles_select_own on public.profiles
   for select using (id = auth.uid());
@@ -91,6 +116,8 @@ drop policy if exists profiles_update_own on public.profiles;
 create policy profiles_update_own on public.profiles
   for update using (id = auth.uid());
 
+-- helper function bypasses RLS to avoid infinite recursion when a
+-- profiles policy needs to check the caller's own role
 create or replace function public.current_user_role()
 returns user_role
 language sql
@@ -101,10 +128,12 @@ as $$
   select role from public.profiles where id = auth.uid();
 $$;
 
+-- admins can read every profile (powers the admin dashboard counts)
 drop policy if exists profiles_select_admin on public.profiles;
 create policy profiles_select_admin on public.profiles
   for select using (public.current_user_role() = 'admin');
 
+-- a caregiver can read a patient's profile only once the link is accepted
 drop policy if exists profiles_select_linked_patient on public.profiles;
 create policy profiles_select_linked_patient on public.profiles
   for select using (
@@ -116,12 +145,14 @@ create policy profiles_select_linked_patient on public.profiles
     )
   );
 
+-- caregivers and patients can see links that involve them
 drop policy if exists links_select_participant on public.caregiver_links;
 create policy links_select_participant on public.caregiver_links
   for select using (
     caregiver_id = auth.uid() or patient_id = auth.uid()
   );
 
+-- only admins can create or change links this milestone
 drop policy if exists links_admin_write on public.caregiver_links;
 create policy links_admin_write on public.caregiver_links
   for all using (public.current_user_role() = 'admin');

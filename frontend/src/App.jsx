@@ -7,6 +7,11 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProfilePage from "./features/profile/ProfilePage";
+import MedicationsPage from "./features/medications/MedicationsPage";
+import MedicationForm from "./features/medications/MedicationForm";
+import RemindersPage from "./features/reminders/RemindersPage";
+import HistoryPage from "./features/adherence/HistoryPage";
+import NotificationsPage from "./features/notifications/NotificationsPage";
 
 export default function App() {
   return (
@@ -31,6 +36,54 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/medications"
+            element={
+              <ProtectedRoute>
+                <MedicationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/medications/new"
+            element={
+              <ProtectedRoute>
+                <MedicationForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/medications/:id/edit"
+            element={
+              <ProtectedRoute>
+                <MedicationForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reminders"
+            element={
+              <ProtectedRoute>
+                <RemindersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <HistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <NotificationsPage />
               </ProtectedRoute>
             }
           />

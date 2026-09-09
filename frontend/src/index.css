@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  background-color: #F0FDFA;
+}
+
+h1, h2, h3, .heading {
+  font-family: "Quicksand", sans-serif;
+}
