@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.api.auth import router as auth_router
@@ -13,11 +14,25 @@ app = FastAPI(
     version=settings.app_version,
 )
 
+
+# Allow the React frontend to communicate with the FastAPI backend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# Session management
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.jwt_secret_key,
 )
 
+
+# API routers
 app.include_router(auth_router)
 app.include_router(rbac_router)
 app.include_router(profile_router)
