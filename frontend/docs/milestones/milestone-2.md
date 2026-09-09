@@ -2,7 +2,7 @@
 
 - **Intern:** Advala Indhu
 - **Branch:** intern/01-advala-indhu
-- **Submitted on:** <fill in the date you actually push and verify this>
+- **Submitted on:** 2026-09-09
 
 ## Evaluation criteria
 
