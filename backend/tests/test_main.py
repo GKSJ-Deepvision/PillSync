@@ -218,3 +218,65 @@ def test_admin_cannot_access_caregiver_rbac():
     )
 
     assert response.status_code == 403
+
+def test_create_profile():
+    token = get_access_token("vaishnavi", "Test@123")
+
+    response = client.post(
+        "/profile",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "full_name": "Vaishnavi Padala",
+            "date_of_birth": "2005-05-15",
+            "phone": "9876543210",
+            "address": "Hyderabad, Telangana",
+        },
+    )
+
+    assert response.status_code in [201, 400]
+
+    if response.status_code == 201:
+        data = response.json()
+        assert data["full_name"] == "Vaishnavi Padala"
+        assert data["user_id"] == 1
+
+
+def test_get_profile():
+    token = get_access_token("vaishnavi", "Test@123")
+
+    response = client.get(
+        "/profile",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["user_id"] == 1
+    assert data["full_name"] == "Vaishnavi Padala"
+
+
+def test_update_profile():
+    token = get_access_token("vaishnavi", "Test@123")
+
+    response = client.put(
+        "/profile",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "phone": "9123456789",
+            "address": "Hyderabad",
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["phone"] == "9123456789"
+    assert data["address"] == "Hyderabad"
+
+
+def test_profile_requires_authentication():
+    response = client.get("/profile")
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Not authenticated"

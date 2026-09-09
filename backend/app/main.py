@@ -3,6 +3,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.api.auth import router as auth_router
 from app.api.rbac import router as rbac_router
+from app.api.profile import router as profile_router
 from app.core.config import settings
 
 
@@ -19,6 +20,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(rbac_router)
+app.include_router(profile_router)
 
 
 @app.get("/")
