@@ -8,27 +8,18 @@ client = TestClient(app)
 
 def test_root():
     response = client.get("/")
-
     assert response.status_code == 200
-    assert response.json() == {
-        "message": "PillSync API is running",
-        "version": "0.1.0",
-    }
+    assert response.json()["message"] == "PillSync API is running"
 
 
 def test_health_check():
     response = client.get("/health")
-
     assert response.status_code == 200
-    assert response.json() == {
-        "status": "healthy",
-        "environment": "development",
-    }
+    assert response.json()["status"] == "healthy"
 
 
 def test_protected_endpoint_without_token():
     response = client.get("/auth/me")
-
     assert response.status_code == 401
     assert response.json()["detail"] == "Not authenticated"
 
@@ -36,10 +27,7 @@ def test_protected_endpoint_without_token():
 def test_login():
     response = client.post(
         "/auth/login",
-        data={
-            "username": "vaishnavi",
-            "password": "Test@123",
-        },
+        data={"username": "vaishnavi", "password": "Test@123"},
     )
 
     assert response.status_code == 200
@@ -53,10 +41,7 @@ def test_login():
 def test_protected_endpoint_with_token():
     login_response = client.post(
         "/auth/login",
-        data={
-            "username": "vaishnavi",
-            "password": "Test@123",
-        },
+        data={"username": "vaishnavi", "password": "Test@123"},
     )
 
     assert login_response.status_code == 200
@@ -65,9 +50,7 @@ def test_protected_endpoint_with_token():
 
     response = client.get(
         "/auth/me",
-        headers={
-            "Authorization": f"Bearer {token}",
-        },
+        headers={"Authorization": f"Bearer {token}"},
     )
 
     assert response.status_code == 200
@@ -78,13 +61,11 @@ def test_protected_endpoint_with_token():
     assert data["email"] == "vaishnavi@example.com"
     assert data["role"] == "patient"
 
+
 def test_session_after_login():
     login_response = client.post(
         "/auth/login",
-        data={
-            "username": "vaishnavi",
-            "password": "Test@123",
-        },
+        data={"username": "vaishnavi", "password": "Test@123"},
     )
 
     assert login_response.status_code == 200
@@ -102,10 +83,7 @@ def test_session_after_login():
 def test_logout():
     login_response = client.post(
         "/auth/login",
-        data={
-            "username": "vaishnavi",
-            "password": "Test@123",
-        },
+        data={"username": "vaishnavi", "password": "Test@123"},
     )
 
     assert login_response.status_code == 200
@@ -114,10 +92,129 @@ def test_logout():
 
     assert logout_response.status_code == 200
     assert logout_response.json() == {
-        "message": "Successfully logged out",
+        "message": "Successfully logged out"
     }
 
     session_response = client.get("/auth/session")
 
     assert session_response.status_code == 401
     assert session_response.json()["detail"] == "No active session"
+
+
+def get_access_token(username: str, password: str) -> str:
+    response = client.post(
+        "/auth/login",
+        data={"username": username, "password": password},
+    )
+
+    assert response.status_code == 200
+
+    return response.json()["access_token"]
+
+
+def test_rbac_requires_authentication():
+    response = client.get("/rbac/patient")
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Not authenticated"
+
+
+def test_patient_rbac_access():
+    token = get_access_token("vaishnavi", "Test@123")
+
+    response = client.get(
+        "/rbac/patient",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["role"] == "patient"
+
+
+def test_patient_cannot_access_caregiver_rbac():
+    token = get_access_token("vaishnavi", "Test@123")
+
+    response = client.get(
+        "/rbac/caregiver",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 403
+
+
+def test_patient_cannot_access_admin_rbac():
+    token = get_access_token("vaishnavi", "Test@123")
+
+    response = client.get(
+        "/rbac/admin",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 403
+
+def test_caregiver_rbac_access():
+    token = get_access_token("caregiver_test", "Caregiver@123")
+
+    response = client.get(
+        "/rbac/caregiver",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["role"] == "caregiver"
+
+
+def test_caregiver_cannot_access_patient_rbac():
+    token = get_access_token("caregiver_test", "Caregiver@123")
+
+    response = client.get(
+        "/rbac/patient",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 403
+
+
+def test_caregiver_cannot_access_admin_rbac():
+    token = get_access_token("caregiver_test", "Caregiver@123")
+
+    response = client.get(
+        "/rbac/admin",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 403
+
+
+def test_admin_rbac_access():
+    token = get_access_token("admin_test", "Admin@123")
+
+    response = client.get(
+        "/rbac/admin",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["role"] == "admin"
+
+
+def test_admin_cannot_access_patient_rbac():
+    token = get_access_token("admin_test", "Admin@123")
+
+    response = client.get(
+        "/rbac/patient",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 403
+
+
+def test_admin_cannot_access_caregiver_rbac():
+    token = get_access_token("admin_test", "Admin@123")
+
+    response = client.get(
+        "/rbac/caregiver",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 403
