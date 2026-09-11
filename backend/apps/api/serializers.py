@@ -170,6 +170,13 @@ class MedicationHistorySerializer(serializers.ModelSerializer):
         if schedule is None:
             raise serializers.ValidationError({"schedule": "Schedule is required."})
 
+        request = self.context.get("request")
+
+        if request is not None and schedule.medicine.user_id != request.user.id:
+            raise serializers.ValidationError(
+                {"schedule": "You do not have permission to use this schedule."}
+            )
+
         if not schedule.is_active:
             raise serializers.ValidationError(
                 {"schedule": "Cannot create history for an inactive schedule."}
@@ -180,12 +187,16 @@ class MedicationHistorySerializer(serializers.ModelSerializer):
 
             if scheduled_date < schedule.start_date:
                 raise serializers.ValidationError(
-                    {"scheduled_at": ("Scheduled time cannot be before the schedule start date.")}
+                    {
+                        "scheduled_at": (
+                            "Scheduled time cannot be before " "the schedule start date."
+                        )
+                    }
                 )
 
             if schedule.end_date is not None and scheduled_date > schedule.end_date:
                 raise serializers.ValidationError(
-                    {"scheduled_at": ("Scheduled time cannot be after the schedule end date.")}
+                    {"scheduled_at": ("Scheduled time cannot be after " "the schedule end date.")}
                 )
 
         if status == MedicationHistory.Status.TAKEN and taken_at is None:
@@ -195,7 +206,7 @@ class MedicationHistorySerializer(serializers.ModelSerializer):
 
         if status != MedicationHistory.Status.TAKEN and taken_at is not None:
             raise serializers.ValidationError(
-                {"taken_at": ("Taken time must be empty unless status is taken.")}
+                {"taken_at": "Taken time must be empty unless status is taken."}
             )
 
         return attrs

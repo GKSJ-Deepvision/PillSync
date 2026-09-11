@@ -616,3 +616,156 @@ class MedicationHistoryAPITests(TestCase):
         response = self.client.get(f"/api/medication-history/{other_history.id}/")
 
         self.assertEqual(response.status_code, 404)
+
+    def test_history_rejects_taken_without_taken_at(self):
+        self.authenticate(self.user)
+
+        response = self.client.post(
+            f"/api/medicines/{self.medicine.id}/history/",
+            {
+                "schedule": self.schedule.id,
+                "scheduled_at": "2026-09-06T08:00:00Z",
+                "status": "taken",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("taken_at", response.data)
+
+    def test_history_rejects_missed_with_taken_at(self):
+        self.authenticate(self.user)
+
+        response = self.client.post(
+            f"/api/medicines/{self.medicine.id}/history/",
+            {
+                "schedule": self.schedule.id,
+                "scheduled_at": "2026-09-06T08:00:00Z",
+                "status": "missed",
+                "taken_at": "2026-09-06T08:05:00Z",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("taken_at", response.data)
+
+    def test_history_rejects_skipped_with_taken_at(self):
+        self.authenticate(self.user)
+
+        response = self.client.post(
+            f"/api/medicines/{self.medicine.id}/history/",
+            {
+                "schedule": self.schedule.id,
+                "scheduled_at": "2026-09-06T08:00:00Z",
+                "status": "skipped",
+                "taken_at": "2026-09-06T08:05:00Z",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("taken_at", response.data)
+
+    def test_history_rejects_scheduled_at_before_schedule_start_date(self):
+        self.authenticate(self.user)
+
+        response = self.client.post(
+            f"/api/medicines/{self.medicine.id}/history/",
+            {
+                "schedule": self.schedule.id,
+                "scheduled_at": "2026-08-31T08:00:00Z",
+                "status": "missed",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("scheduled_at", response.data)
+
+    def test_history_rejects_scheduled_at_after_schedule_end_date(self):
+        schedule = MedicineSchedule.objects.create(
+            medicine=self.medicine,
+            dose="1 tablet",
+            time="08:00:00",
+            frequency=MedicineSchedule.Frequency.DAILY,
+            start_date="2026-09-01",
+            end_date="2026-09-10",
+        )
+
+        self.authenticate(self.user)
+
+        response = self.client.post(
+            f"/api/medicines/{self.medicine.id}/history/",
+            {
+                "schedule": schedule.id,
+                "scheduled_at": "2026-09-11T08:00:00Z",
+                "status": "missed",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("scheduled_at", response.data)
+
+    def test_history_rejects_inactive_schedule(self):
+        self.schedule.is_active = False
+        self.schedule.save(update_fields=["is_active"])
+
+        self.authenticate(self.user)
+
+        response = self.client.post(
+            f"/api/medicines/{self.medicine.id}/history/",
+            {
+                "schedule": self.schedule.id,
+                "scheduled_at": "2026-09-06T08:00:00Z",
+                "status": "missed",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("schedule", response.data)
+
+    def test_history_rejects_duplicate_schedule_occurrence(self):
+        self.authenticate(self.user)
+
+        response = self.client.post(
+            f"/api/medicines/{self.medicine.id}/history/",
+            {
+                "schedule": self.schedule.id,
+                "scheduled_at": "2026-09-05T08:00:00Z",
+                "status": "missed",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_user_cannot_create_history_using_other_users_schedule(self):
+        self.authenticate(self.user)
+
+        response = self.client.post(
+            f"/api/medicines/{self.medicine.id}/history/",
+            {
+                "schedule": self.other_schedule.id,
+                "scheduled_at": "2026-09-06T09:00:00Z",
+                "status": "missed",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_user_cannot_update_history_to_other_users_schedule(self):
+        self.authenticate(self.user)
+
+        response = self.client.patch(
+            f"/api/medication-history/{self.history.id}/",
+            {
+                "schedule": self.other_schedule.id,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)

@@ -271,7 +271,11 @@ class MedicationHistoryListCreateView(APIView):
             .order_by("-scheduled_at")
         )
 
-        serializer = MedicationHistorySerializer(history, many=True)
+        serializer = MedicationHistorySerializer(
+            history,
+            many=True,
+            context={"request": request},
+        )
         return Response(serializer.data)
 
     def post(self, request, medicine_id):
@@ -287,14 +291,17 @@ class MedicationHistoryListCreateView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        serializer = MedicationHistorySerializer(data=request.data)
+        serializer = MedicationHistorySerializer(
+            data=request.data,
+            context={"request": request},
+        )
 
         if serializer.is_valid():
             schedule = serializer.validated_data["schedule"]
 
             if schedule.medicine_id != medicine.id:
                 return Response(
-                    {"detail": ("Schedule does not belong to this medicine.")},
+                    {"detail": "Schedule does not belong to this medicine."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -304,7 +311,10 @@ class MedicationHistoryListCreateView(APIView):
             )
 
             return Response(
-                MedicationHistorySerializer(history).data,
+                MedicationHistorySerializer(
+                    history,
+                    context={"request": request},
+                ).data,
                 status=status.HTTP_201_CREATED,
             )
 
@@ -338,7 +348,10 @@ class MedicationHistoryDetailView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        serializer = MedicationHistorySerializer(history)
+        serializer = MedicationHistorySerializer(
+            history,
+            context={"request": request},
+        )
         return Response(serializer.data)
 
     def put(self, request, pk):
@@ -353,6 +366,7 @@ class MedicationHistoryDetailView(APIView):
         serializer = MedicationHistorySerializer(
             history,
             data=request.data,
+            context={"request": request},
         )
 
         if serializer.is_valid():
@@ -377,6 +391,7 @@ class MedicationHistoryDetailView(APIView):
             history,
             data=request.data,
             partial=True,
+            context={"request": request},
         )
 
         if serializer.is_valid():
