@@ -4,6 +4,7 @@
 
 # from .serializers import UserRegistrationSerializer
 
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -445,3 +446,50 @@ class ReminderDetailView(APIView):
         serializer = ReminderSerializer(reminder)
 
         return Response(serializer.data)
+
+
+class ReminderTakenView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            reminder = Reminder.objects.select_related(
+                "schedule",
+                "schedule__medicine",
+            ).get(
+                pk=pk,
+                schedule__medicine__user=request.user,
+            )
+        except Reminder.DoesNotExist:
+            return Response(
+                {"detail": "Reminder not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if reminder.status == Reminder.Status.TAKEN:
+            return Response(
+                {"detail": "Reminder has already been marked as taken."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        history, created = MedicationHistory.objects.get_or_create(
+            schedule=reminder.schedule,
+            scheduled_at=reminder.scheduled_at,
+            defaults={
+                "medicine": reminder.schedule.medicine,
+                "dose": reminder.schedule.dose,
+                "status": MedicationHistory.Status.TAKEN,
+                "taken_at": timezone.now(),
+            },
+        )
+
+        if not created:
+            history.status = MedicationHistory.Status.TAKEN
+            history.taken_at = timezone.now()
+            history.save(update_fields=["status", "taken_at", "updated_at"])
+
+        reminder.status = Reminder.Status.TAKEN
+        reminder.snoozed_until = None
+        reminder.save(update_fields=["status", "snoozed_until", "updated_at"])
+
+        return Response(ReminderSerializer(reminder).data)

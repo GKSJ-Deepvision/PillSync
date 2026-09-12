@@ -11,6 +11,8 @@ class Reminder(models.Model):
 
     class Status(models.TextChoices):
         PENDING = "pending", "Pending"
+        TAKEN = "taken", "Taken"
+        MISSED = "missed", "Missed"
         SNOOZED = "snoozed", "Snoozed"
 
     schedule = models.ForeignKey(

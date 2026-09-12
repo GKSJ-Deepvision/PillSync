@@ -13,6 +13,7 @@ from .views import (
     RegisterView,
     ReminderDetailView,
     ReminderListView,
+    ReminderTakenView,
 )
 
 urlpatterns = [
@@ -45,4 +46,9 @@ urlpatterns = [
     ),
     path("reminders/", ReminderListView.as_view(), name="reminder-list"),
     path("reminders/<int:pk>/", ReminderDetailView.as_view(), name="reminder-detail"),
+    path(
+        "reminders/<int:pk>/taken/",
+        ReminderTakenView.as_view(),
+        name="reminder-taken",
+    ),
 ]
