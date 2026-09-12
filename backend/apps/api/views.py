@@ -5,17 +5,20 @@
 # from .serializers import UserRegistrationSerializer
 
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.medicines.models import MedicationHistory, Medicine, MedicineSchedule
 from apps.profiles.models import Profile
+from apps.reminders.models import Reminder
 
 from .serializers import (
     MedicationHistorySerializer,
     MedicineScheduleSerializer,
     MedicineSerializer,
     ProfileSerializer,
+    ReminderSerializer,
     UserRegistrationSerializer,
 )
 
@@ -402,3 +405,43 @@ class MedicationHistoryDetailView(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+class ReminderListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        reminders = Reminder.objects.filter(schedule__medicine__user=request.user).select_related(
+            "schedule",
+            "schedule__medicine",
+        )
+
+        serializer = ReminderSerializer(
+            reminders,
+            many=True,
+        )
+
+        return Response(serializer.data)
+
+
+class ReminderDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            reminder = Reminder.objects.select_related(
+                "schedule",
+                "schedule__medicine",
+            ).get(
+                pk=pk,
+                schedule__medicine__user=request.user,
+            )
+        except Reminder.DoesNotExist:
+            return Response(
+                {"detail": "Reminder not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = ReminderSerializer(reminder)
+
+        return Response(serializer.data)

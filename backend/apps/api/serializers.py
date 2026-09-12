@@ -3,6 +3,7 @@ from rest_framework import serializers
 from apps.accounts.models import User
 from apps.medicines.models import MedicationHistory, Medicine, MedicineSchedule
 from apps.profiles.models import Profile
+from apps.reminders.models import Reminder
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -210,3 +211,28 @@ class MedicationHistorySerializer(serializers.ModelSerializer):
             )
 
         return attrs
+
+
+class ReminderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reminder
+        fields = [
+            "id",
+            "schedule",
+            "scheduled_at",
+            "period",
+            "status",
+            "snoozed_until",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "id",
+            "schedule",
+            "scheduled_at",
+            "period",
+            "status",
+            "snoozed_until",
+            "created_at",
+            "updated_at",
+        ]

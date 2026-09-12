@@ -7,6 +7,7 @@ from rest_framework.test import APIClient, APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.medicines.models import MedicationHistory, Medicine, MedicineSchedule
+from apps.reminders.models import Reminder
 
 from .serializers import MedicineScheduleSerializer
 
@@ -769,3 +770,102 @@ class MedicationHistoryAPITests(TestCase):
         )
 
         self.assertEqual(response.status_code, 400)
+
+
+class ReminderAPITests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="reminderuser",
+            email="reminder@example.com",
+            password=TEST_PASSWORD,
+            role=User.Role.PATIENT,
+        )
+
+        self.other_user = User.objects.create_user(
+            username="otherreminderuser",
+            email="otherreminder@example.com",
+            password=TEST_PASSWORD,
+            role=User.Role.PATIENT,
+        )
+
+        self.medicine = Medicine.objects.create(
+            user=self.user,
+            name="Paracetamol",
+            dosage="500mg",
+        )
+
+        self.other_medicine = Medicine.objects.create(
+            user=self.other_user,
+            name="Ibuprofen",
+            dosage="200mg",
+        )
+
+        self.schedule = MedicineSchedule.objects.create(
+            medicine=self.medicine,
+            dose="1 tablet",
+            time="08:00:00",
+            frequency=MedicineSchedule.Frequency.DAILY,
+            start_date="2026-09-01",
+        )
+
+        self.other_schedule = MedicineSchedule.objects.create(
+            medicine=self.other_medicine,
+            dose="1 tablet",
+            time="09:00:00",
+            frequency=MedicineSchedule.Frequency.DAILY,
+            start_date="2026-09-01",
+        )
+
+        self.reminder = Reminder.objects.create(
+            schedule=self.schedule,
+            scheduled_at="2026-09-12T08:00:00Z",
+            period=Reminder.Period.MORNING,
+        )
+
+        self.other_reminder = Reminder.objects.create(
+            schedule=self.other_schedule,
+            scheduled_at="2026-09-12T09:00:00Z",
+            period=Reminder.Period.MORNING,
+        )
+
+    def authenticate(self, user):
+        self.client.force_authenticate(user=user)
+
+    def test_unauthenticated_user_cannot_list_reminders(self):
+        response = self.client.get("/api/reminders/")
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_authenticated_user_can_list_own_reminders(self):
+        self.authenticate(self.user)
+
+        response = self.client.get("/api/reminders/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["id"], self.reminder.id)
+
+    def test_user_cannot_see_other_users_reminders(self):
+        self.authenticate(self.user)
+
+        response = self.client.get("/api/reminders/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["id"], self.reminder.id)
+        self.assertNotEqual(response.data[0]["id"], self.other_reminder.id)
+
+    def test_authenticated_user_can_get_own_reminder(self):
+        self.authenticate(self.user)
+
+        response = self.client.get(f"/api/reminders/{self.reminder.id}/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["id"], self.reminder.id)
+
+    def test_user_cannot_get_other_users_reminder(self):
+        self.authenticate(self.user)
+
+        response = self.client.get(f"/api/reminders/{self.other_reminder.id}/")
+
+        self.assertEqual(response.status_code, 404)

@@ -11,6 +11,8 @@ from .views import (
     MeView,
     ProfileView,
     RegisterView,
+    ReminderDetailView,
+    ReminderListView,
 )
 
 urlpatterns = [
@@ -41,4 +43,6 @@ urlpatterns = [
         MedicationHistoryDetailView.as_view(),
         name="medication-history-detail",
     ),
+    path("reminders/", ReminderListView.as_view(), name="reminder-list"),
+    path("reminders/<int:pk>/", ReminderDetailView.as_view(), name="reminder-detail"),
 ]
