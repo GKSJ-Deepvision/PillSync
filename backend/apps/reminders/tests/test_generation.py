@@ -5,7 +5,13 @@ from django.test import TestCase
 
 from apps.medicines.models import Medicine, MedicineSchedule
 from apps.reminders.models import Reminder
-from apps.reminders.services.generation import generate_for_schedule, get_period, schedule_occurs_on
+from apps.reminders.services.generation import (
+    generate_all,
+    generate_for_medicine,
+    generate_for_schedule,
+    get_period,
+    schedule_occurs_on,
+)
 
 User = get_user_model()
 TEST_PASSWORD = "test-password-123"
@@ -158,3 +164,52 @@ class ReminderGenerationTests(TestCase):
         self.assertEqual(len(first), 3)
         self.assertEqual(len(second), 0)
         self.assertEqual(Reminder.objects.count(), 3)
+
+    def test_generates_reminders_for_medicine(self):
+        MedicineSchedule.objects.create(
+            medicine=self.medicine,
+            dose="1 tablet",
+            time=time(8, 0),
+            frequency=MedicineSchedule.Frequency.DAILY,
+            start_date=date(2026, 9, 12),
+        )
+
+        reminders = generate_for_medicine(
+            self.medicine,
+            start_date=date(2026, 9, 12),
+            days=3,
+        )
+
+        self.assertEqual(len(reminders), 3)
+        self.assertEqual(Reminder.objects.count(), 3)
+
+    def test_generates_reminders_for_all_active_schedules(self):
+        second_medicine = Medicine.objects.create(
+            user=self.user,
+            name="Vitamin D",
+            dosage="1000 IU",
+        )
+
+        MedicineSchedule.objects.create(
+            medicine=self.medicine,
+            dose="1 tablet",
+            time=time(8, 0),
+            frequency=MedicineSchedule.Frequency.DAILY,
+            start_date=date(2026, 9, 12),
+        )
+
+        MedicineSchedule.objects.create(
+            medicine=second_medicine,
+            dose="1 tablet",
+            time=time(20, 0),
+            frequency=MedicineSchedule.Frequency.DAILY,
+            start_date=date(2026, 9, 12),
+        )
+
+        reminders = generate_all(
+            start_date=date(2026, 9, 12),
+            days=2,
+        )
+
+        self.assertEqual(len(reminders), 4)
+        self.assertEqual(Reminder.objects.count(), 4)

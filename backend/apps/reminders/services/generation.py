@@ -2,7 +2,7 @@ from datetime import date, datetime, time, timedelta
 
 from django.utils import timezone
 
-from apps.medicines.models import MedicineSchedule
+from apps.medicines.models import Medicine, MedicineSchedule
 
 from ..models import Reminder
 
@@ -72,5 +72,56 @@ def generate_for_schedule(
 
         if created:
             reminders.append(reminder)
+
+    return reminders
+
+
+def generate_for_medicine(
+    medicine: Medicine,
+    *,
+    start_date: date,
+    days: int = 14,
+) -> list[Reminder]:
+    """Generate reminders for all active schedules of a medicine."""
+    reminders = []
+
+    schedules = MedicineSchedule.objects.filter(
+        medicine=medicine,
+        is_active=True,
+    )
+
+    for schedule in schedules:
+        reminders.extend(
+            generate_for_schedule(
+                schedule,
+                start_date=start_date,
+                days=days,
+            )
+        )
+
+    return reminders
+
+
+def generate_all(
+    *,
+    start_date: date,
+    days: int = 14,
+) -> list[Reminder]:
+    """Generate reminders for all active medicine schedules."""
+    reminders = []
+
+    schedules = MedicineSchedule.objects.filter(
+        is_active=True,
+        medicine__is_active=True,
+    )
+
+    for schedule in schedules:
+        reminders.extend(
+            generate_for_schedule(
+                schedule,
+                start_date=start_date,
+                days=days,
+            )
+        )
 
     return reminders
