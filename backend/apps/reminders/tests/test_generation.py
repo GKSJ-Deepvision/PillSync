@@ -5,11 +5,7 @@ from django.test import TestCase
 
 from apps.medicines.models import Medicine, MedicineSchedule
 from apps.reminders.models import Reminder
-from apps.reminders.services.generation import (
-    generate_for_schedule,
-    get_period,
-    schedule_occurs_on,
-)
+from apps.reminders.services.generation import generate_for_schedule, get_period, schedule_occurs_on
 
 User = get_user_model()
 TEST_PASSWORD = "test-password-123"
