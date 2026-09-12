@@ -935,3 +935,63 @@ class ReminderAPITests(APITestCase):
 
         self.assertEqual(first_response.status_code, 200)
         self.assertEqual(second_response.status_code, 400)
+
+    def test_authenticated_user_can_snooze_reminder(self):
+        self.authenticate(self.user)
+
+        response = self.client.post(
+            f"/api/reminders/{self.reminder.id}/snooze/",
+            {"minutes": 15},
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.reminder.refresh_from_db()
+        self.assertEqual(self.reminder.status, Reminder.Status.SNOOZED)
+        self.assertIsNotNone(self.reminder.snoozed_until)
+
+    def test_snooze_requires_positive_minutes(self):
+        self.authenticate(self.user)
+
+        response = self.client.post(
+            f"/api/reminders/{self.reminder.id}/snooze/",
+            {"minutes": 0},
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_user_cannot_snooze_other_users_reminder(self):
+        self.authenticate(self.user)
+
+        response = self.client.post(
+            f"/api/reminders/{self.other_reminder.id}/snooze/",
+            {"minutes": 15},
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_taken_reminder_cannot_be_snoozed(self):
+        self.authenticate(self.user)
+
+        self.reminder.status = Reminder.Status.TAKEN
+        self.reminder.save(update_fields=["status"])
+
+        response = self.client.post(
+            f"/api/reminders/{self.reminder.id}/snooze/",
+            {"minutes": 15},
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_missed_reminder_cannot_be_snoozed(self):
+        self.authenticate(self.user)
+
+        self.reminder.status = Reminder.Status.MISSED
+        self.reminder.save(update_fields=["status"])
+
+        response = self.client.post(
+            f"/api/reminders/{self.reminder.id}/snooze/",
+            {"minutes": 15},
+        )
+
+        self.assertEqual(response.status_code, 400)

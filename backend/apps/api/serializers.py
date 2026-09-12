@@ -236,3 +236,7 @@ class ReminderSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+
+class ReminderSnoozeSerializer(serializers.Serializer):
+    minutes = serializers.IntegerField(min_value=1)

@@ -14,6 +14,7 @@ from .views import (
     ReminderDetailView,
     ReminderListView,
     ReminderMissedView,
+    ReminderSnoozeView,
     ReminderTakenView,
 )
 
@@ -56,5 +57,10 @@ urlpatterns = [
         "reminders/<int:pk>/missed/",
         ReminderMissedView.as_view(),
         name="reminder-missed",
+    ),
+    path(
+        "reminders/<int:pk>/snooze/",
+        ReminderSnoozeView.as_view(),
+        name="reminder-snooze",
     ),
 ]

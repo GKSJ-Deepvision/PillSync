@@ -4,6 +4,8 @@
 
 # from .serializers import UserRegistrationSerializer
 
+from datetime import timedelta
+
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -20,6 +22,7 @@ from .serializers import (
     MedicineSerializer,
     ProfileSerializer,
     ReminderSerializer,
+    ReminderSnoozeSerializer,
     UserRegistrationSerializer,
 )
 
@@ -537,5 +540,50 @@ class ReminderMissedView(APIView):
         reminder.status = Reminder.Status.MISSED
         reminder.snoozed_until = None
         reminder.save(update_fields=["status", "snoozed_until", "updated_at"])
+
+        return Response(ReminderSerializer(reminder).data)
+
+
+class ReminderSnoozeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            reminder = Reminder.objects.select_related(
+                "schedule",
+                "schedule__medicine",
+            ).get(
+                pk=pk,
+                schedule__medicine__user=request.user,
+            )
+        except Reminder.DoesNotExist:
+            return Response(
+                {"detail": "Reminder not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if reminder.status in [
+            Reminder.Status.TAKEN,
+            Reminder.Status.MISSED,
+        ]:
+            return Response(
+                {"detail": "Completed reminders cannot be snoozed."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = ReminderSnoozeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        reminder.status = Reminder.Status.SNOOZED
+        reminder.snoozed_until = timezone.now() + timedelta(
+            minutes=serializer.validated_data["minutes"]
+        )
+        reminder.save(
+            update_fields=[
+                "status",
+                "snoozed_until",
+                "updated_at",
+            ]
+        )
 
         return Response(ReminderSerializer(reminder).data)
