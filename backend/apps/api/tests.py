@@ -902,3 +902,36 @@ class ReminderAPITests(APITestCase):
 
         self.assertEqual(first_response.status_code, 200)
         self.assertEqual(second_response.status_code, 400)
+
+    def test_authenticated_user_can_mark_reminder_as_missed(self):
+        self.authenticate(self.user)
+
+        response = self.client.post(f"/api/reminders/{self.reminder.id}/missed/")
+
+        self.assertEqual(response.status_code, 200)
+
+        self.reminder.refresh_from_db()
+        self.assertEqual(self.reminder.status, Reminder.Status.MISSED)
+
+        history = MedicationHistory.objects.get(
+            schedule=self.schedule,
+            scheduled_at=self.reminder.scheduled_at,
+        )
+        self.assertEqual(history.status, MedicationHistory.Status.MISSED)
+        self.assertIsNone(history.taken_at)
+
+    def test_user_cannot_mark_other_users_reminder_as_missed(self):
+        self.authenticate(self.user)
+
+        response = self.client.post(f"/api/reminders/{self.other_reminder.id}/missed/")
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_cannot_mark_same_reminder_as_missed_twice(self):
+        self.authenticate(self.user)
+
+        first_response = self.client.post(f"/api/reminders/{self.reminder.id}/missed/")
+        second_response = self.client.post(f"/api/reminders/{self.reminder.id}/missed/")
+
+        self.assertEqual(first_response.status_code, 200)
+        self.assertEqual(second_response.status_code, 400)
