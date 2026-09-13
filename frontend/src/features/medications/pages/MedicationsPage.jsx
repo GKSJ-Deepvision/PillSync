@@ -4,13 +4,7 @@ import { medicationApi } from '../../../api/medications';
 import { Layout } from '../../../components/layout';
 import { Badge } from '../../../components/common/Badge';
 import { EmptyState, CardSkeleton } from '../../../components/common';
-import {
-  Search,
-  Plus,
-  Pill,
-  ChevronRight,
-  AlertTriangle,
-} from 'lucide-react';
+import { Search, Plus, Pill, ChevronRight, AlertTriangle } from 'lucide-react';
 import './MedicationsPage.css';
 
 const DISEASE_CATEGORIES = [
@@ -24,8 +18,7 @@ const DISEASE_CATEGORIES = [
 ];
 
 const getCategoryLabel = (value) =>
-  DISEASE_CATEGORIES.find((category) => category.value === value)?.label ||
-  value;
+  DISEASE_CATEGORIES.find((category) => category.value === value)?.label || value;
 
 export function MedicationsPage() {
   const navigate = useNavigate();
@@ -75,13 +68,10 @@ export function MedicationsPage() {
       !query ||
       medicine.medicine_name?.toLowerCase().includes(query) ||
       medicine.generic_name?.toLowerCase().includes(query) ||
-      getCategoryLabel(medicine.disease_category)
-        .toLowerCase()
-        .includes(query);
+      getCategoryLabel(medicine.disease_category).toLowerCase().includes(query);
 
     const matchesDisease =
-      selectedDisease === 'ALL' ||
-      medicine.disease_category === selectedDisease;
+      selectedDisease === 'ALL' || medicine.disease_category === selectedDisease;
 
     return matchesSearch && matchesDisease;
   });
@@ -100,8 +90,7 @@ export function MedicationsPage() {
             <h1 className="meds-title">My Medicines</h1>
 
             <p className="meds-subtitle">
-              Manage your medicines, dosage information, stock quantity, and
-              disease categories.
+              Manage your medicines, dosage information, stock quantity, and disease categories.
             </p>
           </div>
 
@@ -137,9 +126,7 @@ export function MedicationsPage() {
                 type="button"
                 onClick={() => setSelectedDisease(category.value)}
                 className={`meds-category-chip ${
-                  selectedDisease === category.value
-                    ? 'meds-category-chip-active'
-                    : ''
+                  selectedDisease === category.value ? 'meds-category-chip-active' : ''
                 }`}
               >
                 {category.label}
@@ -182,18 +169,13 @@ export function MedicationsPage() {
           <div className="meds-grid">
             {filteredMedications.map((medicine) => {
               const quantity = Number(medicine.quantity ?? 0);
-              const stockPercent = Math.min(
-                100,
-                Math.round((quantity / 30) * 100)
-              );
+              const stockPercent = Math.min(100, Math.round((quantity / 30) * 100));
               const isLowStock = quantity <= 7;
 
               return (
                 <div
                   key={medicine.id}
-                  onClick={() =>
-                    navigate(`/medications/${medicine.id}`)
-                  }
+                  onClick={() => navigate(`/medications/${medicine.id}`)}
                   className="med-card cursor-pointer"
                 >
                   <div>
@@ -204,13 +186,10 @@ export function MedicationsPage() {
                         </div>
 
                         <div>
-                          <h3 className="med-name">
-                            {medicine.medicine_name}
-                          </h3>
+                          <h3 className="med-name">{medicine.medicine_name}</h3>
 
                           <p className="med-dosage">
-                            {medicine.generic_name ||
-                              'Generic name not provided'}
+                            {medicine.generic_name || 'Generic name not provided'}
                           </p>
                         </div>
                       </div>
@@ -221,24 +200,16 @@ export function MedicationsPage() {
                     </div>
 
                     <div className="med-schedule-tags">
-                      <span className="med-tag">
-                        Dosage: {medicine.dosage}
-                      </span>
+                      <span className="med-tag">Dosage: {medicine.dosage}</span>
 
-                      <span className="med-tag">
-                        Form: {medicine.dosage_form}
-                      </span>
+                      <span className="med-tag">Form: {medicine.dosage_form}</span>
                     </div>
 
                     <div className="med-stock-bar-wrapper">
                       <div className="med-stock-label-row">
                         <span>Supply Remaining</span>
 
-                        <span
-                          className={
-                            isLowStock ? 'text-rose-600 font-bold' : ''
-                          }
-                        >
+                        <span className={isLowStock ? 'text-rose-600 font-bold' : ''}>
                           {quantity} units
                         </span>
                       </div>
@@ -246,9 +217,7 @@ export function MedicationsPage() {
                       <div className="med-stock-track">
                         <div
                           className={`med-stock-fill ${
-                            isLowStock
-                              ? 'bg-rose-500'
-                              : 'bg-emerald-500'
+                            isLowStock ? 'bg-rose-500' : 'bg-emerald-500'
                           }`}
                           style={{ width: `${stockPercent}%` }}
                         />

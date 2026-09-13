@@ -97,9 +97,7 @@ export function MedicationDetailPage() {
     );
   }
 
-  const diseaseLabel =
-    DISEASE_LABELS[medication.disease_category] ||
-    medication.disease_category;
+  const diseaseLabel = DISEASE_LABELS[medication.disease_category] || medication.disease_category;
 
   return (
     <Layout>
@@ -112,13 +110,7 @@ export function MedicationDetailPage() {
           Back to Medications
         </Link>
 
-        {error && (
-          <Alert
-            type="danger"
-            message={error}
-            onClose={() => setError('')}
-          />
-        )}
+        {error && <Alert type="danger" message={error} onClose={() => setError('')} />}
 
         <div className="med-detail-header-card">
           <div className="flex items-center gap-4">
@@ -144,8 +136,7 @@ export function MedicationDetailPage() {
               </div>
 
               <p className="mt-0.5 text-xs font-semibold text-slate-500">
-                {medication.generic_name || 'Generic name not provided'} ·{' '}
-                {diseaseLabel}
+                {medication.generic_name || 'Generic name not provided'} · {diseaseLabel}
               </p>
             </div>
           </div>
@@ -175,9 +166,7 @@ export function MedicationDetailPage() {
         <div className="med-detail-info-grid">
           <div className="flex flex-col gap-5">
             <div className="med-detail-card">
-              <h2 className="med-detail-section-title">
-                Medicine Information
-              </h2>
+              <h2 className="med-detail-section-title">Medicine Information</h2>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
@@ -202,9 +191,7 @@ export function MedicationDetailPage() {
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     Dosage
                   </p>
-                  <p className="mt-0.5 text-sm font-bold text-slate-900">
-                    {medication.dosage}
-                  </p>
+                  <p className="mt-0.5 text-sm font-bold text-slate-900">{medication.dosage}</p>
                 </div>
 
                 <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
@@ -220,9 +207,7 @@ export function MedicationDetailPage() {
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     Disease Category
                   </p>
-                  <p className="mt-0.5 text-sm font-bold text-slate-900">
-                    {diseaseLabel}
-                  </p>
+                  <p className="mt-0.5 text-sm font-bold text-slate-900">{diseaseLabel}</p>
                 </div>
 
                 <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
@@ -237,53 +222,38 @@ export function MedicationDetailPage() {
             </div>
 
             <div className="med-detail-card">
-              <h2 className="med-detail-section-title">
-                Medicine Status
-              </h2>
+              <h2 className="med-detail-section-title">Medicine Status</h2>
 
               <div className="text-sm text-slate-700">
                 This medicine is currently{' '}
-                <strong>
-                  {medication.is_active ? 'active' : 'inactive'}
-                </strong>
-                .
+                <strong>{medication.is_active ? 'active' : 'inactive'}</strong>.
               </div>
             </div>
           </div>
 
           <div className="flex flex-col gap-5">
             <div className="med-detail-card">
-              <h3 className="med-detail-section-title">
-                Medicine Summary
-              </h3>
+              <h3 className="med-detail-section-title">Medicine Summary</h3>
 
               <div className="flex flex-col gap-3.5 text-xs">
                 <div className="flex justify-between border-b border-slate-100 pb-2.5">
                   <span className="text-slate-500">Disease</span>
-                  <span className="font-bold text-slate-900">
-                    {diseaseLabel}
-                  </span>
+                  <span className="font-bold text-slate-900">{diseaseLabel}</span>
                 </div>
 
                 <div className="flex justify-between border-b border-slate-100 pb-2.5">
                   <span className="text-slate-500">Dosage</span>
-                  <span className="font-bold text-slate-900">
-                    {medication.dosage}
-                  </span>
+                  <span className="font-bold text-slate-900">{medication.dosage}</span>
                 </div>
 
                 <div className="flex justify-between border-b border-slate-100 pb-2.5">
                   <span className="text-slate-500">Form</span>
-                  <span className="font-bold text-slate-900">
-                    {medication.dosage_form}
-                  </span>
+                  <span className="font-bold text-slate-900">{medication.dosage_form}</span>
                 </div>
 
                 <div className="flex justify-between pb-1">
                   <span className="text-slate-500">Quantity</span>
-                  <span className="font-bold text-slate-900">
-                    {medication.quantity} units
-                  </span>
+                  <span className="font-bold text-slate-900">{medication.quantity} units</span>
                 </div>
               </div>
             </div>

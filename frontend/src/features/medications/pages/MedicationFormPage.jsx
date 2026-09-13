@@ -136,11 +136,7 @@ export function MedicationFormPage() {
         const firstError = Object.values(backendErrors).flat()[0];
         setError(firstError || 'Failed to save medication');
       } else {
-        setError(
-          isEdit
-            ? 'Failed to update medication'
-            : 'Failed to create medication'
-        );
+        setError(isEdit ? 'Failed to update medication' : 'Failed to create medication');
       }
 
       console.error(err);
@@ -181,19 +177,11 @@ export function MedicationFormPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <Alert
-                type="danger"
-                message={error}
-                onClose={() => setError('')}
-              />
-            )}
+            {error && <Alert type="danger" message={error} onClose={() => setError('')} />}
 
             <div className="med-form-grid">
               <div className="med-form-full">
-                <label className="med-form-label">
-                  Medicine Name *
-                </label>
+                <label className="med-form-label">Medicine Name *</label>
                 <input
                   type="text"
                   name="medicine_name"
@@ -206,9 +194,7 @@ export function MedicationFormPage() {
               </div>
 
               <div>
-                <label className="med-form-label">
-                  Generic Name
-                </label>
+                <label className="med-form-label">Generic Name</label>
                 <input
                   type="text"
                   name="generic_name"
@@ -220,9 +206,7 @@ export function MedicationFormPage() {
               </div>
 
               <div>
-                <label className="med-form-label">
-                  Dosage *
-                </label>
+                <label className="med-form-label">Dosage *</label>
                 <input
                   type="number"
                   name="dosage"
@@ -237,9 +221,7 @@ export function MedicationFormPage() {
               </div>
 
               <div>
-                <label className="med-form-label">
-                  Dosage Form *
-                </label>
+                <label className="med-form-label">Dosage Form *</label>
                 <input
                   type="text"
                   name="dosage_form"
@@ -252,9 +234,7 @@ export function MedicationFormPage() {
               </div>
 
               <div>
-                <label className="med-form-label">
-                  Quantity in Supply *
-                </label>
+                <label className="med-form-label">Quantity in Supply *</label>
                 <input
                   type="number"
                   name="quantity"
@@ -269,9 +249,7 @@ export function MedicationFormPage() {
               </div>
 
               <div className="med-form-full">
-                <label className="med-form-label">
-                  Disease / Condition *
-                </label>
+                <label className="med-form-label">Disease / Condition *</label>
                 <select
                   name="disease_category"
                   value={formData.disease_category}
@@ -282,10 +260,7 @@ export function MedicationFormPage() {
                   <option value="">Select a category</option>
 
                   {DISEASE_CATEGORIES.map((category) => (
-                    <option
-                      key={category.value}
-                      value={category.value}
-                    >
+                    <option key={category.value} value={category.value}>
                       {category.label}
                     </option>
                   ))}
@@ -321,11 +296,7 @@ export function MedicationFormPage() {
                 className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-2 text-xs font-bold text-white transition hover:bg-indigo-700 disabled:opacity-60"
               >
                 <Save className="h-4 w-4" />
-                {saving
-                  ? 'Saving...'
-                  : isEdit
-                    ? 'Update Medication'
-                    : 'Save Medication'}
+                {saving ? 'Saving...' : isEdit ? 'Update Medication' : 'Save Medication'}
               </button>
             </div>
           </form>

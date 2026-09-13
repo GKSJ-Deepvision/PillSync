@@ -294,25 +294,14 @@ const realAuthApi = {
           user: {
             id: result.user?.id,
             email: result.user?.email || data.email,
-            name:
-              result.user?.full_name ||
-              result.user?.name ||
-              data.name ||
-              data.email,
-            role: (
-              result.user?.role ||
-              result.role ||
-              data.role ||
-              'PATIENT'
-            ).toLowerCase(),
+            name: result.user?.full_name || result.user?.name || data.name || data.email,
+            role: (result.user?.role || result.role || data.role || 'PATIENT').toLowerCase(),
           },
         };
       }),
 
   forgotPassword: (email) =>
-    apiClient
-      .post(`${AUTH_BASE_URL}/forgot-password/`, { email })
-      .then((res) => res.data),
+    apiClient.post(`${AUTH_BASE_URL}/forgot-password/`, { email }).then((res) => res.data),
 
   resetPassword: (token, newPassword) =>
     apiClient
@@ -324,7 +313,6 @@ const realAuthApi = {
 
   me: () => apiClient.get(`${AUTH_BASE_URL}/me/`).then((res) => res.data),
 
-  logout: () =>
-    apiClient.post(`${AUTH_BASE_URL}/logout/`).then((res) => res.data),
+  logout: () => apiClient.post(`${AUTH_BASE_URL}/logout/`).then((res) => res.data),
 };
 export const authApi = USE_MOCK_API ? mockAuthApi : realAuthApi;
