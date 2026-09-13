@@ -4,6 +4,7 @@
 # Web framework
 Django==5.2.17
 djangorestframework==3.18.0
+django-cors-headers==4.9.0
 
 # Authentication / JWT
 djangorestframework-simplejwt==5.5.1

@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "drf_spectacular",
     "apps.medications",
+    "corsheaders",
 ]
 
 
@@ -32,6 +33,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 
@@ -104,3 +106,6 @@ SPECTACULAR_SETTINGS = {
     ],
 }
 AUTH_USER_MODEL = "accounts.User"
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
