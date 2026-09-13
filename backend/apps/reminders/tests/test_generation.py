@@ -224,10 +224,10 @@ class ReminderGenerationTests(TestCase):
             start_date=date.today(),
         )
 
-        reminders = generate_upcoming_reminders(days=3)
+        generated_count = generate_upcoming_reminders(days=3)
 
-        self.assertEqual(len(reminders), 3)
+        self.assertEqual(generated_count, 3)
         self.assertEqual(
-            reminders[0].schedule,
-            schedule,
+            Reminder.objects.filter(schedule=schedule).count(),
+            3,
         )
