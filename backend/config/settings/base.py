@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_celery_beat",
     "rest_framework",
     "apps.accounts",
     "apps.profiles",
@@ -99,4 +100,11 @@ REST_FRAMEWORK = {
 }
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+}
+
+CELERY_BEAT_SCHEDULE = {
+    "generate-upcoming-reminders": {
+        "task": "apps.reminders.tasks.generate_upcoming_reminders",
+        "schedule": 60 * 60,
+    },
 }
