@@ -12,6 +12,7 @@ from apps.reminders.services.generation import (
     get_period,
     schedule_occurs_on,
 )
+from apps.reminders.tasks import generate_upcoming_reminders
 
 User = get_user_model()
 TEST_PASSWORD = "test-password-123"
@@ -213,3 +214,20 @@ class ReminderGenerationTests(TestCase):
 
         self.assertEqual(len(reminders), 4)
         self.assertEqual(Reminder.objects.count(), 4)
+
+    def test_generate_upcoming_reminders_uses_today(self):
+        schedule = MedicineSchedule.objects.create(
+            medicine=self.medicine,
+            dose="1 tablet",
+            time=time(8, 0),
+            frequency=MedicineSchedule.Frequency.DAILY,
+            start_date=date.today(),
+        )
+
+        reminders = generate_upcoming_reminders(days=3)
+
+        self.assertEqual(len(reminders), 3)
+        self.assertEqual(
+            reminders[0].schedule,
+            schedule,
+        )
