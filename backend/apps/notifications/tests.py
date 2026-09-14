@@ -13,10 +13,9 @@ User = get_user_model()
 
 class NotificationModelTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(
+        self.user = User.objects.create(
             username="notificationuser",
             email="notification@example.com",
-            password="test-password-123",
         )
 
         self.medicine = Medicine.objects.create(
