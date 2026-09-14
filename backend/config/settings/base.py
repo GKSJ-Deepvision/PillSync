@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "apps.medicines",
     "apps.api",
     "apps.reminders",
+    "apps.notifications",
 ]
 
 MIDDLEWARE = [
