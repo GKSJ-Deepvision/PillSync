@@ -39,3 +39,16 @@ def send_notification(notification_id: int):
             "updated_at",
         ]
     )
+
+
+@shared_task
+def dispatch_pending_notifications():
+    """Queue delivery tasks for pending notifications."""
+    notifications = Notification.objects.filter(
+        status=Notification.Status.PENDING,
+    )
+
+    for notification in notifications:
+        send_notification.delay(notification.id)
+
+    return notifications.count()

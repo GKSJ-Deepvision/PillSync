@@ -82,3 +82,21 @@ class SendNotificationTaskTests(TestCase):
             "Delivery failed",
         )
         self.assertIsNone(self.notification.sent_at)
+
+    @patch("apps.notifications.tasks.send_notification.delay")
+    def test_dispatches_pending_notifications(self, mock_delay):
+        second_notification = Notification.objects.create(
+            reminder=self.reminder,
+            channel=Notification.Channel.SMS,
+            message="Take your medicine.",
+        )
+
+        from apps.notifications.tasks import dispatch_pending_notifications
+
+        count = dispatch_pending_notifications()
+
+        self.assertEqual(count, 2)
+
+        mock_delay.assert_any_call(self.notification.id)
+        mock_delay.assert_any_call(second_notification.id)
+        self.assertEqual(mock_delay.call_count, 2)
