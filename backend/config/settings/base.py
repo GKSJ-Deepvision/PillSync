@@ -110,4 +110,8 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.reminders.tasks.generate_upcoming_reminders",
         "schedule": 60 * 60,
     },
+    "dispatch-pending-notifications": {
+        "task": "apps.notifications.tasks.dispatch_pending_notifications",
+        "schedule": 60,
+    },
 }
