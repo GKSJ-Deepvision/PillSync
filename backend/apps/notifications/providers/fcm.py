@@ -1,4 +1,6 @@
-import os
+import firebase_admin
+from django.conf import settings
+from firebase_admin import credentials, messaging
 
 from .base import NotificationProvider
 
@@ -7,11 +9,20 @@ class FCMProvider(NotificationProvider):
     """Firebase Cloud Messaging notification provider."""
 
     def __init__(self):
-        self.server_key = os.getenv("FCM_SERVER_KEY")
+        if not settings.FIREBASE_CREDENTIALS_PATH:
+            raise RuntimeError("FIREBASE_CREDENTIALS_PATH is not configured.")
+
+        if not firebase_admin._apps:
+            cred = credentials.Certificate(settings.FIREBASE_CREDENTIALS_PATH)
+            firebase_admin.initialize_app(cred)
 
     def send(self, *, message: str, recipient: str) -> None:
-        if not self.server_key:
-            raise RuntimeError("FCM_SERVER_KEY is not configured.")
+        notification = messaging.Message(
+            notification=messaging.Notification(
+                title="PillSync Reminder",
+                body=message,
+            ),
+            token=recipient,
+        )
 
-        # Actual FCM delivery will be implemented next.
-        raise NotImplementedError
+        messaging.send(notification)

@@ -15,6 +15,8 @@ ALLOWED_HOSTS = []
 CELERY_BROKER_URL = "redis://localhost:6379/0"
 CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 
+FIREBASE_CREDENTIALS_PATH = os.getenv("FIREBASE_CREDENTIALS_PATH")
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
