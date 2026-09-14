@@ -1,8 +1,13 @@
 name: Branch guard
 
-# Nobody merges into main during this internship: every intern's work stays on
-# their own branch and is reviewed there. This workflow enforces that, and
-# leaves an explanation on any pull request that tries.
+# No intern merges into main: every intern's work stays on their own branch and
+# is reviewed there. This workflow enforces that, and leaves an explanation on
+# any pull request that tries.
+#
+# Mentor branches are exempt. Once main is covered by a ruleset that requires a
+# pull request, a PR is the only way to change the skeleton at all - so failing
+# every PR indiscriminately would either brick main or train everyone to ignore
+# a red check. Only intern/* is refused.
 on:
   pull_request_target:
     types: [opened, reopened, synchronize]
@@ -21,7 +26,9 @@ concurrency:
 jobs:
   block-merge-to-main:
     name: Pull requests into main are not accepted
-    if: github.event_name == 'pull_request_target'
+    if: >-
+      github.event_name == 'pull_request_target' &&
+      startsWith(github.event.pull_request.head.ref, 'intern/')
     runs-on: ubuntu-latest
     steps:
       - name: Explain the policy on the pull request
