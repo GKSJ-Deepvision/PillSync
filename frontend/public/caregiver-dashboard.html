@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PillSync - Caregiver Dashboard</title>
+<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="caregiver-dashboard.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="brand">💊 PillSync</div>
+      <div class="profile-card">
+        <div class="profile-avatar">P</div>
+        <div class="profile-name">Pari Verma</div>
+        <div class="profile-email">pari@gmail.com</div>
+        <span class="role-badge">Caregiver</span>
+      </div>
+      <nav class="nav">
+        <a href="#" class="nav-item active">My Patients</a>
+        <a href="#" class="nav-item">Alerts</a>
+      </nav>
+      <a href="login.html" class="logout">Log out</a>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="greeting">Good morning, Pari</div>
+          <div class="subgreeting">Here's how your patients are doing today</div>
+        </div>
+      </header>
+
+      <!-- ALERTS -->
+      <section class="alerts-section" id="alertsSection"></section>
+
+      <!-- PATIENT LIST -->
+      <section class="patients-section">
+        <h2 class="section-title">Patients you monitor</h2>
+        <div class="patient-grid" id="patientGrid"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="caregiver-dashboard.js"></script>
+</body>
+</html>

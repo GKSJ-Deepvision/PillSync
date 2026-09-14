@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PillSync - Admin Dashboard</title>
+<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="admin-dashboard.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="brand">💊 PillSync</div>
+      <div class="profile-card">
+        <div class="profile-avatar">A</div>
+        <div class="profile-name">Admin</div>
+        <div class="profile-email">admin@pillsync.com</div>
+        <span class="role-badge">Admin</span>
+      </div>
+      <nav class="nav">
+        <a href="#" class="nav-item active">Overview</a>
+        <a href="#" class="nav-item">Users</a>
+        <a href="#" class="nav-item">Activity Log</a>
+      </nav>
+      <a href="login.html" class="logout">Log out</a>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="greeting">Admin overview</div>
+          <div class="subgreeting">Platform-wide stats and user management</div>
+        </div>
+      </header>
+
+      <!-- STAT CARDS -->
+      <section class="stat-grid" id="statGrid"></section>
+
+      <!-- USER MANAGEMENT -->
+      <section class="users-section">
+        <div class="section-header">
+          <h2 class="section-title">All users</h2>
+          <input type="text" class="search-bar-small" id="userSearch" placeholder="Search users...">
+        </div>
+
+        <div class="filter-chips" id="roleFilterChips"></div>
+
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Joined</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody"></tbody>
+        </table>
+      </section>
+
+      <!-- ACTIVITY LOG -->
+      <section class="activity-section">
+        <h2 class="section-title">Recent activity</h2>
+        <div class="activity-list" id="activityList"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="admin-dashboard.js"></script>
+</body>
+</html>

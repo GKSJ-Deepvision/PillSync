@@ -1,0 +1,106 @@
+.search-bar {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 14px;
+  margin-bottom: 16px;
+  font-family: inherit;
+}
+
+.search-bar:focus {
+  outline: none;
+  border-color: var(--sage-soft);
+}
+
+.full-medicine-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.full-med-card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.full-med-card .category-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.full-med-info {
+  flex-grow: 1;
+}
+
+.full-med-info .m-name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.full-med-info .m-meta {
+  font-size: 13px;
+  color: #8A8578;
+  margin-top: 3px;
+}
+
+.full-med-info .m-times {
+  font-size: 12px;
+  color: var(--sage-deep);
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+.full-med-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.stock-tag {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.stock-ok { background: #F1F7F3; color: var(--sage-deep); }
+.stock-low { background: #FDF1EC; color: var(--terracotta); }
+
+.icon-btn {
+  border: 1px solid var(--line);
+  background: white;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.icon-btn:hover {
+  background: #f5f5f0;
+}
+
+.icon-btn.delete {
+  color: var(--terracotta);
+  border-color: var(--terracotta);
+}
+
+.icon-btn.delete:hover {
+  background: #FDF1EC;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #8A8578;
+}

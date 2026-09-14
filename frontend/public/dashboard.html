@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PillSync - Dashboard</title>
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">💊 PillSync</div>
+
+      <!-- PROFILE CARD -->
+      <div class="profile-card" onclick="openProfileModal()" style="cursor:pointer;">
+        <div class="profile-avatar">I</div>
+        <div class="profile-name">Isha Sharma</div>
+        <div class="profile-email">isha@gmail.com</div>
+        <span class="role-badge">Patient</span>
+      </div>
+
+      <!-- CAREGIVER CARD -->
+      <div class="caregiver-card">
+        <div class="caregiver-label">Your caregiver</div>
+        <div class="caregiver-name">Pari Verma</div>
+        <div class="caregiver-email">pari@gmail.com</div>
+      </div>
+
+      <nav class="nav">
+        <a href="dashboard.html" class="nav-item active">🏠 Dashboard</a>
+        <a href="my-medicines.html" class="nav-item">💊 My Medicines</a>
+        <a href="add-medicine.html" class="nav-item">➕ Add Medicine</a>
+        <a href="history.html" class="nav-item">📊 History</a>
+      </nav>
+
+      <a href="login.html" class="logout">Log out</a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+
+      <header class="topbar">
+        <div>
+          <div class="greeting">Good morning, Isha</div>
+          <div class="subgreeting">Here's what's on your plate today</div>
+        </div>
+        <div class="adherence-ring" id="adherenceRing">
+          <svg viewBox="0 0 80 80">
+            <circle class="ring-bg" cx="40" cy="40" r="34"></circle>
+            <circle class="ring-fg" id="ringFg" cx="40" cy="40" r="34"></circle>
+          </svg>
+          <div class="ring-text" id="ringText">--</div>
+        </div>
+      </header>
+
+      <!-- LOW STOCK BANNER -->
+      <div class="alert-banner" id="alertBanner" style="display:none;"></div>
+
+      <!-- WEEKLY STREAK -->
+      <section class="week-section">
+        <h2 class="section-title">This week</h2>
+        <div class="week-strip" id="weekStrip"></div>
+      </section>
+
+      <!-- TODAY'S DOSES TIMELINE -->
+      <section class="today-section">
+        <h2 class="section-title">Today's doses</h2>
+        <div class="timeline" id="timeline"></div>
+      </section>
+
+      <!-- MEDICINE LIST -->
+      <section class="medicines-section">
+        <div class="section-header">
+          <h2 class="section-title">My medicines</h2>
+          <button class="add-btn" onclick="window.location.href='add-medicine.html'">+ Add medicine</button>
+        </div>
+
+        <div class="filter-chips" id="filterChips"></div>
+
+        <div class="medicine-list" id="medicineList"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="dashboard.js"></script>
+    <!-- PROFILE MODAL -->
+  <div class="modal-overlay" id="profileModal" style="display:none;">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeProfileModal()">✕</button>
+
+      <div class="modal-profile-header">
+        <div class="modal-avatar">I</div>
+        <div>
+          <div class="modal-name">Isha Sharma</div>
+          <span class="role-badge">Patient</span>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-row"><span>Email</span><strong>isha@gmail.com</strong></div>
+        <div class="modal-row"><span>Phone</span><strong>+91 98765 43210</strong></div>
+        <div class="modal-row"><span>Age</span><strong>34</strong></div>
+        <div class="modal-row"><span>Blood Group</span><strong>O+</strong></div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Conditions</div>
+        <div class="condition-tags">
+          <span class="condition-tag">Diabetes</span>
+          <span class="condition-tag">Hypertension</span>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Emergency contact</div>
+        <div class="modal-row"><span>Name</span><strong>Pari Verma</strong></div>
+        <div class="modal-row"><span>Relation</span><strong>Caregiver</strong></div>
+        <div class="modal-row"><span>Phone</span><strong>+91 91234 56789</strong></div>
+      </div>
+
+      <button class="btn-primary" style="margin-top:16px;" onclick="closeProfileModal()">Close</button>
+    </div>
+  </div>
+</body>
+</html>
