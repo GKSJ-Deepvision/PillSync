@@ -30,7 +30,7 @@ django-celery-beat==2.*
 # Notifications
 firebase-admin==6.*
 # twilio==9.*
-# sendgrid==6.*
+sendgrid==6.*
 #
 # Utilities
 python-dotenv==1.*
