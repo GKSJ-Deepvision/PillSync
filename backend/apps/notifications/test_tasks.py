@@ -100,3 +100,22 @@ class SendNotificationTaskTests(TestCase):
         mock_delay.assert_any_call(self.notification.id)
         mock_delay.assert_any_call(second_notification.id)
         self.assertEqual(mock_delay.call_count, 2)
+
+    @patch("apps.notifications.tasks.NotificationDispatcher")
+    def test_failed_notification_is_retried(self, mock_dispatcher):
+        mock_dispatcher.return_value.send.side_effect = RuntimeError("Temporary delivery failure")
+
+        with self.assertRaises(RuntimeError):
+            send_notification(self.notification.id)
+
+        self.notification.refresh_from_db()
+
+        self.assertEqual(
+            self.notification.status,
+            Notification.Status.FAILED,
+        )
+        self.assertEqual(self.notification.attempts, 1)
+        self.assertEqual(
+            self.notification.last_error,
+            "Temporary delivery failure",
+        )

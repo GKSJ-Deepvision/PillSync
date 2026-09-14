@@ -5,7 +5,11 @@ from .models import Notification
 from .services.dispatcher import NotificationDispatcher
 
 
-@shared_task
+@shared_task(
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 3},
+)
 def send_notification(notification_id: int):
     """Send a notification through the configured provider."""
     notification = Notification.objects.get(id=notification_id)
