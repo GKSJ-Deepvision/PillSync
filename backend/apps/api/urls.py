@@ -1,6 +1,8 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+from apps.medications.views import DosageListCreateView, MedicationScheduleListCreateView
+
 from .views import (
     HealthCheckView,
     MedicationHistoryDetailView,
@@ -62,5 +64,15 @@ urlpatterns = [
         "reminders/<int:pk>/snooze/",
         ReminderSnoozeView.as_view(),
         name="reminder-snooze",
+    ),
+    path(
+        "dosages/",
+        DosageListCreateView.as_view(),
+        name="dosage-list-create",
+    ),
+    path(
+        "medication-schedules/",
+        MedicationScheduleListCreateView.as_view(),
+        name="medication-schedule-list-create",
     ),
 ]
