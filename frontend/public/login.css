@@ -1,27 +1,29 @@
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('pillsync.jpg');
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('pillsync.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
 }
 .login-box {
   background: white;
   padding: 40px 30px;
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   width: 320px;
   text-align: center;
 }
 .logo {
   font-size: 28px;
   font-weight: bold;
-  color: #3D5A4C;
+  color: #3d5a4c;
   margin-bottom: 5px;
 }
 .subtitle {
@@ -39,14 +41,14 @@ body {
   flex: 1;
   padding: 8px 5px;
   font-size: 12px;
-  border: 1px solid #3D5A4C;
+  border: 1px solid #3d5a4c;
   background: white;
-  color: #3D5A4C;
+  color: #3d5a4c;
   border-radius: 6px;
   cursor: pointer;
 }
 .role-tab.active {
-  background: #3D5A4C;
+  background: #3d5a4c;
   color: white;
 }
 input {
@@ -59,7 +61,7 @@ input {
 }
 input:focus {
   outline: none;
-  border-color: #3D5A4C;
+  border-color: #3d5a4c;
 }
 .options-row {
   display: flex;
@@ -69,13 +71,13 @@ input:focus {
   margin: 10px 0;
 }
 .options-row a {
-  color: #3D5A4C;
+  color: #3d5a4c;
   text-decoration: none;
 }
 button {
   width: 100%;
   padding: 12px;
-  background-color: #3D5A4C;
+  background-color: #3d5a4c;
   color: white;
   border: none;
   border-radius: 6px;
@@ -84,7 +86,7 @@ button {
   margin-top: 10px;
 }
 button:hover {
-  background-color: #3D5A4C;
+  background-color: #3d5a4c;
 }
 #errorMsg {
   color: #e63946;
@@ -97,7 +99,7 @@ button:hover {
   color: #555;
 }
 .signup-link a {
-  color: #3D5A4C;
+  color: #3d5a4c;
   font-weight: bold;
   text-decoration: none;
 }

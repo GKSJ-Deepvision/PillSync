@@ -25,7 +25,7 @@
 
 .stat-card .stat-label {
   font-size: 12px;
-  color: #8A8578;
+  color: #8a8578;
   margin-top: 2px;
 }
 
@@ -61,9 +61,9 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: #8A8578;
+  color: #8a8578;
   padding: 12px 16px;
-  background: #FAF9F5;
+  background: #faf9f5;
   border-bottom: 1px solid var(--line);
 }
 
@@ -84,9 +84,18 @@
   border-radius: 20px;
 }
 
-.role-patient { background: #F1F7F3; color: var(--sage-deep); }
-.role-caregiver { background: #FDF1EC; color: var(--terracotta); }
-.role-admin { background: #EFEAF5; color: #6B5B95; }
+.role-patient {
+  background: #f1f7f3;
+  color: var(--sage-deep);
+}
+.role-caregiver {
+  background: #fdf1ec;
+  color: var(--terracotta);
+}
+.role-admin {
+  background: #efeaf5;
+  color: #6b5b95;
+}
 
 .status-dot {
   display: inline-flex;
@@ -97,7 +106,7 @@
 }
 
 .status-dot::before {
-  content: "";
+  content: '';
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -105,7 +114,7 @@
 }
 
 .status-dot.inactive::before {
-  background: #C9C4B8;
+  background: #c9c4b8;
 }
 
 .table-action {
@@ -134,6 +143,6 @@
 }
 
 .activity-time {
-  color: #8A8578;
+  color: #8a8578;
   font-size: 12px;
 }

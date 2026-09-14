@@ -1,49 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>PillSync - My Medicines</title>
-<link rel="stylesheet" href="dashboard.css">
-<link rel="stylesheet" href="my-medicines.css">
-</head>
-<body>
-
-  <div class="app">
-
-    <aside class="sidebar">
-      <div class="brand">💊 PillSync</div>
-      <div class="profile-card">
-        <div class="profile-avatar">I</div>
-        <div class="profile-name">Isha Sharma</div>
-        <div class="profile-email">isha@gmail.com</div>
-        <span class="role-badge">Patient</span>
-      </div>
-      <nav class="nav">
-        <a href="dashboard.html" class="nav-item">Dashboard</a>
-        <a href="my-medicines.html" class="nav-item active">My Medicines</a>
-        <a href="add-medicine.html" class="nav-item">Add Medicine</a>
-        <a href="history.html" class="nav-item">History</a>
-      </nav>
-      <a href="login.html" class="logout">Log out</a>
-    </aside>
-
-    <main class="main">
-      <header class="topbar">
-        <div>
-          <div class="greeting">My medicines</div>
-          <div class="subgreeting">All the medicines you're currently tracking</div>
+  <head>
+    <meta charset="UTF-8" />
+    <title>PillSync - My Medicines</title>
+    <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="my-medicines.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">💊 PillSync</div>
+        <div class="profile-card">
+          <div class="profile-avatar">I</div>
+          <div class="profile-name">Isha Sharma</div>
+          <div class="profile-email">isha@gmail.com</div>
+          <span class="role-badge">Patient</span>
         </div>
-        <button class="add-btn" onclick="window.location.href='add-medicine.html'">+ Add medicine</button>
-      </header>
+        <nav class="nav">
+          <a href="dashboard.html" class="nav-item">Dashboard</a>
+          <a href="my-medicines.html" class="nav-item active">My Medicines</a>
+          <a href="add-medicine.html" class="nav-item">Add Medicine</a>
+          <a href="history.html" class="nav-item">History</a>
+        </nav>
+        <a href="login.html" class="logout">Log out</a>
+      </aside>
 
-      <input type="text" class="search-bar" id="searchBar" placeholder="Search medicines...">
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <div class="greeting">My medicines</div>
+            <div class="subgreeting">All the medicines you're currently tracking</div>
+          </div>
+          <button class="add-btn" onclick="window.location.href = 'add-medicine.html'">
+            + Add medicine
+          </button>
+        </header>
 
-      <div class="filter-chips" id="filterChips"></div>
+        <input type="text" class="search-bar" id="searchBar" placeholder="Search medicines..." />
 
-      <div class="full-medicine-list" id="fullMedicineList"></div>
-    </main>
-  </div>
+        <div class="filter-chips" id="filterChips"></div>
 
-  <script src="my-medicines.js"></script>
-</body>
+        <div class="full-medicine-list" id="fullMedicineList"></div>
+      </main>
+    </div>
+
+    <script src="my-medicines.js"></script>
+  </body>
 </html>

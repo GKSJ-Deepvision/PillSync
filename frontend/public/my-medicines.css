@@ -47,7 +47,7 @@
 
 .full-med-info .m-meta {
   font-size: 13px;
-  color: #8A8578;
+  color: #8a8578;
   margin-top: 3px;
 }
 
@@ -72,8 +72,14 @@
   white-space: nowrap;
 }
 
-.stock-ok { background: #F1F7F3; color: var(--sage-deep); }
-.stock-low { background: #FDF1EC; color: var(--terracotta); }
+.stock-ok {
+  background: #f1f7f3;
+  color: var(--sage-deep);
+}
+.stock-low {
+  background: #fdf1ec;
+  color: var(--terracotta);
+}
 
 .icon-btn {
   border: 1px solid var(--line);
@@ -96,11 +102,11 @@
 }
 
 .icon-btn.delete:hover {
-  background: #FDF1EC;
+  background: #fdf1ec;
 }
 
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  color: #8A8578;
+  color: #8a8578;
 }

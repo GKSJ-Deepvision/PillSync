@@ -1,67 +1,83 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <title>PillSync - Login</title>
-  <link rel="stylesheet" href="login.css">
-</head>
-<body>
+  <head>
+    <title>PillSync - Login</title>
+    <link rel="stylesheet" href="login.css" />
+  </head>
+  <body>
+    <div class="login-box" id="loginView">
+      <div class="logo">💊 PillSync</div>
+      <div class="subtitle">Your smart medicine companion</div>
+      <div class="role-tabs">
+        <button type="button" class="role-tab active" onclick="selectRole('patient', this)">
+          Patient
+        </button>
+        <button type="button" class="role-tab" onclick="selectRole('caregiver', this)">
+          Caregiver
+        </button>
+        <button type="button" class="role-tab" onclick="selectRole('admin', this)">Admin</button>
+      </div>
 
-  <div class="login-box" id="loginView">
-    <div class="logo">💊 PillSync</div>
-    <div class="subtitle">Your smart medicine companion</div>
-    <div class="role-tabs">
-      <button type="button" class="role-tab active" onclick="selectRole('patient', this)">Patient</button>
-      <button type="button" class="role-tab" onclick="selectRole('caregiver', this)">Caregiver</button>
-      <button type="button" class="role-tab" onclick="selectRole('admin', this)">Admin</button>
+      <input type="email" id="email" placeholder="Email" />
+      <input type="password" id="password" placeholder="Password" />
+
+      <div class="options-row">
+        <label><input type="checkbox" style="width: auto" /> Remember me</label>
+        <a onclick="showView('forgotView')" style="cursor: pointer">Forgot password?</a>
+      </div>
+
+      <p id="errorMsg"></p>
+      <button onclick="handleLogin()">Login</button>
+
+      <div class="signup-link">
+        Don't have an account?
+        <a onclick="showView('signupView')" style="cursor: pointer">Sign up</a>
+      </div>
     </div>
 
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-
-    <div class="options-row">
-      <label><input type="checkbox" style="width:auto;"> Remember me</label>
-      <a onclick="showView('forgotView')" style="cursor:pointer;">Forgot password?</a>
+    <div class="login-box" id="signupView" style="display: none">
+      <div class="logo">💊 PillSync</div>
+      <div class="subtitle">Create your account</div>
+      <div class="role-tabs">
+        <button type="button" class="role-tab active" onclick="selectSignupRole('patient', this)">
+          Patient
+        </button>
+        <button type="button" class="role-tab" onclick="selectSignupRole('caregiver', this)">
+          Caregiver
+        </button>
+        <button type="button" class="role-tab" onclick="selectSignupRole('admin', this)">
+          Admin
+        </button>
+      </div>
+      <input type="text" id="signupName" placeholder="Full Name" />
+      <input type="email" id="signupEmail" placeholder="Email" />
+      <input type="password" id="signupPassword" placeholder="Password" />
+      <input type="password" id="signupConfirm" placeholder="Confirm Password" />
+      <input
+        type="email"
+        id="caregiverPatientEmail"
+        placeholder="Patient's Email (to link)"
+        style="display: none"
+      />
+      <p id="signupError" style="color: #e63946; font-size: 13px; min-height: 18px"></p>
+      <button onclick="handleSignup()">Sign Up</button>
+      <div class="signup-link">
+        Already have an account?
+        <a onclick="showView('loginView')" style="cursor: pointer">Login</a>
+      </div>
     </div>
 
-    <p id="errorMsg"></p>
-    <button onclick="handleLogin()">Login</button>
-
-    <div class="signup-link">
-      Don't have an account? <a onclick="showView('signupView')" style="cursor:pointer;">Sign up</a>
+    <div class="login-box" id="forgotView" style="display: none">
+      <div class="logo">💊 PillSync</div>
+      <div class="subtitle">Reset your password</div>
+      <input type="email" id="forgotEmail" placeholder="Enter your email" />
+      <p id="forgotError" style="color: #e63946; font-size: 13px; min-height: 18px"></p>
+      <button onclick="handleForgotPassword()">Send Reset Link</button>
+      <div class="signup-link">
+        Remembered it? <a onclick="showView('loginView')" style="cursor: pointer">Back to Login</a>
+      </div>
     </div>
-  </div>
 
-  <div class="login-box" id="signupView" style="display:none;">
-    <div class="logo">💊 PillSync</div>
-    <div class="subtitle">Create your account</div>
-    <div class="role-tabs">
-      <button type="button" class="role-tab active" onclick="selectSignupRole('patient', this)">Patient</button>
-      <button type="button" class="role-tab" onclick="selectSignupRole('caregiver', this)">Caregiver</button>
-      <button type="button" class="role-tab" onclick="selectSignupRole('admin', this)">Admin</button>
-    </div>
-    <input type="text" id="signupName" placeholder="Full Name">
-    <input type="email" id="signupEmail" placeholder="Email">
-    <input type="password" id="signupPassword" placeholder="Password">
-    <input type="password" id="signupConfirm" placeholder="Confirm Password">
-    <input type="email" id="caregiverPatientEmail" placeholder="Patient's Email (to link)" style="display:none;">
-    <p id="signupError" style="color:#e63946; font-size:13px; min-height:18px;"></p>
-    <button onclick="handleSignup()">Sign Up</button>
-    <div class="signup-link">
-      Already have an account? <a onclick="showView('loginView')" style="cursor:pointer;">Login</a>
-    </div>
-  </div>
-
-  <div class="login-box" id="forgotView" style="display:none;">
-    <div class="logo">💊 PillSync</div>
-    <div class="subtitle">Reset your password</div>
-    <input type="email" id="forgotEmail" placeholder="Enter your email">
-    <p id="forgotError" style="color:#e63946; font-size:13px; min-height:18px;"></p>
-    <button onclick="handleForgotPassword()">Send Reset Link</button>
-    <div class="signup-link">
-      Remembered it? <a onclick="showView('loginView')" style="cursor:pointer;">Back to Login</a>
-    </div>
-  </div>
-
-  <script src="login.js"></script>
-</body>
+    <script src="login.js"></script>
+  </body>
 </html>

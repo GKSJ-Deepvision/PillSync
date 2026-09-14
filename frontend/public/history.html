@@ -1,52 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>PillSync - History</title>
-<link rel="stylesheet" href="dashboard.css">
-<link rel="stylesheet" href="history.css">
-</head>
-<body>
-
-  <div class="app">
-
-    <aside class="sidebar">
-      <div class="brand">💊 PillSync</div>
-      <div class="profile-card">
-        <div class="profile-avatar">I</div>
-        <div class="profile-name">Isha Sharma</div>
-        <div class="profile-email">isha@gmail.com</div>
-        <span class="role-badge">Patient</span>
-      </div>
-      <nav class="nav">
-        <a href="dashboard.html" class="nav-item">Dashboard</a>
-        <a href="my-medicines.html" class="nav-item">My Medicines</a>
-        <a href="add-medicine.html" class="nav-item">Add Medicine</a>
-        <a href="dashboard.html" class="nav-item">Dashboard</a>
-      </nav>
-      <a href="login.html" class="logout">Log out</a>
-    </aside>
-
-    <main class="main">
-      <header class="topbar">
-        <div>
-          <div class="greeting">Medication history</div>
-          <div class="subgreeting">Your adherence over the past days</div>
+  <head>
+    <meta charset="UTF-8" />
+    <title>PillSync - History</title>
+    <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="history.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">💊 PillSync</div>
+        <div class="profile-card">
+          <div class="profile-avatar">I</div>
+          <div class="profile-name">Isha Sharma</div>
+          <div class="profile-email">isha@gmail.com</div>
+          <span class="role-badge">Patient</span>
         </div>
-      </header>
+        <nav class="nav">
+          <a href="dashboard.html" class="nav-item">Dashboard</a>
+          <a href="my-medicines.html" class="nav-item">My Medicines</a>
+          <a href="add-medicine.html" class="nav-item">Add Medicine</a>
+          <a href="dashboard.html" class="nav-item">Dashboard</a>
+        </nav>
+        <a href="login.html" class="logout">Log out</a>
+      </aside>
 
-      <!-- SUMMARY STATS -->
-      <section class="summary-row" id="summaryRow"></section>
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <div class="greeting">Medication history</div>
+            <div class="subgreeting">Your adherence over the past days</div>
+          </div>
+        </header>
 
-      <!-- HISTORY LOG -->
-      <section class="history-section">
-        <h2 class="section-title">Daily log</h2>
-        <div class="history-list" id="historyList"></div>
-      </section>
+        <!-- SUMMARY STATS -->
+        <section class="summary-row" id="summaryRow"></section>
 
-    </main>
-  </div>
+        <!-- HISTORY LOG -->
+        <section class="history-section">
+          <h2 class="section-title">Daily log</h2>
+          <div class="history-list" id="historyList"></div>
+        </section>
+      </main>
+    </div>
 
-  <script src="history.js"></script>
-</body>
+    <script src="history.js"></script>
+  </body>
 </html>
