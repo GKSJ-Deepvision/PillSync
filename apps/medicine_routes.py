@@ -14,12 +14,18 @@ def add_medicine(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # Automatically assign the logged-in user's ID to the medicine
-    new_medicine = Medicine(**medicine.model_dump(), user_id=current_user.id)
+    data = medicine.model_dump()
+    times_list = data.pop("times", [])
+    times_str = ",".join(times_list) if times_list else None
+    
+    new_medicine = Medicine(**data, times=times_str, user_id=current_user.id)
     db.add(new_medicine)
     db.commit()
     db.refresh(new_medicine)
-    return new_medicine
+    
+    out_dict = new_medicine.__dict__.copy()
+    out_dict["times"] = out_dict["times"].split(",") if out_dict.get("times") else []
+    return out_dict
 
 @router.get("/", response_model=List[MedicineOut])
 def get_my_medicines(
@@ -27,4 +33,9 @@ def get_my_medicines(
     current_user: User = Depends(get_current_user)
 ):
     medicines = db.query(Medicine).filter(Medicine.user_id == current_user.id).all()
-    return medicines
+    results = []
+    for m in medicines:
+        out_dict = m.__dict__.copy()
+        out_dict["times"] = out_dict["times"].split(",") if out_dict.get("times") else []
+        results.append(out_dict)
+    return results

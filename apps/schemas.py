@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from typing import Optional, List
 from enum import Enum
 from datetime import datetime
@@ -14,6 +14,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     role: Optional[UserRole] = UserRole.PATIENT
+    caregiver_id: Optional[int] = None
 
 # Response schema for returning user details (excludes password)
 class UserOut(BaseModel):
@@ -21,9 +22,9 @@ class UserOut(BaseModel):
     full_name: str
     email: EmailStr
     role: UserRole
+    caregiver_id: Optional[int] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Response schema for JWT token
 class Token(BaseModel):
@@ -36,14 +37,14 @@ class MedicineCreate(BaseModel):
     disease: Optional[str] = None
     total_quantity: int
     daily_frequency: int
+    times: Optional[List[str]] = []
 
 class MedicineOut(MedicineCreate):
     id: int
     user_id: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class AdherenceStatus(str, Enum):
     TAKEN = "TAKEN"
@@ -60,8 +61,7 @@ class AdherenceLogOut(BaseModel):
     status: str
     timestamp: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class AdherenceReportOut(BaseModel):
     total_medicines: int
@@ -70,5 +70,4 @@ class AdherenceReportOut(BaseModel):
     doses_missed: int
     adherence_percentage: float
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

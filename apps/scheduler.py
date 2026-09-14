@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, time
+from datetime import datetime, time, timezone
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.orm import Session
 
@@ -21,7 +21,7 @@ def check_due_medicines():
     db: Session = SessionLocal()
     try:
         # Calculate the start of today in UTC
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         today_start = datetime.combine(now.date(), time.min)
 
         # Query all active prescriptions / medicines

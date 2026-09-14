@@ -27,7 +27,7 @@ document.getElementById("medFrequency").addEventListener("change", function () {
   }
 });
 
-document.getElementById("medForm").addEventListener("submit", function (e) {
+document.getElementById("medForm").addEventListener("submit", async function (e) {
   e.preventDefault();
 
   const name = document.getElementById("medName").value.trim();
@@ -43,21 +43,62 @@ document.getElementById("medForm").addEventListener("submit", function (e) {
   }
 
   const times = Array.from(document.querySelectorAll(".dose-time")).map(input => input.value);
+  
+  // Basic inference of dosage from name if possible (e.g. "Metformin 500mg" -> "500mg")
+  // Or just "1 tablet" default.
+  let dosage = "1 tablet";
+  if (name.includes("mg") || name.includes("mcg")) {
+     dosage = name.split(" ").slice(1).join(" ") || dosage;
+  }
 
-  const newMedicine = {
+  const payload = {
     name: name,
-    category: category,
-    freq: freqLabels[frequency],
-    stock: parseInt(stock),
-    color: categoryColors[category] || "#8A8578",
-    times: times,
-    startDate: startDate
+    dosage: dosage,
+    disease: category,
+    total_quantity: parseInt(stock),
+    daily_frequency: parseInt(frequency),
+    times: times
   };
 
-  // Save to browser storage so it shows up on the dashboard
-  const existing = JSON.parse(localStorage.getItem("pillsync_medicines") || "[]");
-  existing.push(newMedicine);
-  localStorage.setItem("pillsync_medicines", JSON.stringify(existing));
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+    alert("You are not logged in!");
+    window.location.href = "login.html";
+    return;
+  }
 
-  window.location.href = "dashboard.html";
+  try {
+    const response = await fetch("http://localhost:8000/medicines/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      errorMsg.textContent = errorData.detail || "Failed to add medicine.";
+      return;
+    }
+
+    // Temporarily save to localStorage as well for any UI components that haven't been updated to use API
+    const existing = JSON.parse(localStorage.getItem("pillsync_medicines") || "[]");
+    existing.push({
+      name: name,
+      category: category,
+      freq: freqLabels[frequency],
+      stock: parseInt(stock),
+      color: categoryColors[category] || "#8A8578",
+      times: times,
+      startDate: startDate
+    });
+    localStorage.setItem("pillsync_medicines", JSON.stringify(existing));
+
+    window.location.href = "dashboard.html";
+  } catch (error) {
+    console.error("Error adding medicine:", error);
+    errorMsg.textContent = "An error occurred while connecting to the server.";
+  }
 });

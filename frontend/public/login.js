@@ -23,7 +23,7 @@ function showView(viewId) {
   document.getElementById(viewId).style.display = "block";
 }
 
-function handleLogin() {
+async function handleLogin() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   const errorMsg = document.getElementById("errorMsg");
@@ -34,18 +34,45 @@ function handleLogin() {
   }
 
   errorMsg.textContent = "";
-  console.log("Attempting login with:", email, password, "as role:", selectedRole);
+  console.log("Attempting login with:", email, "as role:", selectedRole);
 
-  if (selectedRole === "caregiver") {
-    window.location.href = "caregiver-dashboard.html";
-  } else if (selectedRole === "admin") {
-    window.location.href = "admin-dashboard.html";
-  } else {
-    window.location.href = "dashboard.html";
+  try {
+    const formData = new URLSearchParams();
+    formData.append("username", email);
+    formData.append("password", password);
+
+    const response = await fetch("http://localhost:8000/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      errorMsg.textContent = errorData.detail || "Login failed.";
+      return;
+    }
+
+    const data = await response.json();
+    localStorage.setItem("access_token", data.access_token);
+    
+    // The role should ideally come from the backend, but we'll use the selected one for redirect for now.
+    if (selectedRole === "caregiver") {
+      window.location.href = "caregiver-dashboard.html";
+    } else if (selectedRole === "admin") {
+      window.location.href = "admin-dashboard.html";
+    } else {
+      window.location.href = "dashboard.html";
+    }
+  } catch (error) {
+    console.error("Error during login:", error);
+    errorMsg.textContent = "An error occurred during login.";
   }
 }
 
-function handleSignup() {
+async function handleSignup() {
   const name = document.getElementById("signupName").value;
   const email = document.getElementById("signupEmail").value;
   const password = document.getElementById("signupPassword").value;
@@ -66,9 +93,36 @@ function handleSignup() {
       errorMsg.textContent = "Please enter the patient's email to link.";
       return;
     }
+    // We would link patientEmail here based on further API design, for now we just proceed with role
   }
   errorMsg.textContent = "";
-  console.log("Signing up:", name, email, password, "as role:", selectedSignupRole);
+  
+  try {
+    const response = await fetch("http://localhost:8000/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        full_name: name,
+        email: email,
+        password: password,
+        role: selectedSignupRole
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      errorMsg.textContent = errorData.detail || "Registration failed.";
+      return;
+    }
+
+    alert("Registration successful! You can now log in.");
+    showView("loginView");
+  } catch (error) {
+    console.error("Error during registration:", error);
+    errorMsg.textContent = "An error occurred during registration.";
+  }
 }
 
 function handleForgotPassword() {

@@ -17,7 +17,9 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     role = Column(Enum(UserRole), default=UserRole.PATIENT)
+    caregiver_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     
+    caregiver = relationship("User", remote_side=[id], backref="patients")
     medicines = relationship("Medicine", back_populates="owner")
 
 class Medicine(Base):
@@ -30,6 +32,7 @@ class Medicine(Base):
     disease = Column(String, nullable=True)            # e.g., "Diabetes"
     total_quantity = Column(Integer, nullable=False)   # e.g., 60 tablets
     daily_frequency = Column(Integer, nullable=False) # e.g., 2 times a day
+    times = Column(String, nullable=True)             # e.g., "08:00,13:00"
     created_at = Column(DateTime, default=datetime.utcnow)
 
     owner = relationship("User", back_populates="medicines")

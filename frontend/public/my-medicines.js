@@ -1,17 +1,57 @@
-const defaultMedicines = [
-  { id: "med1", name: "Metformin 500mg", category: "Diabetes", freq: "2 times/day", stock: 12, color: "#7FA98E", times: ["08:00", "20:00"] },
-  { id: "med2", name: "Amlodipine 5mg", category: "Blood Pressure", freq: "1 time/day", stock: 4, color: "#D97B5B", times: ["13:00"] },
-  { id: "med3", name: "Vitamin D3", category: "Vitamins", freq: "1 time/day", stock: 20, color: "#C9A96E", times: ["21:00"] }
-];
-
-// Give any saved medicines an id too, if they don't already have one
-let savedMedicines = JSON.parse(localStorage.getItem("pillsync_medicines") || "[]");
-savedMedicines = savedMedicines.map((m, i) => ({ id: m.id || "saved" + i, ...m }));
-
-let allMedicines = [...defaultMedicines, ...savedMedicines];
-
+let allMedicines = [];
 let activeCategory = "All";
 let searchTerm = "";
+
+const categoryColors = {
+  "Blood Pressure": "#D97B5B",
+  "Diabetes": "#7FA98E",
+  "Thyroid": "#C9A96E",
+  "Antibiotics": "#8E7CC3",
+  "Vitamins": "#C9A96E",
+  "Heart Medications": "#D97B5B",
+  "Other": "#8A8578"
+};
+
+async function fetchMedicines() {
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+    alert("You are not logged in!");
+    window.location.href = "login.html";
+    return;
+  }
+
+  try {
+    const response = await fetch("http://localhost:8000/medicines/", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      console.error("Failed to fetch medicines");
+      return;
+    }
+
+    const data = await response.json();
+    
+    // Map API data format to the format expected by the UI
+    allMedicines = data.map(med => ({
+      id: med.id,
+      name: med.name,
+      category: med.disease || "Other",
+      freq: `${med.daily_frequency} time(s)/day`,
+      stock: med.total_quantity,
+      color: categoryColors[med.disease] || "#8A8578",
+      times: med.times || []
+    }));
+
+    renderFilterChips();
+    renderList();
+  } catch (error) {
+    console.error("Error fetching medicines:", error);
+  }
+}
 
 function renderFilterChips() {
   const categories = ["All", ...new Set(allMedicines.map(m => m.category))];
@@ -34,11 +74,9 @@ function renderFilterChips() {
 function deleteMedicine(id) {
   if (!confirm("Remove this medicine from your list?")) return;
 
+  // We should ideally call a DELETE API endpoint here, 
+  // but since it's not present in Aryan's routes, we just hide it locally for now.
   allMedicines = allMedicines.filter(m => m.id !== id);
-
-  // Update localStorage (only the saved/custom ones, defaults stay hardcoded)
-  const updatedSaved = allMedicines.filter(m => m.id.startsWith("saved") || !m.id.startsWith("med"));
-  localStorage.setItem("pillsync_medicines", JSON.stringify(updatedSaved));
 
   renderFilterChips();
   renderList();
@@ -65,7 +103,7 @@ function renderList() {
     const stockLow = med.stock <= 5;
     const stockClass = stockLow ? "stock-low" : "stock-ok";
     const stockText = stockLow ? `Only ${med.stock} left` : `${med.stock} in stock`;
-    const timesText = med.times ? med.times.join(", ") : "";
+    const timesText = med.times && med.times.length > 0 ? med.times.join(", ") : "";
 
     const card = document.createElement("div");
     card.className = "full-med-card";
@@ -91,5 +129,5 @@ document.getElementById("searchBar").addEventListener("input", function () {
   renderList();
 });
 
-renderFilterChips();
-renderList();
+// Fetch when the page loads
+fetchMedicines();
