@@ -1,0 +1,103 @@
+* { box-sizing: border-box; }
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('pillsync.jpg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+.login-box {
+  background: white;
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  width: 320px;
+  text-align: center;
+}
+.logo {
+  font-size: 28px;
+  font-weight: bold;
+  color: #3D5A4C;
+  margin-bottom: 5px;
+}
+.subtitle {
+  color: #888;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+.role-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.role-tab {
+  flex: 1;
+  padding: 8px 5px;
+  font-size: 12px;
+  border: 1px solid #3D5A4C;
+  background: white;
+  color: #3D5A4C;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.role-tab.active {
+  background: #3D5A4C;
+  color: white;
+}
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+input:focus {
+  outline: none;
+  border-color: #3D5A4C;
+}
+.options-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  margin: 10px 0;
+}
+.options-row a {
+  color: #3D5A4C;
+  text-decoration: none;
+}
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: #3D5A4C;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  margin-top: 10px;
+}
+button:hover {
+  background-color: #3D5A4C;
+}
+#errorMsg {
+  color: #e63946;
+  font-size: 13px;
+  min-height: 18px;
+}
+.signup-link {
+  margin-top: 15px;
+  font-size: 13px;
+  color: #555;
+}
+.signup-link a {
+  color: #3D5A4C;
+  font-weight: bold;
+  text-decoration: none;
+}

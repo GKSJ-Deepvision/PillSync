@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PillSync - Add Medicine</title>
+<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="add-medicine.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="brand">💊 PillSync</div>
+      <div class="profile-card">
+        <div class="profile-avatar">I</div>
+        <div class="profile-name">Isha Sharma</div>
+        <div class="profile-email">isha@gmail.com</div>
+        <span class="role-badge">Patient</span>
+      </div>
+      <nav class="nav">
+        <a href="dashboard.html" class="nav-item">Dashboard</a>
+        <a href="my-medicines.html" class="nav-item">My Medicines</a>
+        <a href="#" class="nav-item active">Add Medicine</a>
+        <a href="history.html" class="nav-item">History</a>
+      </nav>
+      <a href="login.html" class="logout">Log out</a>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="greeting">Add a medicine</div>
+          <div class="subgreeting">Fill in the details below to start tracking it</div>
+        </div>
+      </header>
+
+      <form class="med-form" id="medForm">
+
+        <label>Medicine name</label>
+        <input type="text" id="medName" list="medSuggestions" placeholder="e.g. Metformin 500mg" autocomplete="off">
+        <datalist id="medSuggestions">
+          <option value="Metformin 500mg">
+          <option value="Amlodipine 5mg">
+          <option value="Amoxycillin 500mg">
+          <option value="Atorvastatin 10mg">
+          <option value="Levothyroxine 50mcg">
+          <option value="Paracetamol 650mg">
+          <option value="Azithromycin 500mg">
+          <option value="Losartan 50mg">
+        </datalist>
+
+        <label>Category</label>
+        <select id="medCategory">
+          <option value="Blood Pressure">Blood Pressure</option>
+          <option value="Diabetes">Diabetes</option>
+          <option value="Thyroid">Thyroid</option>
+          <option value="Antibiotics">Antibiotics</option>
+          <option value="Vitamins">Vitamins</option>
+          <option value="Heart Medications">Heart Medications</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <div class="form-row">
+          <div>
+            <label>Frequency</label>
+            <select id="medFrequency">
+              <option value="1">Once a day</option>
+              <option value="2">Twice a day</option>
+              <option value="3">3 times a day</option>
+            </select>
+          </div>
+          <div>
+            <label>Current stock (tablets)</label>
+            <input type="number" id="medStock" placeholder="e.g. 30" min="1">
+          </div>
+        </div>
+
+        <label>Reminder times</label>
+        <div class="time-inputs" id="timeInputs">
+          <input type="time" class="dose-time" value="08:00">
+        </div>
+
+        <label>Start date</label>
+        <input type="date" id="medStartDate">
+
+        <p class="form-error" id="formError"></p>
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" onclick="window.location.href='dashboard.html'">Cancel</button>
+          <button type="submit" class="btn-primary">Save medicine</button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="add-medicine.js"></script>
+</body>
+</html>
