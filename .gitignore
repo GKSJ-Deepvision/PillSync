@@ -17,6 +17,7 @@ dist/
 .coverage
 .coverage.*
 coverage.xml
+pytest-report.xml
 htmlcov/
 *.sqlite3
 *.db
