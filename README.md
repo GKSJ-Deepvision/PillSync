@@ -117,6 +117,120 @@ docker compose up --build
 
 ---
 
+## AI Refill Prediction Engine (Module 6)
+
+Implemented: a Python/FastAPI service (`backend/apps/refills`) backed by a
+trained ML model (`ml/src/refill_prediction`) that predicts, per medicine,
+how many days of stock a patient has left — adjusted for the patient's
+*actual* adherence pattern, not just the prescribed dose. Shown on both the
+**patient** dashboard/Refills page and the **caregiver** dashboard
+(aggregated across every linked patient, most urgent first).
+
+```bash
+# 1. Train the model (writes ml/models/refill_predictor.joblib)
+pip install -r ml/requirements.txt
+python -m ml.src.refill_prediction.train
+
+# 2. Run the API
+cd backend
+pip install -r requirements/dev.txt
+python -m uvicorn config.main:app --reload --port 8000
+
+# 3. Point the frontend at it (already the default)
+# frontend/.env -> VITE_API_BASE_URL=http://localhost:8000/api
+```
+
+The frontend falls back to a local rule-based estimate if this service
+isn't running, so the dashboards never go blank — they just say so. See
+`ml/README.md` and `backend/apps/refills/README.md` for how the model is
+trained/selected and how the API is shaped.
+
+---
+
+## Running Milestone 1 locally
+
+This branch's Milestone 1 (auth, database, RBAC, profiles) is built on
+**Supabase** — see [`docs/milestones/milestone-1.md`](docs/milestones/milestone-1.md)
+and [`docs/database/README.md`](docs/database/README.md) for why. It needs a
+free Supabase project plus the frontend; the Django backend under
+`backend/` is not required to see Milestone 1 working.
+
+### 1. Create the Supabase project and database
+
+1. Go to [supabase.com](https://supabase.com) → **New project** (the free
+   tier is enough). Note the **Project URL** and the **`anon` public key**
+   from **Project Settings → API** once it's provisioned.
+2. Open **SQL Editor → New query**, paste the entire contents of
+   [`docs/database/schema.sql`](docs/database/schema.sql), and run it. This
+   creates the `profiles` and `caregiver_links` tables, the auto-provisioning
+   trigger, and all Row Level Security policies.
+3. Then run [`docs/database/schema_m2_m3.sql`](docs/database/schema_m2_m3.sql)
+   the same way — it adds `medications`, `medication_schedules` and
+   `dose_logs` (Medicine Management, Scheduling, Reminders, Dose Tracking,
+   History, Refill Alerts and the Adherence Dashboard all depend on this).
+3. *(Optional, recommended for local testing)* In **Authentication →
+   Providers → Email**, turn off "Confirm email" so newly registered test
+   accounts can sign in immediately without clicking an email link.
+4. *(Optional)* In **Authentication → Providers → Google**, enable Google
+   sign-in and add your OAuth client ID/secret if you want to test the
+   "Continue with Google" button — it's safe to leave disabled otherwise.
+
+### 2. Run the frontend
+
+```bash
+cd frontend
+cp .env.example .env
+```
+
+Edit `frontend/.env` and set:
+
+```bash
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-public-key
+```
+
+Then:
+
+```bash
+npm install
+npm run dev
+```
+
+Open the URL Vite prints (defaults to **http://localhost:5173**).
+
+### 3. Try it out
+
+1. Go to `/register`, choose **Patient**, fill in the form, and submit.
+   (If you disabled email confirmation in step 1.3, you're signed in
+   immediately; otherwise, confirm via the email Supabase sends, then sign
+   in at `/login`.)
+2. You'll land on the **patient dashboard** with the Dose Ring widget.
+   Visit `/profile` to fill in conditions, blood group and an emergency
+   contact, save, then refresh to confirm it persisted.
+3. Register a second account as **Caregiver** to see the caregiver
+   dashboard body (empty until an admin links a patient).
+4. To provision the **Admin** account, first create or reset the account in
+   Supabase **Authentication → Users** using the admin email and password you
+   choose. Then run [`docs/database/provision-admin.sql`](docs/database/provision-admin.sql)
+   in **SQL Editor**. Sign in at `/login`; the existing profile role lookup
+   will open the Admin dashboard automatically. Never put the admin password
+   in frontend source code or `.env` variables exposed to Vite.
+
+### 4. Verify the checks CI will run
+
+```bash
+cd frontend
+npm run lint          # ESLint
+npm run format:check  # Prettier
+npm test              # Vitest — 3 tests
+npm run build         # Production build
+```
+
+All four should pass with no setup beyond `npm install` (they don't need a
+live Supabase connection).
+
+---
+
 ## Automated checks
 
 Every push to any branch runs [`CI`](.github/workflows/ci.yml):

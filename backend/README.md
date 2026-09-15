@@ -4,7 +4,7 @@ Python API for the PillSync platform.
 
 **Stack (from the project spec):** Python + Django REST Framework (FastAPI is the
 approved alternative), PostgreSQL in production / SQLite for local development,
-Tesseract OCR + spaCy + OpenAI API, JWT + OAuth2, Pytest + Django Test Client.
+Tesseract OCR with trained medicine recognizers, JWT + OAuth2, Pytest + Django Test Client.
 
 ## Layout
 
@@ -44,3 +44,18 @@ Run all four locally before you push. `black .` and `isort .` fix formatting for
 
 If you choose FastAPI instead of Django, keep the same folder layout, expose the app
 as `config/main.py:app`, and keep `pytest` as the test runner — CI works either way.
+
+## OCR deployment
+
+The backend runs Tesseract locally and does not send prescription images to Groq.
+Docker installs the Tesseract system binary automatically.
+
+From the repository root:
+
+```bash
+docker compose up --build backend frontend
+```
+
+The OCR endpoint is available at `POST /api/v1/ocr/extract`. For Windows, install
+Tesseract separately if it is not already available, or set `TESSERACT_CMD` in
+`backend/.env`.

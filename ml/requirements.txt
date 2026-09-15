@@ -1,0 +1,9 @@
+# Dependencies for training / evaluating the refill-prediction model.
+# The backend service only needs scikit-learn + joblib at inference time
+# (see backend/requirements/base.txt); pandas/numpy are needed here for the
+# synthetic-data generator and training script.
+scikit-learn==1.5.*
+pandas==2.2.*
+numpy==1.26.*
+joblib==1.4.*
+Pillow==11.*

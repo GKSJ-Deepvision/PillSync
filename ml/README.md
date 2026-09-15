@@ -18,3 +18,25 @@ approach works before wiring it in.
 
 **Never commit real prescriptions, or any image containing a real person's medical
 data or identity.** Use synthetic or public-domain samples only.
+
+## Refill prediction (`src/refill_prediction/`)
+
+Predicts, per medicine, how many days of stock a patient has left — and does
+it by learning the patient's *actual* adherence pattern rather than just
+assuming every dose gets taken as prescribed.
+
+| File | Purpose |
+|---|---|
+| `features.py` | Turns `medications` + `medication_schedules` + `dose_logs` rows into the model's feature vector. Shared by training and serving so they never drift apart. |
+| `synthetic_data.py` | Simulates a realistic population of adherence patterns (see its docstring) to train on until real `dose_logs` history has accumulated in production. |
+| `train.py` | Benchmarks Linear Regression / Random Forest / Gradient Boosting by cross-validated MAE, keeps the winner, writes `models/refill_predictor.joblib` + `models/refill_predictor_metadata.json`. |
+| `model.py` | `RefillPredictor` — the inference-time class the FastAPI service imports. Combines the ML adherence estimate with exact dosing-schedule arithmetic; falls back to "assume prescribed dose" if no model artifact exists yet. |
+
+Retrain with:
+
+```bash
+pip install -r ml/requirements.txt
+python -m ml.src.refill_prediction.train
+```
+
+Run its tests with `pytest ml/tests`.

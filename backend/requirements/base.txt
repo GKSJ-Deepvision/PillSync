@@ -1,12 +1,18 @@
 # Runtime dependencies for the PillSync backend.
 # Pin a version when you add a package so every branch installs the same thing.
 #
-# Web framework (pick Django REST Framework or FastAPI, not both)
-# django==5.0.*
-# djangorestframework==3.15.*
-# django-cors-headers==4.*
-# fastapi==0.115.*
-# uvicorn[standard]==0.32.*
+# Web framework — FastAPI (this backend's chosen stack; DRF was the spec's
+# alternative but FastAPI needed nothing beyond what Module 6 requires).
+fastapi==0.115.*
+uvicorn[standard]==0.32.*
+pydantic==2.*
+python-dotenv==1.*
+
+# Module 6 — AI Refill Prediction Engine (backend/apps/refills)
+scikit-learn==1.5.*
+joblib==1.4.*
+# pandas/numpy are only needed for training (see ml/requirements.txt), not
+# for serving predictions with an already-trained model.
 #
 # Auth
 # djangorestframework-simplejwt==5.*
@@ -21,8 +27,9 @@
 # django-celery-beat==2.*
 #
 # OCR and NLP
-# pytesseract==0.3.*
-# Pillow==11.*
+pytesseract==0.3.*
+Pillow==11.*
+python-multipart==0.0.*
 # opencv-python-headless==4.*
 # spacy==3.*
 # openai==1.*
@@ -31,7 +38,4 @@
 # firebase-admin==6.*
 # twilio==9.*
 # sendgrid==6.*
-#
-# Utilities
-# python-dotenv==1.*
-# pydantic==2.*
+

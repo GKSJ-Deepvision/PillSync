@@ -78,9 +78,10 @@ To verify by hand: open `/register`, create a Patient account, confirm the
 email if your Supabase project requires it, sign in, land on the patient
 dashboard with the Dose Ring, fill in `/profile`, sign out, sign back in and
 confirm the data persisted. Create a second account as Caregiver to see the
-different dashboard body. To see the Admin view, open Supabase's Table
-Editor, open `profiles`, and change that user's `role` to `admin` by hand
-(there is no self-serve admin signup, by design).
+different dashboard body. To provision the Admin view, create or reset the
+admin account in Supabase Authentication, then run
+`docs/database/provision-admin.sql` in the SQL Editor. There is no self-serve
+admin signup, by design.
 
 ## Tests
 

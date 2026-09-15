@@ -28,11 +28,13 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
     env_file:
       - ./backend/.env
     volumes:
       - ./backend:/app
+      - ./ml:/app/ml
     ports:
       - "8000:8000"
     depends_on:
@@ -43,24 +45,28 @@ services:
 
   worker:
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
     command: celery -A config worker -l info
     env_file:
       - ./backend/.env
     volumes:
       - ./backend:/app
+      - ./ml:/app/ml
     depends_on:
       - backend
       - redis
 
   beat:
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
     command: celery -A config beat -l info
     env_file:
       - ./backend/.env
     volumes:
       - ./backend:/app
+      - ./ml:/app/ml
     depends_on:
       - backend
       - redis

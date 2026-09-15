@@ -1,0 +1,13 @@
+project_id = "tsmpeiazzersgqwyjntw"
+
+# By default Supabase's Edge Function *gateway* requires a valid JWT on
+# every request, including the browser's automatic CORS preflight
+# (OPTIONS) call — which never carries an Authorization header. That
+# preflight then gets rejected before diet-ai/index.ts ever runs, and the
+# browser reports it as a CORS failure even though the function's own
+# corsHeaders are correct.
+#
+# diet-ai already verifies the caller's JWT itself (supabaseClient.auth.getUser())
+# so it's safe to let the gateway skip its own check here.
+[functions.diet-ai]
+verify_jwt = false

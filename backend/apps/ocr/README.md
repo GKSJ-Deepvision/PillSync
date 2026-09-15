@@ -2,7 +2,7 @@
 
 **Implement here**
 - Medicine image and prescription upload endpoints (with file type/size validation)
-- Tesseract OCR pipeline + spaCy / OpenAI post-processing
+- Tesseract OCR pipeline with trained medicine recognition
 - Extraction of: medicine name, dosage, quantity, frequency, prescription details
 - Confidence scoring and a manual-correction path when extraction is uncertain
 - Manual entry fallback

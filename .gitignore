@@ -63,6 +63,8 @@ ml/models/*
 *.onnx
 *.pkl
 *.joblib
+!ml/models/handwritten_medicine_classifier.joblib
+!ml/models/printed_medicine_classifier.joblib
 .ipynb_checkpoints/
 
 # ---- Editors and OS ----

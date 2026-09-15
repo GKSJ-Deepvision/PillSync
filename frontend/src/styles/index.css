@@ -2,19 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Default theme (Dose Indigo). Overwritten at runtime by ThemeContext,
+     these values are just the first-paint fallback before JS runs. */
+  --brand: #5b5fef;
+  --brand-soft: #e7e7fd;
+  --brand-deep: #4144c4;
+  --accent: #ff5d73;
+  --accent-soft: #ffe3e7;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
   }
   body {
-    background-color: #f6f8fc;
+    background-color: #F6F8FC;
   }
   ::selection {
-    background-color: #ffe3e7;
-    color: #101a2e;
+    background-color: #FFE3E7;
+    color: #101A2E;
   }
   *:focus-visible {
-    outline: 2px solid #5b5fef;
+    outline: 2px solid #5B5FEF;
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -39,12 +49,73 @@
   .badge {
     @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[11px] font-medium uppercase tracking-wider;
   }
+  .btn-brand {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-body text-sm font-semibold text-white transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    background-color: var(--brand);
+  }
+  .btn-brand:hover {
+    background-color: var(--brand-deep);
+  }
+  .chip {
+    @apply rounded-full border border-ink/10 px-3 py-1 font-body text-[12px] font-medium text-ink-fog transition-colors;
+  }
+  .chip-active {
+    color: var(--brand-deep);
+    background-color: var(--brand-soft);
+    border-color: transparent;
+  }
+}
+
+.message-row {
+  border: 1px solid rgba(16, 26, 46, 0.08);
+  background: #fbfcff;
+  transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+}
+
+.message-row:hover,
+.message-row-open {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.message-row-open {
+  animation: message-open 240ms ease-out;
+}
+
+.message-preview {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.message-preview-open {
+  display: block;
+  -webkit-line-clamp: unset;
+  animation: message-reveal 220ms ease-out;
+}
+
+.message-attachment {
+  animation: message-reveal 220ms ease-out;
+}
+
+@keyframes message-open {
+  from { transform: translateY(4px); opacity: 0.7; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes message-reveal {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Safe-area padding for the fixed mobile bottom nav on notch devices */
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;

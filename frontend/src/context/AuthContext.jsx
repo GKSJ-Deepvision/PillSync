@@ -20,7 +20,11 @@ export function AuthProvider({ children }) {
       setProfile(null);
       return;
     }
-    const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).single();
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
 
     if (error) {
       // eslint-disable-next-line no-console
@@ -125,19 +129,7 @@ export function AuthProvider({ children }) {
       updateProfile,
       refreshProfile: () => loadProfile(session?.user?.id),
     }),
-    [
-      session,
-      profile,
-      loading,
-      signUp,
-      signIn,
-      signInWithOAuth,
-      signOut,
-      sendPasswordReset,
-      updatePassword,
-      updateProfile,
-      loadProfile,
-    ]
+    [session, profile, loading, signUp, signIn, signInWithOAuth, signOut, sendPasswordReset, updatePassword, updateProfile, loadProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

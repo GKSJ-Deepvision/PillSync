@@ -7,6 +7,14 @@ import RegisterPage from "../features/auth/RegisterPage";
 import ForgotPasswordPage from "../features/auth/ForgotPasswordPage";
 import ResetPasswordPage from "../features/auth/ResetPasswordPage";
 import ProfilePage from "../features/profile/ProfilePage";
+import MedicationsPage from "../features/medications/MedicationsPage";
+import HistoryPage from "../features/reminders/HistoryPage";
+import RefillsPage from "../features/refills/RefillsPage";
+import AdherenceDashboard from "../features/adherence/AdherenceDashboard";
+import DietPlannerPage from "../features/fitness/pages/DietPlannerPage";
+import ProgressStreakPage from "../features/fitness/pages/ProgressStreakPage";
+import PrescriptionUploadPage from "../features/prescriptions/PrescriptionUploadPage";
+import OCRPage from "../features/ocr/OCRPage";
 
 import PatientDashboard from "../pages/PatientDashboard";
 import CaregiverDashboard from "../pages/CaregiverDashboard";
@@ -40,6 +48,74 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute>
             <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/medications"
+        element={
+          <ProtectedRoute allowedRoles={["patient"]}>
+            <MedicationsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/prescriptions"
+        element={
+          <ProtectedRoute allowedRoles={["patient"]}>
+            <PrescriptionUploadPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ocr"
+        element={
+          <ProtectedRoute allowedRoles={["patient"]}>
+            <OCRPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/history"
+        element={
+          <ProtectedRoute allowedRoles={["patient"]}>
+            <HistoryPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/refills"
+        element={
+          <ProtectedRoute allowedRoles={["patient"]}>
+            <RefillsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/adherence"
+        element={
+          <ProtectedRoute allowedRoles={["patient"]}>
+            <AdherenceDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/diet-planner"
+        element={
+          <ProtectedRoute allowedRoles={["patient"]}>
+            <DietPlannerPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/exercises"
+        element={<Navigate to="/diet-planner" replace />}
+      />
+      <Route
+        path="/progress"
+        element={
+          <ProtectedRoute allowedRoles={["patient"]}>
+            <ProgressStreakPage />
           </ProtectedRoute>
         }
       />
