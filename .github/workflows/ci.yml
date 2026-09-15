@@ -205,6 +205,15 @@ jobs:
           # Guarantee the tools CI needs, even if the branch has not listed them.
           pip install ruff black isort pytest pytest-cov
 
+      - name: Apply database migrations
+        shell: bash
+        run: |
+          if [ -f alembic.ini ]; then
+            alembic upgrade head
+          else
+            echo "No alembic.ini yet - skipping migrations."
+          fi
+
       - name: Ruff (lint)
         run: ruff check . --output-format=github
 
