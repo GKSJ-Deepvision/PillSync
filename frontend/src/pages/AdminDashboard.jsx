@@ -3,7 +3,10 @@ import DashboardLayout from "../components/layout/DashboardLayout";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
 import { timeOfDayGreeting } from "../utils/greeting";
-import { DUMMY_ADHERENCE_LEADERBOARD, DUMMY_RECENT_ACTIVITY } from "../features/admin/mockAdminData";
+import {
+  DUMMY_ADHERENCE_LEADERBOARD,
+  DUMMY_RECENT_ACTIVITY,
+} from "../features/admin/mockAdminData";
 
 export default function AdminDashboard() {
   const { profile } = useAuth();
@@ -31,16 +34,16 @@ export default function AdminDashboard() {
       });
       setCounts(next);
       setRecent(
-        [...data]
-          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-          .slice(0, 5)
+        [...data].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5)
       );
       setCaregivers(data.filter((p) => p.role === "caregiver"));
       setPatients(data.filter((p) => p.role === "patient"));
 
       const { data: linkData } = await supabase
         .from("caregiver_links")
-        .select("id, status, caregiver:caregiver_id(id, full_name), patient:patient_id(id, full_name)")
+        .select(
+          "id, status, caregiver:caregiver_id(id, full_name), patient:patient_id(id, full_name)"
+        )
         .order("created_at", { ascending: false });
       setLinks(linkData || []);
     }
@@ -88,7 +91,9 @@ export default function AdminDashboard() {
     setAssignmentMessage("Patient assigned successfully.");
     const { data } = await supabase
       .from("caregiver_links")
-      .select("id, status, caregiver:caregiver_id(id, full_name), patient:patient_id(id, full_name)")
+      .select(
+        "id, status, caregiver:caregiver_id(id, full_name), patient:patient_id(id, full_name)"
+      )
       .order("created_at", { ascending: false });
     setLinks(data || []);
   };
@@ -128,8 +133,12 @@ export default function AdminDashboard() {
           <ul className="mt-4 divide-y divide-ink/5">
             {recent.map((p) => (
               <li key={p.id} className="flex items-center justify-between py-3">
-                <span className="font-body text-sm font-medium text-ink">{p.full_name || "Unnamed"}</span>
-                <span className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">{p.role}</span>
+                <span className="font-body text-sm font-medium text-ink">
+                  {p.full_name || "Unnamed"}
+                </span>
+                <span className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">
+                  {p.role}
+                </span>
               </li>
             ))}
           </ul>
@@ -141,7 +150,10 @@ export default function AdminDashboard() {
         <p className="mt-1 font-body text-[13px] text-ink-fog">
           Assigned caregivers can view only their accepted patients.
         </p>
-        <form onSubmit={assignPatient} className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+        <form
+          onSubmit={assignPatient}
+          className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+        >
           <label className="font-body text-sm font-medium text-ink">
             Caregiver
             <select
@@ -178,16 +190,23 @@ export default function AdminDashboard() {
             {assignmentBusy ? "Assigning..." : "Assign patient"}
           </button>
         </form>
-        {assignmentMessage && <p className="mt-3 font-body text-sm text-ink-fog">{assignmentMessage}</p>}
+        {assignmentMessage && (
+          <p className="mt-3 font-body text-sm text-ink-fog">{assignmentMessage}</p>
+        )}
 
         {links.length > 0 && (
           <ul className="mt-5 divide-y divide-ink/5">
             {links.map((link) => (
               <li key={link.id} className="flex items-center justify-between gap-4 py-3">
                 <span className="font-body text-sm text-ink">
-                  {link.caregiver?.full_name || "Unnamed caregiver"} → {link.patient?.full_name || "Unnamed patient"}
+                  {link.caregiver?.full_name || "Unnamed caregiver"} →{" "}
+                  {link.patient?.full_name || "Unnamed patient"}
                 </span>
-                <button type="button" onClick={() => removeAssignment(link.id)} className="font-body text-[13px] font-medium text-rose hover:text-rose-deep">
+                <button
+                  type="button"
+                  onClick={() => removeAssignment(link.id)}
+                  className="font-body text-[13px] font-medium text-rose hover:text-rose-deep"
+                >
                   Remove
                 </button>
               </li>
@@ -199,11 +218,15 @@ export default function AdminDashboard() {
       <div className="grid gap-4 sm:grid-cols-3 mt-6">
         <div className="card">
           <span className="badge bg-mint-soft text-mint-deep">Diet plans generated</span>
-          <p className="mt-3 font-display text-3xl font-semibold text-ink">{fitnessCounts.dietPlans}</p>
+          <p className="mt-3 font-display text-3xl font-semibold text-ink">
+            {fitnessCounts.dietPlans}
+          </p>
         </div>
         <div className="card">
           <span className="badge bg-indigo-soft text-indigo-deep">Exercises assigned</span>
-          <p className="mt-3 font-display text-3xl font-semibold text-ink">{fitnessCounts.assignments}</p>
+          <p className="mt-3 font-display text-3xl font-semibold text-ink">
+            {fitnessCounts.assignments}
+          </p>
         </div>
         <div className="card">
           <span className="badge bg-rose-soft text-rose-deep">Daily check-ins logged</span>
@@ -234,23 +257,27 @@ export default function AdminDashboard() {
 
       <div className="card mt-6">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-base font-semibold text-ink">Recent platform activity</h2>
+          <h2 className="font-display text-base font-semibold text-ink">
+            Recent platform activity
+          </h2>
           <span className="badge bg-porcelain-dim text-ink-fog">Demo data</span>
         </div>
         <ul className="mt-4 divide-y divide-ink/5">
           {DUMMY_RECENT_ACTIVITY.map((row, i) => (
             <li key={i} className="flex items-center justify-between py-3">
               <span className="font-body text-sm text-ink">{row.text}</span>
-              <span className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">{row.when}</span>
+              <span className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">
+                {row.when}
+              </span>
             </li>
           ))}
         </ul>
       </div>
 
       <p className="mt-6 font-body text-[13px] text-ink-fog">
-        Full activity auditing, caregiver↔patient assignment tools and platform-wide
-        analytics are scoped for later milestones — this view proves role-gated admin
-        access and read access across every profile via Row Level Security.
+        Full activity auditing, caregiver↔patient assignment tools and platform-wide analytics are
+        scoped for later milestones — this view proves role-gated admin access and read access
+        across every profile via Row Level Security.
       </p>
     </DashboardLayout>
   );

@@ -19,7 +19,14 @@ export const EXERCISE_POSES = {
     rightKnee: { values: [45, 10, 45], dur: 1.1 },
     leftShoulder: { values: [-25, 25, -25], dur: 1.1 },
     rightShoulder: { values: [25, -25, 25], dur: 1.1 },
-    bob: { values: [[0, 0], [0, -4], [0, 0]], dur: 1.1 },
+    bob: {
+      values: [
+        [0, 0],
+        [0, -4],
+        [0, 0],
+      ],
+      dur: 1.1,
+    },
   },
   jumping_jacks: {
     dur: 0.8,
@@ -27,7 +34,14 @@ export const EXERCISE_POSES = {
     rightHip: { values: [0, -25, 0], dur: 0.8 },
     leftShoulder: { values: [10, -165, 10], dur: 0.8 },
     rightShoulder: { values: [-10, 165, -10], dur: 0.8 },
-    bob: { values: [[0, 0], [0, -14], [0, 0]], dur: 0.8 },
+    bob: {
+      values: [
+        [0, 0],
+        [0, -14],
+        [0, 0],
+      ],
+      dur: 0.8,
+    },
   },
   squats: {
     dur: 1.6,
@@ -37,7 +51,14 @@ export const EXERCISE_POSES = {
     rightKnee: { values: [0, 75, 0], dur: 1.6 },
     leftShoulder: { static: -85 },
     rightShoulder: { static: 85 },
-    bob: { values: [[0, 0], [0, 22], [0, 0]], dur: 1.6 },
+    bob: {
+      values: [
+        [0, 0],
+        [0, 22],
+        [0, 0],
+      ],
+      dur: 1.6,
+    },
   },
   lunges: {
     dur: 1.6,
@@ -47,7 +68,14 @@ export const EXERCISE_POSES = {
     rightKnee: { values: [80, 10, 80], dur: 1.6 },
     leftShoulder: { static: -20 },
     rightShoulder: { static: 20 },
-    bob: { values: [[0, 0], [0, 14], [0, 0]], dur: 1.6 },
+    bob: {
+      values: [
+        [0, 0],
+        [0, 14],
+        [0, 0],
+      ],
+      dur: 1.6,
+    },
   },
   push_ups: {
     dur: 1.3,
@@ -56,21 +84,42 @@ export const EXERCISE_POSES = {
     rightShoulder: { values: [-70, -20, -70], dur: 1.3 },
     leftKnee: { static: 4 },
     rightKnee: { static: 4 },
-    bob: { values: [[0, 0], [0, 10], [0, 0]], dur: 1.3 },
+    bob: {
+      values: [
+        [0, 0],
+        [0, 10],
+        [0, 0],
+      ],
+      dur: 1.3,
+    },
   },
   plank_hold: {
     dur: 2.2,
     figureRotate: -80,
     leftShoulder: { static: 70 },
     rightShoulder: { static: -70 },
-    bob: { values: [[0, 0], [0, 2], [0, 0]], dur: 2.2 }, // subtle "hold, breathe" wobble
+    bob: {
+      values: [
+        [0, 0],
+        [0, 2],
+        [0, 0],
+      ],
+      dur: 2.2,
+    }, // subtle "hold, breathe" wobble
   },
   wall_pushups: {
     dur: 1.6,
     torsoLean: { static: 18 },
     leftShoulder: { values: [40, 15, 40], dur: 1.6 },
     rightShoulder: { values: [-40, -15, -40], dur: 1.6 },
-    bob: { values: [[0, 0], [3, 0], [0, 0]], dur: 1.6 },
+    bob: {
+      values: [
+        [0, 0],
+        [3, 0],
+        [0, 0],
+      ],
+      dur: 1.6,
+    },
   },
   chair_stand_sit: {
     dur: 2.2,
@@ -81,7 +130,14 @@ export const EXERCISE_POSES = {
     rightKnee: { values: [0, 95, 0], dur: 2.2 },
     leftShoulder: { static: -25 },
     rightShoulder: { static: 25 },
-    bob: { values: [[0, 0], [0, 30], [0, 0]], dur: 2.2 },
+    bob: {
+      values: [
+        [0, 0],
+        [0, 30],
+        [0, 0],
+      ],
+      dur: 2.2,
+    },
   },
   seated_marching: {
     dur: 1.4,
@@ -101,7 +157,14 @@ export const EXERCISE_POSES = {
     rightKnee: { static: 8 },
     leftShoulder: { static: 40 },
     rightShoulder: { static: 40 },
-    bob: { values: [[0, 0], [0, 3], [0, 0]], dur: 3 },
+    bob: {
+      values: [
+        [0, 0],
+        [0, 3],
+        [0, 0],
+      ],
+      dur: 3,
+    },
   },
   cat_cow_stretch: {
     dur: 2.4,
@@ -120,7 +183,16 @@ export const EXERCISE_POSES = {
   },
   tree_pose_balance: {
     dur: 3.2,
-    sway: { values: [[0, 0], [3, 0], [0, 0], [-3, 0], [0, 0]], dur: 3.2 },
+    sway: {
+      values: [
+        [0, 0],
+        [3, 0],
+        [0, 0],
+        [-3, 0],
+        [0, 0],
+      ],
+      dur: 3.2,
+    },
     leftHip: { static: -40 },
     leftKnee: { static: 110 },
     leftShoulder: { static: -170 },
@@ -128,7 +200,16 @@ export const EXERCISE_POSES = {
   },
   single_leg_stand: {
     dur: 3.2,
-    sway: { values: [[0, 0], [2, 0], [0, 0], [-2, 0], [0, 0]], dur: 3.2 },
+    sway: {
+      values: [
+        [0, 0],
+        [2, 0],
+        [0, 0],
+        [-2, 0],
+        [0, 0],
+      ],
+      dur: 3.2,
+    },
     leftHip: { static: -18 },
     leftKnee: { static: 30 },
     leftShoulder: { static: -70 },

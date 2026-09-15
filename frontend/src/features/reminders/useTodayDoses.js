@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ensureTodayDoseLogs, autoMarkMissed, listTodayDoses, markDoseTaken, markDoseMissed, snoozeDose } from "./api";
+import {
+  ensureTodayDoseLogs,
+  autoMarkMissed,
+  listTodayDoses,
+  markDoseTaken,
+  markDoseMissed,
+  snoozeDose,
+} from "./api";
 import { scheduleDoseNotification } from "./notifications";
 
 const POLL_MS = 60_000;
@@ -45,7 +52,11 @@ export function useTodayDoses(patientId) {
 
   const takeAction = async (id, action) => {
     // Optimistic update so the tap feels instant.
-    setDoses((prev) => prev.map((d) => (d.id === id ? { ...d, status: action === "snooze" ? "snoozed" : action } : d)));
+    setDoses((prev) =>
+      prev.map((d) =>
+        d.id === id ? { ...d, status: action === "snooze" ? "snoozed" : action } : d
+      )
+    );
     if (action === "taken") await markDoseTaken(id);
     else if (action === "missed") await markDoseMissed(id);
     else if (action === "snooze") await snoozeDose(id);

@@ -28,11 +28,10 @@ actually wins on this data rather than assuming it upfront.
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 
 import joblib
-import numpy as np
 from sklearn.dummy import DummyRegressor
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.linear_model import LinearRegression
@@ -81,14 +80,14 @@ def run(n_samples: int = 6000, seed: int = 42) -> dict:
 
     feature_importance = None
     if hasattr(best_model, "feature_importances_"):
-        feature_importance = dict(zip(FEATURE_NAMES, [float(v) for v in best_model.feature_importances_]))
+        feature_importance = dict(zip(FEATURE_NAMES, [float(v) for v in best_model.feature_importances_], strict=False))
 
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
     joblib.dump(best_model, MODEL_PATH)
 
     metadata = {
         "algorithm": best_name,
-        "trained_at": datetime.now(timezone.utc).isoformat(),
+        "trained_at": datetime.now(UTC).isoformat(),
         "n_samples": n_samples,
         "feature_names": FEATURE_NAMES,
         "cv_mae_leaderboard": leaderboard,

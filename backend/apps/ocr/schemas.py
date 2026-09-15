@@ -1,16 +1,14 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from pydantic import BaseModel, Field
 
 
 class MedicineExtraction(BaseModel):
     name: str
-    dosage: Optional[str] = None
-    quantity: Optional[str] = None
-    frequency: Optional[str] = None
-    instructions: Optional[str] = None
+    dosage: str | None = None
+    quantity: str | None = None
+    frequency: str | None = None
+    instructions: str | None = None
     confidence: float = Field(ge=0, le=1)
 
 

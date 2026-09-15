@@ -10,15 +10,25 @@ function formatMessageDate(value) {
   });
 }
 
-export default function MessageInbox({ messages, title = "Messages", emptyText = "No messages yet.", onCompose, composeLabel = "New message" }) {
+export default function MessageInbox({
+  messages,
+  title = "Messages",
+  emptyText = "No messages yet.",
+  onCompose,
+  composeLabel = "New message",
+}) {
   const [openId, setOpenId] = useState(null);
 
   return (
     <section className="card message-inbox" aria-labelledby="message-inbox-title">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="font-body text-xs font-semibold uppercase tracking-wider text-ink-fog">Inbox</p>
-          <h2 id="message-inbox-title" className="mt-1 font-display text-lg font-semibold text-ink">{title}</h2>
+          <p className="font-body text-xs font-semibold uppercase tracking-wider text-ink-fog">
+            Inbox
+          </p>
+          <h2 id="message-inbox-title" className="mt-1 font-display text-lg font-semibold text-ink">
+            {title}
+          </h2>
         </div>
         <div className="flex items-center gap-2">
           <span className="badge bg-indigo-soft text-indigo-deep">{messages.length}</span>
@@ -31,7 +41,9 @@ export default function MessageInbox({ messages, title = "Messages", emptyText =
       </div>
 
       {messages.length === 0 ? (
-        <p className="mt-5 rounded-xl bg-porcelain-dim px-4 py-5 font-body text-sm text-ink-fog">{emptyText}</p>
+        <p className="mt-5 rounded-xl bg-porcelain-dim px-4 py-5 font-body text-sm text-ink-fog">
+          {emptyText}
+        </p>
       ) : (
         <ul className="mt-4 space-y-2">
           {messages.map((message) => {
@@ -44,13 +56,22 @@ export default function MessageInbox({ messages, title = "Messages", emptyText =
                   onClick={() => setOpenId(isOpen ? null : message.id)}
                   aria-expanded={isOpen}
                 >
-                  <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-coral" aria-hidden="true" />
+                  <span
+                    className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-coral"
+                    aria-hidden="true"
+                  />
                   <span className="min-w-0 flex-1">
                     <span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                      <span className="font-body text-sm font-semibold text-ink">{message.title}</span>
-                      <span className="font-mono text-[11px] text-ink-fog">{formatMessageDate(message.created_at)}</span>
+                      <span className="font-body text-sm font-semibold text-ink">
+                        {message.title}
+                      </span>
+                      <span className="font-mono text-[11px] text-ink-fog">
+                        {formatMessageDate(message.created_at)}
+                      </span>
                     </span>
-                    <span className={`message-preview mt-1 block font-body text-sm text-ink-fog ${isOpen ? "message-preview-open" : ""}`}>
+                    <span
+                      className={`message-preview mt-1 block font-body text-sm text-ink-fog ${isOpen ? "message-preview-open" : ""}`}
+                    >
                       {message.body}
                     </span>
                     {isOpen && message.image_url && (
@@ -61,7 +82,9 @@ export default function MessageInbox({ messages, title = "Messages", emptyText =
                       />
                     )}
                   </span>
-                  <span className="font-body text-xs font-semibold text-indigo-deep">{isOpen ? "Close" : "Open"}</span>
+                  <span className="font-body text-xs font-semibold text-indigo-deep">
+                    {isOpen ? "Close" : "Open"}
+                  </span>
                 </button>
               </li>
             );

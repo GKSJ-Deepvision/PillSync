@@ -26,10 +26,7 @@ export default function ThemeSwitcher({ className = "" }) {
         className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/10 bg-white shadow-sm transition-transform active:scale-95"
         style={{ boxShadow: `inset 0 0 0 2px ${theme.brand}` }}
       >
-        <span
-          className="h-4 w-4 rounded-full"
-          style={{ backgroundColor: theme.brand }}
-        />
+        <span className="h-4 w-4 rounded-full" style={{ backgroundColor: theme.brand }} />
       </button>
 
       {open && (
@@ -50,7 +47,8 @@ export default function ThemeSwitcher({ className = "" }) {
                 className="flex h-8 w-8 items-center justify-center rounded-full transition-transform hover:scale-110"
                 style={{
                   backgroundColor: t.swatch,
-                  boxShadow: t.key === theme.key ? "0 0 0 2px white, 0 0 0 4px currentColor" : "none",
+                  boxShadow:
+                    t.key === theme.key ? "0 0 0 2px white, 0 0 0 4px currentColor" : "none",
                   color: t.swatch,
                 }}
                 aria-label={t.name}

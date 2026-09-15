@@ -38,7 +38,9 @@ export default function PatientDashboard() {
       const { data: meds } = await listMedications(user.id);
       const fromDate = new Date();
       fromDate.setDate(fromDate.getDate() - 45);
-      const { data: history } = await listDoseHistory(user.id, { fromDate: fromDate.toISOString() });
+      const { data: history } = await listDoseHistory(user.id, {
+        fromDate: fromDate.toISOString(),
+      });
       const medsWithHistory = meds.map((med) => ({
         ...med,
         recent_dose_logs: history.filter((log) => log.medication_id === med.id),
@@ -71,7 +73,12 @@ export default function PatientDashboard() {
       .channel(`patient-notifications-${user.id}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications", filter: `recipient_id=eq.${user.id}` },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `recipient_id=eq.${user.id}`,
+        },
         (payload) => {
           setMessages((current) => [payload.new, ...current].slice(0, 5));
           if (typeof Notification !== "undefined" && Notification.permission === "granted") {
@@ -90,7 +97,9 @@ export default function PatientDashboard() {
 
   const taken = {};
   WINDOWS.forEach((w) => {
-    taken[w.key] = doses.some((d) => windowForTime(d.scheduled_for) === w.key && d.status === "taken");
+    taken[w.key] = doses.some(
+      (d) => windowForTime(d.scheduled_for) === w.key && d.status === "taken"
+    );
   });
 
   const takenCount = doses.filter((d) => d.status === "taken").length;
@@ -99,7 +108,11 @@ export default function PatientDashboard() {
     <DashboardLayout eyebrow="Patient" title={`${label}, ${firstName}`}>
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
         <div className="lg:col-span-2">
-          <MessageInbox messages={messages} title="Messages from your care team" emptyText="Your caregiver messages will appear here." />
+          <MessageInbox
+            messages={messages}
+            title="Messages from your care team"
+            emptyText="Your caregiver messages will appear here."
+          />
         </div>
         {/* Dose Summary */}
         <div className="card flex flex-col items-center gap-4 text-center">
@@ -119,7 +132,11 @@ export default function PatientDashboard() {
           <div className="card">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="font-display text-base font-semibold text-ink">Today&apos;s doses</h2>
-              <Link to="/medications" className="font-body text-[13px] font-semibold" style={{ color: "var(--brand-deep)" }}>
+              <Link
+                to="/medications"
+                className="font-body text-[13px] font-semibold"
+                style={{ color: "var(--brand-deep)" }}
+              >
                 Manage medicines →
               </Link>
             </div>
@@ -127,23 +144,43 @@ export default function PatientDashboard() {
           </div>
 
           {/* AI-backed refill outlook */}
-          <RefillOutlookCard predictions={refillPredictions} loading={refillsLoading} linkTo="/refills" title="Refill outlook" />
+          <RefillOutlookCard
+            predictions={refillPredictions}
+            loading={refillsLoading}
+            linkTo="/refills"
+            title="Refill outlook"
+          />
 
           {/* Feature quick links */}
           <div className="grid gap-4 sm:grid-cols-3">
-            <Link to="/history" className="rounded-2xl border border-ink/15 bg-white/60 p-4 transition-colors hover:bg-white">
+            <Link
+              to="/history"
+              className="rounded-2xl border border-ink/15 bg-white/60 p-4 transition-colors hover:bg-white"
+            >
               <h3 className="font-display text-sm font-semibold text-ink">Medication history</h3>
-              <p className="mt-1 font-body text-[13px] text-ink-fog">Every dose you&apos;ve taken or missed.</p>
+              <p className="mt-1 font-body text-[13px] text-ink-fog">
+                Every dose you&apos;ve taken or missed.
+              </p>
             </Link>
 
-            <Link to="/refills" className="rounded-2xl border border-ink/15 bg-white/60 p-4 transition-colors hover:bg-white">
+            <Link
+              to="/refills"
+              className="rounded-2xl border border-ink/15 bg-white/60 p-4 transition-colors hover:bg-white"
+            >
               <h3 className="font-display text-sm font-semibold text-ink">Stock & refills</h3>
-              <p className="mt-1 font-body text-[13px] text-ink-fog">Predicted refill dates for every medicine.</p>
+              <p className="mt-1 font-body text-[13px] text-ink-fog">
+                Predicted refill dates for every medicine.
+              </p>
             </Link>
 
-            <Link to="/adherence" className="rounded-2xl border border-ink/15 bg-white/60 p-4 transition-colors hover:bg-white">
+            <Link
+              to="/adherence"
+              className="rounded-2xl border border-ink/15 bg-white/60 p-4 transition-colors hover:bg-white"
+            >
               <h3 className="font-display text-sm font-semibold text-ink">Adherence dashboard</h3>
-              <p className="mt-1 font-body text-[13px] text-ink-fog">Your streak and daily trend.</p>
+              <p className="mt-1 font-body text-[13px] text-ink-fog">
+                Your streak and daily trend.
+              </p>
             </Link>
           </div>
         </div>

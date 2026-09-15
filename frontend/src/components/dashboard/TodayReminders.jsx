@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useTodayDoses } from "../../features/reminders/useTodayDoses";
-import { notificationPermission, requestNotificationPermission } from "../../features/reminders/notifications";
+import {
+  notificationPermission,
+  requestNotificationPermission,
+} from "../../features/reminders/notifications";
 
 const STATUS_STYLE = {
   pending: { label: "Upcoming", className: "bg-porcelain-dim text-ink-fog" },
@@ -39,7 +42,10 @@ export default function TodayReminders({ patientId }) {
           <span className="font-body text-[13px] text-ink-fog">
             Turn on browser notifications to get reminded the moment a dose is due.
           </span>
-          <span className="font-body text-[13px] font-semibold" style={{ color: "var(--brand-deep)" }}>
+          <span
+            className="font-body text-[13px] font-semibold"
+            style={{ color: "var(--brand-deep)" }}
+          >
             Enable
           </span>
         </button>

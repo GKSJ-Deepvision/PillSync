@@ -21,7 +21,12 @@ describe("refillPrediction", () => {
 
   it("flags low stock inside the refill lead time", () => {
     const schedules = [{ dose_quantity: 2, days_of_week: [0, 1, 2, 3, 4, 5, 6] }];
-    const result = predictRefill({ stockQuantity: 6, schedules, refillLeadDays: 5, today: new Date("2026-01-01") });
+    const result = predictRefill({
+      stockQuantity: 6,
+      schedules,
+      refillLeadDays: 5,
+      today: new Date("2026-01-01"),
+    });
     expect(result.daysRemaining).toBe(3);
     expect(result.status).toBe("low");
   });

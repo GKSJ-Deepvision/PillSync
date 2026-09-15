@@ -174,13 +174,23 @@ def _simulate_case(rng: random.Random, np_rng: np.random.Generator, drug_row: pd
             ewm_recent = 0.7 * ewm_recent + 0.3 * (sum(day_outcomes) / len(day_outcomes))
 
     history_cutoff = start + timedelta(days=HISTORY_DAYS)
-    history_logs = [l for l in dose_logs if datetime.fromisoformat(l["scheduled_for"]) < datetime.combine(history_cutoff, datetime.min.time())]
-    future_logs = [l for l in dose_logs if datetime.fromisoformat(l["scheduled_for"]) >= datetime.combine(history_cutoff, datetime.min.time())]
+    history_logs = [
+        log_entry
+        for log_entry in dose_logs
+        if datetime.fromisoformat(log_entry["scheduled_for"])
+        < datetime.combine(history_cutoff, datetime.min.time())
+    ]
+    future_logs = [
+        log_entry
+        for log_entry in dose_logs
+        if datetime.fromisoformat(log_entry["scheduled_for"])
+        >= datetime.combine(history_cutoff, datetime.min.time())
+    ]
 
     if not future_logs:
         label = base
     else:
-        label = sum(1 for l in future_logs if l["status"] == "taken") / len(future_logs)
+        label = sum(1 for log_entry in future_logs if log_entry["status"] == "taken") / len(future_logs)
 
     pack_size = max(6, int(drug_row["pack_size"] if pd.notna(drug_row["pack_size"]) else 10))
     # Stock is a random point within a plausible number of packs on hand.
@@ -209,7 +219,7 @@ def generate_training_frame(n_samples: int = 6000, seed: int = 42) -> pd.DataFra
     for i in range(n_samples):
         start = anchor - timedelta(days=rng.randint(0, 200))
         case = _simulate_case(rng, np_rng, catalog_sample.iloc[i], start)
-        rows.append({**dict(zip(FEATURE_NAMES, case.features)), "label_future_adherence": case.label_future_adherence})
+        rows.append({**dict(zip(FEATURE_NAMES, case.features, strict=False)), "label_future_adherence": case.label_future_adherence})
 
     return pd.DataFrame(rows)
 
@@ -226,17 +236,29 @@ def build_training_frame_from_dose_logs(medications: list[dict], schedules_by_me
     rows = []
     for med in medications:
         med_id = med["id"]
-        logs = sorted(dose_logs_by_med.get(med_id, []), key=lambda l: l["scheduled_for"])
+        logs = sorted(dose_logs_by_med.get(med_id, []), key=lambda log_entry: log_entry["scheduled_for"])
         if len(logs) < 10:
             continue
         last_ts = datetime.fromisoformat(str(logs[-1]["scheduled_for"]).replace("Z", "+00:00"))
         cutoff = last_ts.date() - timedelta(days=FUTURE_DAYS)
-        history = [l for l in logs if datetime.fromisoformat(str(l["scheduled_for"]).replace("Z", "+00:00")).date() < cutoff]
-        future = [l for l in logs if datetime.fromisoformat(str(l["scheduled_for"]).replace("Z", "+00:00")).date() >= cutoff]
-        future_resolved = [l for l in future if l.get("status") in ("taken", "missed")]
+        history = [
+            log_entry
+            for log_entry in logs
+            if datetime.fromisoformat(str(log_entry["scheduled_for"]).replace("Z", "+00:00")).date()
+            < cutoff
+        ]
+        future = [
+            log_entry
+            for log_entry in logs
+            if datetime.fromisoformat(str(log_entry["scheduled_for"]).replace("Z", "+00:00")).date()
+            >= cutoff
+        ]
+        future_resolved = [
+            log_entry for log_entry in future if log_entry.get("status") in ("taken", "missed")
+        ]
         if not history or not future_resolved:
             continue
-        label = sum(1 for l in future_resolved if l["status"] == "taken") / len(future_resolved)
+        label = sum(1 for log_entry in future_resolved if log_entry["status"] == "taken") / len(future_resolved)
         bundle = build_features(med, schedules_by_med.get(med_id, []), history, today=cutoff)
         rows.append({**bundle.as_dict(), "label_future_adherence": label})
     return pd.DataFrame(rows)

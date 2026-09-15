@@ -13,17 +13,6 @@ import sys
 from datetime import date
 from pathlib import Path
 
-# `ml/` lives at the repository root, one level above `backend/`, so it
-# isn't necessarily importable from wherever the ASGI server or pytest was
-# launched. Make the import robust to cwd by adding the repo root
-# explicitly, rather than requiring a particular working directory or a
-# PYTHONPATH env var to be set just right.
-_REPO_ROOT = Path(__file__).resolve().parents[4]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
-from ml.src.refill_prediction.model import RefillPrediction, get_predictor  # noqa: E402
-
 from ..schemas import (
     BatchPredictRequest,
     BatchPredictResponse,
@@ -36,6 +25,17 @@ from ..schemas import (
     PredictRequest,
     RefillPredictionOut,
 )
+
+# `ml/` lives at the repository root, one level above `backend/`, so it
+# isn't necessarily importable from wherever the ASGI server or pytest was
+# launched. Make the import robust to cwd by adding the repo root
+# explicitly, rather than requiring a particular working directory or a
+# PYTHONPATH env var to be set just right.
+_REPO_ROOT = Path(__file__).resolve().parents[4]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from ml.src.refill_prediction.model import RefillPrediction, get_predictor  # noqa: E402
 
 URGENT_STATUSES = {"empty", "low"}
 WATCH_RISKS = {"watch", "declining"}
@@ -70,7 +70,9 @@ def _sort_key(p: RefillPredictionOut):
 
 
 def predict_one(payload: PredictRequest) -> RefillPredictionOut:
-    case = MedicationCase(medication=payload.medication, schedules=payload.schedules, dose_logs=payload.dose_logs)
+    case = MedicationCase(
+        medication=payload.medication, schedules=payload.schedules, dose_logs=payload.dose_logs
+    )
     return _run_case(case, payload.as_of)
 
 

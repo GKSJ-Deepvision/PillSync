@@ -42,7 +42,10 @@ export default function ProfilePage() {
       date_of_birth: form.date_of_birth || null,
       blood_group: form.blood_group || null,
       conditions: form.conditions
-        ? form.conditions.split(",").map((c) => c.trim()).filter(Boolean)
+        ? form.conditions
+            .split(",")
+            .map((c) => c.trim())
+            .filter(Boolean)
         : [],
       emergency_contact_name: form.emergency_contact_name || null,
       emergency_contact_phone: form.emergency_contact_phone || null,
@@ -86,7 +89,9 @@ export default function ProfilePage() {
             <h2 className="font-display text-base font-semibold text-ink">Basic details</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="field-label" htmlFor="full_name">Full name</label>
+                <label className="field-label" htmlFor="full_name">
+                  Full name
+                </label>
                 <input
                   id="full_name"
                   className="field-input"
@@ -95,7 +100,9 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className="field-label" htmlFor="phone">Phone</label>
+                <label className="field-label" htmlFor="phone">
+                  Phone
+                </label>
                 <input
                   id="phone"
                   className="field-input"
@@ -105,7 +112,9 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className="field-label" htmlFor="dob">Date of birth</label>
+                <label className="field-label" htmlFor="dob">
+                  Date of birth
+                </label>
                 <input
                   id="dob"
                   type="date"
@@ -116,7 +125,9 @@ export default function ProfilePage() {
               </div>
               {role === "patient" && (
                 <div>
-                  <label className="field-label" htmlFor="blood_group">Blood group</label>
+                  <label className="field-label" htmlFor="blood_group">
+                    Blood group
+                  </label>
                   <input
                     id="blood_group"
                     className="field-input"
@@ -149,7 +160,9 @@ export default function ProfilePage() {
               <h2 className="font-display text-base font-semibold text-ink">Emergency contact</h2>
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
                 <div>
-                  <label className="field-label" htmlFor="ec_name">Name</label>
+                  <label className="field-label" htmlFor="ec_name">
+                    Name
+                  </label>
                   <input
                     id="ec_name"
                     className="field-input"
@@ -158,7 +171,9 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div>
-                  <label className="field-label" htmlFor="ec_phone">Phone</label>
+                  <label className="field-label" htmlFor="ec_phone">
+                    Phone
+                  </label>
                   <input
                     id="ec_phone"
                     className="field-input"
@@ -167,13 +182,17 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div>
-                  <label className="field-label" htmlFor="ec_relation">Relation</label>
+                  <label className="field-label" htmlFor="ec_relation">
+                    Relation
+                  </label>
                   <input
                     id="ec_relation"
                     className="field-input"
                     placeholder="Spouse"
                     value={form.emergency_contact_relation}
-                    onChange={(e) => setForm({ ...form, emergency_contact_relation: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, emergency_contact_relation: e.target.value })
+                    }
                   />
                 </div>
               </div>

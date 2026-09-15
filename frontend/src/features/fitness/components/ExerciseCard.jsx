@@ -23,7 +23,11 @@ export default function ExerciseCard({
         <h3 className="font-display text-sm font-semibold text-ink">{exercise.name}</h3>
         <p className="font-body text-[13px] text-ink-fog">{exercise.description}</p>
         <div className="mt-1 flex w-full gap-2">
-          <button type="button" className="btn-secondary flex-1 !py-2 !text-[13px]" onClick={() => setOpen(true)}>
+          <button
+            type="button"
+            className="btn-secondary flex-1 !py-2 !text-[13px]"
+            onClick={() => setOpen(true)}
+          >
             How to do it
           </button>
           {onAssign && (
@@ -64,10 +68,10 @@ export default function ExerciseCard({
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <span className="badge bg-indigo-soft text-indigo-deep">
-                  {exercise.category}
-                </span>
-                <h2 className="mt-2 font-display text-xl font-semibold text-ink">{exercise.name}</h2>
+                <span className="badge bg-indigo-soft text-indigo-deep">{exercise.category}</span>
+                <h2 className="mt-2 font-display text-xl font-semibold text-ink">
+                  {exercise.name}
+                </h2>
               </div>
               <button
                 type="button"
@@ -80,7 +84,12 @@ export default function ExerciseCard({
             </div>
 
             <div className="mt-4 flex justify-center">
-              <ExerciseFigure exerciseId={exercise.id} ageGroup={ageGroup} gender={gender} size={180} />
+              <ExerciseFigure
+                exerciseId={exercise.id}
+                ageGroup={ageGroup}
+                gender={gender}
+                size={180}
+              />
             </div>
 
             <p className="mt-3 font-body text-sm text-ink-fog">Equipment: {exercise.equipment}</p>

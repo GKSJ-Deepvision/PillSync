@@ -6,7 +6,11 @@ const FOLDER = import.meta.env.VITE_CLOUDINARY_FOLDER || "assets";
 
 export async function uploadPrescriptionImage(patientId, file) {
   if (!UPLOAD_PRESET) {
-    return { error: new Error("Cloudinary upload preset is missing. Set VITE_CLOUDINARY_UPLOAD_PRESET in frontend/.env.") };
+    return {
+      error: new Error(
+        "Cloudinary upload preset is missing. Set VITE_CLOUDINARY_UPLOAD_PRESET in frontend/.env."
+      ),
+    };
   }
   const body = new FormData();
   body.append("file", file);
@@ -18,18 +22,19 @@ export async function uploadPrescriptionImage(patientId, file) {
     body,
   });
   const result = await response.json();
-  if (!response.ok) return { error: new Error(result.error?.message || "Cloudinary upload failed.") };
+  if (!response.ok)
+    return { error: new Error(result.error?.message || "Cloudinary upload failed.") };
 
   const { data, error } = await supabase
     .from("prescriptions")
     .insert({
-    patient_id: patientId,
-    image_url: result.secure_url,
-    cloudinary_public_id: result.public_id,
-    original_filename: file.name,
-    mime_type: file.type,
-    file_size: file.size,
-    status: "uploaded",
+      patient_id: patientId,
+      image_url: result.secure_url,
+      cloudinary_public_id: result.public_id,
+      original_filename: file.name,
+      mime_type: file.type,
+      file_size: file.size,
+      status: "uploaded",
     })
     .select()
     .single();

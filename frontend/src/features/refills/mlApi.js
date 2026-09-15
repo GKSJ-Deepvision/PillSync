@@ -9,7 +9,10 @@
  */
 import { predictRefill as predictRefillLocally } from "../../lib/refillPrediction";
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api").replace(/\/$/, "");
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api").replace(
+  /\/$/,
+  ""
+);
 const REFILLS_BASE = `${API_BASE}/v1/refills`;
 
 function medicationToPayload(med) {
@@ -128,7 +131,9 @@ export async function predictRefillsForCaregiver(patients = []) {
       cases: (p.medications ?? []).map((med) => ({
         medication: medicationToPayload(med),
         schedules: schedulesToPayload(med.medication_schedules ?? []),
-        dose_logs: doseLogsToPayload(p.doseLogsByMedication?.[med.id] ?? med.recent_dose_logs ?? []),
+        dose_logs: doseLogsToPayload(
+          p.doseLogsByMedication?.[med.id] ?? med.recent_dose_logs ?? []
+        ),
       })),
     })),
   };
@@ -142,7 +147,10 @@ export async function predictRefillsForCaregiver(patients = []) {
       })
     );
     results.sort((a, b) => b.summary.urgent_count - a.summary.urgent_count);
-    return { patients: results, urgent_total: results.reduce((sum, r) => sum + r.summary.urgent_count, 0) };
+    return {
+      patients: results,
+      urgent_total: results.reduce((sum, r) => sum + r.summary.urgent_count, 0),
+    };
   }
 }
 

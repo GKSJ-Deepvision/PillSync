@@ -67,8 +67,13 @@ export default function RefillsPage() {
   };
 
   const byId = Object.fromEntries(medications.map((m) => [m.id, m]));
-  const rows = predictions.map((prediction) => ({ med: byId[prediction.medication_id], prediction }));
-  const lowStock = rows.filter((r) => r.prediction.stock_status === "low" || r.prediction.stock_status === "empty");
+  const rows = predictions.map((prediction) => ({
+    med: byId[prediction.medication_id],
+    prediction,
+  }));
+  const lowStock = rows.filter(
+    (r) => r.prediction.stock_status === "low" || r.prediction.stock_status === "empty"
+  );
 
   return (
     <DashboardLayout eyebrow="Stock & refills" title="Refill alerts">
@@ -81,63 +86,101 @@ export default function RefillsPage() {
           </span>
           {summary.adherence_watch_count > 0 && (
             <span className="badge bg-coral-soft text-coral-deep">
-              {summary.adherence_watch_count} medicine{summary.adherence_watch_count > 1 ? "s" : ""} with adherence risk
+              {summary.adherence_watch_count} medicine{summary.adherence_watch_count > 1 ? "s" : ""}{" "}
+              with adherence risk
             </span>
           )}
         </div>
       )}
 
       {!loading && lowStock.length > 0 && (
-        <div className="mb-6 rounded-2xl border px-5 py-4" style={{ borderColor: "var(--accent)", backgroundColor: "var(--accent-soft)" }}>
+        <div
+          className="mb-6 rounded-2xl border px-5 py-4"
+          style={{ borderColor: "var(--accent)", backgroundColor: "var(--accent-soft)" }}
+        >
           <p className="font-body text-sm font-semibold" style={{ color: "var(--brand-deep)" }}>
-            {lowStock.length} medicine{lowStock.length > 1 ? "s" : ""} need{lowStock.length === 1 ? "s" : ""} a refill soon
+            {lowStock.length} medicine{lowStock.length > 1 ? "s" : ""} need
+            {lowStock.length === 1 ? "s" : ""} a refill soon
           </p>
           <p className="mt-0.5 font-body text-[13px] text-ink-fog">
-            {lowStock.map((r) => r.med?.name).filter(Boolean).join(", ")}
+            {lowStock
+              .map((r) => r.med?.name)
+              .filter(Boolean)
+              .join(", ")}
           </p>
         </div>
       )}
 
       {loading ? (
-        <p className="font-body text-sm text-ink-fog">Analyzing stock levels and adherence history…</p>
+        <p className="font-body text-sm text-ink-fog">
+          Analyzing stock levels and adherence history…
+        </p>
       ) : rows.length === 0 ? (
-        <p className="card text-center font-body text-sm text-ink-fog">Add a medicine to see refill predictions.</p>
+        <p className="card text-center font-body text-sm text-ink-fog">
+          Add a medicine to see refill predictions.
+        </p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {rows.map(({ med, prediction }) => {
             if (!med) return null;
             const style = STATUS_STYLE[prediction.stock_status];
-            const fillPct = Math.min(100, Math.round((med.stock_quantity / Math.max(med.low_stock_threshold * 4, 1)) * 100));
+            const fillPct = Math.min(
+              100,
+              Math.round((med.stock_quantity / Math.max(med.low_stock_threshold * 4, 1)) * 100)
+            );
             return (
               <div key={med.id} className="card">
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="font-display text-base font-semibold text-ink">{med.name}</h3>
-                    <p className="font-body text-[12px] text-ink-fog">{med.stock_quantity} units in stock</p>
+                    <p className="font-body text-[12px] text-ink-fog">
+                      {med.stock_quantity} units in stock
+                    </p>
                   </div>
-                  <span className={`badge bg-porcelain-dim ${style.text}`}>{REFILL_STATUS_LABEL[prediction.stock_status]}</span>
+                  <span className={`badge bg-porcelain-dim ${style.text}`}>
+                    {REFILL_STATUS_LABEL[prediction.stock_status]}
+                  </span>
                 </div>
 
                 <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-porcelain-dim">
-                  <div className={`h-full rounded-full ${style.bar}`} style={{ width: `${fillPct}%` }} />
+                  <div
+                    className={`h-full rounded-full ${style.bar}`}
+                    style={{ width: `${fillPct}%` }}
+                  />
                 </div>
 
                 <dl className="mt-4 grid grid-cols-2 gap-3">
                   <div>
-                    <dt className="font-mono text-[10px] uppercase tracking-wide text-ink-fog">Prescribed / day</dt>
-                    <dd className="font-body text-sm font-semibold text-ink">{prediction.prescribed_daily_dose || "—"}</dd>
+                    <dt className="font-mono text-[10px] uppercase tracking-wide text-ink-fog">
+                      Prescribed / day
+                    </dt>
+                    <dd className="font-body text-sm font-semibold text-ink">
+                      {prediction.prescribed_daily_dose || "—"}
+                    </dd>
                   </div>
                   <div>
-                    <dt className="font-mono text-[10px] uppercase tracking-wide text-ink-fog">Days remaining</dt>
-                    <dd className="font-body text-sm font-semibold text-ink">{prediction.days_remaining ?? "—"}</dd>
+                    <dt className="font-mono text-[10px] uppercase tracking-wide text-ink-fog">
+                      Days remaining
+                    </dt>
+                    <dd className="font-body text-sm font-semibold text-ink">
+                      {prediction.days_remaining ?? "—"}
+                    </dd>
                   </div>
                   <div>
-                    <dt className="font-mono text-[10px] uppercase tracking-wide text-ink-fog">Runs out</dt>
-                    <dd className="font-body text-sm font-semibold text-ink">{formatDate(prediction.depletion_date)}</dd>
+                    <dt className="font-mono text-[10px] uppercase tracking-wide text-ink-fog">
+                      Runs out
+                    </dt>
+                    <dd className="font-body text-sm font-semibold text-ink">
+                      {formatDate(prediction.depletion_date)}
+                    </dd>
                   </div>
                   <div>
-                    <dt className="font-mono text-[10px] uppercase tracking-wide text-ink-fog">Refill by</dt>
-                    <dd className="font-body text-sm font-semibold text-ink">{formatDate(prediction.refill_by_date)}</dd>
+                    <dt className="font-mono text-[10px] uppercase tracking-wide text-ink-fog">
+                      Refill by
+                    </dt>
+                    <dd className="font-body text-sm font-semibold text-ink">
+                      {formatDate(prediction.refill_by_date)}
+                    </dd>
                   </div>
                 </dl>
 
@@ -147,16 +190,25 @@ export default function RefillsPage() {
                   </span>
                   {prediction.confidence > 0 && (
                     <span className="font-body text-[11px] text-ink-fog">
-                      {Math.round(prediction.confidence * 100)}% confidence · {Math.round(prediction.predicted_adherence_rate * 100)}% predicted adherence
+                      {Math.round(prediction.confidence * 100)}% confidence ·{" "}
+                      {Math.round(prediction.predicted_adherence_rate * 100)}% predicted adherence
                     </span>
                   )}
                 </div>
 
                 <div className="mt-3 flex gap-2 pt-1">
-                  <button type="button" onClick={() => logRefill(med.id, 30)} className="btn-secondary flex-1 py-2 text-[13px]">
+                  <button
+                    type="button"
+                    onClick={() => logRefill(med.id, 30)}
+                    className="btn-secondary flex-1 py-2 text-[13px]"
+                  >
                     + Log refill (30)
                   </button>
-                  <button type="button" onClick={() => logRefill(med.id, -1)} className="btn-secondary flex-1 py-2 text-[13px]">
+                  <button
+                    type="button"
+                    onClick={() => logRefill(med.id, -1)}
+                    className="btn-secondary flex-1 py-2 text-[13px]"
+                  >
                     − 1 dose used
                   </button>
                 </div>

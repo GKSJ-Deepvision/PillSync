@@ -66,14 +66,22 @@ export default function HistoryPage() {
   return (
     <DashboardLayout eyebrow="Medication history" title="Dose history">
       <div className="mb-6 flex flex-wrap gap-3">
-        <select className="field-input w-auto" value={rangeDays} onChange={(e) => setRangeDays(Number(e.target.value))}>
+        <select
+          className="field-input w-auto"
+          value={rangeDays}
+          onChange={(e) => setRangeDays(Number(e.target.value))}
+        >
           {RANGE_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
             </option>
           ))}
         </select>
-        <select className="field-input w-auto" value={medicationId} onChange={(e) => setMedicationId(e.target.value)}>
+        <select
+          className="field-input w-auto"
+          value={medicationId}
+          onChange={(e) => setMedicationId(e.target.value)}
+        >
           <option value="">All medicines</option>
           {medications.map((m) => (
             <option key={m.id} value={m.id}>
@@ -81,7 +89,11 @@ export default function HistoryPage() {
             </option>
           ))}
         </select>
-        <select className="field-input w-auto" value={status} onChange={(e) => setStatus(e.target.value)}>
+        <select
+          className="field-input w-auto"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
           <option value="">All statuses</option>
           <option value="taken">Taken</option>
           <option value="missed">Missed</option>
@@ -93,23 +105,34 @@ export default function HistoryPage() {
       {loading ? (
         <p className="font-body text-sm text-ink-fog">Loading history…</p>
       ) : logs.length === 0 ? (
-        <p className="card text-center font-body text-sm text-ink-fog">No dose history in this range yet.</p>
+        <p className="card text-center font-body text-sm text-ink-fog">
+          No dose history in this range yet.
+        </p>
       ) : (
         <div className="space-y-6">
           {Object.entries(groups).map(([day, dayLogs]) => (
             <div key={day}>
-              <h3 className="mb-2 font-mono text-[11px] uppercase tracking-wider text-ink-fog">{day}</h3>
+              <h3 className="mb-2 font-mono text-[11px] uppercase tracking-wider text-ink-fog">
+                {day}
+              </h3>
               <div className="card divide-y divide-ink/5 p-0">
                 {dayLogs.map((log) => (
                   <div key={log.id} className="flex items-center justify-between gap-3 px-5 py-3">
                     <div className="min-w-0">
-                      <p className="truncate font-body text-sm font-semibold text-ink">{log.medications?.name}</p>
+                      <p className="truncate font-body text-sm font-semibold text-ink">
+                        {log.medications?.name}
+                      </p>
                       <p className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">
-                        {new Date(log.scheduled_for).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} ·{" "}
-                        {log.dose_quantity} dose(s)
+                        {new Date(log.scheduled_for).toLocaleTimeString([], {
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })}{" "}
+                        · {log.dose_quantity} dose(s)
                       </p>
                     </div>
-                    <span className={`badge ${STATUS_BADGE[log.status] ?? STATUS_BADGE.pending}`}>{log.status}</span>
+                    <span className={`badge ${STATUS_BADGE[log.status] ?? STATUS_BADGE.pending}`}>
+                      {log.status}
+                    </span>
                   </div>
                 ))}
               </div>

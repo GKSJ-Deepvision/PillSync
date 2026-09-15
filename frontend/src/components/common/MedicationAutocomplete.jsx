@@ -15,9 +15,7 @@ export default function MedicationAutocomplete({ value, onChange, onSelectSugges
     const q = value.trim().toLowerCase();
     if (q.length < 1) return [];
     return medicationsDataset
-      .filter(
-        (m) => m.name.toLowerCase().includes(q) || m.generic_name.toLowerCase().includes(q)
-      )
+      .filter((m) => m.name.toLowerCase().includes(q) || m.generic_name.toLowerCase().includes(q))
       .slice(0, 6);
   }, [value]);
 

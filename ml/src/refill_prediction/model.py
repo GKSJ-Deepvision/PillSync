@@ -31,7 +31,7 @@ from typing import Any
 
 import joblib
 
-from .features import build_features, daily_dose_from_schedules
+from .features import build_features
 
 MODELS_DIR = Path(__file__).resolve().parents[2] / "models"
 MODEL_PATH = MODELS_DIR / "refill_predictor.joblib"

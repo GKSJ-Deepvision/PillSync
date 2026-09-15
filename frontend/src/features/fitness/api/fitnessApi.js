@@ -2,7 +2,15 @@ import { supabase } from "../../../lib/supabaseClient";
 
 /** Diet plans ------------------------------------------------------------ */
 
-export async function saveDietPlan({ patientId, ageGroup, gender, goal, dietaryPreference, plan, exerciseIds }) {
+export async function saveDietPlan({
+  patientId,
+  ageGroup,
+  gender,
+  goal,
+  dietaryPreference,
+  plan,
+  exerciseIds,
+}) {
   return supabase
     .from("diet_plans")
     .insert({
@@ -29,14 +37,21 @@ export async function listDietPlans(patientId, limit = 5) {
 
 /** Exercise assignments ---------------------------------------------------- */
 
-export async function assignExercises(patientId, exerciseIds, { ageGroup, assignedBy = "ai" } = {}) {
+export async function assignExercises(
+  patientId,
+  exerciseIds,
+  { ageGroup, assignedBy = "ai" } = {}
+) {
   const rows = exerciseIds.map((exerciseId) => ({
     patient_id: patientId,
     exercise_id: exerciseId,
     age_group: ageGroup,
     assigned_by: assignedBy,
   }));
-  return supabase.from("exercise_assignments").upsert(rows, { onConflict: "patient_id,exercise_id,assigned_date" }).select();
+  return supabase
+    .from("exercise_assignments")
+    .upsert(rows, { onConflict: "patient_id,exercise_id,assigned_date" })
+    .select();
 }
 
 export async function listTodayAssignments(patientId) {

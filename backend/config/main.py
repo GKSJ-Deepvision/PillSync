@@ -19,9 +19,9 @@ from __future__ import annotations
 
 import os
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
 
 from apps.ocr.router import router as ocr_router
 from apps.refills.router import router as refills_router

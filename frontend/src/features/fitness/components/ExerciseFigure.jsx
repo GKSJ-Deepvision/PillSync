@@ -44,7 +44,10 @@ function RotateGroup({ channel, pivotX, pivotY, extraOffset = 0, animate, childr
         dur={`${channel.dur}s`}
         repeatCount="indefinite"
         calcMode="spline"
-        keySplines={values.slice(1).map(() => "0.42 0 0.58 1").join(";")}
+        keySplines={values
+          .slice(1)
+          .map(() => "0.42 0 0.58 1")
+          .join(";")}
       />
       {children}
     </g>
@@ -94,7 +97,10 @@ export default function ExerciseFigure({
         dur={`${pose.bob.dur * speed}s`}
         repeatCount="indefinite"
         calcMode="spline"
-        keySplines={pose.bob.values.slice(1).map(() => "0.42 0 0.58 1").join(";")}
+        keySplines={pose.bob.values
+          .slice(1)
+          .map(() => "0.42 0 0.58 1")
+          .join(";")}
       />
     ) : null;
   }
@@ -121,7 +127,17 @@ export default function ExerciseFigure({
       role="img"
       aria-label={`Animated demonstration of ${exerciseId.replaceAll("_", " ")}`}
     >
-      {showGround && <line x1="20" y1="248" x2="180" y2="248" stroke={theme.ground} strokeWidth="4" strokeLinecap="round" />}
+      {showGround && (
+        <line
+          x1="20"
+          y1="248"
+          x2="180"
+          y2="248"
+          stroke={theme.ground}
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+      )}
       {pose.props?.chair && (
         <g stroke={theme.ground} strokeWidth="6" strokeLinecap="round" fill="none">
           <line x1="140" y1="150" x2="140" y2="246" />
@@ -137,30 +153,112 @@ export default function ExerciseFigure({
           <g transform={pose.figureRotate ? `rotate(${pose.figureRotate} 100 150)` : undefined}>
             {/* Legs — attach directly at the hip pivot, independent of torso lean */}
             <RotateGroup channel={leftHip} pivotX={hipXL} pivotY={HIP_Y} animate={animate}>
-              <line x1={hipXL} y1={HIP_Y} x2={hipXL} y2={HIP_Y + THIGH_LEN} stroke={theme.stroke} strokeWidth={sw} strokeLinecap="round" />
-              <RotateGroup channel={leftKnee} pivotX={hipXL} pivotY={HIP_Y + THIGH_LEN} animate={animate}>
-                <line x1={hipXL} y1={HIP_Y + THIGH_LEN} x2={hipXL} y2={HIP_Y + THIGH_LEN + SHIN_LEN} stroke={theme.stroke} strokeWidth={sw} strokeLinecap="round" />
+              <line
+                x1={hipXL}
+                y1={HIP_Y}
+                x2={hipXL}
+                y2={HIP_Y + THIGH_LEN}
+                stroke={theme.stroke}
+                strokeWidth={sw}
+                strokeLinecap="round"
+              />
+              <RotateGroup
+                channel={leftKnee}
+                pivotX={hipXL}
+                pivotY={HIP_Y + THIGH_LEN}
+                animate={animate}
+              >
+                <line
+                  x1={hipXL}
+                  y1={HIP_Y + THIGH_LEN}
+                  x2={hipXL}
+                  y2={HIP_Y + THIGH_LEN + SHIN_LEN}
+                  stroke={theme.stroke}
+                  strokeWidth={sw}
+                  strokeLinecap="round"
+                />
               </RotateGroup>
               <circle cx={hipXL} cy={HIP_Y} r={sw * 0.7} fill={theme.joint} />
             </RotateGroup>
 
             <RotateGroup channel={rightHip} pivotX={hipXR} pivotY={HIP_Y} animate={animate}>
-              <line x1={hipXR} y1={HIP_Y} x2={hipXR} y2={HIP_Y + THIGH_LEN} stroke={theme.stroke} strokeWidth={sw} strokeLinecap="round" />
-              <RotateGroup channel={rightKnee} pivotX={hipXR} pivotY={HIP_Y + THIGH_LEN} animate={animate}>
-                <line x1={hipXR} y1={HIP_Y + THIGH_LEN} x2={hipXR} y2={HIP_Y + THIGH_LEN + SHIN_LEN} stroke={theme.stroke} strokeWidth={sw} strokeLinecap="round" />
+              <line
+                x1={hipXR}
+                y1={HIP_Y}
+                x2={hipXR}
+                y2={HIP_Y + THIGH_LEN}
+                stroke={theme.stroke}
+                strokeWidth={sw}
+                strokeLinecap="round"
+              />
+              <RotateGroup
+                channel={rightKnee}
+                pivotX={hipXR}
+                pivotY={HIP_Y + THIGH_LEN}
+                animate={animate}
+              >
+                <line
+                  x1={hipXR}
+                  y1={HIP_Y + THIGH_LEN}
+                  x2={hipXR}
+                  y2={HIP_Y + THIGH_LEN + SHIN_LEN}
+                  stroke={theme.stroke}
+                  strokeWidth={sw}
+                  strokeLinecap="round"
+                />
               </RotateGroup>
               <circle cx={hipXR} cy={HIP_Y} r={sw * 0.7} fill={theme.joint} />
             </RotateGroup>
 
             {/* Upper body — torso, head and arms rotate together around the hips (torso lean / senior stoop) */}
-            <RotateGroup channel={torsoLean} pivotX={CENTER_X} pivotY={HIP_Y} extraOffset={stoop} animate={animate}>
-              <line x1={CENTER_X} y1={HIP_Y} x2={CENTER_X} y2={NECK_Y} stroke={theme.stroke} strokeWidth={sw} strokeLinecap="round" />
+            <RotateGroup
+              channel={torsoLean}
+              pivotX={CENTER_X}
+              pivotY={HIP_Y}
+              extraOffset={stoop}
+              animate={animate}
+            >
+              <line
+                x1={CENTER_X}
+                y1={HIP_Y}
+                x2={CENTER_X}
+                y2={NECK_Y}
+                stroke={theme.stroke}
+                strokeWidth={sw}
+                strokeLinecap="round"
+              />
 
-              <RotateGroup channel={leftShoulder} pivotX={shoulderXL} pivotY={SHOULDER_Y} animate={animate}>
-                <line x1={shoulderXL} y1={SHOULDER_Y} x2={shoulderXL} y2={SHOULDER_Y + ARM_LEN} stroke={theme.stroke} strokeWidth={sw - 1} strokeLinecap="round" />
+              <RotateGroup
+                channel={leftShoulder}
+                pivotX={shoulderXL}
+                pivotY={SHOULDER_Y}
+                animate={animate}
+              >
+                <line
+                  x1={shoulderXL}
+                  y1={SHOULDER_Y}
+                  x2={shoulderXL}
+                  y2={SHOULDER_Y + ARM_LEN}
+                  stroke={theme.stroke}
+                  strokeWidth={sw - 1}
+                  strokeLinecap="round"
+                />
               </RotateGroup>
-              <RotateGroup channel={rightShoulder} pivotX={shoulderXR} pivotY={SHOULDER_Y} animate={animate}>
-                <line x1={shoulderXR} y1={SHOULDER_Y} x2={shoulderXR} y2={SHOULDER_Y + ARM_LEN} stroke={theme.stroke} strokeWidth={sw - 1} strokeLinecap="round" />
+              <RotateGroup
+                channel={rightShoulder}
+                pivotX={shoulderXR}
+                pivotY={SHOULDER_Y}
+                animate={animate}
+              >
+                <line
+                  x1={shoulderXR}
+                  y1={SHOULDER_Y}
+                  x2={shoulderXR}
+                  y2={SHOULDER_Y + ARM_LEN}
+                  stroke={theme.stroke}
+                  strokeWidth={sw - 1}
+                  strokeLinecap="round"
+                />
               </RotateGroup>
 
               <RotateGroup channel={headTilt} pivotX={CENTER_X} pivotY={NECK_Y} animate={animate}>
@@ -173,7 +271,14 @@ export default function ExerciseFigure({
                     strokeLinecap="round"
                   />
                 )}
-                <circle cx={CENTER_X} cy={HEAD_Y} r={HEAD_R} fill={theme.fill} stroke={theme.stroke} strokeWidth={sw - 1} />
+                <circle
+                  cx={CENTER_X}
+                  cy={HEAD_Y}
+                  r={HEAD_R}
+                  fill={theme.fill}
+                  stroke={theme.stroke}
+                  strokeWidth={sw - 1}
+                />
               </RotateGroup>
             </RotateGroup>
           </g>

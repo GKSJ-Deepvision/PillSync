@@ -124,7 +124,7 @@ def train() -> dict:
     classifier.fit(train_x, train_y)
     artifact = {
         "classifier": classifier,
-        "generic_by_medicine": {medicine: generic for medicine, generic in zip(train_y, train_generic)},
+        "generic_by_medicine": dict(zip(train_y, train_generic, strict=False)),
         "image_size": IMAGE_SIZE,
         "feature_type": "hog",
     }

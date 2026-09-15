@@ -19,7 +19,14 @@ Respond with ONLY minified JSON matching this shape, no prose, no markdown fence
  * Asks Groq's diet/exercise planner for a plan from the frontend environment.
  * The returned shape stays compatible with the Diet Planner page.
  */
-export async function generateDietPlan({ ageGroup, gender, goal, dietaryPreference, activityLevel, conditions }) {
+export async function generateDietPlan({
+  ageGroup,
+  gender,
+  goal,
+  dietaryPreference,
+  activityLevel,
+  conditions,
+}) {
   if (!GROQ_API_KEY) {
     throw new Error("VITE_GROQ_API_KEY is missing. Add it to frontend/.env and restart Vite.");
   }
@@ -38,7 +45,14 @@ export async function generateDietPlan({ ageGroup, gender, goal, dietaryPreferen
         { role: "system", content: SYSTEM_PROMPT },
         {
           role: "user",
-          content: JSON.stringify({ ageGroup, gender, goal, dietaryPreference, activityLevel, conditions: conditions ?? [] }),
+          content: JSON.stringify({
+            ageGroup,
+            gender,
+            goal,
+            dietaryPreference,
+            activityLevel,
+            conditions: conditions ?? [],
+          }),
         },
       ],
     }),
@@ -54,8 +68,9 @@ export async function generateDietPlan({ ageGroup, gender, goal, dietaryPreferen
   if (!rawPlan) throw new Error("Groq returned an empty response.");
 
   const plan = JSON.parse(rawPlan);
-  const exerciseIds = (Array.isArray(plan.exerciseIds) ? plan.exerciseIds : [])
-    .filter((id) => EXERCISE_CATALOG.includes(id));
+  const exerciseIds = (Array.isArray(plan.exerciseIds) ? plan.exerciseIds : []).filter((id) =>
+    EXERCISE_CATALOG.includes(id)
+  );
 
   return { plan, exerciseIds };
 }

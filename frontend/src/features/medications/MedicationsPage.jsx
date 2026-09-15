@@ -52,7 +52,11 @@ export default function MedicationsPage() {
           Add every medicine you take, its strength, and when you take it. PillSync builds your
           reminders and refill alerts from this list automatically.
         </p>
-        <button type="button" onClick={() => setModalMedication(null)} className="btn-brand shrink-0">
+        <button
+          type="button"
+          onClick={() => setModalMedication(null)}
+          className="btn-brand shrink-0"
+        >
           + Add medicine
         </button>
       </div>
@@ -113,7 +117,10 @@ export default function MedicationsPage() {
                   <span className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">
                     {med.stock_quantity} in stock
                   </span>
-                  <span className="font-body text-[12px] font-semibold" style={{ color: "var(--brand-deep)" }}>
+                  <span
+                    className="font-body text-[12px] font-semibold"
+                    style={{ color: "var(--brand-deep)" }}
+                  >
                     {REFILL_STATUS_LABEL[prediction.status]}
                   </span>
                 </div>

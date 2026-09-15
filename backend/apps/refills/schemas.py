@@ -9,7 +9,7 @@ through without remapping.
 from __future__ import annotations
 
 from datetime import date
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -27,10 +27,10 @@ class DoseLogIn(BaseModel):
 
 
 class MedicationIn(BaseModel):
-    id: Optional[str] = None
-    name: Optional[str] = None
-    form: Optional[str] = None
-    therapeutic_class: Optional[str] = None
+    id: str | None = None
+    name: str | None = None
+    form: str | None = None
+    therapeutic_class: str | None = None
     stock_quantity: float = 0
     low_stock_threshold: float = 5
     refill_lead_days: int = 5
@@ -40,19 +40,19 @@ class PredictRequest(BaseModel):
     medication: MedicationIn
     schedules: list[ScheduleIn] = Field(default_factory=list)
     dose_logs: list[DoseLogIn] = Field(default_factory=list)
-    as_of: Optional[date] = None
+    as_of: date | None = None
 
 
 class RefillPredictionOut(BaseModel):
-    medication_id: Optional[str]
-    medication_name: Optional[str]
+    medication_id: str | None
+    medication_name: str | None
     prescribed_daily_dose: float
     predicted_adherence_rate: float
     adjusted_daily_dose: float
     stock_quantity: float
-    days_remaining: Optional[int]
-    depletion_date: Optional[str]
-    refill_by_date: Optional[str]
+    days_remaining: int | None
+    depletion_date: str | None
+    refill_by_date: str | None
     stock_status: Literal["no-schedule", "empty", "low", "ok"]
     adherence_risk: Literal["insufficient-data", "stable", "watch", "declining"]
     confidence: float
@@ -67,7 +67,7 @@ class MedicationCase(BaseModel):
 
 class BatchPredictRequest(BaseModel):
     cases: list[MedicationCase]
-    as_of: Optional[date] = None
+    as_of: date | None = None
 
 
 class BatchSummary(BaseModel):
@@ -83,18 +83,18 @@ class BatchPredictResponse(BaseModel):
 
 class PatientCase(BaseModel):
     patient_id: str
-    patient_name: Optional[str] = None
+    patient_name: str | None = None
     cases: list[MedicationCase] = Field(default_factory=list)
 
 
 class CaregiverPredictRequest(BaseModel):
     patients: list[PatientCase]
-    as_of: Optional[date] = None
+    as_of: date | None = None
 
 
 class PatientRefillSummary(BaseModel):
     patient_id: str
-    patient_name: Optional[str]
+    patient_name: str | None
     predictions: list[RefillPredictionOut]
     summary: BatchSummary
 
@@ -106,8 +106,8 @@ class CaregiverPredictResponse(BaseModel):
 
 class ModelHealth(BaseModel):
     model_loaded: bool
-    algorithm: Optional[str]
+    algorithm: str | None
     version: str
-    trained_at: Optional[str]
-    test_mae: Optional[float]
-    test_r2: Optional[float]
+    trained_at: str | None
+    test_mae: float | None
+    test_r2: float | None

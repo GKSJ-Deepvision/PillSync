@@ -16,7 +16,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from statistics import pstdev
-from typing import Any, Iterable
+from typing import Any
+from collections.abc import Iterable
 
 FEATURE_NAMES = [
     "prescribed_daily_dose",
@@ -73,21 +74,23 @@ def _parse_ts(value: Any) -> datetime:
 
 
 def _resolved(logs: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return [l for l in logs if l.get("status") in ("taken", "missed")]
+    return [log_entry for log_entry in logs if log_entry.get("status") in ("taken", "missed")]
 
 
 def _adherence_rate(logs: list[dict[str, Any]], now: datetime, days: int) -> float | None:
     cutoff = now - timedelta(days=days)
-    window = [l for l in _resolved(logs) if _parse_ts(l["scheduled_for"]) >= cutoff]
+    window = [log_entry for log_entry in _resolved(logs) if _parse_ts(log_entry["scheduled_for"]) >= cutoff]
     if not window:
         return None
-    taken = sum(1 for l in window if l["status"] == "taken")
+    taken = sum(1 for log_entry in window if log_entry["status"] == "taken")
     return taken / len(window)
 
 
 def _missed_streak(logs: list[dict[str, Any]], now: datetime) -> int:
     """Consecutive missed doses counting back from the most recent resolved log."""
-    ordered = sorted(_resolved(logs), key=lambda l: _parse_ts(l["scheduled_for"]), reverse=True)
+    ordered = sorted(
+        _resolved(logs), key=lambda log_entry: _parse_ts(log_entry["scheduled_for"]), reverse=True
+    )
     streak = 0
     for log in ordered:
         if log["status"] == "missed":
@@ -128,7 +131,7 @@ class FeatureBundle:
     names: list[str] = field(default_factory=lambda: list(FEATURE_NAMES))
 
     def as_dict(self) -> dict[str, float]:
-        return dict(zip(self.names, self.values))
+        return dict(zip(self.names, self.values, strict=False))
 
 
 def build_features(

@@ -1,7 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { computeAdherence, groupByDay, currentStreak, byMedication } from "../../src/lib/adherence";
 
-const iso = (day, hour = 8) => new Date(`2026-01-${String(day).padStart(2, "0")}T${String(hour).padStart(2, "0")}:00:00`).toISOString();
+const iso = (day, hour = 8) =>
+  new Date(
+    `2026-01-${String(day).padStart(2, "0")}T${String(hour).padStart(2, "0")}:00:00`
+  ).toISOString();
 
 describe("computeAdherence", () => {
   it("only counts resolved (taken/missed) doses", () => {

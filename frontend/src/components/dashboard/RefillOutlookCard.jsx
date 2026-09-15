@@ -20,17 +20,30 @@ function formatDate(iso) {
  * component, same predictions, so the two roles never see conflicting
  * numbers for the same medicine.
  */
-export default function RefillOutlookCard({ predictions = [], loading = false, linkTo = "/refills", title = "Refill outlook" }) {
+export default function RefillOutlookCard({
+  predictions = [],
+  loading = false,
+  linkTo = "/refills",
+  title = "Refill outlook",
+}) {
   const urgent = predictions.filter((p) => p.stock_status === "low" || p.stock_status === "empty");
-  const adherenceWatch = predictions.filter((p) => p.adherence_risk === "watch" || p.adherence_risk === "declining");
-  const soonest = [...predictions].sort((a, b) => (a.days_remaining ?? Infinity) - (b.days_remaining ?? Infinity)).slice(0, 3);
+  const adherenceWatch = predictions.filter(
+    (p) => p.adherence_risk === "watch" || p.adherence_risk === "declining"
+  );
+  const soonest = [...predictions]
+    .sort((a, b) => (a.days_remaining ?? Infinity) - (b.days_remaining ?? Infinity))
+    .slice(0, 3);
 
   return (
     <div className="card">
       <div className="flex items-center justify-between">
         <h2 className="font-display text-base font-semibold text-ink">{title}</h2>
         {linkTo && (
-          <Link to={linkTo} className="font-body text-[13px] font-semibold" style={{ color: "var(--brand-deep)" }}>
+          <Link
+            to={linkTo}
+            className="font-body text-[13px] font-semibold"
+            style={{ color: "var(--brand-deep)" }}
+          >
             View all →
           </Link>
         )}
@@ -62,11 +75,18 @@ export default function RefillOutlookCard({ predictions = [], loading = false, l
             {soonest.map((p) => (
               <li key={p.medication_id} className="flex items-center justify-between gap-3 py-2">
                 <div className="flex items-center gap-2">
-                  <span className={`h-2 w-2 rounded-full ${STATUS_DOT[p.stock_status]}`} aria-hidden="true" />
-                  <span className="font-body text-sm text-ink">{p.medication_name || "Medicine"}</span>
+                  <span
+                    className={`h-2 w-2 rounded-full ${STATUS_DOT[p.stock_status]}`}
+                    aria-hidden="true"
+                  />
+                  <span className="font-body text-sm text-ink">
+                    {p.medication_name || "Medicine"}
+                  </span>
                 </div>
                 <span className="font-body text-xs text-ink-fog">
-                  {p.days_remaining != null ? `${p.days_remaining}d left · runs out ${formatDate(p.depletion_date)}` : REFILL_STATUS_LABEL[p.stock_status]}
+                  {p.days_remaining != null
+                    ? `${p.days_remaining}d left · runs out ${formatDate(p.depletion_date)}`
+                    : REFILL_STATUS_LABEL[p.stock_status]}
                 </span>
               </li>
             ))}

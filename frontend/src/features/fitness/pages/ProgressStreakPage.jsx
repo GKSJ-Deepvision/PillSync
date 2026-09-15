@@ -3,7 +3,11 @@ import DashboardLayout from "../../../components/layout/DashboardLayout";
 import { useAuth } from "../../../context/AuthContext";
 import { listRecentLogs, listTodayAssignments, upsertTodayLog } from "../api/fitnessApi";
 import { getExerciseById } from "../data/exercisesLibrary";
-import { buildHeatmap, currentFitnessStreak, longestFitnessStreak } from "../../../lib/fitnessStreak";
+import {
+  buildHeatmap,
+  currentFitnessStreak,
+  longestFitnessStreak,
+} from "../../../lib/fitnessStreak";
 
 export default function ProgressStreakPage() {
   const { user } = useAuth();
@@ -62,13 +66,15 @@ export default function ProgressStreakPage() {
         <div className="card">
           <span className="badge bg-mint-soft text-mint-deep">Current streak</span>
           <p className="mt-3 font-display text-4xl font-semibold text-ink">
-            {streak} <span className="text-lg font-normal text-ink-fog">day{streak === 1 ? "" : "s"}</span>
+            {streak}{" "}
+            <span className="text-lg font-normal text-ink-fog">day{streak === 1 ? "" : "s"}</span>
           </p>
         </div>
         <div className="card">
           <span className="badge bg-indigo-soft text-indigo-deep">Longest streak</span>
           <p className="mt-3 font-display text-4xl font-semibold text-ink">
-            {longest} <span className="text-lg font-normal text-ink-fog">day{longest === 1 ? "" : "s"}</span>
+            {longest}{" "}
+            <span className="text-lg font-normal text-ink-fog">day{longest === 1 ? "" : "s"}</span>
           </p>
         </div>
       </div>
@@ -100,7 +106,10 @@ export default function ProgressStreakPage() {
               const ex = getExerciseById(a.exercise_id);
               if (!ex) return null;
               return (
-                <li key={a.id} className="flex items-center gap-3 rounded-xl border border-ink/5 px-4 py-3">
+                <li
+                  key={a.id}
+                  className="flex items-center gap-3 rounded-xl border border-ink/5 px-4 py-3"
+                >
                   <input
                     type="checkbox"
                     checked={completed.has(a.exercise_id)}

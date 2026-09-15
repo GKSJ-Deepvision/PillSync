@@ -32,7 +32,11 @@ export default function DaysOfWeekPicker({ value = [0, 1, 2, 3, 4, 5, 6], onChan
             style={
               active
                 ? { backgroundColor: "var(--brand)", color: "white" }
-                : { backgroundColor: "transparent", color: "#7C879C", border: "1px solid rgba(16,26,46,0.12)" }
+                : {
+                    backgroundColor: "transparent",
+                    color: "#7C879C",
+                    border: "1px solid rgba(16,26,46,0.12)",
+                  }
             }
           >
             {d.label}

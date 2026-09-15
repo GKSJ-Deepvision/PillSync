@@ -3,10 +3,26 @@ import MedicationAutocomplete from "../../components/common/MedicationAutocomple
 import DaysOfWeekPicker from "../../components/common/DaysOfWeekPicker";
 import { createMedication, updateMedication, replaceSchedules, deleteMedication } from "./api";
 
-const FORMS = ["tablet", "capsule", "syrup", "injection", "drops", "inhaler", "cream", "patch", "other"];
+const FORMS = [
+  "tablet",
+  "capsule",
+  "syrup",
+  "injection",
+  "drops",
+  "inhaler",
+  "cream",
+  "patch",
+  "other",
+];
 
 function emptySchedule() {
-  return { key: crypto.randomUUID(), label: "Dose", time_of_day: "08:00", dose_quantity: 1, days_of_week: [0, 1, 2, 3, 4, 5, 6] };
+  return {
+    key: crypto.randomUUID(),
+    label: "Dose",
+    time_of_day: "08:00",
+    dose_quantity: 1,
+    days_of_week: [0, 1, 2, 3, 4, 5, 6],
+  };
 }
 
 function toFormState(medication) {
@@ -44,7 +60,14 @@ function toFormState(medication) {
   };
 }
 
-export default function MedicationFormModal({ patientId, medication, onClose, onSaved, onDeleted, actorLabel = "patient" }) {
+export default function MedicationFormModal({
+  patientId,
+  medication,
+  onClose,
+  onSaved,
+  onDeleted,
+  actorLabel = "patient",
+}) {
   const [form, setForm] = useState(() => toFormState(medication));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -53,9 +76,13 @@ export default function MedicationFormModal({ patientId, medication, onClose, on
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
 
   const updateSchedule = (key, patch) =>
-    setForm((f) => ({ ...f, schedules: f.schedules.map((s) => (s.key === key ? { ...s, ...patch } : s)) }));
+    setForm((f) => ({
+      ...f,
+      schedules: f.schedules.map((s) => (s.key === key ? { ...s, ...patch } : s)),
+    }));
 
-  const addSchedule = () => setForm((f) => ({ ...f, schedules: [...f.schedules, emptySchedule()] }));
+  const addSchedule = () =>
+    setForm((f) => ({ ...f, schedules: [...f.schedules, emptySchedule()] }));
   const removeSchedule = (key) =>
     setForm((f) => ({ ...f, schedules: f.schedules.filter((s) => s.key !== key) }));
 
@@ -107,7 +134,10 @@ export default function MedicationFormModal({ patientId, medication, onClose, on
 
   const handleDelete = async () => {
     if (!medication) return;
-    if (!window.confirm(`Remove ${medication.name} and its full dose history? This can't be undone.`)) return;
+    if (
+      !window.confirm(`Remove ${medication.name} and its full dose history? This can't be undone.`)
+    )
+      return;
     setSaving(true);
     const { error: delError } = await deleteMedication(medication.id);
     setSaving(false);
@@ -125,7 +155,12 @@ export default function MedicationFormModal({ patientId, medication, onClose, on
           <h2 className="font-display text-lg font-semibold text-ink">
             {isEditing ? "Edit medicine" : `Add a medicine for ${actorLabel}`}
           </h2>
-          <button type="button" onClick={onClose} className="text-ink-fog hover:text-ink" aria-label="Close">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-ink-fog hover:text-ink"
+            aria-label="Close"
+          >
             ✕
           </button>
         </div>
@@ -159,7 +194,11 @@ export default function MedicationFormModal({ patientId, medication, onClose, on
             </div>
             <div>
               <label className="field-label">Form</label>
-              <select className="field-input" value={form.form} onChange={(e) => set({ form: e.target.value })}>
+              <select
+                className="field-input"
+                value={form.form}
+                onChange={(e) => set({ form: e.target.value })}
+              >
                 {FORMS.map((f) => (
                   <option key={f} value={f}>
                     {f[0].toUpperCase() + f.slice(1)}
@@ -274,7 +313,12 @@ export default function MedicationFormModal({ patientId, medication, onClose, on
 
           <div className="flex items-center justify-between pt-2">
             {isEditing ? (
-              <button type="button" onClick={handleDelete} disabled={saving} className="font-body text-[13px] font-semibold text-rose">
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={saving}
+                className="font-body text-[13px] font-semibold text-rose"
+              >
                 Delete medicine
               </button>
             ) : (

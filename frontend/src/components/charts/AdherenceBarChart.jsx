@@ -10,7 +10,13 @@ export default function AdherenceBarChart({ days, height = 140 }) {
   const width = Math.max(days.length * (barWidth + gap), 240);
 
   return (
-    <svg viewBox={`0 0 ${width} ${height + 24}`} width="100%" height={height + 24} role="img" aria-label="Daily adherence percentage">
+    <svg
+      viewBox={`0 0 ${width} ${height + 24}`}
+      width="100%"
+      height={height + 24}
+      role="img"
+      aria-label="Daily adherence percentage"
+    >
       {[0, 50, 100].map((line) => (
         <line
           key={line}
@@ -26,7 +32,14 @@ export default function AdherenceBarChart({ days, height = 140 }) {
         const x = i * (barWidth + gap);
         const pct = d.percentage ?? 0;
         const barHeight = (pct / 100) * height;
-        const color = d.percentage === null ? "#EAEEF6" : pct >= 80 ? "var(--brand)" : pct >= 50 ? "var(--accent)" : "#E23F58";
+        const color =
+          d.percentage === null
+            ? "#EAEEF6"
+            : pct >= 80
+              ? "var(--brand)"
+              : pct >= 50
+                ? "var(--accent)"
+                : "#E23F58";
         return (
           <g key={d.label}>
             <rect
@@ -39,7 +52,15 @@ export default function AdherenceBarChart({ days, height = 140 }) {
             >
               <title>{`${d.label}: ${d.percentage === null ? "no doses" : `${d.percentage}%`}`}</title>
             </rect>
-            <text x={x + barWidth / 2} y={height + 14} textAnchor="middle" fontSize="9" fill="currentColor" opacity="0.55" fontFamily="'IBM Plex Mono', monospace">
+            <text
+              x={x + barWidth / 2}
+              y={height + 14}
+              textAnchor="middle"
+              fontSize="9"
+              fill="currentColor"
+              opacity="0.55"
+              fontFamily="'IBM Plex Mono', monospace"
+            >
               {d.label}
             </text>
           </g>

@@ -77,7 +77,8 @@ function Figure3D({ exerciseId, ageGroup, gender }) {
     if (rightKneeRef.current) rightKneeRef.current.rotation.x = a(pose.rightKnee);
     if (leftShoulderRef.current) leftShoulderRef.current.rotation.x = a(pose.leftShoulder);
     if (rightShoulderRef.current) rightShoulderRef.current.rotation.x = a(pose.rightShoulder);
-    if (torsoRef.current) torsoRef.current.rotation.x = deg2rad(sampleAngle(pose.torsoLean, t, speed, animate) + stoop);
+    if (torsoRef.current)
+      torsoRef.current.rotation.x = deg2rad(sampleAngle(pose.torsoLean, t, speed, animate) + stoop);
     if (headRef.current) headRef.current.rotation.x = a(pose.headTilt);
     if (bodyTiltRef.current) bodyTiltRef.current.rotation.x = deg2rad(pose.figureRotate || 0);
 

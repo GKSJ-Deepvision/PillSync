@@ -4,10 +4,7 @@
     "name": "Paracetamol",
     "generic_name": "Acetaminophen",
     "form": "tablet",
-    "common_strengths": [
-      "500 mg",
-      "650 mg"
-    ],
+    "common_strengths": ["500 mg", "650 mg"],
     "category": "Analgesic / Antipyretic",
     "common_frequency": "As directed by physician"
   },
@@ -16,10 +13,7 @@
     "name": "Ibuprofen",
     "generic_name": "Ibuprofen",
     "form": "tablet",
-    "common_strengths": [
-      "200 mg",
-      "400 mg"
-    ],
+    "common_strengths": ["200 mg", "400 mg"],
     "category": "NSAID",
     "common_frequency": "As directed by physician"
   },
@@ -28,10 +22,7 @@
     "name": "Aspirin",
     "generic_name": "Acetylsalicylic acid",
     "form": "tablet",
-    "common_strengths": [
-      "75 mg",
-      "300 mg"
-    ],
+    "common_strengths": ["75 mg", "300 mg"],
     "category": "Antiplatelet / NSAID",
     "common_frequency": "As directed by physician"
   },
@@ -40,10 +31,7 @@
     "name": "Amoxicillin",
     "generic_name": "Amoxicillin",
     "form": "capsule",
-    "common_strengths": [
-      "250 mg",
-      "500 mg"
-    ],
+    "common_strengths": ["250 mg", "500 mg"],
     "category": "Antibiotic",
     "common_frequency": "As directed by physician"
   },
@@ -52,10 +40,7 @@
     "name": "Azithromycin",
     "generic_name": "Azithromycin",
     "form": "tablet",
-    "common_strengths": [
-      "250 mg",
-      "500 mg"
-    ],
+    "common_strengths": ["250 mg", "500 mg"],
     "category": "Antibiotic",
     "common_frequency": "As directed by physician"
   },
@@ -64,10 +49,7 @@
     "name": "Ciprofloxacin",
     "generic_name": "Ciprofloxacin",
     "form": "tablet",
-    "common_strengths": [
-      "250 mg",
-      "500 mg"
-    ],
+    "common_strengths": ["250 mg", "500 mg"],
     "category": "Antibiotic",
     "common_frequency": "As directed by physician"
   },
@@ -76,10 +58,7 @@
     "name": "Metformin",
     "generic_name": "Metformin HCl",
     "form": "tablet",
-    "common_strengths": [
-      "500 mg",
-      "1000 mg"
-    ],
+    "common_strengths": ["500 mg", "1000 mg"],
     "category": "Antidiabetic",
     "common_frequency": "As directed by physician"
   },
@@ -88,10 +67,7 @@
     "name": "Glimepiride",
     "generic_name": "Glimepiride",
     "form": "tablet",
-    "common_strengths": [
-      "1 mg",
-      "2 mg"
-    ],
+    "common_strengths": ["1 mg", "2 mg"],
     "category": "Antidiabetic",
     "common_frequency": "As directed by physician"
   },
@@ -100,9 +76,7 @@
     "name": "Insulin Glargine",
     "generic_name": "Insulin glargine",
     "form": "injection",
-    "common_strengths": [
-      "100 IU/mL"
-    ],
+    "common_strengths": ["100 IU/mL"],
     "category": "Antidiabetic",
     "common_frequency": "As directed by physician"
   },
@@ -111,11 +85,7 @@
     "name": "Atorvastatin",
     "generic_name": "Atorvastatin",
     "form": "tablet",
-    "common_strengths": [
-      "10 mg",
-      "20 mg",
-      "40 mg"
-    ],
+    "common_strengths": ["10 mg", "20 mg", "40 mg"],
     "category": "Statin",
     "common_frequency": "As directed by physician"
   },
@@ -124,10 +94,7 @@
     "name": "Rosuvastatin",
     "generic_name": "Rosuvastatin",
     "form": "tablet",
-    "common_strengths": [
-      "5 mg",
-      "10 mg"
-    ],
+    "common_strengths": ["5 mg", "10 mg"],
     "category": "Statin",
     "common_frequency": "As directed by physician"
   },
@@ -136,10 +103,7 @@
     "name": "Amlodipine",
     "generic_name": "Amlodipine besylate",
     "form": "tablet",
-    "common_strengths": [
-      "5 mg",
-      "10 mg"
-    ],
+    "common_strengths": ["5 mg", "10 mg"],
     "category": "Antihypertensive",
     "common_frequency": "As directed by physician"
   },
@@ -148,10 +112,7 @@
     "name": "Losartan",
     "generic_name": "Losartan potassium",
     "form": "tablet",
-    "common_strengths": [
-      "25 mg",
-      "50 mg"
-    ],
+    "common_strengths": ["25 mg", "50 mg"],
     "category": "Antihypertensive",
     "common_frequency": "As directed by physician"
   },
@@ -160,10 +121,7 @@
     "name": "Telmisartan",
     "generic_name": "Telmisartan",
     "form": "tablet",
-    "common_strengths": [
-      "40 mg",
-      "80 mg"
-    ],
+    "common_strengths": ["40 mg", "80 mg"],
     "category": "Antihypertensive",
     "common_frequency": "As directed by physician"
   },
@@ -172,10 +130,7 @@
     "name": "Metoprolol",
     "generic_name": "Metoprolol tartrate",
     "form": "tablet",
-    "common_strengths": [
-      "25 mg",
-      "50 mg"
-    ],
+    "common_strengths": ["25 mg", "50 mg"],
     "category": "Beta blocker",
     "common_frequency": "As directed by physician"
   },
@@ -184,10 +139,7 @@
     "name": "Enalapril",
     "generic_name": "Enalapril maleate",
     "form": "tablet",
-    "common_strengths": [
-      "5 mg",
-      "10 mg"
-    ],
+    "common_strengths": ["5 mg", "10 mg"],
     "category": "ACE inhibitor",
     "common_frequency": "As directed by physician"
   },
@@ -196,10 +148,7 @@
     "name": "Hydrochlorothiazide",
     "generic_name": "Hydrochlorothiazide",
     "form": "tablet",
-    "common_strengths": [
-      "12.5 mg",
-      "25 mg"
-    ],
+    "common_strengths": ["12.5 mg", "25 mg"],
     "category": "Diuretic",
     "common_frequency": "As directed by physician"
   },
@@ -208,10 +157,7 @@
     "name": "Furosemide",
     "generic_name": "Furosemide",
     "form": "tablet",
-    "common_strengths": [
-      "20 mg",
-      "40 mg"
-    ],
+    "common_strengths": ["20 mg", "40 mg"],
     "category": "Diuretic",
     "common_frequency": "As directed by physician"
   },
@@ -220,10 +166,7 @@
     "name": "Omeprazole",
     "generic_name": "Omeprazole",
     "form": "capsule",
-    "common_strengths": [
-      "20 mg",
-      "40 mg"
-    ],
+    "common_strengths": ["20 mg", "40 mg"],
     "category": "PPI / Antacid",
     "common_frequency": "As directed by physician"
   },
@@ -232,10 +175,7 @@
     "name": "Pantoprazole",
     "generic_name": "Pantoprazole",
     "form": "tablet",
-    "common_strengths": [
-      "20 mg",
-      "40 mg"
-    ],
+    "common_strengths": ["20 mg", "40 mg"],
     "category": "PPI / Antacid",
     "common_frequency": "As directed by physician"
   },
@@ -244,10 +184,7 @@
     "name": "Ranitidine",
     "generic_name": "Ranitidine",
     "form": "tablet",
-    "common_strengths": [
-      "150 mg",
-      "300 mg"
-    ],
+    "common_strengths": ["150 mg", "300 mg"],
     "category": "H2 blocker",
     "common_frequency": "As directed by physician"
   },
@@ -256,9 +193,7 @@
     "name": "Domperidone",
     "generic_name": "Domperidone",
     "form": "tablet",
-    "common_strengths": [
-      "10 mg"
-    ],
+    "common_strengths": ["10 mg"],
     "category": "Antiemetic",
     "common_frequency": "As directed by physician"
   },
@@ -267,10 +202,7 @@
     "name": "Ondansetron",
     "generic_name": "Ondansetron",
     "form": "tablet",
-    "common_strengths": [
-      "4 mg",
-      "8 mg"
-    ],
+    "common_strengths": ["4 mg", "8 mg"],
     "category": "Antiemetic",
     "common_frequency": "As directed by physician"
   },
@@ -279,9 +211,7 @@
     "name": "Cetirizine",
     "generic_name": "Cetirizine HCl",
     "form": "tablet",
-    "common_strengths": [
-      "10 mg"
-    ],
+    "common_strengths": ["10 mg"],
     "category": "Antihistamine",
     "common_frequency": "As directed by physician"
   },
@@ -290,9 +220,7 @@
     "name": "Loratadine",
     "generic_name": "Loratadine",
     "form": "tablet",
-    "common_strengths": [
-      "10 mg"
-    ],
+    "common_strengths": ["10 mg"],
     "category": "Antihistamine",
     "common_frequency": "As directed by physician"
   },
@@ -301,9 +229,7 @@
     "name": "Levocetirizine",
     "generic_name": "Levocetirizine",
     "form": "tablet",
-    "common_strengths": [
-      "5 mg"
-    ],
+    "common_strengths": ["5 mg"],
     "category": "Antihistamine",
     "common_frequency": "As directed by physician"
   },
@@ -312,10 +238,7 @@
     "name": "Montelukast",
     "generic_name": "Montelukast sodium",
     "form": "tablet",
-    "common_strengths": [
-      "4 mg",
-      "10 mg"
-    ],
+    "common_strengths": ["4 mg", "10 mg"],
     "category": "Leukotriene antagonist",
     "common_frequency": "As directed by physician"
   },
@@ -324,9 +247,7 @@
     "name": "Salbutamol Inhaler",
     "generic_name": "Salbutamol",
     "form": "inhaler",
-    "common_strengths": [
-      "100 mcg/dose"
-    ],
+    "common_strengths": ["100 mcg/dose"],
     "category": "Bronchodilator",
     "common_frequency": "As directed by physician"
   },
@@ -335,9 +256,7 @@
     "name": "Budesonide Inhaler",
     "generic_name": "Budesonide",
     "form": "inhaler",
-    "common_strengths": [
-      "200 mcg/dose"
-    ],
+    "common_strengths": ["200 mcg/dose"],
     "category": "Corticosteroid",
     "common_frequency": "As directed by physician"
   },
@@ -346,11 +265,7 @@
     "name": "Levothyroxine",
     "generic_name": "Levothyroxine sodium",
     "form": "tablet",
-    "common_strengths": [
-      "25 mcg",
-      "50 mcg",
-      "100 mcg"
-    ],
+    "common_strengths": ["25 mcg", "50 mcg", "100 mcg"],
     "category": "Thyroid hormone",
     "common_frequency": "As directed by physician"
   },
@@ -359,10 +274,7 @@
     "name": "Prednisolone",
     "generic_name": "Prednisolone",
     "form": "tablet",
-    "common_strengths": [
-      "5 mg",
-      "10 mg"
-    ],
+    "common_strengths": ["5 mg", "10 mg"],
     "category": "Corticosteroid",
     "common_frequency": "As directed by physician"
   },
@@ -371,10 +283,7 @@
     "name": "Dexamethasone",
     "generic_name": "Dexamethasone",
     "form": "tablet",
-    "common_strengths": [
-      "0.5 mg",
-      "4 mg"
-    ],
+    "common_strengths": ["0.5 mg", "4 mg"],
     "category": "Corticosteroid",
     "common_frequency": "As directed by physician"
   },
@@ -383,10 +292,7 @@
     "name": "Warfarin",
     "generic_name": "Warfarin sodium",
     "form": "tablet",
-    "common_strengths": [
-      "1 mg",
-      "5 mg"
-    ],
+    "common_strengths": ["1 mg", "5 mg"],
     "category": "Anticoagulant",
     "common_frequency": "As directed by physician"
   },
@@ -395,9 +301,7 @@
     "name": "Clopidogrel",
     "generic_name": "Clopidogrel",
     "form": "tablet",
-    "common_strengths": [
-      "75 mg"
-    ],
+    "common_strengths": ["75 mg"],
     "category": "Antiplatelet",
     "common_frequency": "As directed by physician"
   },
@@ -406,10 +310,7 @@
     "name": "Diazepam",
     "generic_name": "Diazepam",
     "form": "tablet",
-    "common_strengths": [
-      "5 mg",
-      "10 mg"
-    ],
+    "common_strengths": ["5 mg", "10 mg"],
     "category": "Anxiolytic",
     "common_frequency": "As directed by physician"
   },
@@ -418,10 +319,7 @@
     "name": "Alprazolam",
     "generic_name": "Alprazolam",
     "form": "tablet",
-    "common_strengths": [
-      "0.25 mg",
-      "0.5 mg"
-    ],
+    "common_strengths": ["0.25 mg", "0.5 mg"],
     "category": "Anxiolytic",
     "common_frequency": "As directed by physician"
   },
@@ -430,10 +328,7 @@
     "name": "Sertraline",
     "generic_name": "Sertraline HCl",
     "form": "tablet",
-    "common_strengths": [
-      "50 mg",
-      "100 mg"
-    ],
+    "common_strengths": ["50 mg", "100 mg"],
     "category": "SSRI Antidepressant",
     "common_frequency": "As directed by physician"
   },
@@ -442,10 +337,7 @@
     "name": "Escitalopram",
     "generic_name": "Escitalopram",
     "form": "tablet",
-    "common_strengths": [
-      "5 mg",
-      "10 mg"
-    ],
+    "common_strengths": ["5 mg", "10 mg"],
     "category": "SSRI Antidepressant",
     "common_frequency": "As directed by physician"
   },
@@ -454,9 +346,7 @@
     "name": "Fluoxetine",
     "generic_name": "Fluoxetine HCl",
     "form": "capsule",
-    "common_strengths": [
-      "20 mg"
-    ],
+    "common_strengths": ["20 mg"],
     "category": "SSRI Antidepressant",
     "common_frequency": "As directed by physician"
   },
@@ -465,10 +355,7 @@
     "name": "Amitriptyline",
     "generic_name": "Amitriptyline HCl",
     "form": "tablet",
-    "common_strengths": [
-      "10 mg",
-      "25 mg"
-    ],
+    "common_strengths": ["10 mg", "25 mg"],
     "category": "Tricyclic Antidepressant",
     "common_frequency": "As directed by physician"
   },
@@ -477,10 +364,7 @@
     "name": "Gabapentin",
     "generic_name": "Gabapentin",
     "form": "capsule",
-    "common_strengths": [
-      "100 mg",
-      "300 mg"
-    ],
+    "common_strengths": ["100 mg", "300 mg"],
     "category": "Anticonvulsant",
     "common_frequency": "As directed by physician"
   },
@@ -489,10 +373,7 @@
     "name": "Pregabalin",
     "generic_name": "Pregabalin",
     "form": "capsule",
-    "common_strengths": [
-      "75 mg",
-      "150 mg"
-    ],
+    "common_strengths": ["75 mg", "150 mg"],
     "category": "Anticonvulsant",
     "common_frequency": "As directed by physician"
   },
@@ -501,10 +382,7 @@
     "name": "Levetiracetam",
     "generic_name": "Levetiracetam",
     "form": "tablet",
-    "common_strengths": [
-      "250 mg",
-      "500 mg"
-    ],
+    "common_strengths": ["250 mg", "500 mg"],
     "category": "Anticonvulsant",
     "common_frequency": "As directed by physician"
   },
@@ -513,9 +391,7 @@
     "name": "Phenytoin",
     "generic_name": "Phenytoin sodium",
     "form": "tablet",
-    "common_strengths": [
-      "100 mg"
-    ],
+    "common_strengths": ["100 mg"],
     "category": "Anticonvulsant",
     "common_frequency": "As directed by physician"
   },
@@ -524,10 +400,7 @@
     "name": "Vitamin D3",
     "generic_name": "Cholecalciferol",
     "form": "tablet",
-    "common_strengths": [
-      "1000 IU",
-      "60000 IU"
-    ],
+    "common_strengths": ["1000 IU", "60000 IU"],
     "category": "Supplement",
     "common_frequency": "As directed by physician"
   },
@@ -536,9 +409,7 @@
     "name": "Vitamin B12",
     "generic_name": "Cyanocobalamin",
     "form": "tablet",
-    "common_strengths": [
-      "500 mcg"
-    ],
+    "common_strengths": ["500 mcg"],
     "category": "Supplement",
     "common_frequency": "As directed by physician"
   },
@@ -547,9 +418,7 @@
     "name": "Folic Acid",
     "generic_name": "Folic acid",
     "form": "tablet",
-    "common_strengths": [
-      "5 mg"
-    ],
+    "common_strengths": ["5 mg"],
     "category": "Supplement",
     "common_frequency": "As directed by physician"
   },
@@ -558,9 +427,7 @@
     "name": "Calcium Carbonate",
     "generic_name": "Calcium carbonate",
     "form": "tablet",
-    "common_strengths": [
-      "500 mg"
-    ],
+    "common_strengths": ["500 mg"],
     "category": "Supplement",
     "common_frequency": "As directed by physician"
   },
@@ -569,9 +436,7 @@
     "name": "Iron Supplement",
     "generic_name": "Ferrous sulfate",
     "form": "tablet",
-    "common_strengths": [
-      "325 mg"
-    ],
+    "common_strengths": ["325 mg"],
     "category": "Supplement",
     "common_frequency": "As directed by physician"
   },
@@ -580,9 +445,7 @@
     "name": "Multivitamin",
     "generic_name": "Multivitamin complex",
     "form": "tablet",
-    "common_strengths": [
-      "1 tablet"
-    ],
+    "common_strengths": ["1 tablet"],
     "category": "Supplement",
     "common_frequency": "As directed by physician"
   },
@@ -591,9 +454,7 @@
     "name": "Cough Syrup",
     "generic_name": "Dextromethorphan",
     "form": "syrup",
-    "common_strengths": [
-      "10 mL"
-    ],
+    "common_strengths": ["10 mL"],
     "category": "Antitussive",
     "common_frequency": "As directed by physician"
   },
@@ -602,9 +463,7 @@
     "name": "Amoxicillin-Clavulanate",
     "generic_name": "Co-amoxiclav",
     "form": "tablet",
-    "common_strengths": [
-      "625 mg"
-    ],
+    "common_strengths": ["625 mg"],
     "category": "Antibiotic",
     "common_frequency": "As directed by physician"
   },
@@ -613,9 +472,7 @@
     "name": "Doxycycline",
     "generic_name": "Doxycycline",
     "form": "capsule",
-    "common_strengths": [
-      "100 mg"
-    ],
+    "common_strengths": ["100 mg"],
     "category": "Antibiotic",
     "common_frequency": "As directed by physician"
   },
@@ -624,9 +481,7 @@
     "name": "Metronidazole",
     "generic_name": "Metronidazole",
     "form": "tablet",
-    "common_strengths": [
-      "400 mg"
-    ],
+    "common_strengths": ["400 mg"],
     "category": "Antibiotic",
     "common_frequency": "As directed by physician"
   },
@@ -635,9 +490,7 @@
     "name": "Diclofenac",
     "generic_name": "Diclofenac sodium",
     "form": "tablet",
-    "common_strengths": [
-      "50 mg"
-    ],
+    "common_strengths": ["50 mg"],
     "category": "NSAID",
     "common_frequency": "As directed by physician"
   },
@@ -646,10 +499,7 @@
     "name": "Naproxen",
     "generic_name": "Naproxen",
     "form": "tablet",
-    "common_strengths": [
-      "250 mg",
-      "500 mg"
-    ],
+    "common_strengths": ["250 mg", "500 mg"],
     "category": "NSAID",
     "common_frequency": "As directed by physician"
   },
@@ -658,9 +508,7 @@
     "name": "Tramadol",
     "generic_name": "Tramadol HCl",
     "form": "capsule",
-    "common_strengths": [
-      "50 mg"
-    ],
+    "common_strengths": ["50 mg"],
     "category": "Opioid analgesic",
     "common_frequency": "As directed by physician"
   },
@@ -669,9 +517,7 @@
     "name": "Codeine",
     "generic_name": "Codeine phosphate",
     "form": "tablet",
-    "common_strengths": [
-      "30 mg"
-    ],
+    "common_strengths": ["30 mg"],
     "category": "Opioid analgesic",
     "common_frequency": "As directed by physician"
   },
@@ -680,9 +526,7 @@
     "name": "Insulin Aspart",
     "generic_name": "Insulin aspart",
     "form": "injection",
-    "common_strengths": [
-      "100 IU/mL"
-    ],
+    "common_strengths": ["100 IU/mL"],
     "category": "Antidiabetic",
     "common_frequency": "As directed by physician"
   },
@@ -691,10 +535,7 @@
     "name": "Sitagliptin",
     "generic_name": "Sitagliptin",
     "form": "tablet",
-    "common_strengths": [
-      "50 mg",
-      "100 mg"
-    ],
+    "common_strengths": ["50 mg", "100 mg"],
     "category": "Antidiabetic",
     "common_frequency": "As directed by physician"
   },
@@ -703,10 +544,7 @@
     "name": "Empagliflozin",
     "generic_name": "Empagliflozin",
     "form": "tablet",
-    "common_strengths": [
-      "10 mg",
-      "25 mg"
-    ],
+    "common_strengths": ["10 mg", "25 mg"],
     "category": "Antidiabetic",
     "common_frequency": "As directed by physician"
   },
@@ -715,10 +553,7 @@
     "name": "Allopurinol",
     "generic_name": "Allopurinol",
     "form": "tablet",
-    "common_strengths": [
-      "100 mg",
-      "300 mg"
-    ],
+    "common_strengths": ["100 mg", "300 mg"],
     "category": "Antigout",
     "common_frequency": "As directed by physician"
   },
@@ -727,9 +562,7 @@
     "name": "Colchicine",
     "generic_name": "Colchicine",
     "form": "tablet",
-    "common_strengths": [
-      "0.5 mg"
-    ],
+    "common_strengths": ["0.5 mg"],
     "category": "Antigout",
     "common_frequency": "As directed by physician"
   },
@@ -738,10 +571,7 @@
     "name": "Isosorbide Mononitrate",
     "generic_name": "Isosorbide mononitrate",
     "form": "tablet",
-    "common_strengths": [
-      "20 mg",
-      "60 mg"
-    ],
+    "common_strengths": ["20 mg", "60 mg"],
     "category": "Antianginal",
     "common_frequency": "As directed by physician"
   },
@@ -750,9 +580,7 @@
     "name": "Digoxin",
     "generic_name": "Digoxin",
     "form": "tablet",
-    "common_strengths": [
-      "0.25 mg"
-    ],
+    "common_strengths": ["0.25 mg"],
     "category": "Cardiac glycoside",
     "common_frequency": "As directed by physician"
   },
@@ -761,10 +589,7 @@
     "name": "Spironolactone",
     "generic_name": "Spironolactone",
     "form": "tablet",
-    "common_strengths": [
-      "25 mg",
-      "50 mg"
-    ],
+    "common_strengths": ["25 mg", "50 mg"],
     "category": "Diuretic",
     "common_frequency": "As directed by physician"
   },
@@ -773,9 +598,7 @@
     "name": "Tamsulosin",
     "generic_name": "Tamsulosin HCl",
     "form": "capsule",
-    "common_strengths": [
-      "0.4 mg"
-    ],
+    "common_strengths": ["0.4 mg"],
     "category": "Alpha blocker",
     "common_frequency": "As directed by physician"
   },
@@ -784,10 +607,7 @@
     "name": "Finasteride",
     "generic_name": "Finasteride",
     "form": "tablet",
-    "common_strengths": [
-      "1 mg",
-      "5 mg"
-    ],
+    "common_strengths": ["1 mg", "5 mg"],
     "category": "5-alpha reductase inhibitor",
     "common_frequency": "As directed by physician"
   },
@@ -796,10 +616,7 @@
     "name": "Sildenafil",
     "generic_name": "Sildenafil citrate",
     "form": "tablet",
-    "common_strengths": [
-      "50 mg",
-      "100 mg"
-    ],
+    "common_strengths": ["50 mg", "100 mg"],
     "category": "PDE5 inhibitor",
     "common_frequency": "As directed by physician"
   },
@@ -808,9 +625,7 @@
     "name": "Latanoprost Eye Drops",
     "generic_name": "Latanoprost",
     "form": "drops",
-    "common_strengths": [
-      "0.005%"
-    ],
+    "common_strengths": ["0.005%"],
     "category": "Ophthalmic",
     "common_frequency": "As directed by physician"
   },
@@ -819,9 +634,7 @@
     "name": "Timolol Eye Drops",
     "generic_name": "Timolol maleate",
     "form": "drops",
-    "common_strengths": [
-      "0.5%"
-    ],
+    "common_strengths": ["0.5%"],
     "category": "Ophthalmic",
     "common_frequency": "As directed by physician"
   },
@@ -830,9 +643,7 @@
     "name": "Hydrocortisone Cream",
     "generic_name": "Hydrocortisone",
     "form": "cream",
-    "common_strengths": [
-      "1%"
-    ],
+    "common_strengths": ["1%"],
     "category": "Topical corticosteroid",
     "common_frequency": "As directed by physician"
   },
@@ -841,9 +652,7 @@
     "name": "Clotrimazole Cream",
     "generic_name": "Clotrimazole",
     "form": "cream",
-    "common_strengths": [
-      "1%"
-    ],
+    "common_strengths": ["1%"],
     "category": "Antifungal",
     "common_frequency": "As directed by physician"
   },
@@ -852,9 +661,7 @@
     "name": "Nicotine Patch",
     "generic_name": "Nicotine",
     "form": "patch",
-    "common_strengths": [
-      "21 mg/24h"
-    ],
+    "common_strengths": ["21 mg/24h"],
     "category": "Smoking cessation",
     "common_frequency": "As directed by physician"
   }

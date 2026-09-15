@@ -7,7 +7,11 @@
 export const CATEGORIES = [
   { key: "cardio", label: "Cardio", blurb: "Gets your heart rate up." },
   { key: "strength", label: "Strength", blurb: "Builds muscle and bone density." },
-  { key: "flexibility", label: "Flexibility & Mobility", blurb: "Loosens joints, eases stiffness." },
+  {
+    key: "flexibility",
+    label: "Flexibility & Mobility",
+    blurb: "Loosens joints, eases stiffness.",
+  },
   { key: "balance", label: "Balance", blurb: "Improves stability, lowers fall risk." },
 ];
 
@@ -39,7 +43,11 @@ export const EXERCISES = [
     ageGroups: ["young", "middle"],
     equipment: "None",
     description: "A full-body cardio move that opens and closes the arms and legs in a jump.",
-    benefits: ["Fast heart-rate elevation", "Works arms, legs and core together", "Great for interval training"],
+    benefits: [
+      "Fast heart-rate elevation",
+      "Works arms, legs and core together",
+      "Great for interval training",
+    ],
     steps: [
       "Start standing with feet together, arms at your sides.",
       "Jump your feet out wide while raising your arms overhead.",
@@ -54,7 +62,11 @@ export const EXERCISES = [
     ageGroups: ["young", "middle"],
     equipment: "None",
     description: "A hip-hinge and knee-bend movement that builds lower-body strength.",
-    benefits: ["Strengthens quads, glutes and hamstrings", "Improves everyday movements like sitting/standing", "Builds core stability"],
+    benefits: [
+      "Strengthens quads, glutes and hamstrings",
+      "Improves everyday movements like sitting/standing",
+      "Builds core stability",
+    ],
     steps: [
       "Stand with feet shoulder-width apart, chest up.",
       "Push your hips back and bend your knees like sitting into a chair.",
@@ -69,7 +81,11 @@ export const EXERCISES = [
     ageGroups: ["young", "middle"],
     equipment: "None",
     description: "An alternating single-leg strength move that also challenges balance.",
-    benefits: ["Builds unilateral leg strength", "Improves balance and coordination", "Engages glutes and core"],
+    benefits: [
+      "Builds unilateral leg strength",
+      "Improves balance and coordination",
+      "Engages glutes and core",
+    ],
     steps: [
       "Stand tall, step one foot forward into a long stride.",
       "Lower your hips until both knees are bent near 90°.",
@@ -83,8 +99,13 @@ export const EXERCISES = [
     category: "strength",
     ageGroups: ["young", "middle"],
     equipment: "None (or knees-down modification)",
-    description: "A classic upper-body press performed face-down, supported by hands and toes (or knees).",
-    benefits: ["Strengthens chest, shoulders and triceps", "Engages the core to keep the body straight", "Scales easily via knee push-ups"],
+    description:
+      "A classic upper-body press performed face-down, supported by hands and toes (or knees).",
+    benefits: [
+      "Strengthens chest, shoulders and triceps",
+      "Engages the core to keep the body straight",
+      "Scales easily via knee push-ups",
+    ],
     steps: [
       "Start in a plank with hands slightly wider than shoulders.",
       "Keep your body in one straight line from head to heels.",
@@ -99,7 +120,11 @@ export const EXERCISES = [
     ageGroups: ["young", "middle"],
     equipment: "None",
     description: "An isometric hold that builds core endurance without any movement.",
-    benefits: ["Strengthens deep core muscles", "Improves posture", "No joint strain from repetitive motion"],
+    benefits: [
+      "Strengthens deep core muscles",
+      "Improves posture",
+      "No joint strain from repetitive motion",
+    ],
     steps: [
       "Rest on forearms and toes, elbows under shoulders.",
       "Keep your body in a straight line — no sagging hips, no piked hips.",
@@ -115,7 +140,11 @@ export const EXERCISES = [
     seniorFriendly: true,
     equipment: "A wall",
     description: "A gentler, standing version of the push-up that's easy on wrists and shoulders.",
-    benefits: ["Builds upper-body strength safely", "No floor get-up/get-down required", "Great joint-friendly starting point"],
+    benefits: [
+      "Builds upper-body strength safely",
+      "No floor get-up/get-down required",
+      "Great joint-friendly starting point",
+    ],
     steps: [
       "Stand an arm's length from a wall, palms flat against it at shoulder height.",
       "Keep your body straight and lean in by bending your elbows.",
@@ -131,7 +160,11 @@ export const EXERCISES = [
     seniorFriendly: true,
     equipment: "A sturdy chair",
     description: "A functional squat using a chair as a safety guide and range-of-motion target.",
-    benefits: ["Builds the exact strength used to stand up from a seat", "Reduces fall risk", "Safe way to load the legs for older adults"],
+    benefits: [
+      "Builds the exact strength used to stand up from a seat",
+      "Reduces fall risk",
+      "Safe way to load the legs for older adults",
+    ],
     steps: [
       "Sit toward the front edge of a sturdy chair, feet flat on the floor.",
       "Lean slightly forward and press through your feet to stand up.",
@@ -147,7 +180,11 @@ export const EXERCISES = [
     seniorFriendly: true,
     equipment: "A chair",
     description: "A seated cardio movement that's safe for anyone with balance concerns.",
-    benefits: ["Raises heart rate with zero fall risk", "Improves hip mobility and circulation", "Can be done anywhere with a chair"],
+    benefits: [
+      "Raises heart rate with zero fall risk",
+      "Improves hip mobility and circulation",
+      "Can be done anywhere with a chair",
+    ],
     steps: [
       "Sit tall toward the front of a chair, feet flat on the floor.",
       "Lift one knee up toward your chest, then lower it.",
@@ -163,7 +200,11 @@ export const EXERCISES = [
     seniorFriendly: true,
     equipment: "None",
     description: "A gentle forward hinge that stretches the back of the legs.",
-    benefits: ["Eases tight hamstrings and lower back", "Improves hip flexibility", "Good cool-down after cardio"],
+    benefits: [
+      "Eases tight hamstrings and lower back",
+      "Improves hip flexibility",
+      "Good cool-down after cardio",
+    ],
     steps: [
       "Stand tall, extend one leg slightly forward with heel on the floor.",
       "Keep your back flat and hinge forward from the hips.",
@@ -178,7 +219,11 @@ export const EXERCISES = [
     ageGroups: ["young", "middle"],
     equipment: "A mat",
     description: "A flowing spinal stretch performed on hands and knees.",
-    benefits: ["Mobilizes the entire spine", "Relieves back tension", "Warms up the core before other movement"],
+    benefits: [
+      "Mobilizes the entire spine",
+      "Relieves back tension",
+      "Warms up the core before other movement",
+    ],
     steps: [
       "Start on hands and knees, wrists under shoulders, knees under hips.",
       "Inhale, drop your belly and lift your chest and tailbone (cow).",
@@ -194,7 +239,11 @@ export const EXERCISES = [
     seniorFriendly: true,
     equipment: "None",
     description: "A slow, gentle stretch to release tension built up from sitting or poor posture.",
-    benefits: ["Eases neck and shoulder stiffness", "Very low intensity — safe for every age", "Can be done seated or standing"],
+    benefits: [
+      "Eases neck and shoulder stiffness",
+      "Very low intensity — safe for every age",
+      "Can be done seated or standing",
+    ],
     steps: [
       "Sit or stand tall with shoulders relaxed.",
       "Slowly tilt your head toward one shoulder until you feel a gentle stretch.",
@@ -209,7 +258,11 @@ export const EXERCISES = [
     ageGroups: ["young", "middle"],
     equipment: "None",
     description: "A classic standing yoga balance pose on one leg.",
-    benefits: ["Trains single-leg balance and ankle stability", "Builds focus and calm", "Strengthens the standing leg"],
+    benefits: [
+      "Trains single-leg balance and ankle stability",
+      "Builds focus and calm",
+      "Strengthens the standing leg",
+    ],
     steps: [
       "Stand tall and shift your weight onto one leg.",
       "Place the sole of the other foot on your calf or inner thigh (not on the knee joint).",
@@ -225,7 +278,11 @@ export const EXERCISES = [
     seniorFriendly: true,
     equipment: "A chair or counter to hold if needed",
     description: "A simple, safer balance drill to build stability for daily life.",
-    benefits: ["Directly reduces fall risk", "Strengthens ankle and hip stabilizers", "Can be done next to a counter for safety"],
+    benefits: [
+      "Directly reduces fall risk",
+      "Strengthens ankle and hip stabilizers",
+      "Can be done next to a counter for safety",
+    ],
     steps: [
       "Stand near a chair or counter you can hold if needed.",
       "Shift your weight onto one leg and lift the other slightly off the floor.",

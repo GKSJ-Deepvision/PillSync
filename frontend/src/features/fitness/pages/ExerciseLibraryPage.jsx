@@ -52,10 +52,9 @@ export default function ExerciseLibraryPage() {
           onGenderChange={setGender}
         />
         <p className="mt-4 font-body text-[13px] text-ink-fog">
-          Every animation demonstrates full range of motion at a pace matched to the
-          selected age group — slower and gentler for older adults, brisker for younger
-          adults. Tap "How to do it" on any card for step-by-step instructions and the
-          benefits of that move.
+          Every animation demonstrates full range of motion at a pace matched to the selected age
+          group — slower and gentler for older adults, brisker for younger adults. Tap "How to do
+          it" on any card for step-by-step instructions and the benefits of that move.
         </p>
       </div>
 

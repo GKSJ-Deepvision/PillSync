@@ -13,7 +13,12 @@ export async function extractPrescriptionText(file) {
   }
 
   const result = await response.json().catch(() => ({}));
-  if (!response.ok) return { error: new Error(result.detail || "The image could not be read. Check that the OCR backend is running.") };
+  if (!response.ok)
+    return {
+      error: new Error(
+        result.detail || "The image could not be read. Check that the OCR backend is running."
+      ),
+    };
   return {
     text: result.text || "No text was recognized.",
     medicines: result.medicines || [],
@@ -32,7 +37,9 @@ export async function addOcrMedicines(patientId, medicines) {
     .eq("patient_id", patientId);
   if (existingError) return { error: existingError };
 
-  const existingNames = new Set((existing || []).map((medicine) => medicine.name.trim().toLowerCase()));
+  const existingNames = new Set(
+    (existing || []).map((medicine) => medicine.name.trim().toLowerCase())
+  );
   const rows = recognized
     .filter((medicine) => !existingNames.has(medicine.name.trim().toLowerCase()))
     .map((medicine) => ({

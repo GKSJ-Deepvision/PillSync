@@ -33,11 +33,22 @@ function addDays(date, days) {
  * @param {number} [args.refillLeadDays] - days of buffer before depletion
  * @param {Date}   [args.today]
  */
-export function predictRefill({ stockQuantity, schedules = [], refillLeadDays = 5, today = new Date() }) {
+export function predictRefill({
+  stockQuantity,
+  schedules = [],
+  refillLeadDays = 5,
+  today = new Date(),
+}) {
   const dailyDose = dailyDoseTotal(schedules);
 
   if (dailyDose <= 0) {
-    return { dailyDose: 0, daysRemaining: null, depletionDate: null, refillByDate: null, status: "no-schedule" };
+    return {
+      dailyDose: 0,
+      daysRemaining: null,
+      depletionDate: null,
+      refillByDate: null,
+      status: "no-schedule",
+    };
   }
 
   const daysRemaining = Math.max(0, Math.floor(Number(stockQuantity || 0) / dailyDose));

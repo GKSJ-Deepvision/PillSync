@@ -9,7 +9,11 @@ client = TestClient(app)
 
 def _daily_logs(start, n_days, status):
     return [
-        {"scheduled_for": (start + timedelta(days=i)).isoformat(), "status": status, "dose_quantity": 2}
+        {
+            "scheduled_for": (start + timedelta(days=i)).isoformat(),
+            "status": status,
+            "dose_quantity": 2,
+        }
         for i in range(n_days)
     ]
 
@@ -24,7 +28,12 @@ def test_health_reports_model_status():
 
 def test_predict_matches_spec_worked_example():
     payload = {
-        "medication": {"id": "m1", "name": "BP tablet", "stock_quantity": 60, "refill_lead_days": 5},
+        "medication": {
+            "id": "m1",
+            "name": "BP tablet",
+            "stock_quantity": 60,
+            "refill_lead_days": 5,
+        },
         "schedules": [{"dose_quantity": 2, "days_of_week": list(range(7)), "is_active": True}],
         "dose_logs": [],
         "as_of": "2026-01-01",
@@ -43,12 +52,16 @@ def test_predict_batch_sorts_by_urgency_and_summarizes():
         "cases": [
             {
                 "medication": {"id": "urgent", "stock_quantity": 4, "refill_lead_days": 5},
-                "schedules": [{"dose_quantity": 2, "days_of_week": list(range(7)), "is_active": True}],
+                "schedules": [
+                    {"dose_quantity": 2, "days_of_week": list(range(7)), "is_active": True}
+                ],
                 "dose_logs": [],
             },
             {
                 "medication": {"id": "fine", "stock_quantity": 100, "refill_lead_days": 5},
-                "schedules": [{"dose_quantity": 1, "days_of_week": list(range(7)), "is_active": True}],
+                "schedules": [
+                    {"dose_quantity": 1, "days_of_week": list(range(7)), "is_active": True}
+                ],
                 "dose_logs": [],
             },
         ],
@@ -63,7 +76,9 @@ def test_predict_batch_sorts_by_urgency_and_summarizes():
 
 def test_predict_caregiver_ranks_patients_by_urgency():
     start = date(2025, 11, 1)
-    declining_logs = _daily_logs(start, 20, "taken") + _daily_logs(start + timedelta(days=20), 6, "missed")
+    declining_logs = _daily_logs(start, 20, "taken") + _daily_logs(
+        start + timedelta(days=20), 6, "missed"
+    )
     payload = {
         "as_of": (start + timedelta(days=26)).isoformat(),
         "patients": [
@@ -73,7 +88,9 @@ def test_predict_caregiver_ranks_patients_by_urgency():
                 "cases": [
                     {
                         "medication": {"id": "m1", "stock_quantity": 200, "refill_lead_days": 5},
-                        "schedules": [{"dose_quantity": 1, "days_of_week": list(range(7)), "is_active": True}],
+                        "schedules": [
+                            {"dose_quantity": 1, "days_of_week": list(range(7)), "is_active": True}
+                        ],
                         "dose_logs": [],
                     }
                 ],
@@ -84,7 +101,9 @@ def test_predict_caregiver_ranks_patients_by_urgency():
                 "cases": [
                     {
                         "medication": {"id": "m2", "stock_quantity": 3, "refill_lead_days": 5},
-                        "schedules": [{"dose_quantity": 2, "days_of_week": list(range(7)), "is_active": True}],
+                        "schedules": [
+                            {"dose_quantity": 2, "days_of_week": list(range(7)), "is_active": True}
+                        ],
                         "dose_logs": declining_logs,
                     }
                 ],

@@ -107,10 +107,7 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/exercises"
-        element={<Navigate to="/diet-planner" replace />}
-      />
+      <Route path="/exercises" element={<Navigate to="/diet-planner" replace />} />
       <Route
         path="/progress"
         element={

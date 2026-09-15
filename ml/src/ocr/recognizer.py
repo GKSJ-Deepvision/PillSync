@@ -50,4 +50,4 @@ class PrintedMedicineRecognizer:
         canvas.paste(image, ((PRINTED_IMAGE_SIZE[0] - image.width) // 2, (PRINTED_IMAGE_SIZE[1] - image.height) // 2))
         features = np.asarray(canvas, dtype=np.float32).reshape(1, -1) / 255.0
         probabilities = self.artifact["classifier"].predict_proba(features)[0]
-        return [str(name) for name, probability in zip(self.artifact["encoder"].classes_, probabilities) if probability >= 0.35]
+        return [str(name) for name, probability in zip(self.artifact["encoder"].classes_, probabilities, strict=False) if probability >= 0.35]

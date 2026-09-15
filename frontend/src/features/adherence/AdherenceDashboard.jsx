@@ -35,8 +35,16 @@ export default function AdherenceDashboard() {
       d.setDate(d.getDate() - i);
       const key = d.toLocaleDateString("en-CA");
       const bucket = dayMap[key];
-      const percentage = bucket && bucket.total > 0 ? Math.round((bucket.taken / bucket.total) * 100) : bucket ? null : null;
-      out.push({ label: d.toLocaleDateString(undefined, { day: "numeric" }), percentage: bucket?.total ? percentage : null });
+      const percentage =
+        bucket && bucket.total > 0
+          ? Math.round((bucket.taken / bucket.total) * 100)
+          : bucket
+            ? null
+            : null;
+      out.push({
+        label: d.toLocaleDateString(undefined, { day: "numeric" }),
+        percentage: bucket?.total ? percentage : null,
+      });
     }
     return out;
   }, [dayMap]);
@@ -49,19 +57,30 @@ export default function AdherenceDashboard() {
         <div className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="card text-center">
-              <p className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">Overall adherence</p>
-              <p className="mt-1 font-display text-3xl font-semibold" style={{ color: "var(--brand-deep)" }}>
+              <p className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">
+                Overall adherence
+              </p>
+              <p
+                className="mt-1 font-display text-3xl font-semibold"
+                style={{ color: "var(--brand-deep)" }}
+              >
                 {overall.percentage === null ? "—" : `${overall.percentage}%`}
               </p>
               <p className="mt-1 font-body text-[12px] text-ink-fog">last {WINDOW_DAYS} days</p>
             </div>
             <div className="card text-center">
-              <p className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">Current streak</p>
+              <p className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">
+                Current streak
+              </p>
               <p className="mt-1 font-display text-3xl font-semibold text-ink">{streak}</p>
-              <p className="mt-1 font-body text-[12px] text-ink-fog">fully-adherent day{streak === 1 ? "" : "s"}</p>
+              <p className="mt-1 font-body text-[12px] text-ink-fog">
+                fully-adherent day{streak === 1 ? "" : "s"}
+              </p>
             </div>
             <div className="card text-center">
-              <p className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">Doses taken / missed</p>
+              <p className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">
+                Doses taken / missed
+              </p>
               <p className="mt-1 font-display text-3xl font-semibold text-ink">
                 {overall.taken} / {overall.missed}
               </p>
@@ -79,18 +98,28 @@ export default function AdherenceDashboard() {
           <div className="card">
             <h2 className="mb-3 font-display text-base font-semibold text-ink">By medicine</h2>
             {perMedication.length === 0 ? (
-              <p className="font-body text-sm text-ink-fog">No resolved doses in this window yet.</p>
+              <p className="font-body text-sm text-ink-fog">
+                No resolved doses in this window yet.
+              </p>
             ) : (
               <div className="divide-y divide-ink/5">
                 {perMedication.map((m) => (
-                  <div key={m.medication?.name ?? "unknown"} className="flex items-center justify-between py-3">
+                  <div
+                    key={m.medication?.name ?? "unknown"}
+                    className="flex items-center justify-between py-3"
+                  >
                     <div>
-                      <p className="font-body text-sm font-semibold text-ink">{m.medication?.name ?? "Medicine"}</p>
+                      <p className="font-body text-sm font-semibold text-ink">
+                        {m.medication?.name ?? "Medicine"}
+                      </p>
                       <p className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">
                         {m.taken} taken · {m.missed} missed
                       </p>
                     </div>
-                    <span className="font-display text-lg font-semibold" style={{ color: "var(--brand-deep)" }}>
+                    <span
+                      className="font-display text-lg font-semibold"
+                      style={{ color: "var(--brand-deep)" }}
+                    >
                       {m.percentage === null ? "—" : `${m.percentage}%`}
                     </span>
                   </div>
