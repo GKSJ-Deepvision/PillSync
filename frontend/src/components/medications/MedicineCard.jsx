@@ -7,7 +7,6 @@ import {
   XCircle,
   Tag,
   Trash2,
-  Utensils,
   Calendar,
 } from "lucide-react";
 
@@ -28,18 +27,44 @@ export default function MedicineCard({ medicine, onTake, onMiss, onDelete }) {
   };
 
   const foodTimingLabels = {
-    after_food: { label: "After Food", icon: "🍲", color: "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200" },
-    before_food: { label: "Before Food", icon: "🥣", color: "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200" },
-    with_food: { label: "With Food", icon: "🍱", color: "bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200" },
-    empty_stomach: { label: "Empty Stomach", icon: "☕", color: "bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200" },
-    no_preference: { label: "No Preference", icon: "🌐", color: "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200" },
+    after_food: {
+      label: "After Food",
+      icon: "🍲",
+      color:
+        "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200",
+    },
+    before_food: {
+      label: "Before Food",
+      icon: "🥣",
+      color:
+        "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200",
+    },
+    with_food: {
+      label: "With Food",
+      icon: "🍱",
+      color:
+        "bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200",
+    },
+    empty_stomach: {
+      label: "Empty Stomach",
+      icon: "☕",
+      color:
+        "bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200",
+    },
+    no_preference: {
+      label: "No Preference",
+      icon: "🌐",
+      color:
+        "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200",
+    },
   };
 
   const tagStyle =
     diseaseColors[medicine.diseaseCategory] ||
     "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
 
-  const foodTag = foodTimingLabels[medicine.foodTiming] || foodTimingLabels.after_food;
+  const foodTag =
+    foodTimingLabels[medicine.foodTiming] || foodTimingLabels.after_food;
 
   const handleDelete = () => {
     if (window.confirm(`Are you sure you want to remove ${medicine.name}?`)) {
@@ -93,7 +118,9 @@ export default function MedicineCard({ medicine, onTake, onMiss, onDelete }) {
 
       {/* Meal & Prescription Period Row */}
       <div className="mt-3 flex items-center justify-between gap-2 flex-wrap text-xs">
-        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border flex items-center gap-1 ${foodTag.color}`}>
+        <span
+          className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border flex items-center gap-1 ${foodTag.color}`}
+        >
           <span>{foodTag.icon}</span>
           <span>{foodTag.label}</span>
         </span>
@@ -112,7 +139,9 @@ export default function MedicineCard({ medicine, onTake, onMiss, onDelete }) {
           <span>
             Slots:{" "}
             <strong className="text-slate-800 dark:text-slate-200">
-              {Array.isArray(medicine.timesOfDay) ? medicine.timesOfDay.join(", ") : "Morning"}
+              {Array.isArray(medicine.timesOfDay)
+                ? medicine.timesOfDay.join(", ")
+                : "Morning"}
             </strong>
           </span>
         </div>

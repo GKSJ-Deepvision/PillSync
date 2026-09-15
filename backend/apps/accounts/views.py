@@ -26,6 +26,7 @@ def register_view(request):
         # Sync user to MongoDB 'medicin' database ('users' and 'developer' collections)
         try:
             from config.mongo import store_document
+
             store_document("users", dict(user_data))
             store_document("developer", {"type": "user_registration", "user": dict(user_data)})
         except Exception as err:
@@ -68,6 +69,7 @@ def login_view(request):
     # Sync login activity to MongoDB
     try:
         from config.mongo import store_document
+
         store_document("login_history", dict(user_data))
         store_document("developer", {"type": "user_login", "user": dict(user_data)})
     except Exception as err:

@@ -49,11 +49,36 @@ export default function RemindersPage() {
   };
 
   const foodTimingMap = {
-    after_food: { label: "After Food", icon: "🍲", style: "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200" },
-    before_food: { label: "Before Food", icon: "🥣", style: "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200" },
-    with_food: { label: "With Food", icon: "🍱", style: "bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200" },
-    empty_stomach: { label: "Empty Stomach", icon: "☕", style: "bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200" },
-    no_preference: { label: "No Preference", icon: "🌐", style: "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200" },
+    after_food: {
+      label: "After Food",
+      icon: "🍲",
+      style:
+        "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200",
+    },
+    before_food: {
+      label: "Before Food",
+      icon: "🥣",
+      style:
+        "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200",
+    },
+    with_food: {
+      label: "With Food",
+      icon: "🍱",
+      style:
+        "bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200",
+    },
+    empty_stomach: {
+      label: "Empty Stomach",
+      icon: "☕",
+      style:
+        "bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200",
+    },
+    no_preference: {
+      label: "No Preference",
+      icon: "🌐",
+      style:
+        "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200",
+    },
   };
 
   if (loading) {
@@ -76,7 +101,8 @@ export default function RemindersPage() {
             Smart Reminder & Daily Schedule
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Real-time dosage notifications, meal timing instructions, and daily dosage logs.
+            Real-time dosage notifications, meal timing instructions, and daily
+            dosage logs.
           </p>
         </div>
 
@@ -144,7 +170,8 @@ export default function RemindersPage() {
                 </div>
               ) : (
                 periodReminders.map((rem) => {
-                  const foodTag = foodTimingMap[rem.foodTiming] || foodTimingMap.after_food;
+                  const foodTag =
+                    foodTimingMap[rem.foodTiming] || foodTimingMap.after_food;
                   return (
                     <div
                       key={rem.id}
@@ -164,7 +191,9 @@ export default function RemindersPage() {
                             <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300">
                               {rem.dosage}
                             </span>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded border flex items-center gap-1 ${foodTag.style}`}>
+                            <span
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded border flex items-center gap-1 ${foodTag.style}`}
+                            >
                               <span>{foodTag.icon}</span>
                               <span>{foodTag.label}</span>
                             </span>
@@ -202,7 +231,8 @@ export default function RemindersPage() {
                               onClick={() => markStatus(rem.id, "taken")}
                               className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1"
                             >
-                              <CheckCircle2 className="w-3.5 h-3.5" /> Mark Taken
+                              <CheckCircle2 className="w-3.5 h-3.5" /> Mark
+                              Taken
                             </button>
                             <button
                               onClick={() => markStatus(rem.id, "snoozed")}

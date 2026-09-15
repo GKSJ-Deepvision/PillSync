@@ -4,9 +4,11 @@ MongoDB Helper Module for PillSync
 Provides thread-safe access to MongoDB database connection and helper
 functions for storing, querying, and managing documents/values.
 """
-import os
+
 import logging
-from typing import Any, Dict, List, Optional
+import os
+from typing import Any
+
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -20,7 +22,10 @@ def get_mongo_client():
     if _mongo_client is None:
         try:
             from pymongo import MongoClient
-            mongo_uri = getattr(settings, "MONGO_URI", os.getenv("MONGO_URI", "mongodb://localhost:27017/"))
+
+            mongo_uri = getattr(
+                settings, "MONGO_URI", os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+            )
             _mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=2000)
         except Exception as err:
             logger.error("Failed to initialize MongoDB client: %s", err)
@@ -35,7 +40,7 @@ def get_mongo_db():
     return client[db_name]
 
 
-def store_document(collection_name: str, document: Dict[str, Any]) -> str:
+def store_document(collection_name: str, document: dict[str, Any]) -> str:
     """
     Store a JSON-serializable dictionary document into MongoDB.
     Returns the string representation of the inserted _id.
@@ -47,7 +52,7 @@ def store_document(collection_name: str, document: Dict[str, Any]) -> str:
     return str(result.inserted_id)
 
 
-def get_document(collection_name: str, query: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def get_document(collection_name: str, query: dict[str, Any]) -> dict[str, Any] | None:
     """
     Retrieve a single document matching the query.
     Converts ObjectId _id to string if present.
@@ -59,7 +64,9 @@ def get_document(collection_name: str, query: Dict[str, Any]) -> Optional[Dict[s
     return doc
 
 
-def list_documents(collection_name: str, query: Optional[Dict[str, Any]] = None, limit: int = 100) -> List[Dict[str, Any]]:
+def list_documents(
+    collection_name: str, query: dict[str, Any] | None = None, limit: int = 100
+) -> list[dict[str, Any]]:
     """
     List up to `limit` documents matching query in the specified collection.
     Converts ObjectId _id to string for each document.
@@ -75,7 +82,7 @@ def list_documents(collection_name: str, query: Optional[Dict[str, Any]] = None,
     return documents
 
 
-def delete_document(collection_name: str, query: Dict[str, Any]) -> int:
+def delete_document(collection_name: str, query: dict[str, Any]) -> int:
     """
     Delete documents matching query in collection_name.
     Returns deleted count.

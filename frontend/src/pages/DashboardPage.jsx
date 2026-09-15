@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import MedicineCard from "../components/medications/MedicineCard";
 import AddMedicineModal from "../components/medications/AddMedicineModal";
 import StockProgressBar from "../components/refills/StockProgressBar";
 import {
@@ -115,12 +114,16 @@ export default function DashboardPage() {
   // 2. Build Today's Assigned Dosages Schedule
   const todayDoses = [];
   categoryFilteredMeds.forEach((med) => {
-    const times = med.timesOfDay && med.timesOfDay.length > 0 ? med.timesOfDay : ["Morning"];
+    const times =
+      med.timesOfDay && med.timesOfDay.length > 0
+        ? med.timesOfDay
+        : ["Morning"];
     times.forEach((timePeriod) => {
       let timeStr = med.timingDetails?.[timePeriod] || "08:00 AM";
       if (!med.timingDetails?.[timePeriod]) {
         if (timePeriod === "Afternoon") timeStr = "01:00 PM";
-        if (timePeriod === "Night" || timePeriod === "Evening") timeStr = "09:00 PM";
+        if (timePeriod === "Night" || timePeriod === "Evening")
+          timeStr = "09:00 PM";
       }
 
       todayDoses.push({
@@ -286,7 +289,8 @@ export default function DashboardPage() {
       <div>
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Filter Schedule by Condition Category ({dynamicCategories.length - 1} categories):
+            Filter Schedule by Condition Category (
+            {dynamicCategories.length - 1} categories):
           </span>
         </div>
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
@@ -313,16 +317,23 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
               <Pill className="w-5 h-5 text-brand-600" />
-              Patient's Assigned Dosages Schedule for Today ({todayDoses.length})
+              Patient's Assigned Dosages Schedule for Today ({todayDoses.length}
+              )
             </h3>
             <span className="text-xs text-brand-600 dark:text-brand-400 font-semibold">
-              Today: {new Date().toLocaleDateString("en-US", { weekday: 'short', month: 'short', day: 'numeric' })}
+              Today:{" "}
+              {new Date().toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+              })}
             </span>
           </div>
 
           {todayDoses.length === 0 ? (
             <div className="p-8 rounded-3xl glass-card text-center text-slate-500 text-xs">
-              No assigned doses found for category "{activeTab}". Select another category or click "+ Add Medicine".
+              No assigned doses found for category "{activeTab}". Select another
+              category or click "+ Add Medicine".
             </div>
           ) : (
             <div className="space-y-3">
@@ -345,7 +356,11 @@ export default function DashboardPage() {
                         </span>
                       </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        Scheduled: <strong className="text-slate-800 dark:text-slate-200 font-bold">{dose.time} ({dose.period})</strong> &bull; Current Stock: {dose.stock} pills remaining
+                        Scheduled:{" "}
+                        <strong className="text-slate-800 dark:text-slate-200 font-bold">
+                          {dose.time} ({dose.period})
+                        </strong>{" "}
+                        &bull; Current Stock: {dose.stock} pills remaining
                       </p>
                     </div>
                   </div>
@@ -365,7 +380,11 @@ export default function DashboardPage() {
                     </button>
                     <button
                       onClick={() => {
-                        if (window.confirm(`Are you sure you want to remove ${dose.name}?`)) {
+                        if (
+                          window.confirm(
+                            `Are you sure you want to remove ${dose.name}?`,
+                          )
+                        ) {
                           handleDeleteMedication(dose.medId);
                         }
                       }}

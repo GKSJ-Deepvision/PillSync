@@ -35,4 +35,3 @@ class Medication(models.Model):
     def update_stock_days(self):
         daily_count = max(1, len(self.times_of_day))
         self.stock_days = max(0, self.stock // daily_count)
-

@@ -13,6 +13,7 @@ from .serializers import MedicationSerializer
 def medication_list_create(request):
     if request.method == "GET":
         from config.mongo import list_documents
+
         # Try fetching from MongoDB first if available
         try:
             mongo_meds = list_documents("developer", limit=100)
@@ -22,22 +23,24 @@ def medication_list_create(request):
                 # Format MongoDB documents to match medication response schema
                 formatted = []
                 for m in mongo_meds:
-                    formatted.append({
-                        "id": m.get("id") or m.get("_id"),
-                        "name": m.get("name", "Unknown"),
-                        "dosage": m.get("dosage", "500 mg"),
-                        "stock": m.get("stock", 30),
-                        "total_stock": m.get("total_stock", 60),
-                        "frequency": m.get("frequency", "1 time daily"),
-                        "disease_category": m.get("disease_category", "General"),
-                        "times_of_day": m.get("times_of_day", ["Morning"]),
-                        "stock_days": m.get("stock_days", 30),
-                        "refill_threshold": m.get("refill_threshold", 10),
-                        "fda_ndc": m.get("fda_ndc", ""),
-                        "manufacturer": m.get("manufacturer", ""),
-                        "active_ingredient": m.get("active_ingredient", ""),
-                        "created_at": m.get("created_at", ""),
-                    })
+                    formatted.append(
+                        {
+                            "id": m.get("id") or m.get("_id"),
+                            "name": m.get("name", "Unknown"),
+                            "dosage": m.get("dosage", "500 mg"),
+                            "stock": m.get("stock", 30),
+                            "total_stock": m.get("total_stock", 60),
+                            "frequency": m.get("frequency", "1 time daily"),
+                            "disease_category": m.get("disease_category", "General"),
+                            "times_of_day": m.get("times_of_day", ["Morning"]),
+                            "stock_days": m.get("stock_days", 30),
+                            "refill_threshold": m.get("refill_threshold", 10),
+                            "fda_ndc": m.get("fda_ndc", ""),
+                            "manufacturer": m.get("manufacturer", ""),
+                            "active_ingredient": m.get("active_ingredient", ""),
+                            "created_at": m.get("created_at", ""),
+                        }
+                    )
                 return Response(formatted)
         except Exception as e:
             print("MongoDB fetch warning (falling back to local DB):", e)
@@ -58,6 +61,7 @@ def medication_list_create(request):
             # Sync to MongoDB 'medicin' database (collections 'developer' and 'medications')
             try:
                 from config.mongo import store_document
+
                 store_document("developer", dict(med_data))
                 store_document("medications", dict(med_data))
             except Exception as err:
@@ -68,8 +72,10 @@ def medication_list_create(request):
 
 
 def sync_reminders_for_medication(med):
-    from apps.reminders.models import Reminder
     import datetime
+
+    from apps.reminders.models import Reminder
+
     today = datetime.date.today()
 
     default_times = {
@@ -80,7 +86,7 @@ def sync_reminders_for_medication(med):
 
     timing_details = med.timing_details or {}
 
-    for period in (med.times_of_day or ["Morning"]):
+    for period in med.times_of_day or ["Morning"]:
         time_str = timing_details.get(period) or default_times.get(period, "08:00 AM")
         Reminder.objects.get_or_create(
             medication=med,
@@ -120,9 +126,14 @@ def medication_detail(request, pk):
             # Sync update to MongoDB
             try:
                 from config.mongo import get_mongo_db
+
                 db = get_mongo_db()
-                db["developer"].update_one({"id": updated_med.id}, {"$set": dict(med_data)}, upsert=True)
-                db["medications"].update_one({"id": updated_med.id}, {"$set": dict(med_data)}, upsert=True)
+                db["developer"].update_one(
+                    {"id": updated_med.id}, {"$set": dict(med_data)}, upsert=True
+                )
+                db["medications"].update_one(
+                    {"id": updated_med.id}, {"$set": dict(med_data)}, upsert=True
+                )
             except Exception as err:
                 print("Failed to sync update to MongoDB:", err)
 
@@ -135,6 +146,7 @@ def medication_detail(request, pk):
         # Delete from MongoDB
         try:
             from config.mongo import delete_document
+
             delete_document("developer", {"id": med_id})
             delete_document("medications", {"id": med_id})
         except Exception as err:
@@ -159,6 +171,7 @@ def take_dose(request, pk):
     # Sync update to MongoDB
     try:
         from config.mongo import get_mongo_db
+
         db = get_mongo_db()
         db["developer"].update_one({"id": med.id}, {"$set": dict(med_data)}, upsert=True)
         db["medications"].update_one({"id": med.id}, {"$set": dict(med_data)}, upsert=True)
@@ -279,4 +292,3 @@ def mongo_store_view(request):
                 {"detail": f"Failed to fetch from MongoDB: {str(err)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-

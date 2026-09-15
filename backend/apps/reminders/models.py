@@ -31,4 +31,3 @@ class Reminder(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.time} ({self.status})"
-

@@ -81,7 +81,9 @@ export default function OcrUploadPage() {
     if (!selectedFile && !selectedDatasetSample) return;
     setIsScanning(true);
 
-    const queryTerm = selectedDatasetSample ? selectedDatasetSample.medicineName : "Atorvastatin";
+    const queryTerm = selectedDatasetSample
+      ? selectedDatasetSample.medicineName
+      : "Atorvastatin";
 
     try {
       // Perform live OpenFDA lookup for extracted terms
@@ -118,14 +120,22 @@ export default function OcrUploadPage() {
     } catch (err) {
       console.error("OCR FDA lookup failed", err);
       setOcrResult({
-        medicineName: selectedDatasetSample ? selectedDatasetSample.medicineName : "Atorvastatin",
+        medicineName: selectedDatasetSample
+          ? selectedDatasetSample.medicineName
+          : "Atorvastatin",
         dosage: selectedDatasetSample ? selectedDatasetSample.dosage : "20 mg",
         quantity: 30,
-        frequency: selectedDatasetSample ? selectedDatasetSample.frequency : "1 time daily",
-        timesOfDay: selectedDatasetSample ? selectedDatasetSample.timesOfDay : ["Night"],
+        frequency: selectedDatasetSample
+          ? selectedDatasetSample.frequency
+          : "1 time daily",
+        timesOfDay: selectedDatasetSample
+          ? selectedDatasetSample.timesOfDay
+          : ["Night"],
         doctorName: "Dr. Vance",
         confidenceScore: "95.0%",
-        extractedDisease: selectedDatasetSample ? selectedDatasetSample.diseaseCategory : "Heart",
+        extractedDisease: selectedDatasetSample
+          ? selectedDatasetSample.diseaseCategory
+          : "Heart",
       });
     } finally {
       setIsScanning(false);
@@ -199,10 +209,12 @@ export default function OcrUploadPage() {
                 </span>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 font-semibold">
-                Rx: {sample.medicineName} ({sample.dosage}) &bull; {sample.frequency}
+                Rx: {sample.medicineName} ({sample.dosage}) &bull;{" "}
+                {sample.frequency}
               </p>
               <span className="text-[10px] text-slate-400 block mt-1">
-                Category: {sample.diseaseCategory} | Prescribed by {sample.doctorName}
+                Category: {sample.diseaseCategory} | Prescribed by{" "}
+                {sample.doctorName}
               </span>
             </div>
           ))}

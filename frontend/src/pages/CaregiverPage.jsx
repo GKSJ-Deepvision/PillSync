@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   PhoneCall,
   RefreshCw,
-  Plus,
   UserPlus,
   Mail,
   Phone,
@@ -173,7 +172,8 @@ export default function CaregiverPage() {
             Caregiver Management & Emergency Contacts
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Add your own doctor, family caregiver, or nurse to receive automated missed-dose alerts.
+            Add your own doctor, family caregiver, or nurse to receive automated
+            missed-dose alerts.
           </p>
         </div>
 

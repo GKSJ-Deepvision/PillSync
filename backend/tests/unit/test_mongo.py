@@ -1,9 +1,12 @@
 """
 Unit tests for MongoDB Helper Module and MongoStoreView
 """
-import pytest
+
 from unittest.mock import MagicMock, patch
-from config.mongo import store_document, get_document, list_documents, delete_document
+
+import pytest
+
+from config.mongo import delete_document, get_document, list_documents, store_document
 
 
 @pytest.mark.unit

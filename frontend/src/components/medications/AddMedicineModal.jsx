@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
 import Modal from "../common/Modal";
 import { searchFdaDrugs } from "../../services/api";
-import { Search, Sparkles, Check, Calendar, Clock, Utensils, Pill } from "lucide-react";
+import {
+  Search,
+  Sparkles,
+  Check,
+  Calendar,
+  Clock,
+  Utensils,
+  Pill,
+} from "lucide-react";
 
 export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
   const [formData, setFormData] = useState({
@@ -58,7 +66,10 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
     setFormData((prev) => ({
       ...prev,
       name: drug.name,
-      dosageValue: drug.dosage !== "Standard Dose" ? drug.dosage.replace(/[^0-9.]/g, '') || "500" : prev.dosageValue,
+      dosageValue:
+        drug.dosage !== "Standard Dose"
+          ? drug.dosage.replace(/[^0-9.]/g, "") || "500"
+          : prev.dosageValue,
       activeIngredient: drug.genericName || prev.activeIngredient,
       manufacturer: drug.manufacturer || prev.manufacturer,
       fdaNdc: drug.ndc || prev.fdaNdc,
@@ -141,16 +152,44 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
   };
 
   const foodTimingOptions = [
-    { id: "after_food", label: "After Food", icon: "🍲", desc: "Take within 30 mins after meals" },
-    { id: "before_food", label: "Before Food", icon: "🥣", desc: "Take 30 mins prior to meals" },
-    { id: "with_food", label: "With Food", icon: "🍱", desc: "Take together with meals" },
-    { id: "empty_stomach", label: "Empty Stomach", icon: "☕", desc: "Take 1 hour before or 2 hrs after meal" },
-    { id: "no_preference", label: "No Preference", icon: "🌐", desc: "Can be taken anytime" },
+    {
+      id: "after_food",
+      label: "After Food",
+      icon: "🍲",
+      desc: "Take within 30 mins after meals",
+    },
+    {
+      id: "before_food",
+      label: "Before Food",
+      icon: "🥣",
+      desc: "Take 30 mins prior to meals",
+    },
+    {
+      id: "with_food",
+      label: "With Food",
+      icon: "🍱",
+      desc: "Take together with meals",
+    },
+    {
+      id: "empty_stomach",
+      label: "Empty Stomach",
+      icon: "☕",
+      desc: "Take 1 hour before or 2 hrs after meal",
+    },
+    {
+      id: "no_preference",
+      label: "No Preference",
+      icon: "🌐",
+      desc: "Can be taken anytime",
+    },
   ];
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Add New Dosage Schedule">
-      <form onSubmit={handleSubmit} className="space-y-4 max-h-[78vh] overflow-y-auto pr-1">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4 max-h-[78vh] overflow-y-auto pr-1"
+      >
         {/* Medicine Name with Live OpenFDA Auto-complete */}
         <div className="relative">
           <div className="flex items-center justify-between mb-1">
@@ -214,7 +253,8 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="sm:col-span-2">
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1 flex items-center gap-1">
-              <Pill className="w-3.5 h-3.5 text-brand-500" /> Dosage Strength & Unit
+              <Pill className="w-3.5 h-3.5 text-brand-500" /> Dosage Strength &
+              Unit
             </label>
             <div className="flex gap-2">
               <input
@@ -273,7 +313,9 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
             </label>
             <select
               value={formData.frequency}
-              onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, frequency: e.target.value })
+              }
               className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
             >
               <option value="1 time daily">1 time daily</option>
@@ -293,7 +335,9 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
               type="text"
               placeholder="e.g. Diabetes, Blood Pressure"
               value={formData.diseaseCategory}
-              onChange={(e) => setFormData({ ...formData, diseaseCategory: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, diseaseCategory: e.target.value })
+              }
               className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
               required
             />
@@ -303,7 +347,8 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
         {/* Before / After Food (Meal Relation) */}
         <div>
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2 flex items-center gap-1">
-            <Utensils className="w-3.5 h-3.5 text-amber-500" /> Meal Relation (Before / After Food)
+            <Utensils className="w-3.5 h-3.5 text-amber-500" /> Meal Relation
+            (Before / After Food)
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {foodTimingOptions.map((opt) => (
@@ -321,7 +366,9 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
                   <span>{opt.icon}</span>
                   <span>{opt.label}</span>
                 </div>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 line-clamp-1">{opt.desc}</span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 line-clamp-1">
+                  {opt.desc}
+                </span>
               </button>
             ))}
           </div>
@@ -331,13 +378,16 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
         <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 space-y-2">
           <div className="flex items-center justify-between">
             <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5 text-emerald-500" /> Prescription Schedule Period
+              <Calendar className="w-3.5 h-3.5 text-emerald-500" /> Prescription
+              Schedule Period
             </label>
             <label className="flex items-center gap-1.5 cursor-pointer text-xs text-brand-600 dark:text-brand-400 font-semibold">
               <input
                 type="checkbox"
                 checked={formData.isContinuous}
-                onChange={(e) => setFormData({ ...formData, isContinuous: e.target.checked })}
+                onChange={(e) =>
+                  setFormData({ ...formData, isContinuous: e.target.checked })
+                }
                 className="rounded border-slate-300 text-brand-600 focus:ring-brand-500"
               />
               Continuous / Ongoing
@@ -352,7 +402,9 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
               <input
                 type="date"
                 value={formData.startDate}
-                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, startDate: e.target.value })
+                }
                 className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"
                 required
               />
@@ -366,7 +418,9 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
                 <input
                   type="date"
                   value={formData.endDate}
-                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, endDate: e.target.value })
+                  }
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"
                   required
                 />
@@ -378,7 +432,8 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
         {/* Schedule Timing & Exact Time Slots */}
         <div>
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-2 flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5 text-indigo-500" /> Time Slots & Exact Timings
+            <Clock className="w-3.5 h-3.5 text-indigo-500" /> Time Slots & Exact
+            Timings
           </label>
           <div className="grid grid-cols-3 gap-2 mb-2">
             {["Morning", "Afternoon", "Night"].map((slot) => (
@@ -409,8 +464,13 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {formData.timesOfDay.map((slot) => (
-                  <div key={slot} className="flex items-center gap-1.5 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
-                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">{slot}:</span>
+                  <div
+                    key={slot}
+                    className="flex items-center gap-1.5 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700"
+                  >
+                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                      {slot}:
+                    </span>
                     <input
                       type="text"
                       value={formData.timingDetails[slot] || "08:00 AM"}

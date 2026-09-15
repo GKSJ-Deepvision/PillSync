@@ -31,6 +31,7 @@ ignore = [
 
 [tool.pytest.ini_options]
 minversion = "7.0"
+pythonpath = ["."]
 testpaths = ["tests", "apps"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
