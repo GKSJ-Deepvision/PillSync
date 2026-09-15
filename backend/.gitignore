@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+*.sqlite3
+.env
+ml/artifacts/
+ml/synthea-audit.json
+ml/data/
