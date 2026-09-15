@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import MedicineCard from "../components/medications/MedicineCard";
 import AddMedicineModal from "../components/medications/AddMedicineModal";
-import { fetchMedications, addMedication, takeDoseApi } from "../services/api";
+import { fetchMedications, addMedication, takeDoseApi, deleteMedicationApi } from "../services/api";
 import { Plus, Search, Filter, RefreshCw } from "lucide-react";
 
 export default function MedicationsPage() {
@@ -36,6 +36,16 @@ export default function MedicationsPage() {
     }
   };
 
+  const handleDeleteMedicine = async (id) => {
+    try {
+      await deleteMedicationApi(id);
+      setMedicines((prev) => prev.filter((m) => m.id !== id));
+    } catch (err) {
+      console.error("Failed to delete medicine", err);
+      alert("Failed to delete medicine from database.");
+    }
+  };
+
   const handleAddMedicine = async (newMed) => {
     try {
       const saved = await addMedication(newMed);
@@ -66,6 +76,17 @@ export default function MedicationsPage() {
       </div>
     );
   }
+
+  const dynamicCategories = [
+    "All",
+    ...Array.from(
+      new Set(
+        medicines
+          .map((m) => m.diseaseCategory)
+          .filter((cat) => Boolean(cat) && cat.trim() !== ""),
+      ),
+    ),
+  ];
 
   return (
     <div className="space-y-6">
@@ -104,19 +125,12 @@ export default function MedicationsPage() {
 
         <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
           <Filter className="w-4 h-4 text-slate-400 shrink-0" />
-          {[
-            "All",
-            "Diabetes",
-            "Blood Pressure",
-            "Thyroid",
-            "Antibiotics",
-            "Vitamins",
-          ].map((cat) => (
+          {dynamicCategories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedDisease(cat)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                selectedDisease === cat
+                selectedDisease.toLowerCase() === cat.toLowerCase()
                   ? "bg-brand-600 text-white shadow-sm"
                   : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
@@ -135,6 +149,7 @@ export default function MedicationsPage() {
             medicine={med}
             onTake={handleTakeDose}
             onMiss={() => alert("Missed dose logged.")}
+            onDelete={handleDeleteMedicine}
           />
         ))}
       </div>

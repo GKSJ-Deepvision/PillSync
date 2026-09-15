@@ -70,6 +70,10 @@ export async function fetchMedications() {
     frequency: med.frequency,
     diseaseCategory: med.disease_category,
     timesOfDay: med.times_of_day || [],
+    foodTiming: med.food_timing || "after_food",
+    startDate: med.start_date || "",
+    endDate: med.end_date || "",
+    timingDetails: med.timing_details || {},
     stockDays: med.stock_days,
     refillThreshold: med.refill_threshold,
     activeIngredient: med.active_ingredient,
@@ -87,6 +91,10 @@ export async function addMedication(medData) {
     frequency: medData.frequency || "1 time daily",
     disease_category: medData.diseaseCategory || "General",
     times_of_day: medData.timesOfDay || ["Morning"],
+    food_timing: medData.foodTiming || "after_food",
+    start_date: medData.startDate || new Date().toISOString().split("T")[0],
+    end_date: medData.endDate || null,
+    timing_details: medData.timingDetails || {},
     refill_threshold: Number(medData.refillThreshold) || 10,
     active_ingredient: medData.activeIngredient || "",
     manufacturer: medData.manufacturer || "",
@@ -110,6 +118,10 @@ export async function addMedication(medData) {
     frequency: med.frequency,
     diseaseCategory: med.disease_category,
     timesOfDay: med.times_of_day || [],
+    foodTiming: med.food_timing || "after_food",
+    startDate: med.start_date || "",
+    endDate: med.end_date || "",
+    timingDetails: med.timing_details || {},
     stockDays: med.stock_days,
     refillThreshold: med.refill_threshold,
     activeIngredient: med.active_ingredient,
@@ -136,9 +148,21 @@ export async function takeDoseApi(medId) {
     frequency: med.frequency,
     diseaseCategory: med.disease_category,
     timesOfDay: med.times_of_day || [],
+    foodTiming: med.food_timing || "after_food",
+    startDate: med.start_date || "",
+    endDate: med.end_date || "",
+    timingDetails: med.timing_details || {},
     stockDays: med.stock_days,
     refillThreshold: med.refill_threshold,
   };
+}
+
+export async function deleteMedicationApi(medId) {
+  const response = await fetch(`${API_BASE_URL}/medications/${medId}/`, {
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error("Failed to delete medication from database.");
+  return true;
 }
 
 export async function searchFdaDrugs(query) {
@@ -160,8 +184,10 @@ export async function fetchReminders() {
     id: r.id,
     medicationId: r.medication,
     name: r.name,
+    dosage: r.dosage || "1 Dose",
     time: r.time,
     period: r.period,
+    foodTiming: r.food_timing || "after_food",
     status: r.status,
     disease: r.disease,
   }));
@@ -182,8 +208,10 @@ export async function updateReminderStatusApi(reminderId, status) {
     id: r.id,
     medicationId: r.medication,
     name: r.name,
+    dosage: r.dosage || "1 Dose",
     time: r.time,
     period: r.period,
+    foodTiming: r.food_timing || "after_food",
     status: r.status,
     disease: r.disease,
   };

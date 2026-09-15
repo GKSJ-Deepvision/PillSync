@@ -8,6 +8,7 @@ class Reminder(models.Model):
         ("pending", "Pending"),
         ("taken", "Taken"),
         ("missed", "Missed"),
+        ("snoozed", "Snoozed"),
     )
     PERIOD_CHOICES = (
         ("Morning", "Morning"),
@@ -19,8 +20,10 @@ class Reminder(models.Model):
         Medication, on_delete=models.CASCADE, related_name="reminders", null=True, blank=True
     )
     name = models.CharField(max_length=255)
+    dosage = models.CharField(max_length=100, default="500 mg")
     time = models.CharField(max_length=50, default="08:00 AM")
     period = models.CharField(max_length=50, choices=PERIOD_CHOICES, default="Morning")
+    food_timing = models.CharField(max_length=50, default="after_food")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     disease = models.CharField(max_length=100, default="General")
     scheduled_date = models.DateField(auto_now_add=True)
@@ -28,3 +31,4 @@ class Reminder(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.time} ({self.status})"
+

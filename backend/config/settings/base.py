@@ -1,7 +1,9 @@
 import os
 from pathlib import Path
+import dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+dotenv.load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-pillsync-dev-key-2026-super-secret")
 
@@ -64,6 +66,11 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+# MongoDB configuration
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "medicin")
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},

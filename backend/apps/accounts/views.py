@@ -22,6 +22,15 @@ def register_view(request):
         user = serializer.save()
         refresh = RefreshToken.for_user(user)
         user_data = UserSerializer(user).data
+
+        # Sync user to MongoDB 'medicin' database ('users' and 'developer' collections)
+        try:
+            from config.mongo import store_document
+            store_document("users", dict(user_data))
+            store_document("developer", {"type": "user_registration", "user": dict(user_data)})
+        except Exception as err:
+            print("Failed to sync registered user to MongoDB:", err)
+
         return Response(
             {"access": str(refresh.access_token), "refresh": str(refresh), "user": user_data},
             status=status.HTTP_201_CREATED,
@@ -55,6 +64,15 @@ def login_view(request):
 
     refresh = RefreshToken.for_user(user)
     user_data = UserSerializer(user).data
+
+    # Sync login activity to MongoDB
+    try:
+        from config.mongo import store_document
+        store_document("login_history", dict(user_data))
+        store_document("developer", {"type": "user_login", "user": dict(user_data)})
+    except Exception as err:
+        print("Failed to sync login event to MongoDB:", err)
+
     return Response(
         {"access": str(refresh.access_token), "refresh": str(refresh), "user": user_data}
     )

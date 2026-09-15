@@ -32,7 +32,7 @@ def update_reminder_status(request, pk):
         return Response({"detail": "Reminder not found."}, status=status.HTTP_404_NOT_FOUND)
 
     new_status = request.data.get("status")
-    if new_status in ["taken", "missed", "pending"]:
+    if new_status in ["taken", "missed", "pending", "snoozed"]:
         prev_status = reminder.status
         reminder.status = new_status
         reminder.save()

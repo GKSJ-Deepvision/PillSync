@@ -16,42 +16,116 @@ export default function OcrUploadPage() {
   const [ocrResult, setOcrResult] = useState(null);
   const navigate = useNavigate();
 
+  const ocrDatasetSamples = [
+    {
+      id: "ds-1",
+      title: "Prescription Dataset Scan #1 — Diabetes Care",
+      medicineName: "Metformin",
+      dosage: "500 mg",
+      frequency: "2 times daily",
+      timesOfDay: ["Morning", "Night"],
+      diseaseCategory: "Diabetes",
+      doctorName: "Dr. Robert Vance, MD",
+      confidenceScore: "99.1%",
+    },
+    {
+      id: "ds-2",
+      title: "Prescription Dataset Scan #2 — Blood Pressure",
+      medicineName: "Amlodipine",
+      dosage: "5 mg",
+      frequency: "1 time daily",
+      timesOfDay: ["Morning"],
+      diseaseCategory: "Blood Pressure",
+      doctorName: "Dr. Sarah Jenkins, MD",
+      confidenceScore: "98.7%",
+    },
+    {
+      id: "ds-3",
+      title: "Prescription Dataset Scan #3 — Heart & Cholesterol",
+      medicineName: "Atorvastatin",
+      dosage: "20 mg",
+      frequency: "1 time daily",
+      timesOfDay: ["Night"],
+      diseaseCategory: "Heart",
+      doctorName: "Dr. Michael Chen, MD",
+      confidenceScore: "97.9%",
+    },
+    {
+      id: "ds-4",
+      title: "Prescription Dataset Scan #4 — Antibiotic Course",
+      medicineName: "Amoxicillin",
+      dosage: "250 mg",
+      frequency: "3 times daily",
+      timesOfDay: ["Morning", "Afternoon", "Night"],
+      diseaseCategory: "Antibiotics",
+      doctorName: "Dr. Emily Taylor, MD",
+      confidenceScore: "99.4%",
+    },
+  ];
+
+  const [selectedDatasetSample, setSelectedDatasetSample] = useState(null);
+
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
+      setSelectedDatasetSample(null);
     }
   };
 
+  const selectDatasetSample = (sample) => {
+    setSelectedDatasetSample(sample);
+    setSelectedFile({ name: sample.title });
+  };
+
   const startScan = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile && !selectedDatasetSample) return;
     setIsScanning(true);
+
+    const queryTerm = selectedDatasetSample ? selectedDatasetSample.medicineName : "Atorvastatin";
 
     try {
       // Perform live OpenFDA lookup for extracted terms
-      const fdaResults = await searchFdaDrugs("Atorvastatin");
+      const fdaResults = await searchFdaDrugs(queryTerm);
       const matched = fdaResults[0];
 
-      setOcrResult({
-        medicineName: matched ? matched.name : "Atorvastatin",
-        dosage: matched ? matched.dosage : "20 mg",
-        quantity: 30,
-        frequency: "1 time daily",
-        doctorName: "Dr. Robert Vance, MD",
-        confidenceScore: "98.4%",
-        extractedDisease: "Heart",
-        fdaNdc: matched ? matched.ndc : "0093-7554",
-        manufacturer: matched ? matched.manufacturer : "Viatris",
-      });
+      if (selectedDatasetSample) {
+        setOcrResult({
+          medicineName: selectedDatasetSample.medicineName,
+          dosage: selectedDatasetSample.dosage,
+          quantity: 30,
+          frequency: selectedDatasetSample.frequency,
+          timesOfDay: selectedDatasetSample.timesOfDay,
+          doctorName: selectedDatasetSample.doctorName,
+          confidenceScore: selectedDatasetSample.confidenceScore,
+          extractedDisease: selectedDatasetSample.diseaseCategory,
+          fdaNdc: matched ? matched.ndc : "0093-7554",
+          manufacturer: matched ? matched.manufacturer : "FDA Verified Lab",
+        });
+      } else {
+        setOcrResult({
+          medicineName: matched ? matched.name : "Atorvastatin",
+          dosage: matched ? matched.dosage : "20 mg",
+          quantity: 30,
+          frequency: "1 time daily",
+          timesOfDay: ["Night"],
+          doctorName: "Dr. Vance",
+          confidenceScore: "98.4%",
+          extractedDisease: "Heart",
+          fdaNdc: matched ? matched.ndc : "0093-7554",
+          manufacturer: matched ? matched.manufacturer : "Viatris",
+        });
+      }
     } catch (err) {
       console.error("OCR FDA lookup failed", err);
       setOcrResult({
-        medicineName: "Atorvastatin",
-        dosage: "20 mg",
+        medicineName: selectedDatasetSample ? selectedDatasetSample.medicineName : "Atorvastatin",
+        dosage: selectedDatasetSample ? selectedDatasetSample.dosage : "20 mg",
         quantity: 30,
-        frequency: "1 time daily",
+        frequency: selectedDatasetSample ? selectedDatasetSample.frequency : "1 time daily",
+        timesOfDay: selectedDatasetSample ? selectedDatasetSample.timesOfDay : ["Night"],
         doctorName: "Dr. Vance",
         confidenceScore: "95.0%",
-        extractedDisease: "Heart",
+        extractedDisease: selectedDatasetSample ? selectedDatasetSample.diseaseCategory : "Heart",
       });
     } finally {
       setIsScanning(false);
@@ -68,7 +142,7 @@ export default function OcrUploadPage() {
         totalStock: 60,
         frequency: ocrResult.frequency,
         diseaseCategory: ocrResult.extractedDisease,
-        timesOfDay: ["Night"],
+        timesOfDay: ocrResult.timesOfDay || ["Morning"],
         refillThreshold: 10,
         manufacturer: ocrResult.manufacturer,
         fdaNdc: ocrResult.fdaNdc,
@@ -99,6 +173,42 @@ export default function OcrUploadPage() {
         </p>
       </div>
 
+      {/* OCR Dataset Sample Selector */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-amber-400" />
+          Select from Prescription OCR Dataset:
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {ocrDatasetSamples.map((sample) => (
+            <div
+              key={sample.id}
+              onClick={() => selectDatasetSample(sample)}
+              className={`p-4 rounded-2xl cursor-pointer border transition-all ${
+                selectedDatasetSample?.id === sample.id
+                  ? "bg-brand-50/80 dark:bg-brand-950/80 border-brand-500 shadow-md ring-2 ring-brand-500/30"
+                  : "glass-card border-slate-200/80 dark:border-slate-800 hover:border-brand-300"
+              }`}
+            >
+              <div className="flex items-start justify-between">
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white">
+                  {sample.title}
+                </h4>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300">
+                  Dataset Sample
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 font-semibold">
+                Rx: {sample.medicineName} ({sample.dosage}) &bull; {sample.frequency}
+              </p>
+              <span className="text-[10px] text-slate-400 block mt-1">
+                Category: {sample.diseaseCategory} | Prescribed by {sample.doctorName}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Upload Dropzone */}
       <div className="p-8 rounded-3xl glass-card border-2 border-dashed border-slate-300 dark:border-slate-700 text-center hover:border-brand-500 transition-all flex flex-col items-center justify-center space-y-4">
         <div className="w-16 h-16 rounded-2xl bg-brand-50 dark:bg-brand-950/80 text-brand-600 dark:text-brand-400 flex items-center justify-center shadow-glow">
@@ -109,7 +219,7 @@ export default function OcrUploadPage() {
           <h4 className="text-base font-bold text-slate-800 dark:text-slate-200">
             {selectedFile
               ? selectedFile.name
-              : "Upload Doctor Prescription Image"}
+              : "Or Upload Custom Doctor Prescription Image"}
           </h4>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Supports PNG, JPG, JPEG or PDF files (Max 10MB)
@@ -132,7 +242,7 @@ export default function OcrUploadPage() {
             Browse File
           </label>
 
-          {selectedFile && (
+          {(selectedFile || selectedDatasetSample) && (
             <button
               onClick={startScan}
               disabled={isScanning}
@@ -146,7 +256,7 @@ export default function OcrUploadPage() {
               ) : (
                 <>
                   <ScanLine className="w-4 h-4" />
-                  Extract & Verify Details
+                  Extract & Verify OCR Details
                 </>
               )}
             </button>
