@@ -44,10 +44,12 @@ def check_due_medicines():
 
                 # If required daily frequency is not yet met today, flag as due and notify
                 if taken_logs_today < medicine.daily_frequency:
+                    user_email = medicine.owner.email if medicine.owner else None
                     send_medication_reminder(
                         user_id=medicine.user_id,
                         medicine_name=medicine.name,
-                        dosage=medicine.dosage
+                        dosage=medicine.dosage,
+                        user_email=user_email
                     )
                     due_count += 1
 

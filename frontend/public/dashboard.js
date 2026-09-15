@@ -1,11 +1,6 @@
 /* eslint-disable no-unused-vars, no-console */
-const defaultDoses = [
-  { id: 'dose1', time: '8:00 AM', name: 'Metformin 500mg', status: 'taken' },
-  { id: 'dose2', time: '1:00 PM', name: 'Amlodipine 5mg', status: 'pending' },
-  { id: 'dose3', time: '9:00 PM', name: 'Vitamin D3', status: 'pending' },
-];
-
-let todayDoses = JSON.parse(localStorage.getItem('pillsync_today_doses')) || defaultDoses;
+let myMedicines = [];
+let todayDoses = [];
 
 function saveTodayDoses() {
   localStorage.setItem('pillsync_today_doses', JSON.stringify(todayDoses));
@@ -20,6 +15,7 @@ function markDose(doseId, newStatus) {
     renderAdherenceRing();
   }
 }
+
 function openProfileModal() {
   document.getElementById('profileModal').style.display = 'flex';
 }
@@ -27,27 +23,6 @@ function openProfileModal() {
 function closeProfileModal() {
   document.getElementById('profileModal').style.display = 'none';
 }
-
-const defaultMedicines = [
-  {
-    name: 'Metformin 500mg',
-    category: 'Diabetes',
-    freq: '2 times/day',
-    stock: 12,
-    color: '#7FA98E',
-  },
-  {
-    name: 'Amlodipine 5mg',
-    category: 'Blood Pressure',
-    freq: '1 time/day',
-    stock: 4,
-    color: '#D97B5B',
-  },
-  { name: 'Vitamin D3', category: 'Vitamins', freq: '1 time/day', stock: 20, color: '#C9A96E' },
-];
-
-const savedMedicines = JSON.parse(localStorage.getItem('pillsync_medicines') || '[]');
-const myMedicines = [...defaultMedicines, ...savedMedicines];
 
 const weekData = [
   { day: 'Mon', status: 'full' },
@@ -61,9 +36,106 @@ const weekData = [
 
 let activeCategory = 'All';
 
+const categoryColors = {
+  'Blood Pressure': '#D97B5B',
+  Diabetes: '#7FA98E',
+  Thyroid: '#C9A96E',
+  Antibiotics: '#8E7CC3',
+  Vitamins: '#C9A96E',
+  'Heart Medications': '#D97B5B',
+  Other: '#8A8578',
+};
+
+async function loadDashboardData() {
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  // 1. Fetch User Profile
+  try {
+    const userRes = await fetch('http://localhost:8000/auth/me', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (userRes.ok) {
+      const user = await userRes.json();
+      const initial = user.full_name ? user.full_name.charAt(0).toUpperCase() : 'U';
+      
+      document.getElementById('sidebarAvatar').textContent = initial;
+      document.getElementById('sidebarName').textContent = user.full_name;
+      document.getElementById('sidebarEmail').textContent = user.email;
+      document.getElementById('sidebarRole').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+      document.getElementById('topGreeting').textContent = `Good morning, ${user.full_name.split(' ')[0]}`;
+      
+      document.getElementById('modalAvatar').textContent = initial;
+      document.getElementById('modalName').textContent = user.full_name;
+      document.getElementById('modalEmail').textContent = user.email;
+      document.getElementById('modalRole').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+    }
+  } catch (err) {
+    console.error('Error loading user profile:', err);
+  }
+
+  // 2. Fetch User Medicines
+  try {
+    const medRes = await fetch('http://localhost:8000/medicines/', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (medRes.ok) {
+      const data = await medRes.json();
+      
+      myMedicines = data.map((med) => ({
+        id: med.id,
+        name: med.name,
+        category: med.disease || 'General',
+        freq: `${med.daily_frequency} time(s)/day`,
+        stock: med.total_quantity,
+        color: categoryColors[med.disease] || '#8A8578',
+        times: med.times || [],
+      }));
+
+      // Generate today's doses timeline dynamically from user's medicines
+      todayDoses = [];
+      myMedicines.forEach((med) => {
+        if (med.times && med.times.length > 0) {
+          med.times.forEach((t, idx) => {
+            todayDoses.push({
+              id: `dose_${med.id}_${idx}`,
+              time: t,
+              name: `${med.name}`,
+              status: 'pending'
+            });
+          });
+        } else {
+          todayDoses.push({
+            id: `dose_${med.id}_0`,
+            time: '09:00 AM',
+            name: `${med.name}`,
+            status: 'pending'
+          });
+        }
+      });
+    }
+  } catch (err) {
+    console.error('Error loading medicines:', err);
+  }
+
+  renderAll();
+}
+
+function renderAll() {
+  renderAdherenceRing();
+  renderAlertBanner();
+  renderWeekStrip();
+  renderTimeline();
+  renderFilterChips();
+  renderMedicineList();
+}
+
 function renderAdherenceRing() {
   const taken = todayDoses.filter((d) => d.status === 'taken').length;
-  const total = todayDoses.length;
+  const total = todayDoses.length || 1;
   const percent = Math.round((taken / total) * 100);
   const circumference = 213.6;
   const offset = circumference - (percent / 100) * circumference;
@@ -97,6 +169,12 @@ function renderWeekStrip() {
 function renderTimeline() {
   const timeline = document.getElementById('timeline');
   timeline.innerHTML = '';
+
+  if (todayDoses.length === 0) {
+    timeline.innerHTML = `<p style="font-size: 14px; color: #8A8578; padding: 12px 0;">No medicine doses scheduled for today yet. Add a medicine to get started!</p>`;
+    return;
+  }
+
   todayDoses.forEach((dose) => {
     const chip = document.createElement('div');
     chip.className = 'dose-chip' + (dose.status !== 'pending' ? ' status-' + dose.status : '');
@@ -132,10 +210,17 @@ function renderFilterChips() {
 function renderMedicineList() {
   const list = document.getElementById('medicineList');
   list.innerHTML = '';
+
+  if (myMedicines.length === 0) {
+    list.innerHTML = `<p style="font-size: 14px; color: #8A8578; padding: 12px 0;">No medicines found in your profile. Click "+ Add medicine" to add one!</p>`;
+    return;
+  }
+
   const filtered =
     activeCategory === 'All'
       ? myMedicines
       : myMedicines.filter((m) => m.category === activeCategory);
+
   filtered.forEach((med) => {
     const row = document.createElement('div');
     row.className = 'medicine-row';
@@ -153,74 +238,6 @@ function renderMedicineList() {
     list.appendChild(row);
   });
 }
-function renderRightPanel() {
-  document.getElementById('statTotalMeds').textContent = myMedicines.length;
-  document.getElementById('statDosesToday').textContent = todayDoses.length;
 
-  const fullDays = weekData.filter((d) => d.status === 'full').length;
-  const trackedDays = weekData.filter((d) => d.status !== 'future').length;
-  const avgAdherence = trackedDays > 0 ? Math.round((fullDays / trackedDays) * 100) : 0;
-  document.getElementById('statAvgAdherence').textContent = avgAdherence + '%';
-
-  const refillsContainer = document.getElementById('upcomingRefills');
-  const lowStock = myMedicines.filter((m) => m.stock <= 10).sort((a, b) => a.stock - b.stock);
-
-  if (lowStock.length === 0) {
-    refillsContainer.innerHTML = `<p style="font-size:13px; color:#8A8578;">No refills needed soon.</p>`;
-  } else {
-    refillsContainer.innerHTML = lowStock
-      .map((m) => {
-        const daysLeft = Math.round(m.stock / 2); // rough estimate
-        return `
-        <div class="refill-item">
-          <span>${m.name}</span>
-          <span class="refill-days">${daysLeft}d left</span>
-        </div>
-      `;
-      })
-      .join('');
-  }
-  // Streak calculation
-  let streak = 0;
-  for (let i = weekData.length - 1; i >= 0; i--) {
-    if (weekData[i].status === 'future') continue;
-    if (weekData[i].status === 'full') streak++;
-    else break;
-  }
-  document.getElementById('streakNumber').textContent = streak;
-
-  // Mini bar chart
-  const chartColors = { full: '#7FA98E', partial: '#E9C46A', missed: '#D97B5B', future: '#E4E0D6' };
-  const heights = { full: '100%', partial: '55%', missed: '25%', future: '10%' };
-  const miniChart = document.getElementById('miniChart');
-  miniChart.innerHTML = weekData
-    .map(
-      (d) => `
-    <div class="mini-bar-wrap">
-      <div class="mini-bar" style="height:${heights[d.status]}; background:${chartColors[d.status]}"></div>
-      <div class="mini-bar-label">${d.day.charAt(0)}</div>
-    </div>
-  `
-    )
-    .join('');
-
-  const tips = [
-    'Taking medicines at the same time daily helps build a habit and improves adherence.',
-    'Store your medicines in a cool, dry place away from direct sunlight.',
-    'Never skip a dose without consulting your doctor first.',
-    'Set your reminder times around daily habits like meals for better consistency.',
-  ];
-  document.getElementById('healthTip').textContent = tips[Math.floor(Math.random() * tips.length)];
-}
-function messageCaregiver() {
-  alert(
-    'This would open a message to your caregiver, Pari Verma, once messaging is connected to the backend.'
-  );
-}
-
-renderAdherenceRing();
-renderAlertBanner();
-renderWeekStrip();
-renderTimeline();
-renderFilterChips();
-renderMedicineList();
+// Initial load
+loadDashboardData();

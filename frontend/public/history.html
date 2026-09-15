@@ -11,18 +11,18 @@
       <aside class="sidebar">
         <div class="brand">💊 PillSync</div>
         <div class="profile-card">
-          <div class="profile-avatar">I</div>
-          <div class="profile-name">Isha Sharma</div>
-          <div class="profile-email">isha@gmail.com</div>
-          <span class="role-badge">Patient</span>
+          <div class="profile-avatar" id="sidebarAvatar">U</div>
+          <div class="profile-name" id="sidebarName">Loading...</div>
+          <div class="profile-email" id="sidebarEmail">...</div>
+          <span class="role-badge" id="sidebarRole">Patient</span>
         </div>
         <nav class="nav">
           <a href="dashboard.html" class="nav-item">Dashboard</a>
           <a href="my-medicines.html" class="nav-item">My Medicines</a>
           <a href="add-medicine.html" class="nav-item">Add Medicine</a>
-          <a href="dashboard.html" class="nav-item">Dashboard</a>
+          <a href="history.html" class="nav-item active">History</a>
         </nav>
-        <a href="login.html" class="logout">Log out</a>
+        <a href="login.html" class="logout" onclick="localStorage.removeItem('access_token')">Log out</a>
       </aside>
 
       <main class="main">
