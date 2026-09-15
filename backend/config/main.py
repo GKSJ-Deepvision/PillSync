@@ -17,9 +17,18 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.v1.router import api_router
+from apps.common import model_registry  # noqa: F401 -- see comment below
 from config.database import engine, ping_database
 from config.exceptions import register_exception_handlers
 from config.settings import settings
+
+# `model_registry` imports every app's `models.py` so SQLAlchemy's mapper
+# configuration (needed to resolve string-based relationships like
+# `Medicine.refill_logs: Mapped[list["RefillLog"]]`) happens once at import
+# time. Previously only `alembic/env.py` and `tests/conftest.py` imported it,
+# so the very first real request to touch such a relationship raised
+# `InvalidRequestError: ... failed to locate a name` instead of a 200 —
+# found while wiring up the reminders endpoints for this milestone.
 
 logging.basicConfig(
     level=logging.DEBUG if settings.DEBUG else logging.INFO,

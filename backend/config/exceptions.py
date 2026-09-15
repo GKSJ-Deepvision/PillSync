@@ -18,6 +18,7 @@ from __future__ import annotations
 import logging
 
 from fastapi import FastAPI, Request, status
+from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -46,12 +47,18 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException) 
 async def validation_exception_handler(
     request: Request, exc: RequestValidationError
 ) -> JSONResponse:
+    # `exc.errors()` can contain a raw exception object in an error's
+    # `ctx.error` key — e.g. pydantic wraps a `raise ValueError(...)` from a
+    # `model_validator` this way. Plain `JSONResponse` uses stdlib `json.dumps`
+    # and can't serialize that; `jsonable_encoder` (what FastAPI's own default
+    # handler uses) converts it to a string first. Without this, any 422 whose
+    # validation error originated from a custom validator became a 500 instead.
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content=error_envelope(
             code="VALIDATION_ERROR",
             message="One or more fields failed validation.",
-            details=exc.errors(),
+            details=jsonable_encoder(exc.errors()),
         ),
     )
 

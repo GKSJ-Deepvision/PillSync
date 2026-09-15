@@ -51,8 +51,17 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
 async def client() -> AsyncGenerator[AsyncClient, None]:
     """An httpx client wired directly to the real FastAPI app (ASGI, no socket)."""
 
+    from config.database import engine
     from config.main import app
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://testserver") as ac:
         yield ac
+
+    # `engine` is a module-level singleton, but pytest-asyncio runs each test
+    # function in its own event loop by default, and an asyncpg connection
+    # can't be reused once the loop that opened it is gone. Without this,
+    # the first integration test to touch the DB works, and every one after
+    # it fails with "Event loop is closed" / "attached to a different loop"
+    # — invisible until this milestone added more than one such test.
+    await engine.dispose()
