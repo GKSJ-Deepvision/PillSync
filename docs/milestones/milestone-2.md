@@ -2,7 +2,7 @@
 
 - **Intern:** <Swathi S>
 - **Branch:** <intern/23-swathi-s>
-- **Submitted on:** <2026-09-16>
+- **Submitted on:** <2026-09-16> 
 
 ## Evaluation criteria
 
@@ -41,3 +41,5 @@ python manage.py runserver
 ## Blockers and open questions
 
 Reminder delivery channels, notification workflows, and multiple patient profiles remain open for this milestone.
+
+
