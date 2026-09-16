@@ -1,7 +1,12 @@
-from . import base
+"""Development settings for PillSync."""
 
-globals().update({name: value for name, value in vars(base).items() if not name.startswith("_")})
+from .base import *  # noqa: F403
 
 DEBUG = True
-ALLOWED_HOSTS = [*base.ALLOWED_HOSTS, "testserver"]
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",  # noqa: F405
+    }
+}

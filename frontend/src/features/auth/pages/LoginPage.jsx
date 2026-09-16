@@ -54,7 +54,7 @@ export function LoginPage() {
     setIsAuthenticating(true);
     try {
       await login(formData.email, formData.password, selectedRole);
-      navigate('/profile');
+      navigate('/dashboard');
     } catch (err) {
       console.error('Login failed:', err);
       setError(err.message || 'Incorrect email or password. Please verify your credentials.');
@@ -64,9 +64,14 @@ export function LoginPage() {
   };
 
   const demoAccounts = [
-    { role: 'patient', label: 'Patient', email: 'patient@example.com', password: 'password' },
-    { role: 'caregiver', label: 'Caregiver', email: 'caregiver@example.com', password: 'password' },
-    { role: 'admin', label: 'Admin', email: 'admin@example.com', password: 'password' },
+    { role: 'patient', label: 'Patient', email: 'patient@example.com', password: 'password123' },
+    {
+      role: 'caregiver',
+      label: 'Caregiver',
+      email: 'caregiver@example.com',
+      password: 'password123',
+    },
+    { role: 'admin', label: 'Admin', email: 'admin@example.com', password: 'password123' },
   ];
 
   const handleSelectDemo = (account) => {

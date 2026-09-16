@@ -1,6 +1,6 @@
 ﻿from django.apps import AppConfig
 
 
-class AdherenceConfig(AppConfig):
+class RemindersConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "apps.adherence"
+    name = "apps.reminders"

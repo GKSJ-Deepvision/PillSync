@@ -31,7 +31,7 @@ ignore = [
 [tool.pytest.ini_options]
 minversion = "7.0"
 testpaths = ["tests", "apps"]
-DJANGO_SETTINGS_MODULE = "config.settings.dev"
+django_settings_module = "config.settings.dev"
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]

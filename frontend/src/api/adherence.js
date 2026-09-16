@@ -211,8 +211,32 @@ const realAdherenceApi = {
 
   getMedicationHistory: () =>
     apiClient
-      .get('/adherence/history')
-      .then((res) => res.data)
+      .get('/medication-history/')
+      .then((res) => {
+        const grouped = res.data.reduce((history, record) => {
+          const medicationId = record.medication;
+          const current = history[medicationId] || {
+            id: String(medicationId),
+            medicationName: `${record.medication_name} ${record.dosage}`,
+            category: record.disease,
+            taken: 0,
+            missed: 0,
+            adherence: 100,
+            impact: `Regimen maintained according to prescribed instructions for ${record.disease}.`,
+          };
+
+          if (record.status === 'taken') current.taken += 1;
+          if (['missed', 'skipped'].includes(record.status)) current.missed += 1;
+          const completedDoses = current.taken + current.missed;
+          current.adherence = completedDoses
+            ? Math.round((current.taken / completedDoses) * 100)
+            : 100;
+          history[medicationId] = current;
+          return history;
+        }, {});
+
+        return Object.values(grouped);
+      })
       .catch(() => mockAdherenceData.medicationHistory),
 
   getAdherenceReport: (filters = {}) =>

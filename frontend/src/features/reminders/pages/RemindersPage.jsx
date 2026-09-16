@@ -350,58 +350,48 @@ export function RemindersPage() {
           <div className="reminders-list">
             {displayedReminders.map((reminder) => (
               <div key={reminder.id} className="reminder-card">
-                <div className="flex items-start gap-3.5">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+                <div className="reminder-card-main">
+                  <div className="reminder-icon">
                     <Clock className="h-5 w-5" />
                   </div>
-                  <div>
+                  <div className="reminder-card-content">
                     {/* Patient info for caregiver */}
                     {isCaregiver && reminder.patient && (
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="reminder-patient">
                         <img
                           src={reminder.patientAvatar}
                           alt={reminder.patient}
-                          className="h-5 w-5 rounded-full object-cover border border-slate-200"
+                          className="reminder-patient-avatar"
                         />
-                        <span className="text-xs font-bold text-slate-900">{reminder.patient}</span>
-                        <span className="text-[10px] text-slate-400">({reminder.patientAge}y)</span>
+                        <span className="reminder-patient-name">{reminder.patient}</span>
+                        <span className="reminder-patient-age">{reminder.patientAge} years</span>
                       </div>
                     )}
 
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-bold text-indigo-700">
+                    <div className="reminder-meta">
+                      <span className="reminder-time">
                         {reminder.time} · {reminder.schedule}
                       </span>
                       <span
-                        className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-extrabold capitalize ${
-                          reminder.status === 'taken'
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : reminder.status === 'missed'
-                              ? 'bg-rose-50 text-rose-700'
-                              : reminder.status === 'snoozed'
-                                ? 'bg-amber-50 text-amber-700'
-                                : 'bg-slate-100 text-slate-700'
-                        }`}
+                        className={`reminder-status reminder-status-${reminder.status}`}
                       >
                         ● {reminder.status}
                       </span>
                       {reminder.loggedAt && (
-                        <span className="text-[10px] text-slate-400 font-medium">
-                          ({reminder.loggedAt})
-                        </span>
+                        <span className="reminder-logged">{reminder.loggedAt}</span>
                       )}
                     </div>
 
-                    <h3 className="text-sm font-black text-slate-900 mt-1">
+                    <h3 className="reminder-medication">
                       {reminder.medicationName || reminder.name}
                     </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="reminder-instruction">
                       {reminder.dosage} · {reminder.note || 'Take with water'}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="reminder-actions">
                   {isCaregiver ? (
                     reminder.status === 'missed' ? (
                       <>

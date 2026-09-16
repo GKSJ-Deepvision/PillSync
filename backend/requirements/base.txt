@@ -1,14 +1,16 @@
 # Runtime dependencies for the PillSync backend.
 # Pin a version when you add a package so every branch installs the same thing.
 #
-django==5.0.14
+
+# Web framework
+django==5.0.10
 djangorestframework==3.15.2
 django-cors-headers==4.6.0
 # fastapi==0.115.*
 # uvicorn[standard]==0.32.*
 #
 # Auth
-# djangorestframework-simplejwt==5.*
+djangorestframework-simplejwt==5.3.1
 # django-oauth-toolkit==3.*
 #
 # Database
@@ -33,4 +35,4 @@ django-cors-headers==4.6.0
 #
 # Utilities
 python-dotenv==1.0.1
-pydantic==2.10.6
+pydantic==2.10.4
