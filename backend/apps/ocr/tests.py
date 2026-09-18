@@ -1,7 +1,7 @@
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APITestCase
 
-from apps.ocr.serializers import OCRRecordSerializer
+from apps.api.serializers import OCRRecordSerializer
 
 
 class OCRRecordSerializerTests(APITestCase):
