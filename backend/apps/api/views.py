@@ -8,6 +8,7 @@ from datetime import timedelta
 
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -20,6 +21,7 @@ from .serializers import (
     MedicationHistorySerializer,
     MedicineScheduleSerializer,
     MedicineSerializer,
+    OCRRecordSerializer,
     ProfileSerializer,
     ReminderSerializer,
     ReminderSnoozeSerializer,
@@ -587,3 +589,24 @@ class ReminderSnoozeView(APIView):
         )
 
         return Response(ReminderSerializer(reminder).data)
+
+
+class OCRUploadView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        serializer = OCRRecordSerializer(data=request.data)
+
+        if serializer.is_valid():
+            record = serializer.save(user=request.user)
+
+            return Response(
+                OCRRecordSerializer(record).data,
+                status=status.HTTP_201_CREATED,
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )

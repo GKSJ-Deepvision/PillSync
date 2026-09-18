@@ -11,6 +11,7 @@ from .views import (
     MedicineScheduleDetailView,
     MedicineScheduleListCreateView,
     MeView,
+    OCRUploadView,
     ProfileView,
     RegisterView,
     ReminderDetailView,
@@ -74,5 +75,10 @@ urlpatterns = [
         "medication-schedules/",
         MedicationScheduleListCreateView.as_view(),
         name="medication-schedule-list-create",
+    ),
+    path(
+        "ocr/upload/",
+        OCRUploadView.as_view(),
+        name="ocr-upload",
     ),
 ]

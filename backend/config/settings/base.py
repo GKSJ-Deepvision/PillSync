@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "apps.profiles",
     "apps.medicines",
     "apps.medications",
+    "apps.ocr",
     "apps.api",
     "apps.reminders",
     "apps.notifications",
