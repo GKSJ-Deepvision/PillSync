@@ -9,13 +9,13 @@
       <div class="logo">💊 PillSync</div>
       <div class="subtitle">Your smart medicine companion</div>
       <div class="role-tabs">
-        <button type="button" class="role-tab active" onclick="selectRole('patient', this)">
+        <button type="button" class="role-tab active" onclick="selectRole('PATIENT', this)">
           Patient
         </button>
-        <button type="button" class="role-tab" onclick="selectRole('caregiver', this)">
+        <button type="button" class="role-tab" onclick="selectRole('CAREGIVER', this)">
           Caregiver
         </button>
-        <button type="button" class="role-tab" onclick="selectRole('admin', this)">Admin</button>
+        <button type="button" class="role-tab" onclick="selectRole('ADMIN', this)">Admin</button>
       </div>
 
       <input type="email" id="email" placeholder="Email" />
@@ -39,19 +39,16 @@
       <div class="logo">💊 PillSync</div>
       <div class="subtitle">Create your account</div>
       <div class="role-tabs">
-        <button type="button" class="role-tab active" onclick="selectSignupRole('patient', this)">
+        <button type="button" class="role-tab active" onclick="selectSignupRole('PATIENT', this)">
           Patient
         </button>
-        <button type="button" class="role-tab" onclick="selectSignupRole('caregiver', this)">
+        <button type="button" class="role-tab" onclick="selectSignupRole('CAREGIVER', this)">
           Caregiver
-        </button>
-        <button type="button" class="role-tab" onclick="selectSignupRole('admin', this)">
-          Admin
         </button>
       </div>
       <input type="text" id="signupName" placeholder="Full Name" />
       <input type="email" id="signupEmail" placeholder="Email" />
-      <input type="password" id="signupPassword" placeholder="Password" />
+      <input type="password" id="signupPassword" placeholder="Password (min 10 characters)" />
       <input type="password" id="signupConfirm" placeholder="Confirm Password" />
       <input
         type="email"

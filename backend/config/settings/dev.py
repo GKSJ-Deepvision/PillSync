@@ -26,3 +26,7 @@ CELERY_TASK_ALWAYS_EAGER = True
 # WhiteNoise serves the collected static bundle in production. Locally there is
 # no bundle to serve, and its warning on every request is just noise.
 MIDDLEWARE = [m for m in MIDDLEWARE if "whitenoise" not in m]  # noqa: F405
+
+# Disable throttling in development so repeated test registrations/logins aren't blocked.
+REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"] = []  # noqa: F405
+REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {}  # noqa: F405

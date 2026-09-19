@@ -98,3 +98,7 @@
   background: #fdf1ec;
   color: var(--terracotta);
 }
+.badge-neutral {
+  background: #f5f3ef;
+  color: #8a8578;
+}

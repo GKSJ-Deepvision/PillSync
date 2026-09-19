@@ -10,18 +10,29 @@
     <div class="app">
       <aside class="sidebar">
         <div class="brand">💊 PillSync</div>
+
+        <!-- PROFILE CARD -->
         <div class="profile-card">
           <div class="profile-avatar" id="sidebarAvatar">U</div>
           <div class="profile-name" id="sidebarName">Loading...</div>
           <div class="profile-email" id="sidebarEmail">...</div>
           <span class="role-badge" id="sidebarRole">Patient</span>
         </div>
+
+        <!-- CAREGIVER CARD -->
+        <div class="caregiver-card">
+          <div class="caregiver-label">Your caregiver</div>
+          <div class="caregiver-name" id="caregiverName">None linked</div>
+          <div class="caregiver-email" id="caregiverEmail">No email</div>
+        </div>
+
         <nav class="nav">
-          <a href="dashboard.html" class="nav-item">Dashboard</a>
-          <a href="my-medicines.html" class="nav-item active">My Medicines</a>
-          <a href="add-medicine.html" class="nav-item">Add Medicine</a>
-          <a href="history.html" class="nav-item">History</a>
+          <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+          <a href="my-medicines.html" class="nav-item active">💊 My Medicines</a>
+          <a href="add-medicine.html" class="nav-item">➕ Add Medicine</a>
+          <a href="history.html" class="nav-item">📊 History</a>
         </nav>
+
         <a href="login.html" class="logout" onclick="localStorage.removeItem('access_token')">Log out</a>
       </aside>
 
@@ -44,7 +55,7 @@
       </main>
     </div>
 
-    <script src="user-session.js"></script>
-    <script src="my-medicines.js"></script>
+    <script src="user-session.js?v=3"></script>
+    <script src="my-medicines.js?v=3"></script>
   </body>
 </html>

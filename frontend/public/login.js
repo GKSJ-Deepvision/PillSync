@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars, no-console */
-let selectedRole = 'patient'; // default
-let selectedSignupRole = 'patient';
+let selectedRole = 'PATIENT'; // default
+let selectedSignupRole = 'PATIENT';
 
 function selectRole(role, btn) {
   selectedRole = role;
@@ -18,7 +18,7 @@ function selectSignupRole(role, btn) {
   btn.classList.add('active');
 
   const caregiverField = document.getElementById('caregiverPatientEmail');
-  caregiverField.style.display = role === 'caregiver' ? 'block' : 'none';
+  caregiverField.style.display = role === 'CAREGIVER' ? 'block' : 'none';
 }
 
 function showView(viewId) {
@@ -42,31 +42,47 @@ async function handleLogin() {
   console.log('Attempting login with:', email, 'as role:', selectedRole);
 
   try {
-    const formData = new URLSearchParams();
-    formData.append('username', email);
-    formData.append('password', password);
-
-    const response = await fetch('http://localhost:8000/auth/login', {
+    const response = await fetch('/api/v1/auth/login/', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: formData,
+      body: JSON.stringify({ email, password }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      errorMsg.textContent = errorData.detail || 'Login failed.';
+      errorMsg.textContent = errorData.detail || errorData?.error?.message || 'Login failed.';
       return;
     }
 
     const data = await response.json();
-    localStorage.setItem('access_token', data.access_token);
+    localStorage.setItem('access_token', data.access);
+    if (data.refresh) localStorage.setItem('refresh_token', data.refresh);
 
-    // The role should ideally come from the backend, but we'll use the selected one for redirect for now.
-    if (selectedRole === 'caregiver') {
+    // Fetch the real user role from the backend, then redirect accordingly.
+    try {
+      const meRes = await fetch('/api/v1/users/me/', {
+        headers: { Authorization: `Bearer ${data.access}` },
+      });
+      if (meRes.ok) {
+        const me = await meRes.json();
+        const role = (me.role || '').toUpperCase();
+        if (role === 'CAREGIVER') {
+          window.location.href = 'caregiver-dashboard.html';
+        } else if (role === 'ADMIN') {
+          window.location.href = 'admin-dashboard.html';
+        } else {
+          window.location.href = 'dashboard.html';
+        }
+        return;
+      }
+    } catch (_) { /* fall through to UI-based redirect */ }
+
+    // Fallback: use the UI-selected role
+    if (selectedRole === 'CAREGIVER') {
       window.location.href = 'caregiver-dashboard.html';
-    } else if (selectedRole === 'admin') {
+    } else if (selectedRole === 'ADMIN') {
       window.location.href = 'admin-dashboard.html';
     } else {
       window.location.href = 'dashboard.html';
@@ -92,7 +108,7 @@ async function handleSignup() {
     errorMsg.textContent = 'Passwords do not match.';
     return;
   }
-  if (selectedSignupRole === 'caregiver') {
+  if (selectedSignupRole === 'CAREGIVER') {
     const patientEmail = document.getElementById('caregiverPatientEmail').value;
     if (patientEmail === '') {
       errorMsg.textContent = "Please enter the patient's email to link.";
@@ -103,7 +119,7 @@ async function handleSignup() {
   errorMsg.textContent = '';
 
   try {
-    const response = await fetch('http://localhost:8000/auth/register', {
+    const response = await fetch('/api/v1/auth/register/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -112,13 +128,21 @@ async function handleSignup() {
         full_name: name,
         email: email,
         password: password,
+        password_confirm: confirm,
         role: selectedSignupRole,
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      errorMsg.textContent = errorData.detail || 'Registration failed.';
+      // Backend returns { error: { message, details } } for validation errors
+      const details = errorData?.error?.details;
+      if (details) {
+        const firstError = Object.values(details)[0];
+        errorMsg.textContent = Array.isArray(firstError) ? firstError[0] : firstError;
+      } else {
+        errorMsg.textContent = errorData.detail || errorData?.error?.message || 'Registration failed.';
+      }
       return;
     }
 

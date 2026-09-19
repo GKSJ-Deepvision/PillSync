@@ -29,7 +29,7 @@ async function loadUserProfileHeader() {
   }
 
   try {
-    const response = await fetch('http://localhost:8000/auth/me', {
+    const response = await fetch('/api/v1/users/me/', {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -43,7 +43,8 @@ async function loadUserProfileHeader() {
 
     const user = await response.json();
     const initial = user.full_name ? user.full_name.charAt(0).toUpperCase() : 'U';
-    const roleCapitalized = user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Patient';
+    // Use role_display from backend (e.g. "Patient") or format the uppercase role value
+    const roleCapitalized = user.role_display || (user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase() : 'Patient');
     const firstName = user.full_name ? user.full_name.split(' ')[0] : 'User';
     const timeGreeting = getGreetingPrefix();
 

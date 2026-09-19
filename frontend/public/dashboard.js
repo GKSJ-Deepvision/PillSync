@@ -55,7 +55,7 @@ async function loadDashboardData() {
 
   // 1. Fetch User Profile
   try {
-    const userRes = await fetch('http://localhost:8000/auth/me', {
+    const userRes = await fetch('/api/v1/users/me/', {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (userRes.ok) {
@@ -79,20 +79,21 @@ async function loadDashboardData() {
 
   // 2. Fetch User Medicines
   try {
-    const medRes = await fetch('http://localhost:8000/medicines/', {
+    const medRes = await fetch('/api/v1/medicines/', {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (medRes.ok) {
       const data = await medRes.json();
-      
-      myMedicines = data.map((med) => ({
+      const medicines = data.results || data; // handle paginated response
+
+      myMedicines = medicines.map((med) => ({
         id: med.id,
         name: med.name,
-        category: med.disease || 'General',
-        freq: `${med.daily_frequency} time(s)/day`,
-        stock: med.total_quantity,
-        color: categoryColors[med.disease] || '#8A8578',
-        times: med.times || [],
+        category: med.category_display || med.category || 'General',
+        freq: med.schedules && med.schedules.length > 0 ? `${med.schedules.length} time(s)/day` : '—',
+        stock: med.quantity_remaining,
+        color: categoryColors[med.category] || '#8A8578',
+        times: med.schedules ? med.schedules.map((s) => s.time_of_day?.slice(0, 5)) : [],
       }));
 
       // Generate today's doses timeline dynamically from user's medicines

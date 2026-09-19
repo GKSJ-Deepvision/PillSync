@@ -22,7 +22,7 @@ async function fetchMedicines() {
   }
 
   try {
-    const response = await fetch('http://localhost:8000/medicines/', {
+    const response = await fetch('/api/v1/medicines/', {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -35,16 +35,17 @@ async function fetchMedicines() {
     }
 
     const data = await response.json();
+    const medicines = data.results || data; // handle paginated {results:[]} or plain array
 
     // Map API data format to the format expected by the UI
-    allMedicines = data.map((med) => ({
+    allMedicines = medicines.map((med) => ({
       id: med.id,
       name: med.name,
-      category: med.disease || 'Other',
-      freq: `${med.daily_frequency} time(s)/day`,
-      stock: med.total_quantity,
-      color: categoryColors[med.disease] || '#8A8578',
-      times: med.times || [],
+      category: med.category_display || med.category || 'Other',
+      freq: med.schedules && med.schedules.length > 0 ? `${med.schedules.length} time(s)/day` : '—',
+      stock: med.quantity_remaining,
+      color: categoryColors[med.category] || '#8A8578',
+      times: med.schedules ? med.schedules.map((s) => s.time_of_day?.slice(0, 5)) : [],
     }));
 
     renderFilterChips();
@@ -72,15 +73,28 @@ function renderFilterChips() {
   });
 }
 
-function deleteMedicine(id) {
+async function deleteMedicine(id) {
   if (!confirm('Remove this medicine from your list?')) return;
 
-  // We should ideally call a DELETE API endpoint here,
-  // but since it's not present in Aryan's routes, we just hide it locally for now.
-  allMedicines = allMedicines.filter((m) => m.id !== id);
+  const token = localStorage.getItem('access_token');
+  if (!token) { window.location.href = 'login.html'; return; }
 
-  renderFilterChips();
-  renderList();
+  try {
+    const res = await fetch(`/api/v1/medicines/${id}/`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok || res.status === 204) {
+      allMedicines = allMedicines.filter((m) => m.id !== id);
+      renderFilterChips();
+      renderList();
+    } else {
+      alert('Failed to delete medicine. Please try again.');
+    }
+  } catch (err) {
+    console.error('Error deleting medicine:', err);
+    alert('Network error while deleting medicine.');
+  }
 }
 
 function renderList() {
