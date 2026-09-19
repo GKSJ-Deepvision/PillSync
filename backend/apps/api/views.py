@@ -14,6 +14,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.medicines.models import MedicationHistory, Medicine, MedicineSchedule
+from apps.ocr.models import OCRRecord
+from apps.ocr.services.extractor import extract_text
 from apps.profiles.models import Profile
 from apps.reminders.models import Reminder
 
@@ -598,15 +600,27 @@ class OCRUploadView(APIView):
     def post(self, request):
         serializer = OCRRecordSerializer(data=request.data)
 
-        if serializer.is_valid():
-            record = serializer.save(user=request.user)
-
+        if not serializer.is_valid():
             return Response(
-                OCRRecordSerializer(record).data,
-                status=status.HTTP_201_CREATED,
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
+        record = serializer.save(user=request.user)
+
+        if record.upload_type == OCRRecord.UploadType.MEDICINE_IMAGE:
+            record.status = OCRRecord.Status.PROCESSING
+            record.save(update_fields=["status"])
+
+            try:
+                record.extracted_text = extract_text(record.file.path)
+                record.status = OCRRecord.Status.COMPLETED
+                record.save(update_fields=["extracted_text", "status"])
+            except Exception:
+                record.status = OCRRecord.Status.FAILED
+                record.save(update_fields=["status"])
+
         return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST,
+            OCRRecordSerializer(record).data,
+            status=status.HTTP_201_CREATED,
         )

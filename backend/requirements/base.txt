@@ -21,8 +21,8 @@ redis==5.*
 django-celery-beat==2.*
 #
 # OCR and NLP
-# pytesseract==0.3.*
-# Pillow==11.*
+pytesseract==0.3.*
+Pillow==11.*
 # opencv-python-headless==4.*
 # spacy==3.*
 # openai==1.*
