@@ -76,7 +76,6 @@ class OCRUploadViewTests(APITestCase):
         User = get_user_model()
         user = User.objects.create_user(
             username="ocr_test_user",
-            password="testpass123",
         )
 
         request = APIRequestFactory().post(
