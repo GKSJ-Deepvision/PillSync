@@ -1,5 +1,3 @@
- 
-
 /**
  * Common user profile loader for all static HTML pages in PillSync.
  * Automatically updates sidebar profile info, topbar greeting (Good morning/afternoon/evening),
@@ -8,13 +6,13 @@
 function getGreetingPrefix() {
   const hour = new Date().getHours();
   if (hour >= 5 && hour < 12) {
-    return "Good morning";
+    return 'Good morning';
   } else if (hour >= 12 && hour < 17) {
-    return "Good afternoon";
+    return 'Good afternoon';
   } else if (hour >= 17 && hour < 22) {
-    return "Good evening";
+    return 'Good evening';
   } else {
-    return "Good night";
+    return 'Good night';
   }
 }
 
@@ -30,7 +28,7 @@ async function loadUserProfileHeader() {
 
   try {
     const response = await fetch('/api/v1/users/me/', {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!response.ok) {
@@ -44,25 +42,34 @@ async function loadUserProfileHeader() {
     const user = await response.json();
     const initial = user.full_name ? user.full_name.charAt(0).toUpperCase() : 'U';
     // Use role_display from backend (e.g. "Patient") or format the uppercase role value
-    const roleCapitalized = user.role_display || (user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase() : 'Patient');
+    const roleCapitalized =
+      user.role_display ||
+      (user.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase()
+        : 'Patient');
     const firstName = user.full_name ? user.full_name.split(' ')[0] : 'User';
     const timeGreeting = getGreetingPrefix();
 
     // 1. Sidebar Profile Updates
-    const sidebarAvatar = document.getElementById('sidebarAvatar') || document.querySelector('.profile-avatar');
+    const sidebarAvatar =
+      document.getElementById('sidebarAvatar') || document.querySelector('.profile-avatar');
     if (sidebarAvatar) sidebarAvatar.textContent = initial;
 
-    const sidebarName = document.getElementById('sidebarName') || document.querySelector('.profile-name');
+    const sidebarName =
+      document.getElementById('sidebarName') || document.querySelector('.profile-name');
     if (sidebarName) sidebarName.textContent = user.full_name;
 
-    const sidebarEmail = document.getElementById('sidebarEmail') || document.querySelector('.profile-email');
+    const sidebarEmail =
+      document.getElementById('sidebarEmail') || document.querySelector('.profile-email');
     if (sidebarEmail) sidebarEmail.textContent = user.email;
 
-    const sidebarRole = document.getElementById('sidebarRole') || document.querySelector('.role-badge');
+    const sidebarRole =
+      document.getElementById('sidebarRole') || document.querySelector('.role-badge');
     if (sidebarRole) sidebarRole.textContent = roleCapitalized;
 
     // 2. Topbar Greeting Updates
-    const topGreeting = document.getElementById('topGreeting') || document.querySelector('.greeting');
+    const topGreeting =
+      document.getElementById('topGreeting') || document.querySelector('.greeting');
     if (topGreeting) {
       // Check if page header is a dashboard greeting or static page title
       if (topGreeting.textContent.includes('Good') || topGreeting.id === 'topGreeting') {

@@ -1,8 +1,8 @@
-/* 
+/*
  * API Debug Visualizer
  * Intercepts window.fetch and visually displays HTTP requests.
  */
-(function() {
+(function () {
   // Only inject once
   if (window.__API_LOGGER_INJECTED__) return;
   window.__API_LOGGER_INJECTED__ = true;
@@ -30,7 +30,7 @@
   const list = document.getElementById('api-debug-list');
   const countBadge = document.getElementById('api-debug-count');
   const clearBtn = document.getElementById('api-debug-clear');
-  
+
   let reqCount = 0;
 
   toggle.addEventListener('click', () => {
@@ -46,7 +46,7 @@
   function logRequest(url, method, status, hasToken, isSaved, recordsCount) {
     reqCount++;
     countBadge.textContent = reqCount;
-    
+
     // Auto-open panel on first request
     if (reqCount === 1) {
       panel.style.display = 'flex';
@@ -54,10 +54,10 @@
 
     const item = document.createElement('div');
     item.className = 'api-debug-item';
-    
+
     const isSuccess = status >= 200 && status < 300;
-    const statusText = status === 201 ? '201 Created' : (status === 200 ? '200 OK' : status);
-    
+    const statusText = status === 201 ? '201 Created' : status === 200 ? '200 OK' : status;
+
     let dbStatus = '';
     if (method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE') {
       dbStatus = `│ Database: ${isSuccess ? 'Saved ✓' : 'Failed ✗'}                    │\n`;
@@ -75,19 +75,21 @@
 │ Authentication: ${hasToken ? 'JWT ✓                        ' : 'None ✗                       '}│
 ${dbStatus}└──────────────────────────────────────┘
 </pre>`;
-    
+
     list.prepend(item);
   }
 
   // Intercept fetch
   const originalFetch = window.fetch;
-  window.fetch = async function(...args) {
-    const urlStr = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url ? args[0].url : '');
+  window.fetch = async function (...args) {
+    const urlStr =
+      typeof args[0] === 'string' ? args[0] : args[0] && args[0].url ? args[0].url : '';
     const options = args[1] || {};
     const method = options.method || (args[0] && args[0].method) || 'GET';
-    
+
     const headers = options.headers || (args[0] && args[0].headers) || {};
-    const authHeader = typeof headers.get === 'function' ? headers.get('Authorization') : headers['Authorization'];
+    const authHeader =
+      typeof headers.get === 'function' ? headers.get('Authorization') : headers['Authorization'];
     const hasToken = !!authHeader;
 
     // Only log calls to our API
@@ -111,11 +113,11 @@ ${dbStatus}└──────────────────────
         } catch {
           // ignore parsing error
         }
-        
+
         // Truncate URL for display
         let displayUrl = urlStr.replace(window.location.origin, '');
         if (displayUrl.length > 31) displayUrl = displayUrl.slice(0, 28) + '...';
-        
+
         logRequest(displayUrl, method, response.status, hasToken, true, count);
         return response;
       } catch (err) {
@@ -123,8 +125,7 @@ ${dbStatus}└──────────────────────
         throw err;
       }
     }
-    
+
     return originalFetch.apply(this, args);
   };
-
 })();

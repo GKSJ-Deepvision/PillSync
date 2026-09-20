@@ -77,7 +77,10 @@ async function deleteMedicine(id) {
   if (!confirm('Remove this medicine from your list?')) return;
 
   const token = localStorage.getItem('access_token');
-  if (!token) { window.location.href = 'login.html'; return; }
+  if (!token) {
+    window.location.href = 'login.html';
+    return;
+  }
 
   try {
     const res = await fetch(`/api/v1/medicines/${id}/`, {

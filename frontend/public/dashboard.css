@@ -347,10 +347,18 @@ body {
   margin: 6px 0 4px;
 }
 
-.taken-label  { color: var(--sage-soft); }
-.missed-label { color: var(--terracotta); }
-.skipped-label { color: #8a8578; }
-.snoozed-label { color: #c9a96e; }
+.taken-label {
+  color: var(--sage-soft);
+}
+.missed-label {
+  color: var(--terracotta);
+}
+.skipped-label {
+  color: #8a8578;
+}
+.snoozed-label {
+  color: #c9a96e;
+}
 
 .overdue-tag {
   display: inline-block;

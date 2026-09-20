@@ -10,7 +10,7 @@ def run_ocr_and_get_confidence(image, desc):
     """
     Runs Tesseract on the given image array and prints out the raw text,
     along with average confidence for detected words.
-    
+
     WHY: We need to see if preprocessing actually improves the OCR engine's
     confidence and accuracy.
     """
@@ -27,9 +27,9 @@ def run_ocr_and_get_confidence(image, desc):
     # Run image_to_data to get word-level bounding boxes and confidences
     # Output.DICT returns a dictionary containing arrays for words, confidences, etc.
     data = pytesseract.image_to_data(image, output_type=Output.DICT)
-    
+
     # Filter out empty words/spaces which typically have -1 confidence
-    confidences = [int(conf) for conf, text in zip(data['conf'], data['text'], strict=True) 
+    confidences = [int(conf) for conf, text in zip(data['conf'], data['text'], strict=True)
                    if text.strip() and int(conf) != -1]
 
     if confidences:
@@ -63,7 +63,7 @@ def main():
     run_ocr_and_get_confidence(gray_img, "Grayscale Image")
 
     # Experiment C: Thresholded Image (Binarization)
-    # WHY: OCR engines work best with stark black-and-white contrast. 
+    # WHY: OCR engines work best with stark black-and-white contrast.
     # OTSU thresholding automatically finds the optimal threshold value to separate
     # dark text (foreground) from light paper (background).
     # We apply THRESH_BINARY to make text purely black and background purely white.

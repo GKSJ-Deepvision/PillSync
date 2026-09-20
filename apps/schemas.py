@@ -1,5 +1,4 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
-from typing import Optional, List
 from enum import Enum
 from datetime import datetime
 
@@ -13,8 +12,8 @@ class UserCreate(BaseModel):
     full_name: str
     email: EmailStr
     password: str
-    role: Optional[UserRole] = UserRole.PATIENT
-    caregiver_id: Optional[int] = None
+    role: UserRole | None = UserRole.PATIENT
+    caregiver_id: int | None = None
 
 # Response schema for returning user details (excludes password)
 class UserOut(BaseModel):
@@ -22,7 +21,7 @@ class UserOut(BaseModel):
     full_name: str
     email: EmailStr
     role: UserRole
-    caregiver_id: Optional[int] = None
+    caregiver_id: int | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -34,10 +33,10 @@ class Token(BaseModel):
 class MedicineCreate(BaseModel):
     name: str
     dosage: str
-    disease: Optional[str] = None
+    disease: str | None = None
     total_quantity: int
     daily_frequency: int
-    times: Optional[List[str]] = []
+    times: list[str] | None = []
 
 class MedicineOut(MedicineCreate):
     id: int

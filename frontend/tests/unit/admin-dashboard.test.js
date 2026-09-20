@@ -20,9 +20,30 @@ const ADMIN_USER = {
 
 const ALL_USERS_RESPONSE = {
   results: [
-    { id: 'u1', full_name: 'Asha Patel', email: 'asha@example.com', role: 'PATIENT', is_active: true, date_joined: '2026-09-01T00:00:00Z' },
-    { id: 'u2', full_name: 'Ravi Kumar', email: 'ravi@example.com', role: 'CAREGIVER', is_active: true, date_joined: '2026-09-02T00:00:00Z' },
-    { id: 'u3', full_name: 'Priya Sharma', email: 'priya@example.com', role: 'PATIENT', is_active: false, date_joined: '2026-09-03T00:00:00Z' },
+    {
+      id: 'u1',
+      full_name: 'Asha Patel',
+      email: 'asha@example.com',
+      role: 'PATIENT',
+      is_active: true,
+      date_joined: '2026-09-01T00:00:00Z',
+    },
+    {
+      id: 'u2',
+      full_name: 'Ravi Kumar',
+      email: 'ravi@example.com',
+      role: 'CAREGIVER',
+      is_active: true,
+      date_joined: '2026-09-02T00:00:00Z',
+    },
+    {
+      id: 'u3',
+      full_name: 'Priya Sharma',
+      email: 'priya@example.com',
+      role: 'PATIENT',
+      is_active: false,
+      date_joined: '2026-09-03T00:00:00Z',
+    },
   ],
 };
 

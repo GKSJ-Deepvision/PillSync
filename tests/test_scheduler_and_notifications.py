@@ -1,6 +1,6 @@
 import pytest
 import asyncio
-from datetime import datetime, time, timezone
+from datetime import datetime, UTC
 from apps.notifications import send_medication_reminder
 from apps.scheduler import scheduler, check_due_medicines
 from apps.database import SessionLocal
@@ -48,7 +48,7 @@ def test_check_due_medicines():
         check_due_medicines()
 
         # Add TAKEN adherence log for today
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         log = AdherenceLog(
             medicine_id=medicine.id,
             status="TAKEN",

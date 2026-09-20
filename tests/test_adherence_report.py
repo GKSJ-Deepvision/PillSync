@@ -29,7 +29,7 @@ def create_test_user(db, email: str, full_name: str = "Test User"):
 def test_get_adherence_report_empty(db_session):
     user = create_test_user(db_session, "empty_user@example.com", "Empty User")
     report = get_adherence_report(db=db_session, current_user=user)
-    
+
     assert report["total_medicines"] == 0
     assert report["total_doses_logged"] == 0
     assert report["doses_taken"] == 0

@@ -1,5 +1,3 @@
- 
-
 const token = localStorage.getItem('access_token');
 if (!token) window.location.href = 'login.html';
 
@@ -51,9 +49,7 @@ async function loadCaregiverDashboard() {
 
     const assignData = await assignRes.json();
     const assignments = assignData.results || assignData;
-    const active = assignments.filter(
-      (a) => (a.status || '').toUpperCase() === 'ACTIVE'
-    );
+    const active = assignments.filter((a) => (a.status || '').toUpperCase() === 'ACTIVE');
 
     if (active.length === 0) {
       renderEmpty();
@@ -98,10 +94,11 @@ async function loadCaregiverDashboard() {
         .filter((m) => m.quantity_remaining != null && m.quantity_remaining <= 5)
         .map((m) => `${m.name} (${m.quantity_remaining} left)`);
 
-      const conditions = (profile.patient_conditions || [])
-        .map((c) => c.condition?.name || c.condition_display || '')
-        .filter(Boolean)
-        .join(', ') || 'No conditions listed';
+      const conditions =
+        (profile.patient_conditions || [])
+          .map((c) => c.condition?.name || c.condition_display || '')
+          .filter(Boolean)
+          .join(', ') || 'No conditions listed';
 
       // Today's dose summary from the backend
       const todayResult = todaySummaries[idx];

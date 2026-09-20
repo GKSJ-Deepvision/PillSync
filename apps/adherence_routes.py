@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
 from apps.database import get_db
 from apps.models import Medicine, AdherenceLog, User
 from apps.schemas import AdherenceLogCreate, AdherenceLogOut, AdherenceReportOut
@@ -60,26 +59,26 @@ def log_adherence(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Medicine not found"
         )
-    
+
     # Ensure strict authorization: user can only log adherence for their own medicines
     if medicine.user_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You are not authorized to log adherence for this medicine"
         )
-    
+
     # Create the adherence log entry
     adherence_log = AdherenceLog(
         medicine_id=log_data.medicine_id,
         status=log_data.status.value if hasattr(log_data.status, "value") else str(log_data.status)
     )
-    
+
     db.add(adherence_log)
     db.commit()
     db.refresh(adherence_log)
     return adherence_log
 
-@router.get("/medicine/{medicine_id}", response_model=List[AdherenceLogOut])
+@router.get("/medicine/{medicine_id}", response_model=list[AdherenceLogOut])
 def get_medicine_adherence_logs(
     medicine_id: int,
     db: Session = Depends(get_db),
@@ -92,13 +91,13 @@ def get_medicine_adherence_logs(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Medicine not found"
         )
-    
+
     # Ensure authorization
     if medicine.user_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You are not authorized to view adherence for this medicine"
         )
-    
+
     logs = db.query(AdherenceLog).filter(AdherenceLog.medicine_id == medicine_id).all()
     return logs

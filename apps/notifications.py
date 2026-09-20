@@ -27,7 +27,7 @@ def send_medication_reminder(user_id: int, medicine_name: str, dosage: str, user
     """
     subject = f"PillSync Reminder: {medicine_name} is due!"
     body = f"Hello,\n\nThis is your PillSync reminder to take your medication.\n\nMedicine: {medicine_name}\nDosage: {dosage}\n\nPlease log it in your PillSync dashboard."
-    
+
     recipient = user_email or "patient@example.com"
 
     if SMTP_SERVER and SMTP_USERNAME and SMTP_PASSWORD:

@@ -20,9 +20,7 @@ const USER_RESPONSE = {
 };
 
 const ASSIGNMENTS_RESPONSE = {
-  results: [
-    { id: 'assign-001', status: 'ACTIVE', patient: 'patient-001' },
-  ],
+  results: [{ id: 'assign-001', status: 'ACTIVE', patient: 'patient-001' }],
 };
 
 const PROFILES_RESPONSE = {

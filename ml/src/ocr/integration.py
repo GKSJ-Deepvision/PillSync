@@ -28,9 +28,9 @@ def run_integration_experiment():
 
     # 2 & 3. Run Tesseract to get raw text and confidence
     text = pytesseract.image_to_string(image)
-    
+
     data = pytesseract.image_to_data(image, output_type=Output.DICT)
-    confidences = [int(conf) for conf, word in zip(data['conf'], data['text'], strict=True) 
+    confidences = [int(conf) for conf, word in zip(data['conf'], data['text'], strict=True)
                    if word.strip() and int(conf) != -1]
 
     avg_conf = sum(confidences) / len(confidences) if confidences else 0.0

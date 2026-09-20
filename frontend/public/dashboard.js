@@ -68,7 +68,9 @@ async function loadDashboardData() {
     const initial = user.full_name ? user.full_name.charAt(0).toUpperCase() : 'U';
     const role =
       user.role_display ||
-      (user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase() : 'Patient');
+      (user.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase()
+        : 'Patient');
     const firstName = user.full_name ? user.full_name.split(' ')[0] : 'User';
     const hour = new Date().getHours();
     const greeting =
@@ -113,8 +115,7 @@ async function loadDashboardData() {
       name: med.name,
       category: med.category || 'OTHER',
       categoryDisplay: med.category_display || 'Other',
-      freq:
-        med.schedules && med.schedules.length > 0 ? `${med.schedules.length} time(s)/day` : '—',
+      freq: med.schedules && med.schedules.length > 0 ? `${med.schedules.length} time(s)/day` : '—',
       stock: med.quantity_remaining,
       color: categoryColors[med.category] || '#8A8578',
     }));
@@ -258,9 +259,12 @@ function renderDoseChip(dose, container) {
 
   // Status label
   let statusLabel = '';
-  if (dose.status === 'TAKEN') statusLabel = '<div class="dose-status-label taken-label">✓ Taken</div>';
-  else if (dose.status === 'MISSED') statusLabel = '<div class="dose-status-label missed-label">✗ Missed</div>';
-  else if (dose.status === 'SKIPPED') statusLabel = '<div class="dose-status-label skipped-label">— Skipped</div>';
+  if (dose.status === 'TAKEN')
+    statusLabel = '<div class="dose-status-label taken-label">✓ Taken</div>';
+  else if (dose.status === 'MISSED')
+    statusLabel = '<div class="dose-status-label missed-label">✗ Missed</div>';
+  else if (dose.status === 'SKIPPED')
+    statusLabel = '<div class="dose-status-label skipped-label">— Skipped</div>';
   else if (snoozed) statusLabel = '<div class="dose-status-label snoozed-label">⏱ Snoozed</div>';
 
   const overdueFlag = dose.is_overdue ? '<span class="overdue-tag">Overdue</span>' : '';
@@ -270,11 +274,15 @@ function renderDoseChip(dose, container) {
     <div class="med-name">${dose.medicine_name}</div>
     ${dose.medicine_strength ? `<div class="med-strength">${dose.medicine_strength}</div>` : ''}
     ${statusLabel}
-    ${!resolved ? `
+    ${
+      !resolved
+        ? `
     <div class="actions">
       <button class="btn-taken" id="btn-taken-${dose.id}" onclick="markDose('${dose.id}', 'taken')" ${snoozed ? '' : ''}>Taken</button>
       <button class="btn-missed" id="btn-missed-${dose.id}" onclick="markDose('${dose.id}', 'missed')">Missed</button>
-    </div>` : ''}
+    </div>`
+        : ''
+    }
   `;
 
   container.appendChild(chip);
@@ -334,7 +342,7 @@ window.markDose = async function markDose(doseId, action) {
     if (btnMissed) btnMissed.disabled = false;
     showToast('Network error. Please try again.', 'error');
   }
-}
+};
 
 function updateDoseInState(updatedDose) {
   const SLOT_ORDER = ['MORNING', 'AFTERNOON', 'EVENING', 'NIGHT'];

@@ -22,8 +22,18 @@ const HISTORY_14_RESPONSE = {
       pending: 0,
       adherence_percent: 50.0,
       doses: [
-        { id: 'dose-001', medicine_name: 'Metformin', scheduled_for: '2026-09-20T08:00:00Z', status: 'TAKEN' },
-        { id: 'dose-002', medicine_name: 'Lisinopril', scheduled_for: '2026-09-20T09:00:00Z', status: 'MISSED' },
+        {
+          id: 'dose-001',
+          medicine_name: 'Metformin',
+          scheduled_for: '2026-09-20T08:00:00Z',
+          status: 'TAKEN',
+        },
+        {
+          id: 'dose-002',
+          medicine_name: 'Lisinopril',
+          scheduled_for: '2026-09-20T09:00:00Z',
+          status: 'MISSED',
+        },
       ],
     },
     {
@@ -35,8 +45,18 @@ const HISTORY_14_RESPONSE = {
       pending: 0,
       adherence_percent: 100.0,
       doses: [
-        { id: 'dose-003', medicine_name: 'Metformin', scheduled_for: '2026-09-19T08:00:00Z', status: 'TAKEN' },
-        { id: 'dose-004', medicine_name: 'Lisinopril', scheduled_for: '2026-09-19T09:00:00Z', status: 'TAKEN' },
+        {
+          id: 'dose-003',
+          medicine_name: 'Metformin',
+          scheduled_for: '2026-09-19T08:00:00Z',
+          status: 'TAKEN',
+        },
+        {
+          id: 'dose-004',
+          medicine_name: 'Lisinopril',
+          scheduled_for: '2026-09-19T09:00:00Z',
+          status: 'TAKEN',
+        },
       ],
     },
   ],

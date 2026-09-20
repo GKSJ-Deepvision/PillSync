@@ -77,7 +77,9 @@ async function handleLogin() {
         }
         return;
       }
-    } catch (_) { /* fall through to UI-based redirect */ }
+    } catch (_) {
+      /* fall through to UI-based redirect */
+    }
 
     // Fallback: use the UI-selected role
     if (selectedRole === 'CAREGIVER') {
@@ -141,7 +143,8 @@ async function handleSignup() {
         const firstError = Object.values(details)[0];
         errorMsg.textContent = Array.isArray(firstError) ? firstError[0] : firstError;
       } else {
-        errorMsg.textContent = errorData.detail || errorData?.error?.message || 'Registration failed.';
+        errorMsg.textContent =
+          errorData.detail || errorData?.error?.message || 'Registration failed.';
       }
       return;
     }

@@ -128,7 +128,8 @@ document.getElementById('medForm').addEventListener('submit', async function (e)
         const firstError = Object.values(details)[0];
         errorMsg.textContent = Array.isArray(firstError) ? firstError[0] : firstError;
       } else {
-        errorMsg.textContent = errorData.detail || errorData?.error?.message || 'Failed to add medicine.';
+        errorMsg.textContent =
+          errorData.detail || errorData?.error?.message || 'Failed to add medicine.';
       }
       return;
     }

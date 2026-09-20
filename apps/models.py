@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Enum, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Enum
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
@@ -18,7 +18,7 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     role = Column(Enum(UserRole), default=UserRole.PATIENT)
     caregiver_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    
+
     caregiver = relationship("User", remote_side=[id], backref="patients")
     medicines = relationship("Medicine", back_populates="owner")
 

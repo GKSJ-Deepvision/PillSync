@@ -120,16 +120,17 @@ async function loadActivityFeed() {
       const when = entry.sent_at || entry.created_at;
       const timeLabel = when ? formatActivityTime(when) : '—';
       // e.g. "Medicine reminder via Email · Sent"
-      const text = [entry.category_display, entry.channel_display]
-        .filter(Boolean)
-        .join(' via ') + (entry.status_display ? ` · ${entry.status_display}` : '');
+      const text =
+        [entry.category_display, entry.channel_display].filter(Boolean).join(' via ') +
+        (entry.status_display ? ` · ${entry.status_display}` : '');
 
       item.innerHTML = `<span>${text}</span><span class="activity-time">${timeLabel}</span>`;
       list.appendChild(item);
     });
   } catch (err) {
     console.error('Error loading activity feed:', err);
-    if (list) list.innerHTML = `<div style="color:#8a8578; font-size:13px;">Could not load activity.</div>`;
+    if (list)
+      list.innerHTML = `<div style="color:#8a8578; font-size:13px;">Could not load activity.</div>`;
   }
 }
 

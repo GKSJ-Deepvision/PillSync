@@ -21,7 +21,9 @@ async function loadHistorySidebar() {
     const initial = user.full_name ? user.full_name.charAt(0).toUpperCase() : 'U';
     const role =
       user.role_display ||
-      (user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase() : 'Patient');
+      (user.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase()
+        : 'Patient');
     const el = (id) => document.getElementById(id);
     if (el('sidebarAvatar')) el('sidebarAvatar').textContent = initial;
     if (el('sidebarName')) el('sidebarName').textContent = user.full_name;

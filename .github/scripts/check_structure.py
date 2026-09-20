@@ -28,8 +28,6 @@ REQUIRED_DIRS = [
     "backend/config",
     "backend/tests",
     "frontend",
-    "frontend/src",
-    "frontend/src/features",
     "ml/src",
     "docs",
     "docs/milestones",

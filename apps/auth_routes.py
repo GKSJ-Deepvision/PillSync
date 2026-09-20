@@ -15,10 +15,10 @@ def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
-    
+
     # Create new user
     hashed_pwd = hash_password(user_data.password)
     new_user = User(
@@ -28,7 +28,7 @@ def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
         role=user_data.role,
         caregiver_id=user_data.caregiver_id
     )
-    
+
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -36,7 +36,7 @@ def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=Token)
 def login_user(
-    form_data: OAuth2PasswordRequestForm = Depends(), 
+    form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
     # Retrieve user by email (OAuth2 form uses 'username' field for email)
@@ -47,7 +47,7 @@ def login_user(
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     # Generate token containing user_id and role
     access_token = create_access_token(
         data={"sub": str(user.id), "role": user.role.value}
