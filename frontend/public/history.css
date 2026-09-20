@@ -72,3 +72,18 @@
   background: #fdf1ec;
   color: var(--terracotta);
 }
+
+.status-pill.skipped {
+  background: #f5f4f0;
+  color: #8a8578;
+}
+
+.status-pill.pending {
+  background: #fefae0;
+  color: #b5830a;
+}
+
+.status-pill.partial {
+  background: #fff8e1;
+  color: #b5830a;
+}

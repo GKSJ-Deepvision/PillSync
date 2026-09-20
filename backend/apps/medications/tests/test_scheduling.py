@@ -128,7 +128,7 @@ class TestDosesPerDay:
 
 class TestGeneration:
     def test_creates_one_dose_per_day_in_the_horizon(self, medicine):
-        schedule = make_schedule(medicine)
+        schedule = make_schedule(medicine, time_of_day=time(23, 59))
         created = generation.generate_for_schedule(schedule, horizon_days=6)
 
         # Today plus six days ahead.
@@ -136,7 +136,7 @@ class TestGeneration:
         assert DoseEvent.objects.filter(schedule=schedule).count() == 7
 
     def test_running_twice_creates_nothing_extra(self, medicine):
-        schedule = make_schedule(medicine)
+        schedule = make_schedule(medicine, time_of_day=time(23, 59))
         generation.generate_for_schedule(schedule, horizon_days=6)
         second = generation.generate_for_schedule(schedule, horizon_days=6)
 
@@ -144,7 +144,7 @@ class TestGeneration:
         assert DoseEvent.objects.filter(schedule=schedule).count() == 7
 
     def test_extending_the_horizon_only_adds_the_new_days(self, medicine):
-        schedule = make_schedule(medicine)
+        schedule = make_schedule(medicine, time_of_day=time(23, 59))
         generation.generate_for_schedule(schedule, horizon_days=3)
         generation.generate_for_schedule(schedule, horizon_days=6)
 

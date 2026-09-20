@@ -1,0 +1,86 @@
+#api-debug-logger {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 999999;
+  font-family: 'Courier New', Courier, monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+#api-debug-toggle {
+  background-color: #2b2b28;
+  color: #c9a96e;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  border: 1px solid #4a4a44;
+}
+
+#api-debug-count {
+  background-color: #c9a96e;
+  color: #1c1c1b;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+#api-debug-panel {
+  background-color: #1c1c1b;
+  color: #e0e0e0;
+  width: 380px;
+  max-height: 500px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+  border: 1px solid #4a4a44;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#api-debug-header {
+  background-color: #2b2b28;
+  padding: 10px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #4a4a44;
+}
+
+#api-debug-clear {
+  background: none;
+  border: 1px solid #c9a96e;
+  color: #c9a96e;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+#api-debug-list {
+  padding: 10px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.api-debug-item {
+  background-color: #2b2b28;
+  padding: 0;
+  border-radius: 4px;
+}
+
+.api-debug-pre {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.2;
+  color: #7fa98e;
+}

@@ -34,8 +34,8 @@ gunicorn==26.2.0
 python-dotenv==1.2.3
 
 # --- Added in Milestone 3 (OCR and AI) ---
-# pytesseract==0.3.13
-# opencv-python-headless==4.11.0.86
+pytesseract==0.3.13
+opencv-python-headless==4.11.0.86
 # spacy==3.8.4
 # openai==1.99.1
 

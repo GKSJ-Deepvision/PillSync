@@ -247,6 +247,8 @@ class TestReminderTasks:
         assert stale.status == DoseStatus.MISSED
 
     def test_generation_tops_up_the_horizon(self, schedule):
+        schedule.time_of_day = time(23, 59)
+        schedule.save()
         created = tasks.generate_dose_events(horizon_days=3)
         assert created == 4
         assert tasks.generate_dose_events(horizon_days=3) == 0

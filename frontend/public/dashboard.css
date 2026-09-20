@@ -335,6 +335,40 @@ body {
   background: #fdf1ec;
 }
 
+.dose-chip .med-strength {
+  font-size: 11px;
+  color: #8a8578;
+  margin-bottom: 8px;
+}
+
+.dose-status-label {
+  font-size: 12px;
+  font-weight: 700;
+  margin: 6px 0 4px;
+}
+
+.taken-label  { color: var(--sage-soft); }
+.missed-label { color: var(--terracotta); }
+.skipped-label { color: #8a8578; }
+.snoozed-label { color: #c9a96e; }
+
+.overdue-tag {
+  display: inline-block;
+  margin-left: 6px;
+  background: #fdf1ec;
+  color: var(--terracotta);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  vertical-align: middle;
+}
+
+.dose-chip button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .section-header {
   display: flex;
   justify-content: space-between;

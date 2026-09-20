@@ -102,3 +102,11 @@
   background: #f5f3ef;
   color: #8a8578;
 }
+
+.patient-pending {
+  font-size: 11px;
+  color: #b5830a;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
