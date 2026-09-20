@@ -17,21 +17,21 @@ def run_ocr_and_get_confidence(image, desc):
     print(f"\n{'='*50}")
     print(f"--- OCR Output: {desc} ---")
     print(f"{'='*50}")
-    
+
     # Run standard image_to_string for raw text
     text = pytesseract.image_to_string(image)
     print("RAW TEXT:\n")
     print(text.strip())
     print("-" * 50)
-    
+
     # Run image_to_data to get word-level bounding boxes and confidences
     # Output.DICT returns a dictionary containing arrays for words, confidences, etc.
     data = pytesseract.image_to_data(image, output_type=Output.DICT)
     
     # Filter out empty words/spaces which typically have -1 confidence
-    confidences = [int(conf) for conf, text in zip(data['conf'], data['text']) 
+    confidences = [int(conf) for conf, text in zip(data['conf'], data['text'], strict=True) 
                    if text.strip() and int(conf) != -1]
-                   
+
     if confidences:
         avg_conf = sum(confidences) / len(confidences)
         print(f"Average Confidence: {avg_conf:.2f}%")
@@ -50,18 +50,18 @@ def main():
 
     # Load original image (BGR format by default in cv2)
     original_img = cv2.imread(image_path)
-    
+
     # Experiment A: Original Image
     # WHY: We establish a baseline to see if preprocessing is even necessary.
     # Often, modern Tesseract handles clean images fine without help.
     run_ocr_and_get_confidence(original_img, "Original BGR Image")
-    
+
     # Experiment B: Grayscale Image
     # WHY: Color information usually confuses OCR engines. Converting to grayscale
     # simplifies the image to single-channel intensity, removing noise from colored backgrounds.
     gray_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
     run_ocr_and_get_confidence(gray_img, "Grayscale Image")
-    
+
     # Experiment C: Thresholded Image (Binarization)
     # WHY: OCR engines work best with stark black-and-white contrast. 
     # OTSU thresholding automatically finds the optimal threshold value to separate

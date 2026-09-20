@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, no-console */
+ 
 
 /**
  * Common user profile loader for all static HTML pages in PillSync.

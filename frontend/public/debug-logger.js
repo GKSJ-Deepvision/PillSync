@@ -108,7 +108,7 @@ ${dbStatus}└──────────────────────
           } else if (data && data.slots) {
             count = Object.values(data.slots).flat().length; // Today's doses
           }
-        } catch (e) {
+        } catch {
           // ignore parsing error
         }
         

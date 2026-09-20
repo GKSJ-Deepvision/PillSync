@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, no-console */
+/* eslint-disable no-unused-vars */
 
 const BASE_URL = '/api/v1';
 

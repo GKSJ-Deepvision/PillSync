@@ -12,7 +12,7 @@ d = ImageDraw.Draw(img)
 try:
     font = ImageFont.truetype("arial.ttf", 24)
     title_font = ImageFont.truetype("arial.ttf", 32)
-except IOError:
+except OSError:
     font = ImageFont.load_default()
     title_font = ImageFont.load_default()
 

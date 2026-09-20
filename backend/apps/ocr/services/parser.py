@@ -1,7 +1,7 @@
 import re
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
-def parse_ocr_text(text: str) -> Dict[str, Any]:
+def parse_ocr_text(text: str) -> dict[str, Any]:
     """
     Parses raw OCR text to extract structured medicine details.
     Returns None for fields that cannot be confidently identified.
@@ -16,7 +16,7 @@ def parse_ocr_text(text: str) -> Dict[str, Any]:
         }
 
     text_clean = text.replace('\n', ' ')
-    
+
     # 1. Extract Dosage (e.g., 500 mg, 10 ml, 50mcg)
     dosage_match = re.search(r'\b(\d+(?:\.\d+)?)\s*(mg|ml|mcg|g)\b', text_clean, re.IGNORECASE)
     dosage = dosage_match.group(0).strip() if dosage_match else None

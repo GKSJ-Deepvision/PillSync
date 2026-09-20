@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, no-console */
+/* eslint-disable no-unused-vars */
 
 // ── State ─────────────────────────────────────────────────────────────────────
 // todayData holds the full /doses/today/ response so we can re-render without

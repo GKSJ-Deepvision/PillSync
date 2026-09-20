@@ -1,4 +1,3 @@
-import pytest
 from apps.ocr.services.parser import parse_ocr_text
 
 def test_parse_empty_text():

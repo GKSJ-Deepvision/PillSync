@@ -1,5 +1,4 @@
 import os
-import pytest
 import cv2
 import pytesseract
 from apps.ocr.services.parser import parse_ocr_text
@@ -18,7 +17,6 @@ def test_tesseract_to_parser_integration():
     ))
     
     assert os.path.exists(image_path), f"Synthetic image missing at {image_path}"
-    
     # Run Tesseract
     image = cv2.imread(image_path)
     text = pytesseract.image_to_string(image)

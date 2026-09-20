@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, no-console */
+/* eslint-disable no-unused-vars */
 
 const token = localStorage.getItem('access_token');
 if (!token) window.location.href = 'login.html';
