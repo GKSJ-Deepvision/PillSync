@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "apps.medications",
     "corsheaders",
+    "apps.adherence",
 ]
 
 

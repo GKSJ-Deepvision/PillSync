@@ -1,0 +1,61 @@
+from django.urls import path
+
+from apps.adherence.views import (
+    DoseEventCreateView,
+    DoseEventUpdateView,
+    HistoryView,
+    MedicationBreakdownView,
+    MonthlyView,
+    ReportView,
+    SummaryView,
+    TodayView,
+    WeeklyView,
+)
+
+urlpatterns = [
+    path(
+        "summary/",
+        SummaryView.as_view(),
+        name="adherence-summary",
+    ),
+    path(
+        "history/",
+        HistoryView.as_view(),
+        name="adherence-history",
+    ),
+    path(
+        "medications/",
+        MedicationBreakdownView.as_view(),
+        name="adherence-medications",
+    ),
+    path(
+        "today/",
+        TodayView.as_view(),
+        name="adherence-today",
+    ),
+    path(
+        "weekly/",
+        WeeklyView.as_view(),
+        name="adherence-weekly",
+    ),
+    path(
+        "monthly/",
+        MonthlyView.as_view(),
+        name="adherence-monthly",
+    ),
+    path(
+        "log/",
+        DoseEventCreateView.as_view(),
+        name="adherence-log",
+    ),
+    path(
+        "log/<int:pk>/",
+        DoseEventUpdateView.as_view(),
+        name="adherence-log-update",
+    ),
+    path(
+        "report/",
+        ReportView.as_view(),
+        name="adherence-report",
+    ),
+]
