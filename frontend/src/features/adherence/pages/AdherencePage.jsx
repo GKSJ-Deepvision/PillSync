@@ -1,562 +1,987 @@
-import { useEffect, useState } from 'react';
-import { adherenceApi, mockAdherenceData } from '../../../api/adherence';
-import { Layout } from '../../../components/layout';
-import { CardSkeleton, Alert } from '../../../components/common';
-import { Badge } from '../../../components/common/Badge';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  BarChart,
-  Bar,
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  ComposedChart,
-  Line,
-  Area,
-  Legend,
 } from 'recharts';
 import {
-  TrendingUp,
-  Flame,
-  ShieldCheck,
-  HeartPulse,
-  Sparkles,
-  Download,
+  BarChart3,
+  CalendarDays,
   CheckCircle2,
-  Award,
-  Activity,
-  Droplets,
+  Clock3,
+  Download,
+  FileDown,
+  Flame,
   Pill,
+  RefreshCw,
+  TrendingUp,
+  XCircle,
 } from 'lucide-react';
+
+import { adherenceApi } from '../../../api/adherence';
+import { Layout } from '../../../components/layout';
+import { Alert } from '../../../components/common';
 import './AdherencePage.css';
 
+const PRESETS = [
+  { id: '7', label: 'Last 7 days', days: 7 },
+  { id: '30', label: 'Last 30 days', days: 30 },
+];
+
+const STATUS_META = {
+  TAKEN: {
+    label: 'Taken',
+    className: 'adherence-status adherence-status-taken',
+  },
+  MISSED: {
+    label: 'Missed',
+    className: 'adherence-status adherence-status-missed',
+  },
+  SNOOZED: {
+    label: 'Snoozed',
+    className: 'adherence-status adherence-status-pending',
+  },
+  PENDING: {
+    label: 'Pending',
+    className: 'adherence-status adherence-status-pending',
+  },
+};
+
+function getLocalDateString(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+function getPresetRange(days) {
+  const end = new Date();
+  const start = new Date();
+
+  start.setDate(end.getDate() - (days - 1));
+
+  return {
+    startDate: getLocalDateString(start),
+    endDate: getLocalDateString(end),
+  };
+}
+
+function formatDisplayDate(value) {
+  if (!value) return '—';
+
+  const date = new Date(`${value}T00:00:00`);
+
+  return new Intl.DateTimeFormat('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
+}
+
+function formatShortDate(value) {
+  if (!value) return '';
+
+  const date = new Date(`${value}T00:00:00`);
+
+  return new Intl.DateTimeFormat('en-IN', {
+    day: 'numeric',
+    month: 'short',
+  }).format(date);
+}
+
+function formatTime(value) {
+  if (!value) return '—';
+
+  const [hours, minutes] = value.split(':').map(Number);
+  const date = new Date();
+
+  date.setHours(hours, minutes, 0, 0);
+
+  return new Intl.DateTimeFormat('en-IN', {
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(date);
+}
+
+function formatPercentage(value) {
+  if (value === null || value === undefined) return '—';
+
+  return `${Number(value).toFixed(1)}%`;
+}
+
+function getErrorMessage(error, fallback = 'Unable to load adherence data.') {
+  const detail = error?.response?.data?.detail;
+
+  if (detail) return detail;
+
+  const firstFieldError = Object.values(error?.response?.data || {})[0];
+
+  if (Array.isArray(firstFieldError) && firstFieldError.length > 0) {
+    return firstFieldError[0];
+  }
+
+  if (typeof firstFieldError === 'string') {
+    return firstFieldError;
+  }
+
+  return fallback;
+}
+
+function StatCard({ label, value, helper, icon: Icon, tone }) {
+  return (
+    <article className="adherence-stat-card">
+      <div className="adherence-stat-top">
+        <div>
+          <p className="adherence-stat-label">{label}</p>
+          <p className={`adherence-stat-value adherence-stat-${tone}`}>{value}</p>
+        </div>
+
+        <div className={`adherence-stat-icon adherence-stat-icon-${tone}`}>
+          <Icon size={21} strokeWidth={2.2} />
+        </div>
+      </div>
+
+      <p className="adherence-stat-helper">{helper}</p>
+    </article>
+  );
+}
+
+function SectionHeader({ icon: Icon, title, description, action }) {
+  return (
+    <div className="adherence-section-header">
+      <div className="adherence-section-heading">
+        <div className="adherence-section-icon">
+          <Icon size={18} />
+        </div>
+
+        <div>
+          <h2>{title}</h2>
+          {description && <p>{description}</p>}
+        </div>
+      </div>
+
+      {action}
+    </div>
+  );
+}
+
+function StatusBadge({ status }) {
+  const meta = STATUS_META[status] || STATUS_META.PENDING;
+
+  return <span className={meta.className}>{meta.label}</span>;
+}
+
 export function AdherencePage() {
-  const [summary, setSummary] = useState(mockAdherenceData.summary);
-  const [weeklyData, setWeeklyData] = useState(mockAdherenceData.weeklyAdherence);
-  const [healthData, setHealthData] = useState(mockAdherenceData.healthImprovement);
-  const [medicationHistory, setMedicationHistory] = useState(mockAdherenceData.medicationHistory);
-  const [selectedMetric, setSelectedMetric] = useState('all');
+  const defaultRange = getPresetRange(7);
+
+  const [preset, setPreset] = useState('7');
+  const [startDate, setStartDate] = useState(defaultRange.startDate);
+  const [endDate, setEndDate] = useState(defaultRange.endDate);
+
+  const [report, setReport] = useState(null);
+  const [todayDoses, setTodayDoses] = useState([]);
+
   const [loading, setLoading] = useState(true);
+  const [actionId, setActionId] = useState(null);
+  const [exporting, setExporting] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchAdherenceData = async () => {
-      try {
-        setLoading(true);
-        const [summaryRes, weeklyRes, healthRes, historyRes] = await Promise.all([
-          adherenceApi.getSummary().catch(() => mockAdherenceData.summary),
-          adherenceApi.getWeeklyAdherence().catch(() => mockAdherenceData.weeklyAdherence),
-          adherenceApi.getHealthImprovement().catch(() => mockAdherenceData.healthImprovement),
-          adherenceApi.getMedicationHistory().catch(() => mockAdherenceData.medicationHistory),
-        ]);
+  const fetchDashboard = useCallback(async () => {
+    if (!startDate || !endDate) {
+      throw new Error('Please select a valid date range.');
+    }
 
-        if (isMounted) {
-          setSummary(summaryRes || mockAdherenceData.summary);
-          setWeeklyData(weeklyRes || mockAdherenceData.weeklyAdherence);
-          setHealthData(healthRes || mockAdherenceData.healthImprovement);
-          setMedicationHistory(historyRes || mockAdherenceData.medicationHistory);
-        }
-      } catch (err) {
-        console.error('Error fetching adherence data:', err);
+    if (startDate > endDate) {
+      throw new Error('Start date must be on or before the end date.');
+    }
+
+    const diff =
+      (new Date(`${endDate}T00:00:00`) - new Date(`${startDate}T00:00:00`)) / (1000 * 60 * 60 * 24);
+
+    if (diff > 365) {
+      throw new Error('Please select a date range of 366 days or less.');
+    }
+
+    const [reportResponse, todayResponse] = await Promise.all([
+      adherenceApi.getReport({
+        start_date: startDate,
+        end_date: endDate,
+      }),
+      adherenceApi.getToday(),
+    ]);
+
+    return {
+      reportResponse,
+      todayResponse,
+    };
+  }, [startDate, endDate]);
+
+  const loadDashboard = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError('');
+
+      const { reportResponse, todayResponse } = await fetchDashboard();
+
+      setReport(reportResponse);
+      setTodayDoses(todayResponse);
+    } catch (requestError) {
+      setReport(null);
+      setTodayDoses([]);
+      setError(getErrorMessage(requestError));
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchDashboard]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadInitialDashboard = async () => {
+      try {
+        const { reportResponse, todayResponse } = await fetchDashboard();
+
+        if (cancelled) return;
+
+        setReport(reportResponse);
+        setTodayDoses(todayResponse);
+        setError('');
+      } catch (requestError) {
+        if (cancelled) return;
+
+        setReport(null);
+        setTodayDoses([]);
+        setError(getErrorMessage(requestError));
       } finally {
-        if (isMounted) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchAdherenceData();
+    void loadInitialDashboard();
+
     return () => {
-      isMounted = false;
+      cancelled = true;
     };
-  }, []);
+  }, [fetchDashboard]);
 
-  if (loading) {
-    return (
-      <Layout>
-        <CardSkeleton count={4} />
-      </Layout>
-    );
-  }
+  const handlePresetChange = (presetId) => {
+    const selected = PRESETS.find((item) => item.id === presetId);
 
-  const doseRatioData = [
-    { name: 'Taken on Time', value: summary?.takenDoses || 37, color: '#10b981' },
-    { name: 'Missed / Delayed', value: summary?.missedDoses || 2, color: '#f43f5e' },
-  ];
+    if (!selected) return;
+
+    const range = getPresetRange(selected.days);
+
+    setPreset(presetId);
+    setStartDate(range.startDate);
+    setEndDate(range.endDate);
+  };
+
+  const handleStartDateChange = (event) => {
+    setPreset('custom');
+    setStartDate(event.target.value);
+  };
+
+  const handleEndDateChange = (event) => {
+    setPreset('custom');
+    setEndDate(event.target.value);
+  };
+
+  const handleDoseAction = async (dose, status) => {
+    const actionKey = `${dose.schedule_id}-${dose.dose_date}-${status}`;
+
+    try {
+      setActionId(actionKey);
+      setError('');
+
+      await adherenceApi.logDose({
+        schedule: dose.schedule_id,
+        dose_date: dose.dose_date,
+        status,
+      });
+
+      await loadDashboard();
+    } catch (requestError) {
+      setError(
+        getErrorMessage(requestError, `Unable to mark this dose as ${status.toLowerCase()}.`)
+      );
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      setExporting(true);
+      setError('');
+
+      const data = await adherenceApi.getReport({
+        start_date: startDate,
+        end_date: endDate,
+      });
+
+      const rows = [['Date', 'Scheduled', 'Taken', 'Missed', 'Pending', 'Adherence %']];
+
+      data.daily_history.forEach((day) => {
+        rows.push([
+          day.date,
+          day.scheduled,
+          day.taken,
+          day.missed,
+          day.pending,
+          day.adherence_rate ?? '',
+        ]);
+      });
+
+      const csv = rows
+        .map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(','))
+        .join('\n');
+
+      const blob = new Blob([csv], {
+        type: 'text/csv;charset=utf-8;',
+      });
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+
+      link.href = url;
+      link.download = `pillsync-adherence-${startDate}-to-${endDate}.csv`;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      URL.revokeObjectURL(url);
+    } catch (requestError) {
+      setError(getErrorMessage(requestError, 'Unable to export the adherence report.'));
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const dailyChartData = useMemo(() => {
+    return (report?.daily_history || []).map((item) => ({
+      ...item,
+      label: formatShortDate(item.date),
+      adherence: item.adherence_rate ?? 0,
+    }));
+  }, [report]);
+
+  const statusChartData = useMemo(() => {
+    if (!report?.status_breakdown) return [];
+
+    return [
+      {
+        name: 'Taken',
+        value: report.status_breakdown.taken || 0,
+        fill: '#10b981',
+      },
+      {
+        name: 'Missed',
+        value: report.status_breakdown.missed || 0,
+        fill: '#f43f5e',
+      },
+      {
+        name: 'Pending',
+        value: report.status_breakdown.pending || 0,
+        fill: '#f59e0b',
+      },
+    ].filter((item) => item.value > 0);
+  }, [report]);
+
+  const summary = report?.summary;
+
+  const hasHistory = dailyChartData.length > 0;
+  const hasMedicationData = (report?.medications || []).length > 0;
+  const hasTodayDoses = todayDoses.length > 0;
 
   return (
     <Layout>
-      <div className="adherence-container">
-        {/* Header Banner */}
-        <div className="adherence-header">
+      <main className="adherence-page">
+        <section className="adherence-hero">
           <div>
-            <div className="adherence-title-row">
-              <h1 className="adherence-title">Adherence & Health Analytics</h1>
-              <Badge variant="success" size="sm">
-                <ShieldCheck className="h-3.5 w-3.5" />
-                94% Target Exceeded
-              </Badge>
-              <Badge variant="primary" size="sm">
-                Verified Clinical Protocol
-              </Badge>
+            <div className="adherence-eyebrow">
+              <span className="adherence-eyebrow-dot" />
+              Medication management
             </div>
-            <p className="adherence-subtitle">
-              Longitudinal tracking of medication intake consistency, streaks, and daily health
-              improvement vitals
+
+            <h1>Adherence Analytics</h1>
+
+            <p>
+              Monitor your medication intake, identify missed doses, and understand adherence trends
+              from your recorded dose history.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="adherence-toolbar">
+            <div className="adherence-range-select">
+              <CalendarDays size={17} />
+              <select
+                value={preset}
+                onChange={(event) => handlePresetChange(event.target.value)}
+                aria-label="Adherence date range"
+              >
+                {PRESETS.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label}
+                  </option>
+                ))}
+                <option value="custom">Custom range</option>
+              </select>
+            </div>
+
             <button
               type="button"
-              onClick={() =>
-                alert('Adherence and health vitals summary PDF exported successfully.')
-              }
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 transition cursor-pointer"
+              className="adherence-secondary-button"
+              onClick={loadDashboard}
+              disabled={loading}
             >
-              <Download className="h-3.5 w-3.5 text-slate-500" />
-              Export Clinical Report
+              <RefreshCw size={16} className={loading ? 'adherence-spin' : ''} />
+              Refresh
+            </button>
+
+            <button
+              type="button"
+              className="adherence-primary-button"
+              onClick={handleExport}
+              disabled={exporting || loading || !report}
+            >
+              <FileDown size={16} />
+              {exporting ? 'Exporting…' : 'Export CSV'}
             </button>
           </div>
-        </div>
+        </section>
+
+        <section className="adherence-filters-panel">
+          <div>
+            <p className="adherence-filter-label">Start date</p>
+            <input
+              type="date"
+              value={startDate}
+              onChange={handleStartDateChange}
+              max={endDate || getLocalDateString()}
+            />
+          </div>
+
+          <div>
+            <p className="adherence-filter-label">End date</p>
+            <input
+              type="date"
+              value={endDate}
+              onChange={handleEndDateChange}
+              min={startDate || undefined}
+              max={getLocalDateString()}
+            />
+          </div>
+
+          <div className="adherence-range-summary">
+            <span>Showing</span>
+            <strong>
+              {formatDisplayDate(startDate)} — {formatDisplayDate(endDate)}
+            </strong>
+          </div>
+        </section>
 
         {error && <Alert type="danger" message={error} onClose={() => setError('')} />}
 
-        {/* 1. Summary Stat KPI Cards */}
-        <div className="adherence-kpi-grid">
-          <div className="adherence-kpi-card">
-            <div className="adherence-kpi-header">
-              <div>
-                <p className="adherence-kpi-label">Overall Adherence</p>
-                <p className="adherence-kpi-value text-indigo-600">{summary.overallAdherence}%</p>
+        {loading ? (
+          <div className="adherence-loading-grid">
+            {[1, 2, 3, 4].map((item) => (
+              <div className="adherence-skeleton-card" key={item}>
+                <div className="adherence-skeleton-line adherence-skeleton-small" />
+                <div className="adherence-skeleton-line adherence-skeleton-large" />
+                <div className="adherence-skeleton-line adherence-skeleton-medium" />
               </div>
-              <div className="adherence-kpi-icon-box icon-indigo">
-                <TrendingUp className="h-5 w-5" />
-              </div>
-            </div>
-            <div className="adherence-kpi-meta text-emerald-600">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              <span>+7.2% above clinical baseline</span>
-            </div>
+            ))}
+
+            <div className="adherence-skeleton-chart" />
+            <div className="adherence-skeleton-chart adherence-skeleton-small-chart" />
           </div>
+        ) : report ? (
+          <>
+            <section className="adherence-stats-grid">
+              <StatCard
+                label="Overall adherence"
+                value={formatPercentage(summary?.adherence_rate)}
+                helper={`${summary?.taken_doses || 0} taken of ${
+                  summary?.completed_doses || 0
+                } completed doses`}
+                icon={TrendingUp}
+                tone="indigo"
+              />
 
-          <div className="adherence-kpi-card">
-            <div className="adherence-kpi-header">
-              <div>
-                <p className="adherence-kpi-label">Doses Completed</p>
-                <p className="adherence-kpi-value text-emerald-600">
-                  {summary.takenDoses}{' '}
-                  <span className="text-sm font-semibold text-slate-400">
-                    / {summary.totalDoses}
-                  </span>
-                </p>
-              </div>
-              <div className="adherence-kpi-icon-box icon-emerald">
-                <CheckCircle2 className="h-5 w-5" />
-              </div>
-            </div>
-            <div className="adherence-kpi-meta text-slate-500">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-400" />
-              <span>94.8% on-schedule accuracy</span>
-            </div>
-          </div>
+              <StatCard
+                label="Taken doses"
+                value={summary?.taken_doses || 0}
+                helper={`${summary?.scheduled_doses || 0} scheduled in this range`}
+                icon={CheckCircle2}
+                tone="green"
+              />
 
-          <div className="adherence-kpi-card">
-            <div className="adherence-kpi-header">
-              <div>
-                <p className="adherence-kpi-label">Intake Streak</p>
-                <p className="adherence-kpi-value text-amber-600">{summary.streak} Days</p>
-              </div>
-              <div className="adherence-kpi-icon-box vital-icon-amber">
-                <Flame className="h-5 w-5" />
-              </div>
-            </div>
-            <div className="adherence-kpi-meta text-amber-600">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
-              <span>Consecutive on-time intake</span>
-            </div>
-          </div>
+              <StatCard
+                label="Missed doses"
+                value={summary?.missed_doses || 0}
+                helper={`${summary?.pending_doses || 0} currently pending`}
+                icon={XCircle}
+                tone="rose"
+              />
 
-          <div className="adherence-kpi-card">
-            <div className="adherence-kpi-header">
-              <div>
-                <p className="adherence-kpi-label">Health Vitality Score</p>
-                <p className="adherence-kpi-value text-emerald-600">{summary.healthScore} / 100</p>
-              </div>
-              <div className="adherence-kpi-icon-box icon-emerald">
-                <Sparkles className="h-5 w-5" />
-              </div>
-            </div>
-            <div className="adherence-kpi-meta text-emerald-700">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              <span>Optimal recovery state</span>
-            </div>
-          </div>
-        </div>
+              <StatCard
+                label="Current streak"
+                value={`${summary?.current_streak || 0} ${
+                  summary?.current_streak === 1 ? 'day' : 'days'
+                }`}
+                helper="Consecutive days without a missed scheduled dose"
+                icon={Flame}
+                tone="amber"
+              />
+            </section>
 
-        {/* 2. FEATURE HIGHLIGHT: Daily Health Improvement Correlation Chart */}
-        <div className="adherence-health-banner">
-          <div className="adherence-health-header">
-            <div>
-              <h2 className="adherence-health-title">
-                <HeartPulse className="h-5 w-5 text-indigo-600" />
-                Daily Health Improvement & Medication Correlation
-              </h2>
-              <p className="adherence-health-subtitle">
-                Demonstrating how consistent daily medication adherence directly stabilizes blood
-                pressure and glycemic health
-              </p>
-            </div>
-
-            <div className="adherence-metric-tabs">
-              {[
-                { id: 'all', label: 'All Vitals' },
-                { id: 'bp', label: 'Blood Pressure (BP)' },
-                { id: 'sugar', label: 'Blood Glucose' },
-                { id: 'vitality', label: 'Vitality Score' },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setSelectedMetric(tab.id)}
-                  className={
-                    'adherence-metric-tab-btn ' +
-                    (selectedMetric === tab.id ? 'adherence-metric-tab-btn-active' : '')
-                  }
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="h-72 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart
-                data={healthData}
-                margin={{ top: 15, right: 20, left: -15, bottom: 0 }}
-              >
-                <defs>
-                  <linearGradient id="adherenceGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis
-                  dataKey="day"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#475569', fontSize: 12, fontWeight: 700 }}
-                />
-                <YAxis
-                  yAxisId="left"
-                  domain={[60, 160]}
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#94a3b8', fontSize: 11 }}
-                />
-                <YAxis
-                  yAxisId="right"
-                  orientation="right"
-                  domain={[0, 100]}
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#94a3b8', fontSize: 11 }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: '1rem',
-                    border: '1px solid #e2e8f0',
-                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)',
-                    backgroundColor: '#ffffff',
-                    fontSize: '12px',
-                  }}
-                  formatter={(val, name) => {
-                    if (name === 'Adherence %') return [val + '%', name];
-                    if (name === 'Systolic BP') return [val + ' mmHg', name];
-                    if (name === 'Blood Glucose') return [val + ' mg/dL', name];
-                    if (name === 'Health Vitality') return [val + ' / 100', name];
-                    return [val, name];
-                  }}
-                />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '10px', fontSize: '12px' }} />
-
-                <Area
-                  yAxisId="right"
-                  type="monotone"
-                  dataKey="adherence"
-                  name="Adherence %"
-                  stroke="#4f46e5"
-                  strokeWidth={2}
-                  fill="url(#adherenceGradient)"
+            <section className="adherence-main-grid">
+              <article className="adherence-panel adherence-trend-panel">
+                <SectionHeader
+                  icon={TrendingUp}
+                  title="Daily adherence trend"
+                  description="Completed-dose adherence across the selected period"
                 />
 
-                {(selectedMetric === 'all' || selectedMetric === 'bp') && (
-                  <Line
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="systolicBP"
-                    name="Systolic BP"
-                    stroke="#ef4444"
-                    strokeWidth={3}
-                    dot={{ r: 4, fill: '#ef4444' }}
-                  />
-                )}
+                {hasHistory ? (
+                  <div className="adherence-chart">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart
+                        data={dailyChartData}
+                        margin={{
+                          top: 12,
+                          right: 12,
+                          left: -12,
+                          bottom: 0,
+                        }}
+                      >
+                        <defs>
+                          <linearGradient id="adherenceAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#4f46e5" stopOpacity={0.28} />
+                            <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.02} />
+                          </linearGradient>
+                        </defs>
 
-                {(selectedMetric === 'all' || selectedMetric === 'sugar') && (
-                  <Line
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="bloodSugar"
-                    name="Blood Glucose"
-                    stroke="#f59e0b"
-                    strokeWidth={3}
-                    dot={{ r: 4, fill: '#f59e0b' }}
-                  />
-                )}
+                        <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#e2e8f0" />
 
-                {(selectedMetric === 'all' || selectedMetric === 'vitality') && (
-                  <Line
-                    yAxisId="right"
-                    type="monotone"
-                    dataKey="healthScore"
-                    name="Health Vitality"
-                    stroke="#10b981"
-                    strokeWidth={3}
-                    dot={{ r: 4, fill: '#10b981' }}
-                  />
-                )}
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
+                        <XAxis
+                          dataKey="label"
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{
+                            fill: '#64748b',
+                            fontSize: 11,
+                            fontWeight: 600,
+                          }}
+                        />
 
-          {/* 3 Vital Stats Summary Cards */}
-          <div className="adherence-vitals-summary-grid">
-            <div className="adherence-vital-stat-card">
-              <div className="vital-icon-box vital-icon-rose">
-                <Activity className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="vital-stat-title">Blood Pressure Stabilized</p>
-                <p className="vital-stat-value">122/78 mmHg (Reduced by 16 mmHg)</p>
-              </div>
-            </div>
+                        <YAxis
+                          domain={[0, 100]}
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{
+                            fill: '#94a3b8',
+                            fontSize: 11,
+                          }}
+                          tickFormatter={(value) => `${value}%`}
+                        />
 
-            <div className="adherence-vital-stat-card">
-              <div className="vital-icon-box vital-icon-amber">
-                <Droplets className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="vital-stat-title">Fasting Glucose In Range</p>
-                <p className="vital-stat-value">114 mg/dL (Reduced by 28 mg/dL)</p>
-              </div>
-            </div>
+                        <Tooltip
+                          formatter={(value) => [`${Number(value).toFixed(1)}%`, 'Adherence']}
+                          labelFormatter={(label) => `Date: ${label}`}
+                          contentStyle={{
+                            borderRadius: '14px',
+                            border: '1px solid #e2e8f0',
+                            boxShadow: '0 12px 30px rgba(15, 23, 42, 0.10)',
+                            background: '#ffffff',
+                          }}
+                        />
 
-            <div className="adherence-vital-stat-card">
-              <div className="vital-icon-box vital-icon-emerald">
-                <Pill className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="vital-stat-title">Care Plan Target</p>
-                <p className="vital-stat-value text-emerald-700 font-semibold">
-                  100% Weekend On-Time Intake
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 3. Weekly Bar Chart & Dose Ratio Donut */}
-        <div className="adherence-charts-grid">
-          <div className="adherence-panel">
-            <div className="adherence-panel-header">
-              <div>
-                <h2 className="adherence-panel-title">Weekly Intake Consistency</h2>
-                <p className="adherence-panel-desc">Daily doses completed vs scheduled</p>
-              </div>
-              <Badge variant="primary" size="xs">
-                <Award className="h-3.5 w-3.5" /> 90% Target Met
-              </Badge>
-            </div>
-
-            <div className="h-56 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={weeklyData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis
-                    dataKey="day"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#64748b', fontSize: 12, fontWeight: 700 }}
-                  />
-                  <YAxis
-                    domain={[0, 100]}
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 11 }}
-                  />
-                  <Tooltip
-                    formatter={(val) => [val + '%', 'Adherence']}
-                    contentStyle={{
-                      borderRadius: '12px',
-                      border: '1px solid #e2e8f0',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                      fontSize: '12px',
-                    }}
-                  />
-                  <Bar dataKey="adherence" fill="#4f46e5" radius={[6, 6, 0, 0]} maxBarSize={36} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="adherence-panel flex flex-col justify-between">
-            <div>
-              <h2 className="adherence-panel-title mb-1">Dose Ratio Breakdown</h2>
-              <p className="text-xs text-slate-500 mb-2">Taken on time vs missed aggregate ratio</p>
-
-              <div className="h-44 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={doseRatioData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={48}
-                      outerRadius={68}
-                      paddingAngle={4}
-                      dataKey="value"
-                    >
-                      {doseRatioData.map((entry, index) => (
-                        <Cell key={'cell-' + index} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div className="space-y-2 pt-2 border-t border-slate-100">
-              {doseRatioData.map((item) => (
-                <div key={item.name} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="h-2.5 w-2.5 rounded-full"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span className="font-semibold text-slate-700">{item.name}</span>
+                        <Area
+                          type="monotone"
+                          dataKey="adherence"
+                          stroke="#4f46e5"
+                          strokeWidth={3}
+                          fill="url(#adherenceAreaGradient)"
+                          activeDot={{
+                            r: 5,
+                            strokeWidth: 2,
+                            stroke: '#ffffff',
+                          }}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
                   </div>
-                  <span className="font-bold text-slate-900">{item.value} Doses</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+                ) : (
+                  <div className="adherence-empty-state">
+                    <BarChart3 size={30} />
+                    <h3>No adherence history yet</h3>
+                    <p>Once doses are recorded as taken or missed, the trend will appear here.</p>
+                  </div>
+                )}
+              </article>
 
-        {/* 4. Caregiver Clinical Progress Review Box */}
-        <div className="adherence-clinical-note-box">
-          <img
-            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80"
-            alt="Caregiver"
-            className="adherence-clinical-avatar"
-          />
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-xs font-bold text-slate-900">Dr. Oliver Mitchell</h3>
-              <span className="text-[10px] font-semibold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
-                Lead Caregiver & Physician Review
-              </span>
-            </div>
-            <p className="text-xs text-slate-700 leading-relaxed mb-2">
-              "Outstanding adherence consistency over the past 14 days! Maintaining &gt;90%
-              on-schedule intake with Metformin and Lisinopril has directly stabilized systolic
-              blood pressure to 122 mmHg and lowered fasting blood glucose to 114 mg/dL. Continue
-              current morning and evening regimens."
-            </p>
-            <div className="flex items-center gap-4 text-[11px] text-slate-500">
-              <span>📅 Reviewed: Today, 08:30 AM</span>
-              <span>🛡️ Next Milestone Check: Sunday, Sep 6</span>
-            </div>
-          </div>
-        </div>
+              <article className="adherence-panel adherence-status-panel">
+                <SectionHeader
+                  icon={BarChart3}
+                  title="Dose status"
+                  description="Recorded and pending dose distribution"
+                />
 
-        {/* 5. Adherence by Medication Table */}
-        <div className="adherence-panel">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h2 className="adherence-panel-title">Adherence by Prescribed Regimen</h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Compliance breakdown and real-world health impact per active medicine
-              </p>
-            </div>
-          </div>
+                {statusChartData.length > 0 ? (
+                  <>
+                    <div className="adherence-donut">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={statusChartData}
+                            dataKey="value"
+                            nameKey="name"
+                            innerRadius={62}
+                            outerRadius={88}
+                            paddingAngle={3}
+                            stroke="none"
+                          >
+                            {statusChartData.map((entry) => (
+                              <Cell key={entry.name} fill={entry.fill} />
+                            ))}
+                          </Pie>
 
-          <div className="adherence-table-wrapper">
-            <table className="adherence-table">
-              <thead>
-                <tr>
-                  <th>Medication & Category</th>
-                  <th>Completed Doses</th>
-                  <th>Compliance Rate</th>
-                  <th>Clinical Health Impact</th>
-                </tr>
-              </thead>
-              <tbody>
-                {medicationHistory.map((med) => (
-                  <tr key={med.id}>
-                    <td>
+                          <Tooltip
+                            formatter={(value, name) => [value, name]}
+                            contentStyle={{
+                              borderRadius: '12px',
+                              border: '1px solid #e2e8f0',
+                            }}
+                          />
+
+                          <Legend
+                            verticalAlign="bottom"
+                            iconType="circle"
+                            wrapperStyle={{
+                              fontSize: '12px',
+                              paddingTop: '8px',
+                            }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+
+                    <div className="adherence-status-summary">
                       <div>
-                        <p className="font-bold text-slate-900 m-0">{med.medicationName}</p>
-                        <span className="text-[10px] text-indigo-600 font-semibold">
-                          {med.category || 'General Care'}
-                        </span>
+                        <span className="adherence-status-dot adherence-dot-taken" />
+                        <span>Taken</span>
+                        <strong>{report.status_breakdown?.taken || 0}</strong>
                       </div>
-                    </td>
-                    <td>
-                      <div className="flex items-center gap-2">
-                        <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700">
-                          {med.taken} taken
-                        </span>
-                        {med.missed > 0 ? (
-                          <span className="rounded-md bg-rose-50 px-2 py-0.5 text-xs font-bold text-rose-700">
-                            {med.missed} missed
-                          </span>
-                        ) : (
-                          <span className="rounded-md bg-slate-50 px-2 py-0.5 text-xs font-bold text-slate-500">
-                            0 missed
-                          </span>
+
+                      <div>
+                        <span className="adherence-status-dot adherence-dot-missed" />
+                        <span>Missed</span>
+                        <strong>{report.status_breakdown?.missed || 0}</strong>
+                      </div>
+
+                      <div>
+                        <span className="adherence-status-dot adherence-dot-pending" />
+                        <span>Pending</span>
+                        <strong>{report.status_breakdown?.pending || 0}</strong>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="adherence-empty-state adherence-empty-state-compact">
+                    <Clock3 size={28} />
+                    <h3>No dose data</h3>
+                    <p>Your recorded dose activity will appear here.</p>
+                  </div>
+                )}
+              </article>
+            </section>
+
+            <section className="adherence-panel">
+              <SectionHeader
+                icon={Pill}
+                title="Today's doses"
+                description="Record what happened today to keep your analytics current"
+              />
+
+              {hasTodayDoses ? (
+                <div className="adherence-today-list">
+                  {todayDoses.map((dose) => {
+                    const isTaken = dose.status === 'TAKEN';
+                    const isPending = dose.status === 'PENDING';
+
+                    const takenActionKey = `${dose.schedule_id}-${dose.dose_date}-TAKEN`;
+                    const missedActionKey = `${dose.schedule_id}-${dose.dose_date}-MISSED`;
+
+                    return (
+                      <div
+                        className="adherence-today-row"
+                        key={`${dose.schedule_id}-${dose.dose_date}`}
+                      >
+                        <div className="adherence-today-time">
+                          <span>{formatTime(dose.scheduled_time)}</span>
+                          <small>{dose.time_of_day}</small>
+                        </div>
+
+                        <div className="adherence-today-medicine">
+                          <div className="adherence-pill-icon">
+                            <Pill size={17} />
+                          </div>
+
+                          <div>
+                            <strong>{dose.medicine_name}</strong>
+                            <span>Scheduled for {formatTime(dose.scheduled_time)}</span>
+                          </div>
+                        </div>
+
+                        <div className="adherence-today-status">
+                          <StatusBadge status={dose.status} />
+
+                          {isTaken && dose.taken_at && (
+                            <span className="adherence-action-note">
+                              Recorded at{' '}
+                              {new Date(dose.taken_at).toLocaleTimeString('en-IN', {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                              })}
+                            </span>
+                          )}
+                        </div>
+
+                      <div className="adherence-today-actions">
+                        {!isTaken && (
+                          <>
+                            <button
+                              type="button"
+                              className="adherence-take-button"
+                              onClick={() => handleDoseAction(dose, 'TAKEN')}
+                              disabled={
+                                actionId === takenActionKey || actionId === missedActionKey
+                              }
+                            >
+                              <CheckCircle2 size={15} />
+                              {actionId === takenActionKey ? 'Saving…' : 'Mark taken'}
+                            </button>
+
+                            {isPending && (
+                              <button
+                                type="button"
+                                className="adherence-miss-button"
+                                onClick={() => handleDoseAction(dose, 'MISSED')}
+                                disabled={
+                                  actionId === takenActionKey || actionId === missedActionKey
+                                }
+                              >
+                                <XCircle size={15} />
+                                {actionId === missedActionKey ? 'Saving…' : 'Mark missed'}
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
-                    </td>
-                    <td>
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-24 rounded-full bg-slate-100 h-2 overflow-hidden">
-                          <div
-                            className="bg-indigo-600 h-full rounded-full transition-all duration-500"
-                            style={{ width: med.adherence + '%' }}
-                          />
-                        </div>
-                        <span className="text-xs font-bold text-slate-900">{med.adherence}%</span>
                       </div>
-                    </td>
-                    <td>
-                      <span className="text-xs font-medium text-slate-600">
-                        {med.impact ||
-                          'Regimen maintained according to prescribed clinical instructions.'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="adherence-empty-state">
+                  <CalendarDays size={30} />
+                  <h3>No doses scheduled today</h3>
+                  <p>Add an active medication schedule to start recording today's intake.</p>
+                </div>
+              )}
+            </section>
+
+            <section className="adherence-panel">
+              <SectionHeader
+                icon={Pill}
+                title="Adherence by medication"
+                description="Medication-level performance for the selected period"
+              />
+
+              {hasMedicationData ? (
+                <div className="adherence-table-scroll">
+                  <table className="adherence-table">
+                    <thead>
+                      <tr>
+                        <th>Medication</th>
+                        <th>Scheduled</th>
+                        <th>Taken</th>
+                        <th>Missed</th>
+                        <th>Pending</th>
+                        <th>Adherence</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {report.medications.map((medicine) => (
+                        <tr key={medicine.medicine_id}>
+                          <td>
+                            <div className="adherence-medication-cell">
+                              <div className="adherence-medication-avatar">
+                                <Pill size={16} />
+                              </div>
+                              <div>
+                                <strong>{medicine.medicine_name}</strong>
+                                <span>
+                                  {medicine.completed_doses ||
+                                    medicine.taken_doses + medicine.missed_doses}{' '}
+                                  completed
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td>{medicine.scheduled_doses}</td>
+
+                          <td>
+                            <span className="adherence-number-success">{medicine.taken_doses}</span>
+                          </td>
+
+                          <td>
+                            <span className="adherence-number-danger">{medicine.missed_doses}</span>
+                          </td>
+
+                          <td>{medicine.pending_doses}</td>
+
+                          <td>
+                            <div className="adherence-progress-cell">
+                              <div className="adherence-progress-track">
+                                <div
+                                  className="adherence-progress-fill"
+                                  style={{
+                                    width: `${medicine.adherence_rate || 0}%`,
+                                  }}
+                                />
+                              </div>
+
+                              <strong>{formatPercentage(medicine.adherence_rate)}</strong>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="adherence-empty-state">
+                  <Pill size={30} />
+                  <h3>No active medication schedules</h3>
+                  <p>
+                    Your medication adherence breakdown will appear once you have active schedules.
+                  </p>
+                </div>
+              )}
+            </section>
+
+            <section className="adherence-panel">
+              <SectionHeader
+                icon={CalendarDays}
+                title="Daily history"
+                description="A complete day-by-day view of scheduled and completed doses"
+              />
+
+              {hasHistory ? (
+                <div className="adherence-history-list">
+                  {report.daily_history
+                    .slice()
+                    .reverse()
+                    .map((day) => (
+                      <div className="adherence-history-row" key={day.date}>
+                        <div className="adherence-history-date">
+                          <strong>{formatShortDate(day.date)}</strong>
+                          <span>{day.date}</span>
+                        </div>
+
+                        <div className="adherence-history-metric">
+                          <span>Scheduled</span>
+                          <strong>{day.scheduled}</strong>
+                        </div>
+
+                        <div className="adherence-history-metric adherence-history-success">
+                          <span>Taken</span>
+                          <strong>{day.taken}</strong>
+                        </div>
+
+                        <div className="adherence-history-metric adherence-history-danger">
+                          <span>Missed</span>
+                          <strong>{day.missed}</strong>
+                        </div>
+
+                        <div className="adherence-history-metric">
+                          <span>Pending</span>
+                          <strong>{day.pending}</strong>
+                        </div>
+
+                        <div className="adherence-history-rate">
+                          <strong>{formatPercentage(day.adherence_rate)}</strong>
+
+                          <div className="adherence-progress-track">
+                            <div
+                              className="adherence-progress-fill"
+                              style={{
+                                width: `${day.adherence_rate || 0}%`,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="adherence-empty-state">
+                  <CalendarDays size={30} />
+                  <h3>No history for this period</h3>
+                  <p>Select a different date range or start recording doses.</p>
+                </div>
+              )}
+            </section>
+
+            <section className="adherence-footer-note">
+              <div className="adherence-footer-icon">
+                <CheckCircle2 size={18} />
+              </div>
+
+              <div>
+                <strong>Analytics are based on recorded medication doses.</strong>
+                <p>
+                  Future doses remain pending until their scheduled time, and historical unrecorded
+                  doses are treated as missed for adherence reporting.
+                </p>
+              </div>
+
+              <Download size={17} className="adherence-footer-download-icon" />
+            </section>
+          </>
+        ) : (
+          <section className="adherence-page-empty">
+            <div className="adherence-page-empty-icon">
+              <Pill size={32} />
+            </div>
+
+            <h2>Adherence analytics unavailable</h2>
+
+            <p>We couldn't retrieve your adherence data. Check your connection and try again.</p>
+
+            <button type="button" className="adherence-primary-button" onClick={loadDashboard}>
+              <RefreshCw size={16} />
+              Try again
+            </button>
+          </section>
+        )}
+      </main>
     </Layout>
   );
 }

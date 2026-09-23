@@ -15,6 +15,34 @@ const DISEASE_CATEGORIES = [
   { value: 'HEART', label: 'Heart Medications' },
 ];
 
+const TIME_OF_DAY_OPTIONS = [
+  { value: 'MORNING', label: 'Morning' },
+  { value: 'AFTERNOON', label: 'Afternoon' },
+  { value: 'NIGHT', label: 'Night' },
+];
+
+const REPEAT_RULE_OPTIONS = [
+  { value: 'DAILY', label: 'Daily' },
+  { value: 'WEEKLY', label: 'Weekly' },
+  { value: 'CUSTOM', label: 'Custom' },
+];
+
+const getTodayDate = () => {
+  const today = new Date();
+  const offset = today.getTimezoneOffset();
+  const localDate = new Date(today.getTime() - offset * 60 * 1000);
+  return localDate.toISOString().split('T')[0];
+};
+
+const getDefaultSchedule = () => ({
+  scheduled_time: '08:00',
+  time_of_day: 'MORNING',
+  frequency: 'Once daily',
+  repeat_rule: 'DAILY',
+  start_date: getTodayDate(),
+  end_date: '',
+});
+
 export function MedicationFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -28,6 +56,7 @@ export function MedicationFormPage() {
     quantity: '',
     disease_category: '',
     is_active: true,
+    schedule: getDefaultSchedule(),
   });
 
   const [loading, setLoading] = useState(false);
@@ -42,6 +71,7 @@ export function MedicationFormPage() {
         setLoading(true);
 
         const data = await medicationApi.getMedicationById(id);
+        const existingSchedule = data.dosages?.[0]?.schedules?.[0];
 
         setFormData({
           medicine_name: data.medicine_name || '',
@@ -51,6 +81,16 @@ export function MedicationFormPage() {
           quantity: data.quantity ?? '',
           disease_category: data.disease_category || '',
           is_active: data.is_active ?? true,
+          schedule: existingSchedule
+            ? {
+                scheduled_time: existingSchedule.scheduled_time?.slice(0, 5) || '08:00',
+                time_of_day: existingSchedule.time_of_day || 'MORNING',
+                frequency: existingSchedule.frequency || 'Once daily',
+                repeat_rule: existingSchedule.repeat_rule || 'DAILY',
+                start_date: existingSchedule.start_date || getTodayDate(),
+                end_date: existingSchedule.end_date || '',
+              }
+            : getDefaultSchedule(),
         });
       } catch (err) {
         setError('Failed to load medication');
@@ -69,6 +109,18 @@ export function MedicationFormPage() {
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  const handleScheduleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      schedule: {
+        ...prev.schedule,
+        [name]: value,
+      },
     }));
   };
 
@@ -98,6 +150,39 @@ export function MedicationFormPage() {
       return false;
     }
 
+    if (!formData.schedule.scheduled_time) {
+      setError('Schedule time is required');
+      return false;
+    }
+
+    if (!formData.schedule.time_of_day) {
+      setError('Time of day is required');
+      return false;
+    }
+
+    if (!formData.schedule.frequency.trim()) {
+      setError('Frequency is required');
+      return false;
+    }
+
+    if (!formData.schedule.repeat_rule) {
+      setError('Repeat rule is required');
+      return false;
+    }
+
+    if (!formData.schedule.start_date) {
+      setError('Start date is required');
+      return false;
+    }
+
+    if (
+      formData.schedule.end_date &&
+      formData.schedule.end_date < formData.schedule.start_date
+    ) {
+      setError('End date cannot be before start date');
+      return false;
+    }
+
     return true;
   };
 
@@ -115,6 +200,14 @@ export function MedicationFormPage() {
       quantity: Number(formData.quantity),
       disease_category: formData.disease_category,
       is_active: formData.is_active,
+      schedule: {
+        scheduled_time: formData.schedule.scheduled_time,
+        time_of_day: formData.schedule.time_of_day,
+        frequency: formData.schedule.frequency.trim(),
+        repeat_rule: formData.schedule.repeat_rule,
+        start_date: formData.schedule.start_date,
+        end_date: formData.schedule.end_date || null,
+      },
     };
 
     try {
@@ -172,7 +265,7 @@ export function MedicationFormPage() {
               {isEdit ? 'Edit Medication' : 'Add New Medication'}
             </h1>
             <p className="mt-0.5 text-xs text-slate-500">
-              Enter the medicine details and supply information.
+              Enter the medicine details, supply information, and dosing schedule.
             </p>
           </div>
 
@@ -267,7 +360,99 @@ export function MedicationFormPage() {
                 </select>
               </div>
 
-              <div className="med-form-full">
+              <div className="med-form-full mt-2 border-t border-slate-100 pt-4">
+                <div className="mb-3">
+                  <h2 className="text-sm font-black text-slate-900">Dosing Schedule</h2>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    Set when this medicine should be taken.
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label className="med-form-label">Schedule Time *</label>
+                <input
+                  type="time"
+                  name="scheduled_time"
+                  value={formData.schedule.scheduled_time}
+                  onChange={handleScheduleChange}
+                  required
+                  className="med-form-input"
+                />
+              </div>
+
+              <div>
+                <label className="med-form-label">Time of Day *</label>
+                <select
+                  name="time_of_day"
+                  value={formData.schedule.time_of_day}
+                  onChange={handleScheduleChange}
+                  required
+                  className="med-form-input cursor-pointer"
+                >
+                  {TIME_OF_DAY_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="med-form-label">Frequency *</label>
+                <input
+                  type="text"
+                  name="frequency"
+                  value={formData.schedule.frequency}
+                  onChange={handleScheduleChange}
+                  placeholder="e.g. Once daily"
+                  required
+                  className="med-form-input"
+                />
+              </div>
+
+              <div>
+                <label className="med-form-label">Repeat Rule *</label>
+                <select
+                  name="repeat_rule"
+                  value={formData.schedule.repeat_rule}
+                  onChange={handleScheduleChange}
+                  required
+                  className="med-form-input cursor-pointer"
+                >
+                  {REPEAT_RULE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="med-form-label">Start Date *</label>
+                <input
+                  type="date"
+                  name="start_date"
+                  value={formData.schedule.start_date}
+                  onChange={handleScheduleChange}
+                  required
+                  className="med-form-input"
+                />
+              </div>
+
+              <div>
+                <label className="med-form-label">End Date</label>
+                <input
+                  type="date"
+                  name="end_date"
+                  value={formData.schedule.end_date}
+                  onChange={handleScheduleChange}
+                  min={formData.schedule.start_date}
+                  className="med-form-input"
+                />
+              </div>
+
+              <div className="med-form-full mt-2">
                 <label className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
                   <input
                     type="checkbox"
