@@ -1,5 +1,5 @@
 """
-Django settings for PillSync backend — Milestone 3 (OCR + Refill prediction).
+Django settings for PillSync backend - Milestone 3 (OCR + Refill prediction).
 Talks to the same Supabase-managed PostgreSQL database used by the frontend,
 via a standard Postgres connection (DATABASE_URL / discrete env vars).
 """
@@ -9,7 +9,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-insecure-key-change-in-production")
@@ -104,7 +104,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-# Tesseract binary path — override via env if it's installed somewhere else.
+# Tesseract binary path - override via env if it's installed somewhere else.
 TESSERACT_CMD = os.environ.get("TESSERACT_CMD", "tesseract")
 
 CORS_ALLOWED_ORIGINS = [
