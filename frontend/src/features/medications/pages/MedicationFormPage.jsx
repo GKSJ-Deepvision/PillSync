@@ -175,10 +175,7 @@ export function MedicationFormPage() {
       return false;
     }
 
-    if (
-      formData.schedule.end_date &&
-      formData.schedule.end_date < formData.schedule.start_date
-    ) {
+    if (formData.schedule.end_date && formData.schedule.end_date < formData.schedule.start_date) {
       setError('End date cannot be before start date');
       return false;
     }

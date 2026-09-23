@@ -760,37 +760,37 @@ export function AdherencePage() {
                           )}
                         </div>
 
-                      <div className="adherence-today-actions">
-                        {!isTaken && (
-                          <>
-                            <button
-                              type="button"
-                              className="adherence-take-button"
-                              onClick={() => handleDoseAction(dose, 'TAKEN')}
-                              disabled={
-                                actionId === takenActionKey || actionId === missedActionKey
-                              }
-                            >
-                              <CheckCircle2 size={15} />
-                              {actionId === takenActionKey ? 'Saving…' : 'Mark taken'}
-                            </button>
-
-                            {isPending && (
+                        <div className="adherence-today-actions">
+                          {!isTaken && (
+                            <>
                               <button
                                 type="button"
-                                className="adherence-miss-button"
-                                onClick={() => handleDoseAction(dose, 'MISSED')}
+                                className="adherence-take-button"
+                                onClick={() => handleDoseAction(dose, 'TAKEN')}
                                 disabled={
                                   actionId === takenActionKey || actionId === missedActionKey
                                 }
                               >
-                                <XCircle size={15} />
-                                {actionId === missedActionKey ? 'Saving…' : 'Mark missed'}
+                                <CheckCircle2 size={15} />
+                                {actionId === takenActionKey ? 'Saving…' : 'Mark taken'}
                               </button>
-                            )}
-                          </>
-                        )}
-                      </div>
+
+                              {isPending && (
+                                <button
+                                  type="button"
+                                  className="adherence-miss-button"
+                                  onClick={() => handleDoseAction(dose, 'MISSED')}
+                                  disabled={
+                                    actionId === takenActionKey || actionId === missedActionKey
+                                  }
+                                >
+                                  <XCircle size={15} />
+                                  {actionId === missedActionKey ? 'Saving…' : 'Mark missed'}
+                                </button>
+                              )}
+                            </>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
