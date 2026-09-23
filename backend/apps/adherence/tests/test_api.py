@@ -1,4 +1,5 @@
 from datetime import date, time, timedelta
+from secrets import token_urlsafe
 
 import pytest
 from django.utils import timezone
@@ -19,7 +20,7 @@ def patient():
     return User.objects.create_user(
         email="adherence-patient@example.com",
         full_name="Adherence Patient",
-        password="test-password-12345678",
+        password=token_urlsafe(24),
         role=UserRole.PATIENT,
     )
 
@@ -29,7 +30,7 @@ def second_patient():
     return User.objects.create_user(
         email="adherence-second@example.com",
         full_name="Second Patient",
-        password="test-password-12345678",
+        password=token_urlsafe(24),
         role=UserRole.PATIENT,
     )
 
@@ -39,7 +40,7 @@ def caregiver():
     return User.objects.create_user(
         email="adherence-caregiver@example.com",
         full_name="Adherence Caregiver",
-        password="test-password-12345678",
+        password=token_urlsafe(24),
         role=UserRole.CAREGIVER,
     )
 

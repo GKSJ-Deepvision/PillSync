@@ -1,4 +1,5 @@
 from datetime import date, datetime, time
+from secrets import token_urlsafe
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -22,7 +23,7 @@ def patient():
     return User.objects.create_user(
         email="adherence-test@example.com",
         full_name="Adherence Test Patient",
-        password="test-password-12345678",
+        password=token_urlsafe(24),
     )
 
 
