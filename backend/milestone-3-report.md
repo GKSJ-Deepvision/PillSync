@@ -1,4 +1,4 @@
-# Milestone 3 — OCR Recognition & Refill Prediction (Week 5–6)
+﻿# Milestone 3 â€” OCR Recognition & Refill Prediction (Week 5â€“6)
 
 - **Intern:** Advala Indhu
 - **Branch:** intern/01-advala-indhu
@@ -8,66 +8,66 @@
 
 | Criterion | Status | Evidence (file, path or link) |
 |---|---|---|
-| OCR extracting name, dosage, quantity, frequency | ☑ Done | `backend/apps/ocr/services.py` (`run_ocr`, `parse_fields`) + `backend/apps/ocr/views.py` (`POST /api/ocr/scan/`). Verified end-to-end with a real generated label image — Tesseract correctly read the medicine name and frequency; dosage/quantity extraction is regex-based and unit-tested separately from image quality. |
-| Refill prediction engine | ☑ Done | `backend/apps/refills/services.py` — matches the spec's example exactly (60 tablets ÷ 2/day = 30 days), plus depletion date, recommended refill-by date, and low-stock flag. `POST /api/refills/check/` in `backend/apps/refills/views.py`. |
-| Adherence tracking with percentages and trends | ☑ Done | Built in Milestone 2 (`frontend/src/features/adherence/HistoryPage.jsx`, `frontend/src/lib/scheduling.js`); intern guide's module table places this under M3, but the working code has existed since M2 and is unchanged here. |
-| Refill and low-stock notifications | ☑ Done | `backend/apps/refills/services.py::refill_notification_message` matches the spec's exact wording ("Your BP medicine is expected to finish in 5 days. Please arrange a refill."). Surfaced in the refill-check response and shown in `frontend/src/features/refills/RefillsPage.jsx` when stock is low. |
+| OCR medicine recognition operational | â˜‘ Done (printed/typed) Â· â˜ Not connected (handwriting/poor-quality: reader built and tested, no live API key) | `backend/apps/ocr/engine/` (`extractor.py`, `parser.py`, `vision.py`, `pipeline.py`), `POST /api/ocr/scan/` in `backend/apps/ocr/views.py` |
+| Extraction of name, dosage, quantity, frequency, prescription details | â˜‘ Done | `parser.py` returns one entry per medicine: name, strength, units per dose, doses per day, times of day, duration, quantity, food instruction, plus doctor, date, expiry and refills. Review screen: `frontend/src/features/ocr/ScanPage.jsx` â€” confirmed live in browser: 4/4 medicines read correctly from a real upload |
+| AI refill prediction system functional | â˜‘ Done (schedule-based) | `refill_forecast()` in `frontend/docs/database/schema-milestone3.sql`; page `frontend/src/features/refills/RefillsPage.jsx` â€” confirmed live: forecast, "I bought"/"Recount" actions, stock bar all working |
+| Medication adherence tracking completed | â˜‘ Done | Dose logging from M2 + `adherence_daily/weekly/by_medication/by_slot()` SQL functions |
+| Refill notifications working correctly | â˜‘ Done | `check_refills()` / `check_refills_all()` write `refill` rows to `notifications` for the patient and accepted caregivers |
+| Low-stock alerts | â˜‘ Done | `is_low_stock` in the forecast; alert throttled to one per medicine per 24 h and re-armed when stock is added |
+| Adherence analytics (daily history, percentage, trends) | â˜‘ Done | `frontend/src/features/adherence/AdherenceReportPage.jsx` â€” confirmed live: weekly %, 8-week trend, per-medicine, per-time-of-day, streak, print to PDF, linked from History page |
 
-## What I built
+## OCR pipeline
 
-This milestone required real Python — OCR needs Tesseract, which Supabase can't provide — so it's the first genuine Django backend work on this branch, alongside the two apps from the spec's module table: `backend/apps/ocr/` and `backend/apps/refills/`.
+1. **Validation** (`pipeline.validate_upload`): JPG/PNG/WebP only, max 10 MB, checked with Pillow rather than the file name.
+2. **Preprocessing** (`extractor.preprocess`): grayscale, upscale to 1500 px wide, denoise, adaptive threshold. Reads the Tesseract binary path from `TESSERACT_CMD` (Django setting), so it works whether or not Tesseract is on the system `PATH`.
+3. **OCR**: Tesseract with `--oem 3 --psm 6` (keeps one medicine per line); mean word confidence and word count are recorded.
+4. **Parsing** (`parser.py`): the text is split into one block per medicine (numbered lines, `Tab./Cap.` prefixes, or `NAME strength` lines); wrapped lines join the block above; footer text (advice, follow-up, charts) is excluded. Each block is parsed for strength, per-dose units, frequency (`1-0-1`, `OD/BD/TDS/QID`, `HS`, `SOS`, "3X a day", table rows like `1 Morning, 1 Night`), duration, quantity (printed, or calculated as units Ã— doses Ã— days), and food instructions. Layouts handled: list, table, and pharmacy label. Duplicate photos of the same label are merged.
+5. **Cross-check**: a printed quantity that differs from units Ã— doses Ã— days is flagged.
+6. **Low confidence / handwriting / cluttered photos**: if mean confidence is below 65, fewer than 25 words are readable, or no medicine is found, the image is sent to the vision reader (`vision.py`, provider set by `PILLSYNC_VISION_PROVIDER`). Its JSON is range-checked and cross-checked; low-confidence results always require confirmation. **Without a configured API key, the user gets a clear "enter manually" warning and can add medicines by hand rather than risk saving unreliable data.** No paid API key was available for this submission (see Blockers).
+7. **Human confirmation**: nothing is saved by the scan. The review screen shows one editable card per medicine and requires the user to tick a confirmation box before "Save" is enabled â€” confirmed live.
 
-**OCR**: `POST /api/ocr/scan/` accepts a patient ID and an image (multipart form), runs it through Tesseract via `pytesseract`, and parses the raw text with regex into medicine name, dosage, quantity, and frequency. The parsing logic (`parse_fields`) is a pure function — it takes text in and structured fields out, with no Django or image dependency — specifically so it can be unit-tested against known strings without needing an actual image or Tesseract installed in CI. Extraction is best-effort: it's designed to pre-fill an "Add medicine" form for the patient to review and correct, not to be authoritative on its own.
+## Refill prediction logic
 
-**Refill prediction**: `POST /api/refills/check/` takes a medicine's current quantity and daily consumption rate and returns days remaining, an estimated depletion date, a recommended refill-by date (with a configurable lead-time buffer), and whether it's currently low stock. The core math (`days_of_stock_remaining`) is the same formula as the spec's worked example. Every check is persisted to a `RefillCheck` row for history/audit.
+- `remaining = counted stock + purchases âˆ’ units taken since the count` (a recount starts a new count, so doses are never subtracted twice)
+- `daily_use = scheduled daily use` â€” **schedule-based**, matching the spec's worked example directly (60 tablets at 2/day â†’ 30 days). An adherence-adjusted version (daily use scaled by the last 14 days of actual taken/missed doses, clamped 50â€“100%) was built, tested, and run live, but was reverted to the simpler schedule-only calculation for this submission so the number always matches the printed dosing instructions exactly.
+- `days_left = remaining Ã· daily_use`; depletion date = today + days_left; recommended refill date = depletion âˆ’ 5 days; low stock when days_left â‰¤ 5.
 
-**Frontend integration**: `frontend/src/features/ocr/ScanPage.jsx` lets a patient upload a label photo, see what was extracted, and jump straight into "Add medicine" with those fields pre-filled. `frontend/src/features/refills/RefillsPage.jsx` lets a patient enter their on-hand quantity and daily usage per medicine and see the prediction, with a red "Low stock" banner and the exact spec-wording message when relevant. Both call the Django API via a small client (`frontend/src/lib/apiClient.js`), kept separate from `supabaseClient.js` since this milestone's backend is Django, not Supabase.
+Spec case, confirmed live in the running app: 60 tablets at 2 per day â†’ 30 days.
 
-## Database design
+## Live verification
 
-Two new Django-managed tables, living in the same PostgreSQL database (SQLite locally if no DB env is configured, matching the intern guide's dev flexibility):
+All three new screens were exercised in the running app (Chrome, `localhost:5173` / `localhost:8000`), not just in automated tests:
 
-| Table | Purpose |
-|---|---|
-| `ocr_prescriptionscan` | One row per uploaded image: the image file itself, the raw OCR text, and the parsed fields. `patient_id` is a UUID referencing `profiles.id` in Supabase's schema — not a Django FK, since the user table lives in Supabase's Auth/Postgres, not Django's. |
-| `refills_refillcheck` | One row per refill calculation: quantity on hand, daily consumption, and the computed days remaining / depletion date / refill-by date / low-stock flag. `medication_id` and `patient_id` are UUIDs referencing the frontend's `medications` and `profiles` tables the same way. |
+- **Scan** (`/scan`): uploaded a real multi-medicine prescription image â†’ 4 medicine cards returned, each with strength, per-dose amount, duration and food instruction pre-filled and editable; saved successfully to the Medicines list.
+- **Refills** (`/refills`): a medicine with a stock count showed a live forecast ("About 15 days left Â· 10 left Â· 1/day", depletion and reorder dates), plus working "I bought" and "Recount now" actions.
+- **Weekly adherence report** (`/adherence-report`, linked from the History page): showed this-week %, comparison to the previous week, perfect-day streak, a daily bar chart, an 8-week trend, per-medicine and per-time-of-day breakdowns, auto-generated insight text, and a working "Print / save as PDF" button. Numbers matched the existing History page's 30-day total.
 
-This intentionally keeps Django's database separate from direct foreign-key coupling to Supabase's tables — the two are related by UUID convention, not a real cross-database constraint, which is the correct pattern when the frontend and backend own different pieces of the schema.
+## A real-world OCR limitation found and documented (not fixed)
 
-## How to run and verify it
-
-```bash
-cd backend
-python -m venv .venv
-source .venv/bin/activate      # Windows: .venv\Scripts\activate
-pip install -r requirements/dev.txt
-
-cp .env.example .env
-# fill in SUPABASE_DB_HOST etc. to point at the same Postgres as the
-# frontend, or leave blank to use local SQLite for quick testing
-
-python manage.py migrate
-python manage.py runserver
-
-# separately, in frontend/.env, set:
-#   VITE_API_BASE_URL=http://localhost:8000
-
-black --check .
-isort --check-only .
-ruff check .
-python manage.py check
-pytest
-```
-
-Then in the running frontend app: `/medications` → **Scan a label** to test OCR, or **Refill check** to test the prediction engine against a real medicine.
+A photo of an actual medicine blister strip (Sitagliptin 50 mg, foil packaging, 447Ã—447 px) was tested. Tesseract OCR confidence was 23.9%, well below the 65% threshold. Three preprocessing strategies were tried (CLAHE contrast + sharpening, denoise + adaptive threshold, and cropping to the single highest-confidence text region) â€” none improved readability past ~20%, confirming the limit is the photo itself (small size, foil glare), not the pipeline. The app correctly refused to guess and showed the "enter manually" fallback instead of saving unreliable data. This is exactly the case the (currently unconnected) vision reader is meant to handle.
 
 ## Tests
 
-- Test files added: `backend/apps/ocr/tests/test_services.py`, `backend/apps/ocr/tests/test_views.py`, `backend/apps/refills/tests/test_services.py`, `backend/apps/refills/tests/test_views.py`.
-- What they cover: OCR field-parsing against known text strings (dosage, quantity, frequency, medicine-name heuristics, empty-input handling); the OCR upload endpoint with a mocked extraction call; the refill math against the spec's exact worked example plus edge cases (zero consumption, low-stock threshold boundaries); the refill-check endpoint's validation and response shape.
-- `pytest` result: 21 passed, 0 failed.
-- Also verified live: ran real Tesseract OCR against a generated test label image outside the test suite, confirming the pipeline works end-to-end with actual image input, not just mocked calls.
+- Test files:
+  - backend: `apps/ocr/tests/test_parser.py`, `test_pipeline.py`, `test_views.py`; `apps/common/tests/test_supabase_auth.py`; `apps/refills/tests/test_views.py`
+  - frontend: `tests/unit/ocrMapping.test.js`, `refill.test.js`, `adherence.test.js`
+  - database: `frontend/docs/database/test-milestone3.sql` (run on PostgreSQL 16 against `schema.sql` + `schema-milestone2.sql`)
+- What they cover: multi-medicine parsing (list, table, label layouts), handwriting/low-confidence routing and validation of model output (with a mocked model response), API authentication including expired, forged, wrong-audience and algorithm-confusion tokens, refill maths and low-stock alerts, row-level security and function privileges.
+- Results: `pytest` 57 passed; `vitest` 13 passed (frontend, existing suite â€” the 36-test suite for the new `lib/` modules written during development was not carried into the final commit and should be re-added); SQL test file passed in full on a scratch PostgreSQL instance. `black`, `isort`, `ruff` all clean on every file touched this milestone.
+
+## CI
+
+The branch's GitHub Actions pipeline failed on the first few pushes; all failures were environment/config issues, not application bugs, and were fixed and verified in a fresh, from-scratch virtual environment before the final push (not just locally, where a long-lived `.venv` was hiding missing packages):
+- `manage.py` had a Unix shebang without the executable bit set (ruff `EXE001`) â€” removed the shebang, since it's always run as `python manage.py`.
+- `frontend/package-lock.json` had drifted out of sync with `package.json`, which `npm ci` (used by CI) rejects unlike `npm install` â€” regenerated and committed.
+- Settings lived in a single `config/settings.py`, but CI expects `DJANGO_SETTINGS_MODULE=config.settings.dev` (a package). Restructured into `config/settings/{__init__.py, base.py, dev.py}`; `manage.py`, `wsgi.py`, `asgi.py` and `pytest.ini` updated to match.
+- `requirements/base.txt` was missing `django-cors-headers`, `opencv-python-headless`, `numpy`, and `PyJWT[crypto]` â€” all had been quietly satisfied by packages already sitting in the long-lived local `.venv`, so `pip install -r requirements` never surfaced the gap locally. Found and fixed by testing in a disposable clean `.venv-citest`.
+- Separately (not a CI issue, found while testing the fix above): `apps/ocr/engine/extractor.py` never configured `pytesseract.tesseract_cmd` from the `TESSERACT_CMD` Django setting, unlike the old `services.py`. Locally this was masked by Tesseract being on `PATH` in every terminal used; it surfaced as a live `503 Service Unavailable` on `/api/ocr/scan/` once tested with `PATH` unset. Fixed.
 
 ## Blockers and open questions
 
-None currently blocking. This milestone is the natural point to resolve the Supabase-vs-Django question flagged in Milestones 1 and 2: OCR and refill prediction now live in Django because they need Python/Tesseract, while auth, profiles, medications, reminders, and notifications remain on Supabase. If the mentor prefers everything consolidated on one backend going forward, Milestone 4 would be the point to migrate the Supabase-hosted pieces into Django, or alternatively to have Django proxy through to the same Postgres tables Supabase already manages.
+- **Vision reader has no live API key.** Both Anthropic and OpenAI require a paid account with billing before issuing a usable key; no free credit was available on either. The reader is implemented and unit-tested against a mocked model response, and the app correctly falls back to manual entry without it â€” no incorrect data can be saved. Connecting a real key is a follow-up step, not a blocker for this submission.
+- **Two known bugs to investigate next, not yet fixed:** (1) the Dashboard's medicine count does not update immediately after a medicine is deleted on the Medicines page, even after a hard refresh â€” needs a proper look. (2) The 36 unit tests written for the new `frontend/src/lib/{ocrMapping,refill,adherence}.js` modules during development were not carried into what ended up pushed; the modules themselves are pushed and confirmed working live, but their tests should be re-added.
+- **A Supabase `service_role` key was pasted into a working chat session while debugging legacy API-key settings.** It was not published anywhere public, but should still be rotated in the Supabase dashboard as a housekeeping step (Project Settings â†’ API â†’ Secret API keys â†’ roll), done separately from this submission.
+- Question for mentor: this milestone keeps OCR in Django and refill/adherence logic in Supabase SQL (so it works with row-level security). Is that split acceptable, or should more move to the Django backend?
+- Scheduled low-stock alerts need the `pg_cron` extension enabled in Supabase (one-time step, noted in the SQL file); without it, alerts are raised when the Refills page is opened rather than on a schedule.
