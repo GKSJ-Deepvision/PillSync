@@ -8,6 +8,9 @@ from dataclasses import dataclass
 import cv2
 import numpy as np
 import pytesseract
+from django.conf import settings
+
+pytesseract.pytesseract.tesseract_cmd = getattr(settings, "TESSERACT_CMD", "tesseract")
 
 
 @dataclass
