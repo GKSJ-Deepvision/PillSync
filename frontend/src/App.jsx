@@ -12,6 +12,9 @@ import MedicationForm from "./features/medications/MedicationForm";
 import RemindersPage from "./features/reminders/RemindersPage";
 import HistoryPage from "./features/adherence/HistoryPage";
 import NotificationsPage from "./features/notifications/NotificationsPage";
+import ScanPage from "./features/ocr/ScanPage";
+import RefillsPage from "./features/refills/RefillsPage";
+import AdherenceReportPage from "./features/adherence/AdherenceReportPage";
 
 export default function App() {
   return (
@@ -87,8 +90,34 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/scan"
+            element={
+              <ProtectedRoute>
+                <ScanPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/refills"
+            element={
+              <ProtectedRoute>
+                <RefillsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+    path="/adherence-report"
+    element={
+      <ProtectedRoute>
+        <AdherenceReportPage />
+      </ProtectedRoute>
+    }
+  />
+
         </Routes>
       </BrowserRouter>
     </AuthProvider>
   );
 }
+

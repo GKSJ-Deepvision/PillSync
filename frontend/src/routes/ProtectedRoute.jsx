@@ -1,11 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import AppLayout from "../components/AppLayout";
 
-/**
- * Gates which dashboard body renders per role. This is a UI convenience
- * only — the enforcement that actually matters happens server-side via
- * Postgres Row Level Security policies on profiles / caregiver_links.
- */
 export default function ProtectedRoute({ allowedRoles, children }) {
   const { session, role, loading } = useAuth();
 
@@ -21,5 +17,5 @@ export default function ProtectedRoute({ allowedRoles, children }) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  return children;
+  return <AppLayout>{children}</AppLayout>;
 }
