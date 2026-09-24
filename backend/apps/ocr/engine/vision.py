@@ -32,7 +32,6 @@ from collections.abc import Callable
 
 from .parser import Medicine, score
 
-
 DEFAULT_MODELS = {
     "anthropic": "claude-sonnet-5",
     "openai": "gpt-4o",
@@ -125,14 +124,13 @@ def _post(
             return json.loads(response.read())
 
     except Exception as exc:
-        raise VisionError(
-            f"vision request failed: {exc}"
-        ) from exc
+        raise VisionError(f"vision request failed: {exc}") from exc
 
 
 # ---------------------------------------------------------------------------
 # Gemini
 # ---------------------------------------------------------------------------
+
 
 def _call_gemini(
     image_bytes: bytes,
@@ -152,10 +150,7 @@ def _call_gemini(
 
     b64 = base64.b64encode(image_bytes).decode("ascii")
 
-    url = (
-        "https://generativelanguage.googleapis.com/"
-        f"v1beta/models/{model}:generateContent"
-    )
+    url = "https://generativelanguage.googleapis.com/" f"v1beta/models/{model}:generateContent"
 
     body = {
         "contents": [
@@ -190,28 +185,16 @@ def _call_gemini(
         candidates = response.get("candidates") or []
 
         if not candidates:
-            raise VisionError(
-                f"Gemini returned no candidates: {response}"
-            )
+            raise VisionError(f"Gemini returned no candidates: {response}")
 
-        parts = (
-            candidates[0]
-            .get("content", {})
-            .get("parts", [])
-        )
+        parts = candidates[0].get("content", {}).get("parts", [])
 
-        text_parts = [
-            part.get("text", "")
-            for part in parts
-            if part.get("text")
-        ]
+        text_parts = [part.get("text", "") for part in parts if part.get("text")]
 
         result = "".join(text_parts).strip()
 
         if not result:
-            raise VisionError(
-                "Gemini returned an empty response"
-            )
+            raise VisionError("Gemini returned an empty response")
 
         return result
 
@@ -219,14 +202,13 @@ def _call_gemini(
         raise
 
     except Exception as exc:
-        raise VisionError(
-            f"unexpected Gemini response: {exc}"
-        ) from exc
+        raise VisionError(f"unexpected Gemini response: {exc}") from exc
 
 
 # ---------------------------------------------------------------------------
 # Main provider dispatcher
 # ---------------------------------------------------------------------------
+
 
 def call_vision_model(
     image_bytes: bytes,
@@ -238,10 +220,7 @@ def call_vision_model(
         "",
     ).lower()
 
-    model = (
-        os.environ.get("PILLSYNC_VISION_MODEL")
-        or DEFAULT_MODELS.get(provider, "")
-    )
+    model = os.environ.get("PILLSYNC_VISION_MODEL") or DEFAULT_MODELS.get(provider, "")
 
     if provider == "gemini":
         return _call_gemini(
@@ -289,10 +268,7 @@ def call_vision_model(
             },
         )
 
-        return "".join(
-            block.get("text", "")
-            for block in out.get("content", [])
-        )
+        return "".join(block.get("text", "") for block in out.get("content", []))
 
     # -----------------------------------------------------------------------
     # OpenAI
@@ -303,9 +279,7 @@ def call_vision_model(
         out = _post(
             "https://api.openai.com/v1/chat/completions",
             {
-                "Authorization": (
-                    f"Bearer {os.environ['OPENAI_API_KEY']}"
-                ),
+                "Authorization": (f"Bearer {os.environ['OPENAI_API_KEY']}"),
             },
             {
                 "model": model,
@@ -323,11 +297,7 @@ def call_vision_model(
                             },
                             {
                                 "type": "image_url",
-                                "image_url": {
-                                    "url": (
-                                        f"data:{media_type};base64,{b64}"
-                                    )
-                                },
+                                "image_url": {"url": (f"data:{media_type};base64,{b64}")},
                             },
                         ],
                     }
@@ -337,14 +307,13 @@ def call_vision_model(
 
         return out["choices"][0]["message"]["content"]
 
-    raise VisionError(
-        "vision provider not configured"
-    )
+    raise VisionError("vision provider not configured")
 
 
 # ---------------------------------------------------------------------------
 # Validation
 # ---------------------------------------------------------------------------
+
 
 def _f(v, lo, hi) -> float | None:
     try:
@@ -373,49 +342,29 @@ def normalize(raw_json: str) -> dict:
         data = json.loads(txt)
 
     except json.JSONDecodeError as exc:
-        raise VisionError(
-            f"model did not return JSON: {exc}"
-        ) from exc
+        raise VisionError(f"model did not return JSON: {exc}") from exc
 
-    if (
-        not isinstance(data, dict)
-        or not isinstance(data.get("medicines"), list)
-    ):
-        raise VisionError(
-            "JSON missing 'medicines' list"
-        )
+    if not isinstance(data, dict) or not isinstance(data.get("medicines"), list):
+        raise VisionError("JSON missing 'medicines' list")
 
     medicines: list[Medicine] = []
 
     for row in data["medicines"]:
 
-        if (
-            not isinstance(row, dict)
-            or not str(row.get("name") or "").strip()
-        ):
+        if not isinstance(row, dict) or not str(row.get("name") or "").strip():
             continue
 
         medicine = Medicine(
             name=str(row["name"]).strip().title(),
-            raw_text=str(
-                row.get("instructions_text") or ""
-            ),
+            raw_text=str(row.get("instructions_text") or ""),
         )
 
         if row.get("brand_name"):
-            medicine.warnings.append(
-                f"Brand name written: {row['brand_name']}"
-            )
+            medicine.warnings.append(f"Brand name written: {row['brand_name']}")
 
-        medicine.strength = (
-            str(row.get("strength") or "")
-            .replace(" ", "")
-            .lower()
-        )
+        medicine.strength = str(row.get("strength") or "").replace(" ", "").lower()
 
-        medicine.form = str(
-            row.get("form") or ""
-        )
+        medicine.form = str(row.get("form") or "")
 
         medicine.units_per_dose = (
             _f(
@@ -434,10 +383,9 @@ def normalize(raw_json: str) -> dict:
 
         medicine.times_of_day = [
             time
-            for time in (
-                row.get("times_of_day") or []
-            )
-            if time in (
+            for time in (row.get("times_of_day") or [])
+            if time
+            in (
                 "morning",
                 "afternoon",
                 "evening",
@@ -452,11 +400,7 @@ def normalize(raw_json: str) -> dict:
             730,
         )
 
-        medicine.duration_days = (
-            int(duration)
-            if duration
-            else None
-        )
+        medicine.duration_days = int(duration) if duration else None
 
         quantity = _f(
             row.get("quantity"),
@@ -464,13 +408,9 @@ def normalize(raw_json: str) -> dict:
             5000,
         )
 
-        medicine.food_instruction = str(
-            row.get("food_instruction") or ""
-        )
+        medicine.food_instruction = str(row.get("food_instruction") or "")
 
-        medicine.as_needed = bool(
-            row.get("as_needed")
-        )
+        medicine.as_needed = bool(row.get("as_needed"))
 
         if quantity:
             medicine.quantity = int(quantity)
@@ -480,15 +420,10 @@ def normalize(raw_json: str) -> dict:
         # Arithmetic cross-check
         # ---------------------------------------------------------------
 
-        if (
-            medicine.doses_per_day
-            and medicine.duration_days
-        ):
+        if medicine.doses_per_day and medicine.duration_days:
 
             calculated_quantity = round(
-                medicine.units_per_dose
-                * medicine.doses_per_day
-                * medicine.duration_days
+                medicine.units_per_dose * medicine.doses_per_day * medicine.duration_days
             )
 
             if medicine.quantity is None:
@@ -509,12 +444,8 @@ def normalize(raw_json: str) -> dict:
         # Model uncertainty
         # ---------------------------------------------------------------
 
-        for field in (
-            row.get("uncertain_fields") or []
-        ):
-            medicine.warnings.append(
-                f"Model unsure about: {field}"
-            )
+        for field in row.get("uncertain_fields") or []:
+            medicine.warnings.append(f"Model unsure about: {field}")
 
         score(medicine)
 
@@ -537,26 +468,14 @@ def normalize(raw_json: str) -> dict:
         if data.get("handwritten"):
             medicine.needs_review = True
 
-        medicine.needs_review = (
-            medicine.needs_review
-            or medicine.confidence < 0.8
-        )
+        medicine.needs_review = medicine.needs_review or medicine.confidence < 0.8
 
         medicines.append(medicine)
 
     return {
-        "doctor": str(
-            data.get("doctor") or ""
-        ),
-
-        "prescription_date": str(
-            data.get("prescription_date") or ""
-        ),
-
-        "expires_on": str(
-            data.get("expires_on") or ""
-        ),
-
+        "doctor": str(data.get("doctor") or ""),
+        "prescription_date": str(data.get("prescription_date") or ""),
+        "expires_on": str(data.get("expires_on") or ""),
         "refills_remaining": (
             data.get("refills_remaining")
             if isinstance(
@@ -565,25 +484,10 @@ def normalize(raw_json: str) -> dict:
             )
             else None
         ),
-
-        "handwritten": bool(
-            data.get("handwritten")
-        ),
-
-        "medicines": [
-            medicine.to_dict()
-            for medicine in medicines
-        ],
-
+        "handwritten": bool(data.get("handwritten")),
+        "medicines": [medicine.to_dict() for medicine in medicines],
         "medicine_count": len(medicines),
-
-        "needs_review": (
-            any(
-                medicine.needs_review
-                for medicine in medicines
-            )
-            or not medicines
-        ),
+        "needs_review": (any(medicine.needs_review for medicine in medicines) or not medicines),
     }
 
 
