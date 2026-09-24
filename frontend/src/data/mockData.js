@@ -115,9 +115,21 @@ export const MOCK_ALERTS = [
 ];
 
 export const MOCK_NOTIFICATIONS = [
-  { id: 'not_1', title: 'Medication Logged', message: 'You logged Metformin 500mg successfully.', time: '10 minutes ago', read: false },
-  { id: 'not_2', title: 'Refill Warning', message: 'Lisinopril is running low. 7 days remaining.', time: '2 hours ago', read: false },
-  { id: 'not_3', title: 'Caregiver Update', message: 'Sarah Smith viewed your adherence report.', time: 'Yesterday', read: true }
+  { id: 'not_1', type: 'general', title: 'Medication Logged', message: 'You logged Metformin 500mg successfully.', time: '10 minutes ago', read: false },
+  {
+    id: 'not_2',
+    type: 'refill',
+    title: 'Refill Warning',
+    message: 'Lisinopril is running low. 7 days remaining.',
+    medicineName: 'Lisinopril',
+    daysRemaining: 7,
+    currentStock: 7,
+    totalStock: 30,
+    urgency: 'medium',
+    time: '2 hours ago',
+    read: false,
+  },
+  { id: 'not_3', type: 'general', title: 'Caregiver Update', message: 'Sarah Smith viewed your adherence report.', time: 'Yesterday', read: true }
 ];
 
 export const MOCK_MEDICATION_HISTORY = [
