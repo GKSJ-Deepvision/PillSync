@@ -132,78 +132,174 @@ export default function ScanPage() {
         {/* Back */}
         <Link
           to="/medications"
-          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors"
         >
           <ArrowLeftIcon />
           Medicines
         </Link>
 
         {/* Header */}
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h1 className="heading text-2xl md:text-3xl font-bold text-gray-900">
-              Scan a prescription
-            </h1>
-
-            <p className="text-sm text-gray-500 mt-1 max-w-4xl">
-              Upload a prescription or medicine label
-              (printed or handwritten). Every medicine on
-              it is read separately, and you check each one
-              before anything is saved.
-            </p>
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-sky-600 text-white flex items-center justify-center shadow-lg shadow-violet-200 shrink-0">
+            <PillIcon className="w-6 h-6" />
           </div>
 
-          <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-sky-600 text-white items-center justify-center shadow-lg shadow-violet-200">
-            <PillIcon className="w-6 h-6" />
+          <div>
+            <h1 className="heading text-2xl md:text-3xl font-bold text-gray-900">
+              Scan a label
+            </h1>
+
+            <p className="text-sm text-gray-500 mt-1 max-w-3xl">
+              Scan a medicine label or prescription using OCR.
+            </p>
           </div>
         </div>
 
-        {/* Upload section */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
+        {/* TOP SECTION */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-          <div>
-            <h2 className="text-base font-semibold text-gray-900">
-              Upload medicine image
-            </h2>
+          {/* Upload card */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
 
-            <p className="text-sm text-gray-500 mt-1">
-              Use a clear photo of the prescription or
-              medicine package.
-            </p>
+            <div className="mb-5">
+              <h2 className="text-base font-semibold text-gray-900">
+                Upload medicine image
+              </h2>
+
+              <p className="text-sm text-gray-500 mt-1">
+                Choose a clear photo of your prescription or medicine package.
+              </p>
+            </div>
+
+            {/* Upload area */}
+            <label
+              htmlFor="medicine-image"
+              className="group cursor-pointer block border-2 border-dashed border-violet-200 hover:border-violet-400 bg-violet-50/40 hover:bg-violet-50 rounded-2xl p-8 text-center transition-colors"
+            >
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-white border border-violet-100 shadow-sm flex items-center justify-center text-violet-500 group-hover:scale-105 transition-transform">
+                <PillIcon className="w-8 h-8" />
+              </div>
+
+              <p className="mt-4 text-sm font-medium text-gray-800">
+                {file ? file.name : "Choose an image"}
+              </p>
+
+              <p className="text-xs text-gray-500 mt-1">
+                PNG, JPG or WEBP
+              </p>
+
+              <span className="inline-flex items-center justify-center mt-4 px-5 py-2.5 rounded-lg bg-white border border-gray-200 text-sm font-medium text-gray-700 shadow-sm group-hover:border-violet-300 group-hover:text-violet-600 transition-colors">
+                Browse files
+              </span>
+
+              <input
+                id="medicine-image"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </label>
+
+            {/* Preview */}
+            {preview && (
+              <div className="mt-4 bg-gray-50 rounded-xl border border-gray-100 p-3">
+                <img
+                  src={preview}
+                  alt="Selected prescription"
+                  className="max-h-56 w-full rounded-lg object-contain"
+                />
+              </div>
+            )}
+
+            {/* Scan button */}
+            <button
+              onClick={handleScan}
+              disabled={!file || status === "scanning"}
+              className="w-full mt-4 bg-gradient-to-br from-violet-500 to-sky-600 text-white font-medium px-4 py-3 rounded-lg shadow-sm hover:shadow-md transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {status === "scanning"
+                ? "Reading prescription…"
+                : "Scan image"}
+            </button>
+
+            {error && (
+              <p className="mt-4 text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
+                {error}
+              </p>
+            )}
           </div>
 
-          <input
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            onChange={handleFileChange}
-            className="w-full text-sm border border-gray-200 rounded-lg p-3 bg-gray-50"
-          />
+          {/* How it works */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
 
-          {preview && (
-            <div className="flex justify-center bg-gray-50 rounded-xl border border-gray-100 p-4">
-              <img
-                src={preview}
-                alt="Selected prescription"
-                className="max-h-80 max-w-full rounded-lg border border-gray-200 object-contain"
-              />
+            <h2 className="text-base font-semibold text-gray-900">
+              How it works
+            </h2>
+
+            <div className="mt-6 space-y-6">
+
+              {/* Step 1 */}
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center font-semibold shrink-0">
+                  1
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    Upload
+                  </h3>
+
+                  <p className="text-sm text-gray-500 mt-1">
+                    Choose a clear photo of your medicine label or prescription.
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-semibold shrink-0">
+                  2
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    Scan
+                  </h3>
+
+                  <p className="text-sm text-gray-500 mt-1">
+                    OCR reads the medicine information from the image.
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-semibold shrink-0">
+                  3
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    Review
+                  </h3>
+
+                  <p className="text-sm text-gray-500 mt-1">
+                    Check the extracted information before saving it.
+                  </p>
+                </div>
+              </div>
+
             </div>
-          )}
 
-          <button
-            onClick={handleScan}
-            disabled={!file || status === "scanning"}
-            className="w-full bg-gradient-to-br from-violet-500 to-sky-600 text-white font-medium px-4 py-3 rounded-lg shadow-sm hover:shadow-md transition-shadow disabled:opacity-50"
-          >
-            {status === "scanning"
-              ? "Reading prescription…"
-              : "Scan image"}
-          </button>
-
-          {error && (
-            <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
-              {error}
-            </p>
-          )}
+            {/* Helpful note */}
+            <div className="mt-8 rounded-xl bg-gray-50 border border-gray-100 p-4">
+              <p className="text-xs leading-5 text-gray-500">
+                For better results, use a well-lit image and make sure the
+                medicine name and dosage are clearly visible.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Scan results */}
@@ -266,13 +362,13 @@ export default function ScanPage() {
             {/* No medicines */}
             {cards.length === 0 && (
               <div className="bg-white rounded-2xl border border-dashed border-violet-200 p-8 text-sm text-gray-600 text-center space-y-3">
+
                 <div className="w-12 h-12 mx-auto rounded-2xl bg-violet-50 flex items-center justify-center">
                   <PillIcon className="w-6 h-6 text-violet-500" />
                 </div>
 
                 <p>
-                  No medicines could be read from this
-                  image.
+                  No medicines could be read from this image.
                 </p>
 
                 <Link
@@ -294,8 +390,7 @@ export default function ScanPage() {
                   </h2>
 
                   <p className="text-sm text-gray-500 mt-1">
-                    Review the extracted medicine information
-                    before saving it.
+                    Review the extracted medicine information before saving it.
                   </p>
                 </div>
 
@@ -324,8 +419,7 @@ export default function ScanPage() {
                               checked={c.include}
                               onChange={(e) =>
                                 update(c.id, {
-                                  include:
-                                    e.target.checked,
+                                  include: e.target.checked,
                                 })
                               }
                               className="w-4 h-4"
@@ -366,8 +460,7 @@ export default function ScanPage() {
                               value={c.strength || ""}
                               onChange={(e) =>
                                 update(c.id, {
-                                  strength:
-                                    e.target.value,
+                                  strength: e.target.value,
                                 })
                               }
                             />
@@ -384,8 +477,7 @@ export default function ScanPage() {
                               value={c.units_per_dose}
                               onChange={(e) =>
                                 update(c.id, {
-                                  units_per_dose:
-                                    e.target.value,
+                                  units_per_dose: e.target.value,
                                 })
                               }
                             />
@@ -401,8 +493,7 @@ export default function ScanPage() {
                               value={c.quantity ?? ""}
                               onChange={(e) =>
                                 update(c.id, {
-                                  quantity:
-                                    e.target.value,
+                                  quantity: e.target.value,
                                 })
                               }
                             />
@@ -413,30 +504,23 @@ export default function ScanPage() {
 
                             <select
                               className={input}
-                              value={
-                                c.disease_category
-                              }
+                              value={c.disease_category}
                               onChange={(e) =>
                                 update(c.id, {
-                                  disease_category:
-                                    e.target.value,
+                                  disease_category: e.target.value,
                                 })
                               }
                             >
-                              <option value="">
-                                —
-                              </option>
+                              <option value="">—</option>
 
-                              {CATEGORIES.map(
-                                (cat) => (
-                                  <option
-                                    key={cat}
-                                    value={cat}
-                                  >
-                                    {cat}
-                                  </option>
-                                )
-                              )}
+                              {CATEGORIES.map((cat) => (
+                                <option
+                                  key={cat}
+                                  value={cat}
+                                >
+                                  {cat}
+                                </option>
+                              ))}
                             </select>
                           </label>
                         </div>
@@ -460,48 +544,40 @@ export default function ScanPage() {
                           {!c.as_needed && (
                             <div className="flex flex-wrap gap-2 items-center">
 
-                              {c.times.map(
-                                (t, i) => (
-                                  <span
-                                    key={i}
-                                    className="flex items-center gap-1"
-                                  >
-                                    <input
-                                      type="time"
-                                      value={t}
-                                      onChange={(e) =>
-                                        setTime(
-                                          c,
-                                          i,
-                                          e.target.value
-                                        )
-                                      }
-                                      className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm"
-                                    />
+                              {c.times.map((t, i) => (
+                                <span
+                                  key={i}
+                                  className="flex items-center gap-1"
+                                >
+                                  <input
+                                    type="time"
+                                    value={t}
+                                    onChange={(e) =>
+                                      setTime(
+                                        c,
+                                        i,
+                                        e.target.value
+                                      )
+                                    }
+                                    className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm"
+                                  />
 
-                                    <button
-                                      type="button"
-                                      aria-label="Remove time"
-                                      onClick={() =>
-                                        update(
-                                          c.id,
-                                          {
-                                            times:
-                                              c.times.filter(
-                                                (_, j) =>
-                                                  j !==
-                                                  i
-                                              ),
-                                          }
-                                        )
-                                      }
-                                      className="text-gray-400 hover:text-red-500"
-                                    >
-                                      <CrossIcon />
-                                    </button>
-                                  </span>
-                                )
-                              )}
+                                  <button
+                                    type="button"
+                                    aria-label="Remove time"
+                                    onClick={() =>
+                                      update(c.id, {
+                                        times: c.times.filter(
+                                          (_, j) => j !== i
+                                        ),
+                                      })
+                                    }
+                                    className="text-gray-400 hover:text-red-500"
+                                  >
+                                    <CrossIcon />
+                                  </button>
+                                </span>
+                              ))}
 
                               <button
                                 type="button"
@@ -523,16 +599,14 @@ export default function ScanPage() {
                         </div>
 
                         {/* OCR warnings */}
-                        {(c.warnings || []).map(
-                          (w) => (
-                            <p
-                              key={w}
-                              className="text-xs text-amber-700 bg-amber-50 rounded-lg p-2"
-                            >
-                              ⚠ {w}
-                            </p>
-                          )
-                        )}
+                        {(c.warnings || []).map((w) => (
+                          <p
+                            key={w}
+                            className="text-xs text-amber-700 bg-amber-50 rounded-lg p-2"
+                          >
+                            ⚠ {w}
+                          </p>
+                        ))}
 
                         {/* Validation errors */}
                         {errs.map((e) => (
@@ -556,18 +630,15 @@ export default function ScanPage() {
                       type="checkbox"
                       checked={confirmed}
                       onChange={(e) =>
-                        setConfirmed(
-                          e.target.checked
-                        )
+                        setConfirmed(e.target.checked)
                       }
                       className="mt-1 w-4 h-4"
                     />
 
                     <span>
-                      I have checked every medicine
-                      above against my prescription.
-                      Text recognition can misread
-                      names and doses.
+                      I have checked every medicine above against my
+                      prescription. Text recognition can misread names and
+                      doses.
                     </span>
                   </label>
 
@@ -578,12 +649,8 @@ export default function ScanPage() {
                   >
                     {status === "saving"
                       ? "Saving…"
-                      : `Save ${
-                          included.length
-                        } medicine${
-                          included.length === 1
-                            ? ""
-                            : "s"
+                      : `Save ${included.length} medicine${
+                          included.length === 1 ? "" : "s"
                         }`}
                   </button>
                 </div>

@@ -1,14 +1,24 @@
 """
-Vision-model reader for HANDWRITTEN or messy prescriptions (Tesseract cannot read handwriting).
-Drop into: backend/apps/ocr/services/vision.py
+Vision-model reader for HANDWRITTEN or messy prescriptions.
 
-Configure with env vars (no extra dependencies - uses urllib):
-  PILLSYNC_VISION_PROVIDER = anthropic | openai        (unset => vision disabled)
-  ANTHROPIC_API_KEY / OPENAI_API_KEY
-  PILLSYNC_VISION_MODEL    = optional model override
+Supported providers:
+  anthropic
+  openai
+  gemini
 
-PRIVACY: this sends the prescription image to a third-party API. Get patient consent,
-and use only synthetic images in tests/CI.
+No extra Python dependencies required.
+Uses urllib for API requests.
+
+Environment variables:
+  PILLSYNC_VISION_PROVIDER = anthropic | openai | gemini
+  ANTHROPIC_API_KEY
+  OPENAI_API_KEY
+  GEMINI_API_KEY
+  PILLSYNC_VISION_MODEL = optional model override
+
+Privacy:
+  This sends prescription/medicine images to the selected third-party API.
+  Use patient consent and synthetic images for tests/CI.
 """
 
 from __future__ import annotations
@@ -22,34 +32,63 @@ from collections.abc import Callable
 
 from .parser import Medicine, score
 
-DEFAULT_MODELS = {"anthropic": "claude-sonnet-5", "openai": "gpt-4o"}
 
-PROMPT = """You are reading a photographed medical prescription or medicine label. It may be handwritten.
-Extract EVERY medicine listed. Return ONLY one JSON object, no prose, no markdown fences:
+DEFAULT_MODELS = {
+    "anthropic": "claude-sonnet-5",
+    "openai": "gpt-4o",
+    "gemini": "gemini-2.5-flash",
+}
 
-{"handwritten": true|false,
- "doctor": string|null, "prescription_date": string|null, "expires_on": string|null,
- "refills_remaining": integer|null,
- "medicines": [{
-   "name": string,                 // generic name as written
-   "brand_name": string|null,      // e.g. a name in brackets
-   "strength": string|null,        // e.g. "500mg"
-   "form": "tab"|"cap"|"syrup"|"inj"|"other"|null,
-   "units_per_dose": number|null,  // tablets/capsules per dose
-   "doses_per_day": number|null,   // "3X a day" => 3 ; null if as-needed or unclear
-   "times_of_day": [ "morning"|"afternoon"|"evening"|"night" ],
-   "duration_days": integer|null,  // "seven days" => 7
-   "quantity": integer|null,       // total dispensed, e.g. "Cap #21" => 21
-   "as_needed": boolean,
-   "food_instruction": string|null,
-   "instructions_text": string,    // the sig exactly as written
-   "confidence": number,           // 0-1, your honest confidence in THIS medicine's fields
-   "uncertain_fields": [string]    // any field you could not read clearly
- }]}
 
-Rules: transcribe what is written; NEVER replace an unclear drug name with a similar-looking known drug -
-put the field in uncertain_fields and lower confidence instead. Use null for anything not written.
-Do not invent quantities or durations. Do not include the patient's name or address."""
+PROMPT = """You are reading a photographed medical prescription or medicine label.
+It may be handwritten.
+
+Extract EVERY medicine listed.
+
+Return ONLY one JSON object. No prose. No markdown fences.
+
+{
+  "handwritten": true|false,
+  "doctor": string|null,
+  "prescription_date": string|null,
+  "expires_on": string|null,
+  "refills_remaining": integer|null,
+  "medicines": [
+    {
+      "name": string,
+      "brand_name": string|null,
+      "strength": string|null,
+      "form": "tab"|"cap"|"syrup"|"inj"|"other"|null,
+      "units_per_dose": number|null,
+      "doses_per_day": number|null,
+      "times_of_day": [
+        "morning"|"afternoon"|"evening"|"night"
+      ],
+      "duration_days": integer|null,
+      "quantity": integer|null,
+      "as_needed": boolean,
+      "food_instruction": string|null,
+      "instructions_text": string,
+      "confidence": number,
+      "uncertain_fields": [string]
+    }
+  ]
+}
+
+Rules:
+
+1. Transcribe what is actually written.
+2. NEVER replace an unclear drug name with a similar-looking known drug.
+3. If a drug name is unclear, put "name" in uncertain_fields and lower confidence.
+4. Use null for information that is not written.
+5. Do not invent quantities.
+6. Do not invent durations.
+7. Do not infer a medication that is not visible.
+8. Do not include the patient's name or address.
+9. If handwriting is present, set handwritten=true.
+10. confidence must represent your honest confidence in the extracted medicine fields.
+11. instructions_text must contain the prescription instruction exactly as readable.
+"""
 
 
 class VisionError(Exception):
@@ -57,31 +96,174 @@ class VisionError(Exception):
 
 
 def vision_enabled() -> bool:
-    p = os.environ.get("PILLSYNC_VISION_PROVIDER", "").lower()
-    return (p == "anthropic" and bool(os.environ.get("ANTHROPIC_API_KEY"))) or (
-        p == "openai" and bool(os.environ.get("OPENAI_API_KEY"))
-    )
-
-
-def _post(url: str, headers: dict, body: dict, timeout: int = 60) -> dict:
-    req = urllib.request.Request(
-        url, json.dumps(body).encode(), {"Content-Type": "application/json", **headers}
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            return json.loads(r.read())
-    except Exception as e:  # network, HTTP error, bad JSON
-        raise VisionError(f"vision request failed: {e}") from e
-
-
-def call_vision_model(image_bytes: bytes, media_type: str = "image/jpeg") -> str:
     provider = os.environ.get("PILLSYNC_VISION_PROVIDER", "").lower()
-    model = os.environ.get("PILLSYNC_VISION_MODEL") or DEFAULT_MODELS.get(provider, "")
-    b64 = base64.b64encode(image_bytes).decode()
+
+    return (
+        (provider == "anthropic" and bool(os.environ.get("ANTHROPIC_API_KEY")))
+        or (provider == "openai" and bool(os.environ.get("OPENAI_API_KEY")))
+        or (provider == "gemini" and bool(os.environ.get("GEMINI_API_KEY")))
+    )
+
+
+def _post(
+    url: str,
+    headers: dict,
+    body: dict,
+    timeout: int = 60,
+) -> dict:
+    request = urllib.request.Request(
+        url,
+        json.dumps(body).encode("utf-8"),
+        {
+            "Content-Type": "application/json",
+            **headers,
+        },
+    )
+
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            return json.loads(response.read())
+
+    except Exception as exc:
+        raise VisionError(
+            f"vision request failed: {exc}"
+        ) from exc
+
+
+# ---------------------------------------------------------------------------
+# Gemini
+# ---------------------------------------------------------------------------
+
+def _call_gemini(
+    image_bytes: bytes,
+    media_type: str,
+    model: str,
+) -> str:
+    """
+    Send the image to Gemini using the REST generateContent API.
+
+    Gemini accepts inline base64 image data and can return structured JSON.
+    """
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+
+    if not api_key:
+        raise VisionError("GEMINI_API_KEY is not configured")
+
+    b64 = base64.b64encode(image_bytes).decode("ascii")
+
+    url = (
+        "https://generativelanguage.googleapis.com/"
+        f"v1beta/models/{model}:generateContent"
+    )
+
+    body = {
+        "contents": [
+            {
+                "parts": [
+                    {
+                        "inline_data": {
+                            "mime_type": media_type,
+                            "data": b64,
+                        }
+                    },
+                    {
+                        "text": PROMPT,
+                    },
+                ]
+            }
+        ],
+        "generationConfig": {
+            "responseMimeType": "application/json",
+        },
+    }
+
+    response = _post(
+        url,
+        {
+            "x-goog-api-key": api_key,
+        },
+        body,
+    )
+
+    try:
+        candidates = response.get("candidates") or []
+
+        if not candidates:
+            raise VisionError(
+                f"Gemini returned no candidates: {response}"
+            )
+
+        parts = (
+            candidates[0]
+            .get("content", {})
+            .get("parts", [])
+        )
+
+        text_parts = [
+            part.get("text", "")
+            for part in parts
+            if part.get("text")
+        ]
+
+        result = "".join(text_parts).strip()
+
+        if not result:
+            raise VisionError(
+                "Gemini returned an empty response"
+            )
+
+        return result
+
+    except VisionError:
+        raise
+
+    except Exception as exc:
+        raise VisionError(
+            f"unexpected Gemini response: {exc}"
+        ) from exc
+
+
+# ---------------------------------------------------------------------------
+# Main provider dispatcher
+# ---------------------------------------------------------------------------
+
+def call_vision_model(
+    image_bytes: bytes,
+    media_type: str = "image/jpeg",
+) -> str:
+
+    provider = os.environ.get(
+        "PILLSYNC_VISION_PROVIDER",
+        "",
+    ).lower()
+
+    model = (
+        os.environ.get("PILLSYNC_VISION_MODEL")
+        or DEFAULT_MODELS.get(provider, "")
+    )
+
+    if provider == "gemini":
+        return _call_gemini(
+            image_bytes,
+            media_type,
+            model,
+        )
+
+    b64 = base64.b64encode(image_bytes).decode("ascii")
+
+    # -----------------------------------------------------------------------
+    # Anthropic
+    # -----------------------------------------------------------------------
+
     if provider == "anthropic":
+
         out = _post(
             "https://api.anthropic.com/v1/messages",
-            {"x-api-key": os.environ["ANTHROPIC_API_KEY"], "anthropic-version": "2023-06-01"},
+            {
+                "x-api-key": os.environ["ANTHROPIC_API_KEY"],
+                "anthropic-version": "2023-06-01",
+            },
             {
                 "model": model,
                 "max_tokens": 2000,
@@ -91,123 +273,332 @@ def call_vision_model(image_bytes: bytes, media_type: str = "image/jpeg") -> str
                         "content": [
                             {
                                 "type": "image",
-                                "source": {"type": "base64", "media_type": media_type, "data": b64},
+                                "source": {
+                                    "type": "base64",
+                                    "media_type": media_type,
+                                    "data": b64,
+                                },
                             },
-                            {"type": "text", "text": PROMPT},
+                            {
+                                "type": "text",
+                                "text": PROMPT,
+                            },
                         ],
                     }
                 ],
             },
         )
-        return "".join(b.get("text", "") for b in out.get("content", []))
+
+        return "".join(
+            block.get("text", "")
+            for block in out.get("content", [])
+        )
+
+    # -----------------------------------------------------------------------
+    # OpenAI
+    # -----------------------------------------------------------------------
+
     if provider == "openai":
+
         out = _post(
             "https://api.openai.com/v1/chat/completions",
-            {"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"},
+            {
+                "Authorization": (
+                    f"Bearer {os.environ['OPENAI_API_KEY']}"
+                ),
+            },
             {
                 "model": model,
                 "max_tokens": 2000,
-                "response_format": {"type": "json_object"},
+                "response_format": {
+                    "type": "json_object",
+                },
                 "messages": [
                     {
                         "role": "user",
                         "content": [
-                            {"type": "text", "text": PROMPT},
+                            {
+                                "type": "text",
+                                "text": PROMPT,
+                            },
                             {
                                 "type": "image_url",
-                                "image_url": {"url": f"data:{media_type};base64,{b64}"},
+                                "image_url": {
+                                    "url": (
+                                        f"data:{media_type};base64,{b64}"
+                                    )
+                                },
                             },
                         ],
                     }
                 ],
             },
         )
+
         return out["choices"][0]["message"]["content"]
-    raise VisionError("vision provider not configured")
+
+    raise VisionError(
+        "vision provider not configured"
+    )
 
 
-# ---------- validation: never trust model output blindly ----------------------------
+# ---------------------------------------------------------------------------
+# Validation
+# ---------------------------------------------------------------------------
+
 def _f(v, lo, hi) -> float | None:
     try:
-        x = float(v)
+        value = float(v)
     except (TypeError, ValueError):
         return None
-    return x if lo <= x <= hi else None
+
+    return value if lo <= value <= hi else None
 
 
 def normalize(raw_json: str) -> dict:
-    """Model JSON string -> same dict shape as parser.parse_prescription(). Raises VisionError if unusable."""
-    txt = re.sub(r"^```(?:json)?|```$", "", raw_json.strip(), flags=re.MULTILINE).strip()
+    """
+    Model JSON string -> same dict shape as parser.parse_prescription().
+
+    The model output is validated before it can reach the rest of PillSync.
+    """
+
+    txt = re.sub(
+        r"^```(?:json)?|```$",
+        "",
+        raw_json.strip(),
+        flags=re.MULTILINE,
+    ).strip()
+
     try:
         data = json.loads(txt)
-    except json.JSONDecodeError as e:
-        raise VisionError(f"model did not return JSON: {e}") from e
-    if not isinstance(data, dict) or not isinstance(data.get("medicines"), list):
-        raise VisionError("JSON missing 'medicines' list")
 
-    meds: list[Medicine] = []
-    for r in data["medicines"]:
-        if not isinstance(r, dict) or not str(r.get("name") or "").strip():
-            continue
-        m = Medicine(
-            name=str(r["name"]).strip().title(), raw_text=str(r.get("instructions_text") or "")
+    except json.JSONDecodeError as exc:
+        raise VisionError(
+            f"model did not return JSON: {exc}"
+        ) from exc
+
+    if (
+        not isinstance(data, dict)
+        or not isinstance(data.get("medicines"), list)
+    ):
+        raise VisionError(
+            "JSON missing 'medicines' list"
         )
-        if r.get("brand_name"):
-            m.warnings.append(f"Brand name written: {r['brand_name']}")
-        m.strength = str(r.get("strength") or "").replace(" ", "").lower()
-        m.form = str(r.get("form") or "")
-        m.units_per_dose = _f(r.get("units_per_dose"), 0.25, 20) or 1.0
-        m.doses_per_day = _f(r.get("doses_per_day"), 0.25, 12)
-        m.times_of_day = [
-            t
-            for t in (r.get("times_of_day") or [])
-            if t in ("morning", "afternoon", "evening", "night", "bedtime")
+
+    medicines: list[Medicine] = []
+
+    for row in data["medicines"]:
+
+        if (
+            not isinstance(row, dict)
+            or not str(row.get("name") or "").strip()
+        ):
+            continue
+
+        medicine = Medicine(
+            name=str(row["name"]).strip().title(),
+            raw_text=str(
+                row.get("instructions_text") or ""
+            ),
+        )
+
+        if row.get("brand_name"):
+            medicine.warnings.append(
+                f"Brand name written: {row['brand_name']}"
+            )
+
+        medicine.strength = (
+            str(row.get("strength") or "")
+            .replace(" ", "")
+            .lower()
+        )
+
+        medicine.form = str(
+            row.get("form") or ""
+        )
+
+        medicine.units_per_dose = (
+            _f(
+                row.get("units_per_dose"),
+                0.25,
+                20,
+            )
+            or 1.0
+        )
+
+        medicine.doses_per_day = _f(
+            row.get("doses_per_day"),
+            0.25,
+            12,
+        )
+
+        medicine.times_of_day = [
+            time
+            for time in (
+                row.get("times_of_day") or []
+            )
+            if time in (
+                "morning",
+                "afternoon",
+                "evening",
+                "night",
+                "bedtime",
+            )
         ]
-        d = _f(r.get("duration_days"), 1, 730)
-        m.duration_days = int(d) if d else None
-        q = _f(r.get("quantity"), 1, 5000)
-        m.food_instruction = str(r.get("food_instruction") or "")
-        m.as_needed = bool(r.get("as_needed"))
-        if q:
-            m.quantity, m.quantity_source = int(q), "printed"
-        if m.doses_per_day and m.duration_days:  # arithmetic cross-check catches misread digits
-            calc = round(m.units_per_dose * m.doses_per_day * m.duration_days)
-            if m.quantity is None:
-                m.quantity, m.quantity_source = calc, "calculated"
-            elif m.quantity != calc:
-                m.warnings.append(
-                    f"Quantity {m.quantity} differs from schedule x duration ({calc}). Check the handwriting."
+
+        duration = _f(
+            row.get("duration_days"),
+            1,
+            730,
+        )
+
+        medicine.duration_days = (
+            int(duration)
+            if duration
+            else None
+        )
+
+        quantity = _f(
+            row.get("quantity"),
+            1,
+            5000,
+        )
+
+        medicine.food_instruction = str(
+            row.get("food_instruction") or ""
+        )
+
+        medicine.as_needed = bool(
+            row.get("as_needed")
+        )
+
+        if quantity:
+            medicine.quantity = int(quantity)
+            medicine.quantity_source = "printed"
+
+        # ---------------------------------------------------------------
+        # Arithmetic cross-check
+        # ---------------------------------------------------------------
+
+        if (
+            medicine.doses_per_day
+            and medicine.duration_days
+        ):
+
+            calculated_quantity = round(
+                medicine.units_per_dose
+                * medicine.doses_per_day
+                * medicine.duration_days
+            )
+
+            if medicine.quantity is None:
+
+                medicine.quantity = calculated_quantity
+                medicine.quantity_source = "calculated"
+
+            elif medicine.quantity != calculated_quantity:
+
+                medicine.warnings.append(
+                    f"Quantity {medicine.quantity} differs "
+                    f"from schedule x duration "
+                    f"({calculated_quantity}). "
+                    "Check the handwriting."
                 )
-        for u in r.get("uncertain_fields") or []:
-            m.warnings.append(f"Model unsure about: {u}")
-        score(m)
-        conf = _f(r.get("confidence"), 0, 1)
-        if conf is not None:
-            m.confidence = round(min(m.confidence, conf), 2)
-        if data.get("handwritten"):  # handwriting => a human must always confirm
-            m.needs_review = True
-        m.needs_review = m.needs_review or m.confidence < 0.8
-        meds.append(m)
+
+        # ---------------------------------------------------------------
+        # Model uncertainty
+        # ---------------------------------------------------------------
+
+        for field in (
+            row.get("uncertain_fields") or []
+        ):
+            medicine.warnings.append(
+                f"Model unsure about: {field}"
+            )
+
+        score(medicine)
+
+        model_confidence = _f(
+            row.get("confidence"),
+            0,
+            1,
+        )
+
+        if model_confidence is not None:
+            medicine.confidence = round(
+                min(
+                    medicine.confidence,
+                    model_confidence,
+                ),
+                2,
+            )
+
+        # Handwritten prescriptions always require confirmation.
+        if data.get("handwritten"):
+            medicine.needs_review = True
+
+        medicine.needs_review = (
+            medicine.needs_review
+            or medicine.confidence < 0.8
+        )
+
+        medicines.append(medicine)
 
     return {
-        "doctor": str(data.get("doctor") or ""),
-        "prescription_date": str(data.get("prescription_date") or ""),
-        "expires_on": str(data.get("expires_on") or ""),
+        "doctor": str(
+            data.get("doctor") or ""
+        ),
+
+        "prescription_date": str(
+            data.get("prescription_date") or ""
+        ),
+
+        "expires_on": str(
+            data.get("expires_on") or ""
+        ),
+
         "refills_remaining": (
             data.get("refills_remaining")
-            if isinstance(data.get("refills_remaining"), int)
+            if isinstance(
+                data.get("refills_remaining"),
+                int,
+            )
             else None
         ),
-        "handwritten": bool(data.get("handwritten")),
-        "medicines": [m.to_dict() for m in meds],
-        "medicine_count": len(meds),
-        "needs_review": any(m.needs_review for m in meds) or not meds,
+
+        "handwritten": bool(
+            data.get("handwritten")
+        ),
+
+        "medicines": [
+            medicine.to_dict()
+            for medicine in medicines
+        ],
+
+        "medicine_count": len(medicines),
+
+        "needs_review": (
+            any(
+                medicine.needs_review
+                for medicine in medicines
+            )
+            or not medicines
+        ),
     }
 
 
 def extract_with_vision(
     image_bytes: bytes,
     media_type: str = "image/jpeg",
-    caller: Callable[[bytes, str], str] = call_vision_model,
+    caller: Callable[
+        [bytes, str],
+        str,
+    ] = call_vision_model,
 ) -> dict:
-    return normalize(caller(image_bytes, media_type))
+
+    return normalize(
+        caller(
+            image_bytes,
+            media_type,
+        )
+    )
