@@ -7,6 +7,8 @@ class MedicationHistoryResponse(BaseModel):
     id: int
     patient_id: int
     medicine_id: int
+    medicine_name: str
+    dosage: str
     scheduled_time: datetime
     action_at: datetime | None
     taken: bool

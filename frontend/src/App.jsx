@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import axios from 'axios'
 import './App.css'
 
@@ -231,6 +231,76 @@ function App() {
 }
 
 function Dashboard({ user, onLogout }) {
+  const [reminders, setReminders] = useState([])
+  const [reminderLoading, setReminderLoading] = useState(true)
+  const [reminderError, setReminderError] = useState('')
+  const [medicationHistory, setMedicationHistory] = useState([])
+  const [historyLoading, setHistoryLoading] = useState(true)
+  const [historyError, setHistoryError] = useState('')
+
+  const fetchReminders = async () => {
+    try {
+      setReminderLoading(true)
+      setReminderError('')
+
+      const token = localStorage.getItem('pillsync_token')
+
+      const response = await axios.get(`${API_URL}/reminders`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      setReminders(response.data)
+    } catch (err) {
+      setReminderError(
+        err.response?.data?.detail ||
+          'Unable to load reminders.',
+      )
+    } finally {
+      setReminderLoading(false)
+    }
+  }
+
+
+    const fetchMedicationHistory = async () => {
+    try {
+      setHistoryLoading(true)
+      setHistoryError('')
+
+      const token = localStorage.getItem('pillsync_token')
+
+      const response = await axios.get(
+        `${API_URL}/medication-history`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+
+      setMedicationHistory(response.data)
+    } catch (err) {
+      setHistoryError(
+        err.response?.data?.detail ||
+          'Unable to load medication history.',
+      )
+    } finally {
+      setHistoryLoading(false)
+    }
+  }
+
+    useEffect(() => {
+    if (user.role === 'patient') {
+      fetchReminders()
+      fetchMedicationHistory()
+    } else {
+      setReminderLoading(false)
+      setHistoryLoading(false)
+    }
+  }, [user.role])
+
+
   const dashboardData = {
     patient: {
       icon: '👤',
@@ -336,6 +406,164 @@ function Dashboard({ user, onLogout }) {
             </div>
           ))}
         </div>
+	        {user.role === 'patient' && (
+          <section className="reminders-section">
+            <div className="reminders-header">
+              <div>
+                <h2 className="section-title">Upcoming Reminders</h2>
+                <p className="reminders-subtitle">
+                  Keep track of your scheduled medicines.
+                </p>
+              </div>
+            </div>
+
+            {reminderLoading && (
+              <div className="reminder-message">
+                Loading reminders...
+              </div>
+            )}
+
+            {reminderError && (
+              <div className="error-message">
+                {reminderError}
+              </div>
+            )}
+
+            {!reminderLoading &&
+              !reminderError &&
+              reminders.length === 0 && (
+                <div className="reminder-message">
+                  No reminders found.
+                </div>
+              )}
+
+            {!reminderLoading &&
+              !reminderError &&
+              reminders.length > 0 && (
+                <div className="reminder-grid">
+                  {reminders.map((reminder) => (
+                    <div
+                      className="reminder-card"
+                      key={reminder.id}
+                    >
+                      <div className="reminder-card-top">
+                        <span className="reminder-icon">💊</span>
+
+                        <span
+                          className={`reminder-status status-${reminder.status}`}
+                        >
+                          {reminder.status}
+                        </span>
+                      </div>
+
+                      <h3>Medication Reminder</h3>
+
+                      <p>
+                        Scheduled:{' '}
+                        {new Date(
+                          reminder.scheduled_at,
+                        ).toLocaleString()}
+                      </p>
+
+                      <p>
+                        Reminder ID: {reminder.id}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+          </section>
+        )}
+
+              {user.role === 'patient' && (
+          <section className="history-section">
+            <div className="history-header">
+              <div>
+                <h2 className="section-title">
+                  Medication History
+                </h2>
+
+                <p className="history-subtitle">
+                  Review your previous medication activities.
+                </p>
+              </div>
+            </div>
+
+            {historyLoading && (
+              <div className="history-message">
+                Loading medication history...
+              </div>
+            )}
+
+            {historyError && (
+              <div className="error-message">
+                {historyError}
+              </div>
+            )}
+
+            {!historyLoading &&
+              !historyError &&
+              medicationHistory.length === 0 && (
+                <div className="history-message">
+                  No medication history found.
+                </div>
+              )}
+
+            {!historyLoading &&
+              !historyError &&
+              medicationHistory.length > 0 && (
+                <div className="history-grid">
+                  {medicationHistory.map((history) => (
+                    <div
+                      className="history-card"
+                      key={history.id}
+                    >
+                      <div className="history-card-top">
+                        <span className="history-icon">
+                          💊
+                        </span>
+
+                        <span
+                          className={`history-status status-${history.status}`}
+                        >
+                          {history.status}
+                        </span>
+                      </div>
+
+                      <h3>{history.medicine_name}</h3>
+
+                      <p>
+                        <strong>Dosage:</strong>{' '}
+                        {history.dosage}
+                      </p>
+
+                      <p>
+                        <strong>Scheduled:</strong>{' '}
+                        {new Date(
+                          history.scheduled_time,
+                        ).toLocaleString()}
+                      </p>
+
+                      <p>
+                        <strong>Action:</strong>{' '}
+                        {history.action_at
+                          ? new Date(
+                              history.action_at,
+                            ).toLocaleString()
+                          : 'No action recorded'}
+                      </p>
+
+                      <p>
+                        <strong>History ID:</strong>{' '}
+                        {history.id}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+          </section>
+        )}
+
       </main>
     </div>
   )
