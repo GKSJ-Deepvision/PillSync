@@ -7,6 +7,7 @@ from app.models import (
     Medicine,
     PatientProfile,
     Prescription,
+    Reminder,
     User,
 )
 

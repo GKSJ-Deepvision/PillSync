@@ -6,6 +6,7 @@ from app.models.medicine import Medicine
 from app.models.patient_profile import PatientProfile
 from app.models.prescription import Prescription
 from app.models.user import User
+from app.models.reminder import Reminder
 
 __all__ = [
     "User",
@@ -16,4 +17,5 @@ __all__ = [
     "Prescription",
     "MedicalCondition",
     "MedicationHistory",
+    "Reminder",
 ]
