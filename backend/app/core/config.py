@@ -14,6 +14,14 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
+    # Notification settings
+    notification_enabled: bool = False
+    notification_default_channel: str = "push"
+
+    fcm_enabled: bool = False
+    twilio_enabled: bool = False
+    sendgrid_enabled: bool = False
+
     model_config = SettingsConfigDict(
         env_file=".env",
         case_sensitive=False,
