@@ -29,6 +29,11 @@ class MedicationHistory(Base):
         nullable=False,
     )
 
+    action_at: Mapped[datetime | None] = mapped_column(
+        DateTime,
+        nullable=True,
+    )
+
     taken: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
@@ -39,4 +44,10 @@ class MedicationHistory(Base):
         String(20),
         default="pending",
         nullable=False,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
     )

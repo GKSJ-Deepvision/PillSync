@@ -10,6 +10,7 @@ from app.api.profile import router as profile_router
 from app.api.medicine import router as medicine_router
 from app.api.dosage_schedule import router as dosage_schedule_router
 from app.api.reminder import router as reminder_router
+from app.api.medication_history import router as medication_history_router
 from app.core.config import settings
 from app.services.reminder_scheduler import (
     start_scheduler,
@@ -58,6 +59,7 @@ app.include_router(profile_router)
 app.include_router(medicine_router)
 app.include_router(dosage_schedule_router)
 app.include_router(reminder_router)
+app.include_router(medication_history_router)
 
 
 @app.get("/")

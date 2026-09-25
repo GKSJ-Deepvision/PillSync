@@ -7,6 +7,7 @@ from app.api.auth import get_current_user
 from app.db.session import get_db
 from app.models.dosage_schedule import DosageSchedule
 from app.models.medicine import Medicine
+from app.models.medication_history import MedicationHistory
 from app.models.reminder import Reminder
 from app.models.user import User
 from app.schemas.reminder import (
@@ -78,6 +79,40 @@ def get_patient_reminder(
         )
 
     return reminder
+
+
+def create_medication_history(
+    reminder: Reminder,
+    user_id: int,
+    status_value: str,
+    db: Session,
+) -> MedicationHistory:
+    schedule = (
+        db.query(DosageSchedule)
+        .filter(
+            DosageSchedule.id == reminder.dosage_schedule_id,
+        )
+        .first()
+    )
+
+    if schedule is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Dosage schedule not found",
+        )
+
+    history = MedicationHistory(
+        patient_id=user_id,
+        medicine_id=schedule.medicine_id,
+        scheduled_time=reminder.scheduled_at,
+        action_at=reminder.action_at,
+        taken=status_value == "taken",
+        status=status_value,
+    )
+
+    db.add(history)
+
+    return history
 
 
 @router.post(
@@ -192,6 +227,13 @@ def update_reminder(
         }:
             reminder.action_at = datetime.utcnow()
 
+            create_medication_history(
+                reminder=reminder,
+                user_id=current_user.id,
+                status_value=reminder_data.status,
+                db=db,
+            )
+
     if reminder_data.snoozed_until is not None:
         reminder.snoozed_until = reminder_data.snoozed_until
 
@@ -220,6 +262,13 @@ def mark_reminder_taken(
     reminder.action_at = datetime.utcnow()
     reminder.snoozed_until = None
 
+    create_medication_history(
+        reminder=reminder,
+        user_id=current_user.id,
+        status_value="taken",
+        db=db,
+    )
+
     db.commit()
     db.refresh(reminder)
 
@@ -244,6 +293,13 @@ def mark_reminder_missed(
     reminder.status = "missed"
     reminder.action_at = datetime.utcnow()
     reminder.snoozed_until = None
+
+    create_medication_history(
+        reminder=reminder,
+        user_id=current_user.id,
+        status_value="missed",
+        db=db,
+    )
 
     db.commit()
     db.refresh(reminder)
@@ -276,6 +332,13 @@ def snooze_reminder(
     reminder.status = "snoozed"
     reminder.action_at = datetime.utcnow()
     reminder.snoozed_until = snoozed_until
+
+    create_medication_history(
+        reminder=reminder,
+        user_id=current_user.id,
+        status_value="snoozed",
+        db=db,
+    )
 
     db.commit()
     db.refresh(reminder)
