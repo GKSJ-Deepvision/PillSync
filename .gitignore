@@ -85,3 +85,4 @@ temp/
 # The intern roster spreadsheet carries 26 people's personal email addresses.
 # Branch assignments live in .github/interns.yml instead, without the emails.
 *.xlsx
+backend/pillsync-61b6a-firebase-adminsdk-*.json

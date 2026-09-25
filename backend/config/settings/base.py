@@ -23,7 +23,11 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "corsheaders",
     "apps.accounts",
-    
+    "apps.medications",
+    "apps.reminders",
+    "apps.notifications",
+    "apps.refills",
+    "django_celery_beat",
 ]
 AUTH_USER_MODEL = "accounts.User"
 
@@ -92,6 +96,12 @@ MEDIA_URL = "media/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOW_ALL_ORIGINS = True
+# Celery
+CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+CELERY_TIMEZONE = "Asia/Kolkata"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",

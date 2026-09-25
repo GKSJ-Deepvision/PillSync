@@ -16,9 +16,9 @@
 # psycopg[binary]==3.*
 #
 # Background jobs / scheduling
-# celery==5.*
-# redis==5.*
-# django-celery-beat==2.*
+ celery==5.*
+ redis==5.*
+ django-celery-beat==2.*
 #
 # OCR and NLP
 # pytesseract==0.3.*
@@ -28,7 +28,7 @@
 # openai==1.*
 #
 # Notifications
-# firebase-admin==6.*
+ firebase-admin==6.*
 # twilio==9.*
 # sendgrid==6.*
 #
