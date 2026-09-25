@@ -81,6 +81,58 @@ def get_patient_reminder(
     return reminder
 
 
+def reminder_response_data(
+    reminder: Reminder,
+    db: Session,
+) -> dict:
+    """
+    Build the reminder response with medicine and dosage details.
+    """
+
+    schedule = (
+        db.query(DosageSchedule)
+        .filter(
+            DosageSchedule.id == reminder.dosage_schedule_id,
+        )
+        .first()
+    )
+
+    if schedule is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Dosage schedule not found",
+        )
+
+    medicine = (
+        db.query(Medicine)
+        .filter(
+            Medicine.id == schedule.medicine_id,
+        )
+        .first()
+    )
+
+    if medicine is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Medicine not found",
+        )
+
+    return {
+        "id": reminder.id,
+        "dosage_schedule_id": reminder.dosage_schedule_id,
+        "medicine_name": medicine.name,
+        "medicine_dosage": medicine.dosage,
+        "dosage_amount": schedule.dosage_amount,
+        "time_of_day": schedule.time_of_day,
+        "frequency": schedule.frequency,
+        "scheduled_at": reminder.scheduled_at,
+        "status": reminder.status,
+        "snoozed_until": reminder.snoozed_until,
+        "action_at": reminder.action_at,
+        "created_at": reminder.created_at,
+    }
+
+
 def create_medication_history(
     reminder: Reminder,
     user_id: int,
@@ -141,7 +193,10 @@ def create_reminder(
     db.commit()
     db.refresh(reminder)
 
-    return reminder
+    return reminder_response_data(
+        reminder,
+        db,
+    )
 
 
 @router.get(
@@ -169,7 +224,13 @@ def list_reminders(
         .all()
     )
 
-    return reminders
+    return [
+        reminder_response_data(
+            reminder,
+            db,
+        )
+        for reminder in reminders
+    ]
 
 
 @router.get(
@@ -181,9 +242,14 @@ def get_reminder(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return get_patient_reminder(
+    reminder = get_patient_reminder(
         reminder_id,
         current_user.id,
+        db,
+    )
+
+    return reminder_response_data(
+        reminder,
         db,
     )
 
@@ -240,7 +306,10 @@ def update_reminder(
     db.commit()
     db.refresh(reminder)
 
-    return reminder
+    return reminder_response_data(
+        reminder,
+        db,
+    )
 
 
 @router.post(
@@ -272,7 +341,10 @@ def mark_reminder_taken(
     db.commit()
     db.refresh(reminder)
 
-    return reminder
+    return reminder_response_data(
+        reminder,
+        db,
+    )
 
 
 @router.post(
@@ -304,7 +376,10 @@ def mark_reminder_missed(
     db.commit()
     db.refresh(reminder)
 
-    return reminder
+    return reminder_response_data(
+        reminder,
+        db,
+    )
 
 
 @router.post(
@@ -343,7 +418,10 @@ def snooze_reminder(
     db.commit()
     db.refresh(reminder)
 
-    return reminder
+    return reminder_response_data(
+        reminder,
+        db,
+    )
 
 
 @router.delete(

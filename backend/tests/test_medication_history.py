@@ -261,3 +261,65 @@ def test_medication_history_not_found():
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Medication history not found"
+def test_patient_cannot_access_another_patients_history():
+    owner_headers = get_auth_headers()
+
+    reminder_id, medicine_id = create_test_reminder(owner_headers)
+
+    action_response = client.post(
+        f"/reminders/{reminder_id}/taken",
+        headers=owner_headers,
+    )
+    assert action_response.status_code == 200
+
+    history_response = client.get(
+        "/medication-history",
+        headers=owner_headers,
+    )
+    assert history_response.status_code == 200
+
+    matching_history = [
+        item
+        for item in history_response.json()
+        if item["medicine_id"] == medicine_id
+        and item["status"] == "taken"
+    ]
+
+    assert matching_history
+
+    history_id = matching_history[-1]["id"]
+
+    register_response = client.post(
+        "/auth/register",
+        json={
+            "username": "history_other_user",
+            "email": "history_other_user@example.com",
+            "password": "Test@123",
+        },
+    )
+
+    assert register_response.status_code in {201, 400}
+
+    login_response = client.post(
+        "/auth/login",
+        data={
+            "username": "history_other_user",
+            "password": "Test@123",
+        },
+    )
+
+    assert login_response.status_code == 200
+
+    other_user_token = login_response.json()["access_token"]
+
+    other_user_headers = {
+        "Authorization": f"Bearer {other_user_token}"
+    }
+
+    response = client.get(
+        f"/medication-history/{history_id}",
+        headers=other_user_headers,
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Medication history not found"

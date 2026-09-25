@@ -598,3 +598,54 @@ input {
     grid-template-columns: 1fr;
   }
 }
+
+/* Reminder Actions */
+
+.reminder-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.reminder-action-button {
+  flex: 1;
+  min-width: 90px;
+  padding: 9px 10px;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  background: #1e293b;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.reminder-action-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: #8b5cf6;
+}
+
+.reminder-action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.taken-button:hover:not(:disabled) {
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.missed-button:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.snooze-button:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.15);
+}
+
+@media (max-width: 600px) {
+  .reminder-action-button {
+    flex: 1 1 100%;
+  }
+}

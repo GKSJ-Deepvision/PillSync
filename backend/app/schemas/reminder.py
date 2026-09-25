@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import datetime, time
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class ReminderCreate(BaseModel):
-    dosage_schedule_id: int = Field(gt=0)
+    dosage_schedule_id: int
     scheduled_at: datetime
 
 
@@ -16,6 +16,14 @@ class ReminderUpdate(BaseModel):
 class ReminderResponse(BaseModel):
     id: int
     dosage_schedule_id: int
+
+    medicine_name: str
+    medicine_dosage: str
+
+    dosage_amount: int
+    time_of_day: time
+    frequency: str
+
     scheduled_at: datetime
     status: str
     snoozed_until: datetime | None
