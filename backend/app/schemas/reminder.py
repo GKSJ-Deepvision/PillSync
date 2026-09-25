@@ -19,6 +19,7 @@ class ReminderResponse(BaseModel):
     scheduled_at: datetime
     status: str
     snoozed_until: datetime | None
+    action_at: datetime | None
     created_at: datetime
 
     model_config = {"from_attributes": True}

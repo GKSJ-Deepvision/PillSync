@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -6,11 +8,13 @@ from app.db.session import get_db
 from app.models.dosage_schedule import DosageSchedule
 from app.models.medicine import Medicine
 from app.models.reminder import Reminder
+from app.models.user import User
 from app.schemas.reminder import (
     ReminderCreate,
     ReminderResponse,
     ReminderUpdate,
 )
+
 
 router = APIRouter(
     prefix="/reminders",
@@ -84,7 +88,7 @@ def get_patient_reminder(
 def create_reminder(
     reminder_data: ReminderCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     get_patient_schedule(
         reminder_data.dosage_schedule_id,
@@ -95,6 +99,7 @@ def create_reminder(
     reminder = Reminder(
         dosage_schedule_id=reminder_data.dosage_schedule_id,
         scheduled_at=reminder_data.scheduled_at,
+        status="pending",
     )
 
     db.add(reminder)
@@ -110,7 +115,7 @@ def create_reminder(
 )
 def list_reminders(
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     reminders = (
         db.query(Reminder)
@@ -139,7 +144,7 @@ def list_reminders(
 def get_reminder(
     reminder_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     return get_patient_reminder(
         reminder_id,
@@ -156,7 +161,7 @@ def update_reminder(
     reminder_id: int,
     reminder_data: ReminderUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     reminder = get_patient_reminder(
         reminder_id,
@@ -164,27 +169,113 @@ def update_reminder(
         db,
     )
 
-    if reminder_data.status is not None:
-        allowed_statuses = {
-            "pending",
-            "taken",
-            "missed",
-            "snoozed",
-        }
+    allowed_statuses = {
+        "pending",
+        "taken",
+        "missed",
+        "snoozed",
+    }
 
+    if reminder_data.status is not None:
         if reminder_data.status not in allowed_statuses:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=(
-                    "Status must be one of: "
-                    "pending, taken, missed, snoozed"
-                ),
+                detail="Invalid reminder status",
             )
 
         reminder.status = reminder_data.status
 
+        if reminder_data.status in {
+            "taken",
+            "missed",
+            "snoozed",
+        }:
+            reminder.action_at = datetime.utcnow()
+
     if reminder_data.snoozed_until is not None:
         reminder.snoozed_until = reminder_data.snoozed_until
+
+    db.commit()
+    db.refresh(reminder)
+
+    return reminder
+
+
+@router.post(
+    "/{reminder_id}/taken",
+    response_model=ReminderResponse,
+)
+def mark_reminder_taken(
+    reminder_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    reminder = get_patient_reminder(
+        reminder_id,
+        current_user.id,
+        db,
+    )
+
+    reminder.status = "taken"
+    reminder.action_at = datetime.utcnow()
+    reminder.snoozed_until = None
+
+    db.commit()
+    db.refresh(reminder)
+
+    return reminder
+
+
+@router.post(
+    "/{reminder_id}/missed",
+    response_model=ReminderResponse,
+)
+def mark_reminder_missed(
+    reminder_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    reminder = get_patient_reminder(
+        reminder_id,
+        current_user.id,
+        db,
+    )
+
+    reminder.status = "missed"
+    reminder.action_at = datetime.utcnow()
+    reminder.snoozed_until = None
+
+    db.commit()
+    db.refresh(reminder)
+
+    return reminder
+
+
+@router.post(
+    "/{reminder_id}/snooze",
+    response_model=ReminderResponse,
+)
+def snooze_reminder(
+    reminder_id: int,
+    snoozed_until: datetime,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    reminder = get_patient_reminder(
+        reminder_id,
+        current_user.id,
+        db,
+    )
+
+    if snoozed_until <= datetime.utcnow():
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Snooze time must be in the future",
+        )
+
+    reminder.status = "snoozed"
+    reminder.action_at = datetime.utcnow()
+    reminder.snoozed_until = snoozed_until
 
     db.commit()
     db.refresh(reminder)
@@ -199,7 +290,7 @@ def update_reminder(
 def delete_reminder(
     reminder_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     reminder = get_patient_reminder(
         reminder_id,

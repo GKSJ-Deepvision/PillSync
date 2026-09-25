@@ -36,6 +36,11 @@ class Reminder(Base):
         nullable=True,
     )
 
+    action_at: Mapped[datetime | None] = mapped_column(
+        DateTime,
+        nullable=True,
+    )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,

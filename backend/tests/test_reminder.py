@@ -151,14 +151,15 @@ def test_mark_reminder_taken():
     response = client.put(
         f"/reminders/{reminder_id}",
         headers=headers,
-        json={
-            "status": "taken",
-        },
+        json={"status": "taken"},
     )
 
     assert response.status_code == 200
-    assert response.json()["status"] == "taken"
 
+    data = response.json()
+
+    assert data["status"] == "taken"
+    assert data["action_at"] is not None
 
 def test_mark_reminder_missed():
     headers = get_auth_headers()
@@ -167,13 +168,15 @@ def test_mark_reminder_missed():
     response = client.put(
         f"/reminders/{reminder_id}",
         headers=headers,
-        json={
-            "status": "missed",
-        },
+        json={"status": "missed"},
     )
 
     assert response.status_code == 200
-    assert response.json()["status"] == "missed"
+
+    data = response.json()
+
+    assert data["status"] == "missed"
+    assert data["action_at"] is not None
 
 
 def test_snooze_reminder():
@@ -195,6 +198,7 @@ def test_snooze_reminder():
 
     assert data["status"] == "snoozed"
     assert data["snoozed_until"] == "2026-09-26T00:30:00"
+    assert data["action_at"] is not None
 
 
 def test_invalid_reminder_status():
@@ -242,3 +246,102 @@ def test_delete_reminder():
 
     assert get_response.status_code == 404
     assert get_response.json()["detail"] == "Reminder not found"
+
+def test_taken_action_endpoint():
+    headers = get_auth_headers()
+    reminder_id, _ = create_test_reminder(headers)
+
+    response = client.post(
+        f"/reminders/{reminder_id}/taken",
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["id"] == reminder_id
+    assert data["status"] == "taken"
+    assert data["action_at"] is not None
+    assert data["snoozed_until"] is None
+
+
+def test_missed_action_endpoint():
+    headers = get_auth_headers()
+    reminder_id, _ = create_test_reminder(headers)
+
+    response = client.post(
+        f"/reminders/{reminder_id}/missed",
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["id"] == reminder_id
+    assert data["status"] == "missed"
+    assert data["action_at"] is not None
+    assert data["snoozed_until"] is None
+
+
+def test_snooze_action_endpoint():
+    headers = get_auth_headers()
+    reminder_id, _ = create_test_reminder(headers)
+
+    response = client.post(
+        f"/reminders/{reminder_id}/snooze",
+        headers=headers,
+        params={
+            "snoozed_until": "2026-09-26T00:30:00",
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["id"] == reminder_id
+    assert data["status"] == "snoozed"
+    assert data["action_at"] is not None
+    assert data["snoozed_until"] == "2026-09-26T00:30:00"
+
+def test_cannot_modify_another_patients_reminder():
+    owner_headers = get_auth_headers()
+
+    reminder_id, _ = create_test_reminder(owner_headers)
+
+    register_response = client.post(
+        "/auth/register",
+        json={
+            "username": "reminder_other_user",
+            "email": "reminder_other_user@example.com",
+            "password": "Test@123",
+        },
+    )
+
+    assert register_response.status_code in {201, 400}
+
+    login_response = client.post(
+        "/auth/login",
+        data={
+            "username": "reminder_other_user",
+            "password": "Test@123",
+        },
+    )
+
+    assert login_response.status_code == 200
+
+    other_user_token = login_response.json()["access_token"]
+
+    other_user_headers = {
+        "Authorization": f"Bearer {other_user_token}",
+    }
+
+    response = client.post(
+        f"/reminders/{reminder_id}/taken",
+        headers=other_user_headers,
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Reminder not found"
