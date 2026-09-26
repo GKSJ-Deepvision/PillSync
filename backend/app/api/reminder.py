@@ -30,10 +30,7 @@ def get_patient_schedule(
 ) -> DosageSchedule:
     schedule = (
         db.query(DosageSchedule)
-        .join(
-            Medicine,
-            DosageSchedule.medicine_id == Medicine.id,
-        )
+        .join(Medicine, DosageSchedule.medicine_id == Medicine.id)
         .filter(
             DosageSchedule.id == schedule_id,
             Medicine.patient_id == user_id,
@@ -85,15 +82,9 @@ def reminder_response_data(
     reminder: Reminder,
     db: Session,
 ) -> dict:
-    """
-    Build the reminder response with medicine and dosage details.
-    """
-
     schedule = (
         db.query(DosageSchedule)
-        .filter(
-            DosageSchedule.id == reminder.dosage_schedule_id,
-        )
+        .filter(DosageSchedule.id == reminder.dosage_schedule_id)
         .first()
     )
 
@@ -105,9 +96,7 @@ def reminder_response_data(
 
     medicine = (
         db.query(Medicine)
-        .filter(
-            Medicine.id == schedule.medicine_id,
-        )
+        .filter(Medicine.id == schedule.medicine_id)
         .first()
     )
 
@@ -133,6 +122,77 @@ def reminder_response_data(
     }
 
 
+def get_schedule_and_medicine(
+    reminder: Reminder,
+    db: Session,
+) -> tuple[DosageSchedule, Medicine]:
+    schedule = (
+        db.query(DosageSchedule)
+        .filter(DosageSchedule.id == reminder.dosage_schedule_id)
+        .first()
+    )
+
+    if schedule is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Dosage schedule not found",
+        )
+
+    medicine = (
+        db.query(Medicine)
+        .filter(Medicine.id == schedule.medicine_id)
+        .first()
+    )
+
+    if medicine is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Medicine not found",
+        )
+
+    return schedule, medicine
+
+
+def consume_medicine_stock(
+    reminder: Reminder,
+    db: Session,
+) -> None:
+    """
+    Decrease medicine stock when a reminder is marked as taken.
+
+    Stock is consumed only once for a reminder.
+    """
+
+    # If this reminder was already taken, do not consume stock again.
+    if reminder.status == "taken":
+        return
+
+    schedule, medicine = get_schedule_and_medicine(
+        reminder=reminder,
+        db=db,
+    )
+
+    dosage_amount = schedule.dosage_amount
+
+    if dosage_amount <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Dosage amount must be greater than zero",
+        )
+
+    if medicine.quantity < dosage_amount:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                f"Insufficient medicine stock. "
+                f"Available: {medicine.quantity}, "
+                f"required: {dosage_amount}"
+            ),
+        )
+
+    medicine.quantity -= dosage_amount
+
+
 def create_medication_history(
     reminder: Reminder,
     user_id: int,
@@ -141,9 +201,7 @@ def create_medication_history(
 ) -> MedicationHistory:
     schedule = (
         db.query(DosageSchedule)
-        .filter(
-            DosageSchedule.id == reminder.dosage_schedule_id,
-        )
+        .filter(DosageSchedule.id == reminder.dosage_schedule_id)
         .first()
     )
 
@@ -193,10 +251,7 @@ def create_reminder(
     db.commit()
     db.refresh(reminder)
 
-    return reminder_response_data(
-        reminder,
-        db,
-    )
+    return reminder_response_data(reminder, db)
 
 
 @router.get(
@@ -217,18 +272,13 @@ def list_reminders(
             Medicine,
             DosageSchedule.medicine_id == Medicine.id,
         )
-        .filter(
-            Medicine.patient_id == current_user.id,
-        )
+        .filter(Medicine.patient_id == current_user.id)
         .order_by(Reminder.scheduled_at)
         .all()
     )
 
     return [
-        reminder_response_data(
-            reminder,
-            db,
-        )
+        reminder_response_data(reminder, db)
         for reminder in reminders
     ]
 
@@ -248,10 +298,7 @@ def get_reminder(
         db,
     )
 
-    return reminder_response_data(
-        reminder,
-        db,
-    )
+    return reminder_response_data(reminder, db)
 
 
 @router.put(
@@ -284,6 +331,13 @@ def update_reminder(
                 detail="Invalid reminder status",
             )
 
+        # Only consume stock when changing INTO taken.
+        if (
+            reminder_data.status == "taken"
+            and reminder.status != "taken"
+        ):
+            consume_medicine_stock(reminder, db)
+
         reminder.status = reminder_data.status
 
         if reminder_data.status in {
@@ -306,10 +360,7 @@ def update_reminder(
     db.commit()
     db.refresh(reminder)
 
-    return reminder_response_data(
-        reminder,
-        db,
-    )
+    return reminder_response_data(reminder, db)
 
 
 @router.post(
@@ -327,6 +378,12 @@ def mark_reminder_taken(
         db,
     )
 
+    # Prevent double consumption.
+    if reminder.status == "taken":
+        return reminder_response_data(reminder, db)
+
+    consume_medicine_stock(reminder, db)
+
     reminder.status = "taken"
     reminder.action_at = datetime.utcnow()
     reminder.snoozed_until = None
@@ -341,10 +398,7 @@ def mark_reminder_taken(
     db.commit()
     db.refresh(reminder)
 
-    return reminder_response_data(
-        reminder,
-        db,
-    )
+    return reminder_response_data(reminder, db)
 
 
 @router.post(
@@ -376,10 +430,7 @@ def mark_reminder_missed(
     db.commit()
     db.refresh(reminder)
 
-    return reminder_response_data(
-        reminder,
-        db,
-    )
+    return reminder_response_data(reminder, db)
 
 
 @router.post(
@@ -418,10 +469,7 @@ def snooze_reminder(
     db.commit()
     db.refresh(reminder)
 
-    return reminder_response_data(
-        reminder,
-        db,
-    )
+    return reminder_response_data(reminder, db)
 
 
 @router.delete(
