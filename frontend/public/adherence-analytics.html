@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>PillSync - Adherence Analytics</title>
+    <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="adherence-analytics.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">💊 PillSync</div>
+
+        <div class="profile-card">
+          <div class="profile-avatar" id="sidebarAvatar">U</div>
+          <div class="profile-name" id="sidebarName">Loading...</div>
+          <div class="profile-email" id="sidebarEmail">...</div>
+          <span class="role-badge" id="sidebarRole">Patient</span>
+        </div>
+
+        <div class="caregiver-card">
+          <div class="caregiver-label">Your caregiver</div>
+          <div class="caregiver-name" id="caregiverName">None linked</div>
+          <div class="caregiver-email" id="caregiverEmail">No email</div>
+        </div>
+
+        <nav class="nav">
+          <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+          <a href="my-medicines.html" class="nav-item">💊 My Medicines</a>
+          <a href="add-medicine.html" class="nav-item">➕ Add Medicine</a>
+          <a href="refill-alerts.html" class="nav-item">🔔 Refill Alerts</a>
+          <a href="dosage-analysis.html" class="nav-item">📈 Dosage Analysis</a>
+          <a href="adherence-analytics.html" class="nav-item active">📊 Adherence Analytics</a>
+          <a href="history.html" class="nav-item">📋 History</a>
+        </nav>
+
+        <a href="login.html" class="logout" onclick="localStorage.removeItem('access_token')">Log out</a>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <div class="greeting">Adherence Analytics</div>
+            <div class="subgreeting">Deeper insights into your medication consistency</div>
+          </div>
+        </header>
+
+                <section class="hero-card">
+          <div class="hero-left">
+            <div class="score-ring-wrap" id="scoreRingWrap"></div>
+            <div class="score-caption" id="scoreCaption"></div>
+          </div>
+          <div class="hero-right">
+            <div class="mini-stat">
+              <div class="mini-stat-num" id="statLast7">--</div>
+              <div class="mini-stat-lbl">Last 7 days</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-num" id="statBest">--</div>
+              <div class="mini-stat-lbl">Best day</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-num" id="statWorst">--</div>
+              <div class="mini-stat-lbl">Lowest day</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="trend-section">
+          <h2 class="section-title">30-day trend</h2>
+          <div class="trend-chart" id="trendChart"></div>
+        </section>
+
+        <section class="breakdown-section">
+          <div class="tab-row">
+            <button class="tab-btn active" id="tabMedBtn" onclick="switchTab('medicine')">By medicine</button>
+            <button class="tab-btn" id="tabDayBtn" onclick="switchTab('day')">By day of week</button>
+          </div>
+          <div id="byMedList" class="tab-panel"></div>
+          <div id="byDayPanel" class="tab-panel" style="display:none;">
+            <div class="heatmap-grid" id="heatmapGrid"></div>
+            <div class="heatmap-legend">
+              <div class="legend-item"><span class="legend-swatch" style="background:#00C2A8"></span>80%+</div>
+              <div class="legend-item"><span class="legend-swatch" style="background:#E9C46A"></span>60-79%</div>
+              <div class="legend-item"><span class="legend-swatch" style="background:#FF6B6B"></span>Below 60%</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="insights-section">
+          <h2 class="section-title">💡 Insights</h2>
+          <div id="insightsList"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="adherence-analytics.js"></script>
+  </body>
+</html>
