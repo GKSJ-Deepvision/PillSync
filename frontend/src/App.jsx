@@ -259,6 +259,9 @@ function Dashboard({ user, onLogout }) {
   const [adherence, setAdherence] = useState(null)
   const [adherenceLoading, setAdherenceLoading] = useState(true)
   const [adherenceError, setAdherenceError] = useState('')
+  const [adherenceTrend, setAdherenceTrend] = useState(null)
+  const [adherenceTrendLoading, setAdherenceTrendLoading] = useState(true)
+  const [adherenceTrendError, setAdherenceTrendError] = useState('')
 
   const [actionLoading, setActionLoading] = useState(null)
 
@@ -423,6 +426,33 @@ function Dashboard({ user, onLogout }) {
     }
   }
 
+
+  const fetchAdherenceTrend = async () => {
+  try {
+    setAdherenceTrendLoading(true)
+    setAdherenceTrendError('')
+
+    const response = await axios.get(
+      `${API_URL}/medication-history/adherence/trend`,
+      {
+        headers: getAuthHeaders(),
+        params: {
+          days: 7,
+        },
+      },
+    )
+
+    setAdherenceTrend(response.data)
+  } catch (err) {
+    setAdherenceTrendError(
+      err.response?.data?.detail ||
+        'Unable to load adherence analytics.',
+    )
+  } finally {
+    setAdherenceTrendLoading(false)
+  }
+}
+
   const handleReminderAction = async (reminderId, action) => {
     try {
       setActionLoading(`${reminderId}-${action}`)
@@ -459,6 +489,7 @@ function Dashboard({ user, onLogout }) {
         fetchNotifications(),
         fetchMedicines(),
         fetchAdherence(),
+        fetchAdherenceTrend(),
       ])
 
       if (selectedMedicineId) {
@@ -573,12 +604,14 @@ function Dashboard({ user, onLogout }) {
       fetchNotifications()
       fetchMedicines()
       fetchAdherence()
+      fetchAdherenceTrend()
     } else {
       setReminderLoading(false)
       setHistoryLoading(false)
       setNotificationLoading(false)
       setMedicineLoading(false)
       setAdherenceLoading(false)
+      setAdherenceTrendLoading(false)
     }
   }, [user.role])
 
@@ -1061,6 +1094,86 @@ function Dashboard({ user, onLogout }) {
                     </div>
                   </div>
                 )}
+                              {!adherenceTrendLoading &&
+                !adherenceTrendError &&
+                adherenceTrend && (
+                  <div className="adherence-analytics">
+                    <div className="analytics-header">
+                      <div>
+                        <h3>Adherence Analytics</h3>
+                        <p>
+                          Your medication adherence trend over the last 7 days.
+                        </p>
+                      </div>
+
+                      <div className="analytics-average">
+                        <span>7-Day Average</span>
+                        <strong>
+                          {adherenceTrend.average_adherence_percentage}%
+                        </strong>
+                      </div>
+                    </div>
+
+                    <div className="adherence-trend">
+                      {adherenceTrend.daily_history.map((day) => {
+                        const dateLabel = new Date(
+                          `${day.date}T00:00:00`,
+                        ).toLocaleDateString(undefined, {
+                          weekday: 'short',
+                          month: 'short',
+                          day: 'numeric',
+                        })
+
+                        return (
+                          <div
+                            className="trend-day"
+                            key={day.date}
+                          >
+                            <div className="trend-day-header">
+                              <span>{dateLabel}</span>
+                              <strong>
+                                {day.adherence_percentage}%
+                              </strong>
+                            </div>
+
+                            <div className="trend-bar">
+                              <div
+                                className="trend-bar-fill"
+                                style={{
+                                  width: `${day.adherence_percentage}%`,
+                                }}
+                              ></div>
+                            </div>
+
+                            <div className="trend-day-stats">
+                              <span>
+                                Taken: {day.taken_doses}
+                              </span>
+                              <span>
+                                Missed: {day.missed_doses}
+                              </span>
+                              <span>
+                                Snoozed: {day.snoozed_doses}
+                              </span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+              {adherenceTrendLoading && (
+                <div className="dashboard-message compact">
+                  Loading adherence analytics...
+                </div>
+              )}
+
+              {adherenceTrendError && (
+                <div className="error-message">
+                  {adherenceTrendError}
+                </div>
+              )}
             </section>
 
             {/* ==================== REMINDERS ==================== */}
