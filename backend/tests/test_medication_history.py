@@ -170,7 +170,7 @@ def test_snoozed_reminder_creates_medication_history():
         f"/reminders/{reminder_id}/snooze",
         headers=headers,
         params={
-            "snoozed_until": "2026-09-26T00:30:00",
+            "snoozed_until": "2026-12-31T23:59:00",
         },
     )
 
