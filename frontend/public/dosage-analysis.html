@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>PillSync - Dosage Analysis</title>
+    <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="dosage-analysis.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">💊 PillSync</div>
+
+        <div class="profile-card">
+          <div class="profile-avatar" id="sidebarAvatar">I</div>
+          <div class="profile-name" id="sidebarName">Isha</div>
+          <div class="profile-email" id="sidebarEmail">isha@gmail.com</div>
+          <span class="role-badge" id="sidebarRole">Patient</span>
+        </div>
+
+        <div class="caregiver-card">
+          <div class="caregiver-label">Your caregiver</div>
+          <div class="caregiver-name" id="caregiverName">pari</div>
+          <div class="caregiver-email" id="caregiverEmail">pari@gmail.com</div>
+        </div>
+
+        <nav class="nav">
+          <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+          <a href="my-medicines.html" class="nav-item">💊 My Medicines</a>
+          <a href="add-medicine.html" class="nav-item">➕ Add Medicine</a>
+          <a href="history.html" class="nav-item">📊 History</a>
+          <a href="refill-alerts.html" class="nav-item">🔔 Refill Alerts</a>
+          <a href="dosage-analysis.html" class="nav-item active">📈 Dosage Analysis</a>
+          
+        </nav>
+
+        <a href="login.html" class="logout" onclick="localStorage.removeItem('access_token')">Log out</a>
+      </aside>
+
+      <main class="main">
+                <header class="topbar">
+          <div>
+            <div class="greeting">Dosage Analysis</div>
+            <div class="subgreeting">A visual breakdown of your daily medicine schedule</div>
+          </div>
+        </header>
+
+                <section class="top-grid">
+          <div class="clock-card">
+            <h2 class="section-title">Your 24-hour dose clock</h2>
+            <div class="clock-wrap" id="clockWrap"></div>
+            <div class="clock-legend" id="clockLegend"></div>
+            <div class="dose-detail-panel" id="doseDetailPanel">Click any dot on the clock to see details</div>
+          </div>
+
+          <div class="side-col">
+            <div class="countdown-card">
+              <h2 class="section-title">Next dose</h2>
+              <div class="countdown-display" id="countdownDisplay"></div>
+            </div>
+
+            <div class="suggestions-card">
+              <h2 class="section-title">💡 Smart suggestions</h2>
+              <div id="suggestionsList"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="conflicts-section" id="conflictsSection"></section>
+
+        <section class="schedule-section">
+          <h2 class="section-title">Full daily schedule</h2>
+          <div class="schedule-list" id="scheduleList"></div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      // Inline fallback: load user info directly (in case user-session.js isn't found)
+      (async function () {
+        const token = localStorage.getItem('access_token');
+        if (!token) return;
+        try {
+          const res = await fetch('http://127.0.0.1:8000/auth/me', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const user = await res.json();
+            document.getElementById('sidebarName').textContent = user.full_name;
+            document.getElementById('sidebarEmail').textContent = user.email;
+            document.getElementById('sidebarAvatar').textContent = user.full_name.charAt(0).toUpperCase();
+          }
+        } catch (e) {
+          console.error('Could not load user info:', e);
+        }
+      })();
+    </script>
+    <script src="dosage-analysis.js"></script>
+  </body>
+</html>

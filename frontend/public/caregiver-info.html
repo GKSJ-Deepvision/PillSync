@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PillSync - Caregiver Info</title>
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">💊 PillSync</div>
+
+      <div class="mini-card" onclick="window.location.href='profile.html'">
+        <div class="mini-avatar">I</div>
+        <div class="mini-text">
+          <div class="mini-name">Isha Sharma</div>
+          <div class="mini-sub">Patient · View profile</div>
+        </div>
+        <span class="mini-chevron">›</span>
+      </div>
+
+      <div class="mini-card" onclick="window.location.href='caregiver-info.html'">
+        <div class="mini-avatar mini-avatar-alt">🤝</div>
+        <div class="mini-text">
+          <div class="mini-name">Pari Verma</div>
+          <div class="mini-sub">Caregiver · View info</div>
+        </div>
+        <span class="mini-chevron">›</span>
+      </div>
+
+      <nav class="nav">
+        <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+        <a href="my-medicines.html" class="nav-item">💊 My Medicines</a>
+        <a href="add-medicine.html" class="nav-item">➕ Add Medicine</a>
+        <a href="history.html" class="nav-item">📊 History</a>
+      </nav>
+
+      <a href="login.html" class="logout">Log out</a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+
+      <header class="topbar">
+        <div>
+          <div class="greeting">Caregiver Info</div>
+          <div class="subgreeting">Contact details for your linked caregiver</div>
+        </div>
+      </header>
+
+      <div class="profile-page-header">
+        <div class="profile-page-avatar" style="background:linear-gradient(135deg,#00C2A8,#7C6AF5);">🤝</div>
+        <div>
+          <div class="profile-page-name">Pari Verma</div>
+          <div class="profile-page-email">pari@gmail.com</div>
+        </div>
+      </div>
+
+      <div class="profile-card-section">
+        <h2 class="section-title">Contact Details</h2>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Phone</span>
+          <span class="profile-field-value">+91 91234 56789</span>
+        </div>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Relation</span>
+          <span class="profile-field-value">Caregiver</span>
+        </div>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Linked since</span>
+          <span class="profile-field-value">Aug 14, 2026</span>
+        </div>
+
+        <div class="profile-page-actions">
+          <button class="edit-toggle-btn" onclick="openChat('Pari Verma')">💬 Message</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>window.CHAT_ME = "Isha Sharma";</script>
+  <script src="chat.js"></script>
+</body>
+</html>

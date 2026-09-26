@@ -12,11 +12,13 @@
 
     <aside class="sidebar">
       <div class="brand">💊 PillSync</div>
-      <div class="profile-card">
-        <div class="profile-avatar">P</div>
-        <div class="profile-name">Pari Verma</div>
-        <div class="profile-email">pari@gmail.com</div>
-        <span class="role-badge">Caregiver</span>
+            <div class="mini-card" onclick="window.location.href='caregiver-profile.html'">
+        <div class="mini-avatar mini-avatar-alt">P</div>
+        <div class="mini-text">
+          <div class="mini-name">Pari Verma</div>
+          <div class="mini-sub">Caregiver · View profile</div>
+        </div>
+        <span class="mini-chevron">›</span>
       </div>
       <nav class="nav">
         <a href="#" class="nav-item active">My Patients</a>
@@ -47,4 +49,21 @@
 
   <script src="caregiver-dashboard.js"></script>
 </body>
+  <!-- CHAT MODAL -->
+  <div class="chat-overlay" id="chatModal" style="display:none;">
+    <div class="chat-box">
+      <div class="chat-header">
+        <span id="chatWithName">Chat</span>
+        <button class="chat-close" onclick="closeChat()">✕</button>
+      </div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMessage()">
+        <button onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+    <script>window.CHAT_ME = "Pari Verma";</script>
+  <script src="chat.js"></script>
+  <script src="caregiver-dashboard.js"></script>
 </html>

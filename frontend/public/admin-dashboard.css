@@ -6,10 +6,12 @@
 }
 
 .stat-card {
-  background: white;
-  border: 1px solid var(--line);
-  border-radius: 12px;
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.6);
+  border-radius: 14px;
   padding: 18px 20px;
+  box-shadow: 0 8px 24px rgba(27,31,59,0.06);
 }
 
 .stat-card .stat-icon {
@@ -84,9 +86,9 @@
   border-radius: 20px;
 }
 
-.role-patient { background: #F1F7F3; color: var(--sage-deep); }
-.role-caregiver { background: #FDF1EC; color: var(--terracotta); }
-.role-admin { background: #EFEAF5; color: #6B5B95; }
+.role-patient { background: rgba(0,194,168,0.12); color: #00A38C; }
+.role-caregiver { background: rgba(255,107,107,0.12); color: #e05252; }
+.role-admin { background: rgba(124,106,245,0.12); color: #6a54e8; }
 
 .status-dot {
   display: inline-flex;
@@ -134,6 +136,92 @@
 }
 
 .activity-time {
+  color: #8A8578;
+  font-size: 12px;
+}
+.role-chart-section {
+  margin-bottom: 36px;
+}
+
+.role-chart-card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+
+.donut-chart {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.donut-chart::after {
+  content: "";
+  position: absolute;
+  width: 76px;
+  height: 76px;
+  background: white;
+  border-radius: 50%;
+}
+
+.donut-center-text {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.donut-center-text .donut-total {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--sage-deep);
+  display: block;
+}
+
+.donut-center-text .donut-label {
+  font-size: 10px;
+  color: #8A8578;
+}
+
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.legend-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  color: #6b6a63;
+  min-width: 80px;
+}
+
+.legend-count {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.legend-percent {
   color: #8A8578;
   font-size: 12px;
 }

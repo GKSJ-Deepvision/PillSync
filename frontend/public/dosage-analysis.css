@@ -1,0 +1,299 @@
+.top-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.clock-card, .complexity-card {
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px 28px;
+}
+
+/* DOSE CLOCK */
+.clock-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.clock-wrap svg {
+  width: 260px;
+  height: 260px;
+}
+
+.clock-face {
+  fill: white;
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.clock-tick {
+  stroke: #D6D0C2;
+  stroke-width: 1;
+}
+
+.clock-tick-major {
+  stroke: #8A8578;
+  stroke-width: 1.5;
+}
+
+.clock-hour-label {
+  font-size: 9px;
+  fill: #8A8578;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+.dose-dot {
+  cursor: pointer;
+}
+
+.dose-dot circle {
+  transition: r 0.15s ease;
+}
+
+.dose-dot:hover circle {
+  r: 8;
+}
+
+.clock-center-label {
+  font-size: 11px;
+  fill: var(--sage-deep);
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.clock-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.legend-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #6b6a63;
+}
+
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+/* COMPLEXITY GAUGE */
+.gauge-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+.gauge-wrap svg {
+  width: 180px;
+  height: 110px;
+}
+
+.gauge-track {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 14;
+  stroke-linecap: round;
+}
+
+.gauge-fill {
+  fill: none;
+  stroke-width: 14;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.6s ease;
+}
+
+.gauge-score {
+  font-size: 26px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+.gauge-max {
+  font-size: 11px;
+  fill: #8A8578;
+  text-anchor: middle;
+}
+
+.complexity-label {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.complexity-desc {
+  text-align: center;
+  font-size: 12px;
+  color: #6b6a63;
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+/* CONFLICTS */
+.conflicts-section {
+  margin-bottom: 28px;
+}
+
+.conflict-item {
+  background: #FFF4D6;
+  border-left: 4px solid #E9C46A;
+  border-radius: 0 10px 10px 0;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #6b5310;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.no-conflicts {
+  background: rgba(0,194,168,0.1);
+  border-left: 4px solid #00C2A8;
+  border-radius: 0 10px 10px 0;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #006e5e;
+  font-weight: 600;
+}
+
+/* SCHEDULE */
+.schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.schedule-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 18px;
+}
+
+.schedule-time {
+  font-weight: 800;
+  color: var(--sage-deep);
+  font-size: 14px;
+  min-width: 70px;
+}
+
+.schedule-meds {
+  font-size: 13px;
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .top-grid { grid-template-columns: 1fr; }
+}
+.side-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.countdown-card, .suggestions-card {
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 22px 24px;
+}
+
+.countdown-display {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.countdown-time {
+  font-size: 32px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #00C2A8, #7C6AF5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.countdown-med {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-top: 4px;
+}
+
+.countdown-sub {
+  font-size: 11px;
+  color: #8A8578;
+  margin-top: 2px;
+}
+
+.suggestion-item {
+  background: #F0ECFA;
+  border-left: 4px solid #7C6AF5;
+  border-radius: 0 10px 10px 0;
+  padding: 12px 14px;
+  font-size: 12px;
+  color: #4a3a8a;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.suggestion-item strong {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 3px;
+}
+
+.no-suggestions {
+  font-size: 12px;
+  color: #8A8578;
+}
+
+/* DOSE DETAIL PANEL */
+.dose-detail-panel {
+  margin-top: 14px;
+  background: #FAF9F5;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 12px;
+  color: #8A8578;
+  text-align: center;
+  min-height: 20px;
+}
+
+.dose-detail-panel.active {
+  background: white;
+  border: 1px solid var(--line);
+  text-align: left;
+  color: var(--ink);
+}
+
+.dose-detail-panel .dd-name {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.dose-detail-panel .dd-time {
+  font-size: 12px;
+  color: #6b6a63;
+  margin-top: 2px;
+}
+
+@media (max-width: 900px) {
+  .top-grid { grid-template-columns: 1fr; }
+}

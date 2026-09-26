@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PillSync - My Profile</title>
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">💊 PillSync</div>
+
+      <div class="mini-card" onclick="window.location.href='profile.html'">
+        <div class="mini-avatar">I</div>
+        <div class="mini-text">
+          <div class="mini-name">Isha Sharma</div>
+          <div class="mini-sub">Patient · View profile</div>
+        </div>
+        <span class="mini-chevron">›</span>
+      </div>
+
+      <div class="mini-card" onclick="window.location.href='caregiver-info.html'">
+        <div class="mini-avatar mini-avatar-alt">🤝</div>
+        <div class="mini-text">
+          <div class="mini-name">Pari Verma</div>
+          <div class="mini-sub">Caregiver · View info</div>
+        </div>
+        <span class="mini-chevron">›</span>
+      </div>
+
+      <nav class="nav">
+        <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+        <a href="my-medicines.html" class="nav-item">💊 My Medicines</a>
+        <a href="add-medicine.html" class="nav-item">➕ Add Medicine</a>
+        <a href="history.html" class="nav-item">📊 History</a>
+      </nav>
+
+      <a href="login.html" class="logout">Log out</a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+
+      <header class="topbar">
+        <div>
+          <div class="greeting">My Profile</div>
+          <div class="subgreeting">View and manage your personal information</div>
+        </div>
+      </header>
+
+      <div class="profile-page-header">
+        <div class="profile-page-avatar" id="pAvatar">I</div>
+        <div>
+          <div class="profile-page-name" id="pName">Isha Sharma</div>
+          <div class="profile-page-email" id="pEmail">isha@gmail.com</div>
+        </div>
+      </div>
+
+      <div class="profile-card-section">
+        <div class="section-header">
+          <h2 class="section-title" style="margin-bottom:0;">Personal Details</h2>
+          <button class="edit-toggle-btn" id="editBtn" onclick="toggleEdit()">Edit</button>
+        </div>
+
+        <div class="profile-field-row">
+          <span class="profile-field-label">Phone</span>
+          <span class="profile-field-value" id="fPhone-view">+91 98765 43210</span>
+          <span class="profile-field-value" id="fPhone-edit" style="display:none;"><input type="text" id="fPhone-input" value="+91 98765 43210"></span>
+        </div>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Age</span>
+          <span class="profile-field-value" id="fAge-view">34</span>
+          <span class="profile-field-value" id="fAge-edit" style="display:none;"><input type="number" id="fAge-input" value="34"></span>
+        </div>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Blood Group</span>
+          <span class="profile-field-value" id="fBlood-view">O+</span>
+          <span class="profile-field-value" id="fBlood-edit" style="display:none;"><input type="text" id="fBlood-input" value="O+"></span>
+        </div>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Conditions</span>
+          <span class="profile-field-value" id="fConditions-view">Diabetes, Hypertension</span>
+          <span class="profile-field-value" id="fConditions-edit" style="display:none;"><input type="text" id="fConditions-input" value="Diabetes, Hypertension"></span>
+        </div>
+
+        <div class="profile-page-actions" id="editActions" style="display:none;">
+          <button class="edit-toggle-btn" onclick="saveProfile()">Save</button>
+          <button class="btn-cancel" onclick="cancelEdit()">Cancel</button>
+        </div>
+      </div>
+            <div class="profile-card-section">
+        <div class="section-header">
+          <h2 class="section-title" style="margin-bottom:0;">Additional Information</h2>
+          <button class="edit-toggle-btn" id="editBtn2" onclick="toggleEdit2()">Edit</button>
+        </div>
+
+        <div class="profile-field-row">
+          <span class="profile-field-label">Gender</span>
+          <span class="profile-field-value" id="fGender-view">Female</span>
+          <span class="profile-field-value" id="fGender-edit" style="display:none;">
+            <select id="fGender-input">
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+              <option value="Other">Other</option>
+            </select>
+          </span>
+        </div>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Date of Birth</span>
+          <span class="profile-field-value" id="fDob-view">14 Mar 1992</span>
+          <span class="profile-field-value" id="fDob-edit" style="display:none;"><input type="date" id="fDob-input"></span>
+        </div>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Address</span>
+          <span class="profile-field-value" id="fAddress-view">Bengaluru, Karnataka</span>
+          <span class="profile-field-value" id="fAddress-edit" style="display:none;"><input type="text" id="fAddress-input" value="Bengaluru, Karnataka"></span>
+        </div>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Occupation</span>
+          <span class="profile-field-value" id="fOccupation-view">Software Engineer</span>
+          <span class="profile-field-value" id="fOccupation-edit" style="display:none;"><input type="text" id="fOccupation-input" value="Software Engineer"></span>
+        </div>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Known Allergies</span>
+          <span class="profile-field-value" id="fAllergies-view">Penicillin</span>
+          <span class="profile-field-value" id="fAllergies-edit" style="display:none;"><input type="text" id="fAllergies-input" value="Penicillin"></span>
+        </div>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Doctor's Name</span>
+          <span class="profile-field-value" id="fDoctor-view">Dr. Kavita Rao</span>
+          <span class="profile-field-value" id="fDoctor-edit" style="display:none;"><input type="text" id="fDoctor-input" value="Dr. Kavita Rao"></span>
+        </div>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Doctor's Contact</span>
+          <span class="profile-field-value" id="fDoctorPhone-view">+91 90000 12345</span>
+          <span class="profile-field-value" id="fDoctorPhone-edit" style="display:none;"><input type="text" id="fDoctorPhone-input" value="+91 90000 12345"></span>
+        </div>
+
+        <div class="profile-page-actions" id="editActions2" style="display:none;">
+          <button class="edit-toggle-btn" onclick="saveProfile2()">Save</button>
+          <button class="btn-cancel" onclick="cancelEdit2()">Cancel</button>
+        </div>
+      </div>
+
+      <div class="profile-card-section">
+        <h2 class="section-title">Emergency Contact</h2>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Name</span>
+          <span class="profile-field-value">Pari Verma</span>
+        </div>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Relation</span>
+          <span class="profile-field-value">Caregiver</span>
+        </div>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Phone</span>
+          <span class="profile-field-value">+91 91234 56789</span>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="profile.js"></script>
+</body>
+</html>

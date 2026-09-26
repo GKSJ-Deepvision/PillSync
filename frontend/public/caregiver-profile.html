@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PillSync - My Profile</title>
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">💊 PillSync</div>
+
+      <div class="mini-card" onclick="window.location.href='caregiver-profile.html'">
+        <div class="mini-avatar mini-avatar-alt">P</div>
+        <div class="mini-text">
+          <div class="mini-name">Pari Verma</div>
+          <div class="mini-sub">Caregiver · View profile</div>
+        </div>
+        <span class="mini-chevron">›</span>
+      </div>
+
+      <nav class="nav">
+        <a href="caregiver-dashboard.html" class="nav-item">🏠 My Patients</a>
+        <a href="#" class="nav-item">🔔 Alerts</a>
+      </nav>
+
+      <a href="login.html" class="logout">Log out</a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+
+      <header class="topbar">
+        <div>
+          <div class="greeting">My Profile</div>
+          <div class="subgreeting">View and manage your personal information</div>
+        </div>
+      </header>
+
+      <div class="profile-page-header">
+        <div class="profile-page-avatar" style="background:linear-gradient(135deg,#00C2A8,#7C6AF5);">P</div>
+        <div>
+          <div class="profile-page-name">Pari Verma</div>
+          <div class="profile-page-email">pari@gmail.com</div>
+        </div>
+      </div>
+
+      <div class="profile-card-section">
+        <div class="section-header">
+          <h2 class="section-title" style="margin-bottom:0;">Personal Details</h2>
+          <button class="edit-toggle-btn" id="editBtn" onclick="toggleEdit()">Edit</button>
+        </div>
+
+        <div class="profile-field-row">
+          <span class="profile-field-label">Phone</span>
+          <span class="profile-field-value" id="fPhone-view">+91 91234 56789</span>
+          <span class="profile-field-value" id="fPhone-edit" style="display:none;"><input type="text" id="fPhone-input" value="+91 91234 56789"></span>
+        </div>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Relation to Patient</span>
+          <span class="profile-field-value" id="fRelation-view">Sister</span>
+          <span class="profile-field-value" id="fRelation-edit" style="display:none;"><input type="text" id="fRelation-input" value="Sister"></span>
+        </div>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Address</span>
+          <span class="profile-field-value" id="fAddress-view">Bengaluru, Karnataka</span>
+          <span class="profile-field-value" id="fAddress-edit" style="display:none;"><input type="text" id="fAddress-input" value="Bengaluru, Karnataka"></span>
+        </div>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Preferred Contact Time</span>
+          <span class="profile-field-value" id="fContactTime-view">Evenings</span>
+          <span class="profile-field-value" id="fContactTime-edit" style="display:none;"><input type="text" id="fContactTime-input" value="Evenings"></span>
+        </div>
+
+        <div class="profile-page-actions" id="editActions" style="display:none;">
+          <button class="edit-toggle-btn" onclick="saveProfile()">Save</button>
+          <button class="btn-cancel" onclick="cancelEdit()">Cancel</button>
+        </div>
+      </div>
+
+      <div class="profile-card-section">
+        <h2 class="section-title">Monitoring</h2>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Linked Patient</span>
+          <span class="profile-field-value">Isha Sharma</span>
+        </div>
+        <div class="profile-field-row">
+          <span class="profile-field-label">Linked since</span>
+          <span class="profile-field-value">Aug 14, 2026</span>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="caregiver-profile.js"></script>
+</body>
+</html>

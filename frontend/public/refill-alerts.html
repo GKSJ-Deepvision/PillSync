@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>PillSync - Refill Alerts</title>
+    <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="refill-alerts.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">💊 PillSync</div>
+
+        <div class="profile-card">
+          <div class="profile-avatar" id="sidebarAvatar">I</div>
+          <div class="profile-name" id="sidebarName">Isha</div>
+          <div class="profile-email" id="sidebarEmail">isha@gmail.com</div>
+          <span class="role-badge" id="sidebarRole">Patient</span>
+        </div>
+
+        <div class="caregiver-card">
+          <div class="caregiver-label">Your caregiver</div>
+          <div class="caregiver-name" id="caregiverName">pari</div>
+          <div class="caregiver-email" id="caregiverEmail">pari@gmail.com</div>
+        </div>
+
+        <nav class="nav">
+          <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+          <a href="my-medicines.html" class="nav-item">💊 My Medicines</a>
+          <a href="add-medicine.html" class="nav-item">➕ Add Medicine</a>
+          <a href="history.html" class="nav-item">📊 History</a>
+          <a href="refill-alerts.html" class="nav-item active">🔔 Refill Alerts</a>
+          <a href="dosage-analysis.html" class="nav-item">📈 Dosage Analysis</a>
+          
+        </nav>
+
+        <a href="login.html" class="logout" onclick="localStorage.removeItem('access_token')">Log out</a>
+      </aside>
+
+      <main class="main">
+                <header class="topbar">
+          <div>
+            <div class="greeting">Refill Alerts</div>
+            <div class="subgreeting">Medicines organized by category, with refill status at a glance</div>
+          </div>
+        </header>
+
+        <section class="summary-strip" id="summaryStrip"></section>
+
+        <div class="controls-row">
+          <input type="text" class="search-bar" id="searchBar" placeholder="Search medicines...">
+          <button class="alert-check-btn" onclick="checkForAlerts()">🔔 Check for alerts</button>
+        </div>
+
+        <div class="filter-chips" id="filterChips"></div>
+
+        <div id="categorySections"></div>
+
+        <div class="refill-toast" id="refillToast"></div>
+      </main>
+    </div>
+
+    <script src="user-session.js?v=3"></script>
+    <script src="refill-alerts.js"></script>
+  </body>
+</html>

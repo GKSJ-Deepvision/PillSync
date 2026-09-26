@@ -1,133 +1,155 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>PillSync - Dashboard</title>
-    <link rel="stylesheet" href="dashboard.css" />
-    <link rel="stylesheet" href="debug-logger.css" />
-  </head>
-  <body>
-    <div class="app">
-      <!-- SIDEBAR -->
-      <aside class="sidebar">
-        <div class="brand">💊 PillSync</div>
+<head>
+<meta charset="UTF-8">
+<title>PillSync - Dashboard</title>
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
 
-        <!-- PROFILE CARD -->
-        <div class="profile-card" onclick="openProfileModal()" style="cursor: pointer">
-          <div class="profile-avatar" id="sidebarAvatar">U</div>
-          <div class="profile-name" id="sidebarName">Loading...</div>
-          <div class="profile-email" id="sidebarEmail">...</div>
-          <span class="role-badge" id="sidebarRole">Patient</span>
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">💊 PillSync</div>
+
+            <!-- PROFILE MINI (click to view full profile) -->
+      <div class="mini-card" onclick="window.location.href='profile.html'">
+        <div class="mini-avatar">I</div>
+        <div class="mini-text">
+          <div class="mini-name">Isha Sharma</div>
+          <div class="mini-sub">Patient · View profile</div>
         </div>
+        <span class="mini-chevron">›</span>
+      </div>
 
-        <!-- CAREGIVER CARD -->
-        <div class="caregiver-card">
-          <div class="caregiver-label">Your caregiver</div>
-          <div class="caregiver-name" id="caregiverName">None linked</div>
-          <div class="caregiver-email" id="caregiverEmail">No email</div>
+      <!-- CAREGIVER MINI (click to view caregiver info) -->
+      <div class="mini-card" onclick="window.location.href='caregiver-info.html'">
+        <div class="mini-avatar mini-avatar-alt">🤝</div>
+        <div class="mini-text">
+          <div class="mini-name">Pari Verma</div>
+          <div class="mini-sub">Caregiver · View info</div>
         </div>
+        <span class="mini-chevron">›</span>
+      </div>
 
-        <nav class="nav">
-          <a href="dashboard.html" class="nav-item active">🏠 Dashboard</a>
-          <a href="my-medicines.html" class="nav-item">💊 My Medicines</a>
-          <a href="add-medicine.html" class="nav-item">➕ Add Medicine</a>
-          <a href="history.html" class="nav-item">📊 History</a>
-        </nav>
+      <nav class="nav">
+        <a href="dashboard.html" class="nav-item active">🏠 Dashboard</a>
+        <a href="my-medicines.html" class="nav-item">💊 My Medicines</a>
+        <a href="add-medicine.html" class="nav-item">➕ Add Medicine</a>
+        <a href="history.html" class="nav-item">📊 History</a>
+        <a href="refill-alerts.html" class="nav-item">🔔 Refill Alerts</a>
+        <a href="dosage-analysis.html" class="nav-item">📈 Dosage Analysis</a>
+      </nav>
 
-        <a href="login.html" class="logout" onclick="localStorage.removeItem('access_token')"
-          >Log out</a
-        >
-      </aside>
+      <a href="login.html" class="logout">Log out</a>
+    </aside>
 
-      <!-- MAIN CONTENT -->
-      <main class="main">
-        <header class="topbar">
-          <div>
-            <div class="greeting" id="topGreeting">Good morning</div>
-            <div class="subgreeting">Here's what's on your plate today</div>
-          </div>
+    <!-- MAIN CONTENT -->
+    <main class="main">
+
+      <header class="topbar">
+        <div>
+          <div class="greeting">Good morning, Isha</div>
+          <div class="subgreeting">Here's what's on your plate today</div>
+        </div>
           <div class="adherence-ring" id="adherenceRing">
-            <svg viewBox="0 0 80 80">
-              <circle class="ring-bg" cx="40" cy="40" r="34"></circle>
-              <circle class="ring-fg" id="ringFg" cx="40" cy="40" r="34"></circle>
-            </svg>
-            <div class="ring-text" id="ringText">--</div>
-          </div>
-        </header>
+          <svg viewBox="0 0 80 80">
+            <defs>
+              <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#00C2A8" />
+                <stop offset="100%" stop-color="#7C6AF5" />
+              </linearGradient>
+            </defs>
+            <circle class="ring-bg" cx="40" cy="40" r="34"></circle>
+            <circle class="ring-fg" id="ringFg" cx="40" cy="40" r="34"></circle>
+          </svg>
+          <div class="ring-text" id="ringText">--</div>
+        </div>
+      </header>
 
-        <!-- LOW STOCK BANNER -->
-        <div class="alert-banner" id="alertBanner" style="display: none"></div>
+      <!-- LOW STOCK BANNER -->
+      <div class="alert-banner" id="alertBanner" style="display:none;"></div>
 
-        <!-- WEEKLY STREAK -->
-        <section class="week-section">
-          <h2 class="section-title">This week</h2>
-          <div class="week-strip" id="weekStrip"></div>
-        </section>
+      <!-- WEEKLY STREAK -->
+      <section class="week-section">
+        <h2 class="section-title">This week</h2>
+        <div class="week-strip" id="weekStrip"></div>
+      </section>
 
-        <!-- TODAY'S DOSES TIMELINE -->
-        <section class="today-section">
-          <h2 class="section-title">Today's doses</h2>
-          <div class="timeline" id="timeline"></div>
-        </section>
+      <!-- TODAY'S DOSES TIMELINE -->
+      <section class="today-section">
+        <h2 class="section-title">Today's doses</h2>
+        <button class="demo-btn" onclick="simulateReminder()">🔔 Simulate reminder</button>
+        <div class="timeline" id="timeline"></div>
+      </section>
 
-        <!-- MEDICINE LIST -->
-        <section class="medicines-section">
-          <div class="section-header">
-            <h2 class="section-title">My medicines</h2>
-            <button class="add-btn" onclick="window.location.href = 'add-medicine.html'">
-              + Add medicine
-            </button>
-          </div>
+      <!-- MEDICINE LIST -->
+      <section class="medicines-section">
+        <div class="section-header">
+          <h2 class="section-title">My medicines</h2>
+          <button class="add-btn" onclick="window.location.href='add-medicine.html'">+ Add medicine</button>
+        </div>
 
-          <div class="filter-chips" id="filterChips"></div>
+        <div class="filter-chips" id="filterChips"></div>
 
-          <div class="medicine-list" id="medicineList"></div>
-        </section>
-      </main>
+        <div class="medicine-list" id="medicineList"></div>
+            </section>
+
+    </main>
+  </div>
+
+  <!-- PROFILE MODAL -->
+  <div class="modal-overlay" id="profileModal" style="display:none;">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeProfileModal()">✕</button>
+      <div class="modal-profile-header">
+        <div class="modal-avatar">I</div>
+        <div>
+          <div class="modal-name">Isha Sharma</div>
+          <span class="role-badge">Patient</span>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-row"><span>Email</span><strong>isha@gmail.com</strong></div>
+        <div class="modal-row"><span>Phone</span><strong>+91 98765 43210</strong></div>
+        <div class="modal-row"><span>Age</span><strong>34</strong></div>
+        <div class="modal-row"><span>Blood Group</span><strong>O+</strong></div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Conditions</div>
+        <div class="condition-tags">
+          <span class="condition-tag">Diabetes</span>
+          <span class="condition-tag">Hypertension</span>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Emergency contact</div>
+        <div class="modal-row"><span>Name</span><strong>Pari Verma</strong></div>
+        <div class="modal-row"><span>Relation</span><strong>Caregiver</strong></div>
+        <div class="modal-row"><span>Phone</span><strong>+91 91234 56789</strong></div>
+      </div>
+      <button class="btn-primary" style="margin-top:16px;" onclick="closeProfileModal()">Close</button>
     </div>
+  </div>
 
-    <script src="user-session.js?v=3"></script>
-    <script src="dashboard.js?v=3"></script>
-    <!-- PROFILE MODAL -->
-    <div class="modal-overlay" id="profileModal" style="display: none">
-      <div class="modal-box">
-        <button class="modal-close" onclick="closeProfileModal()">✕</button>
-
-        <div class="modal-profile-header">
-          <div class="modal-avatar" id="modalAvatar">U</div>
-          <div>
-            <div class="modal-name" id="modalName">User</div>
-            <span class="role-badge" id="modalRole">Patient</span>
-          </div>
-        </div>
-
-        <div class="modal-section">
-          <div class="modal-row"><span>Email</span><strong id="modalEmail">...</strong></div>
-          <div class="modal-row"><span>Phone</span><strong>+91 98765 43210</strong></div>
-          <div class="modal-row"><span>Age</span><strong>34</strong></div>
-          <div class="modal-row"><span>Blood Group</span><strong>O+</strong></div>
-        </div>
-
-        <div class="modal-section">
-          <div class="modal-section-title">Conditions</div>
-          <div class="condition-tags">
-            <span class="condition-tag">Diabetes</span>
-            <span class="condition-tag">Hypertension</span>
-          </div>
-        </div>
-
-        <div class="modal-section">
-          <div class="modal-section-title">Emergency contact</div>
-          <div class="modal-row"><span>Name</span><strong>Pari Verma</strong></div>
-          <div class="modal-row"><span>Relation</span><strong>Caregiver</strong></div>
-          <div class="modal-row"><span>Phone</span><strong>+91 91234 56789</strong></div>
-        </div>
-
-        <button class="btn-primary" style="margin-top: 16px" onclick="closeProfileModal()">
-          Close
-        </button>
+  <!-- CHAT MODAL -->
+  <div class="chat-overlay" id="chatModal" style="display:none;">
+    <div class="chat-box">
+      <div class="chat-header">
+        <span id="chatWithName">Chat</span>
+        <button class="chat-close" onclick="closeChat()">✕</button>
+      </div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMessage()">
+        <button onclick="sendMessage()">Send</button>
       </div>
     </div>
-    <!--<script src="debug-logger.js"></script>-->
-  </body>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script>window.CHAT_ME = "Isha Sharma";</script>
+  <script src="chat.js"></script>
+  <script src="dashboard.js"></script>
+</body>
 </html>
