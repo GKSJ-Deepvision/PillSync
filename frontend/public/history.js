@@ -1,114 +1,222 @@
-// Sample historical data (in a real app, this would come from the backend database)
-const historyLog = [
-  {
-    date: "Mon, Aug 25",
-    doses: [
-      { med: "Metformin 500mg", status: "taken" },
-      { med: "Amlodipine 5mg", status: "taken" },
-      { med: "Vitamin D3", status: "taken" }
-    ]
-  },
-  {
-    date: "Tue, Aug 26",
-    doses: [
-      { med: "Metformin 500mg", status: "taken" },
-      { med: "Amlodipine 5mg", status: "taken" },
-      { med: "Vitamin D3", status: "taken" }
-    ]
-  },
-  {
-    date: "Wed, Aug 27",
-    doses: [
-      { med: "Metformin 500mg", status: "taken" },
-      { med: "Amlodipine 5mg", status: "missed" },
-      { med: "Vitamin D3", status: "taken" }
-    ]
-  },
-  {
-    date: "Thu, Aug 28",
-    doses: [
-      { med: "Metformin 500mg", status: "missed" },
-      { med: "Amlodipine 5mg", status: "missed" },
-      { med: "Vitamin D3", status: "missed" }
-    ]
-  },
-  {
-    date: "Fri, Aug 29",
-    doses: [
-      { med: "Metformin 500mg", status: "taken" },
-      { med: "Amlodipine 5mg", status: "taken" },
-      { med: "Vitamin D3", status: "taken" }
-    ]
-  }
-];
+/* eslint-disable no-unused-vars */
 
-// Pull in today's real data from the dashboard (localStorage)
-const todayDoses = JSON.parse(localStorage.getItem("pillsync_today_doses")) || [];
-if (todayDoses.length > 0) {
-  historyLog.push({
-    date: "Today",
-    doses: todayDoses.map(d => ({
-      med: d.name,
-      status: d.status === "pending" ? "missed" : d.status // treat pending as not-yet-taken for history view
-    }))
-  });
+const token = localStorage.getItem('access_token');
+if (!token) window.location.href = 'login.html';
+
+const BASE = 'http://127.0.0.1:8000';
+
+// ── Load sidebar user profile ─────────────────────────────────────────────────
+async function loadHistorySidebar() {
+  try {
+    const res = await fetch(`${BASE}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.status === 401) {
+      localStorage.removeItem('access_token');
+      window.location.href = 'login.html';
+      return;
+    }
+    if (!res.ok) return;
+    const user = await res.json();
+    const initial = user.full_name ? user.full_name.charAt(0).toUpperCase() : 'U';
+    const role =
+      user.role_display ||
+      (user.role
+        ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase()
+        : 'Patient');
+    const el = (id) => document.getElementById(id);
+    if (el('sidebarAvatar')) el('sidebarAvatar').textContent = initial;
+    if (el('sidebarName')) el('sidebarName').textContent = user.full_name;
+    if (el('sidebarEmail')) el('sidebarEmail').textContent = user.email;
+    if (el('sidebarRole')) el('sidebarRole').textContent = role;
+  } catch (err) {
+    console.error('Error loading sidebar profile:', err);
+  }
 }
 
-function renderSummary() {
-  let totalDoses = 0;
-  let totalTaken = 0;
-
-  historyLog.forEach(day => {
-    day.doses.forEach(dose => {
-      totalDoses++;
-      if (dose.status === "taken") totalTaken++;
+// ── Fetch 14-day history from backend ─────────────────────────────────────────
+async function loadHistory() {
+  showLoading(true);
+  try {
+    const res = await fetch(`${BASE}/doses/history/?days=14`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
-  });
 
-  const adherenceRate = totalDoses > 0 ? Math.round((totalTaken / totalDoses) * 100) : 0;
-  const missedCount = totalDoses - totalTaken;
+    if (res.status === 401) {
+      localStorage.removeItem('access_token');
+      window.location.href = 'login.html';
+      return;
+    }
 
-  const summaryRow = document.getElementById("summaryRow");
+    if (!res.ok) {
+      showError(`Failed to load history (${res.status}). Please try again.`);
+      return;
+    }
+
+    const data = await res.json();
+    // data.days is an array of daily summaries, newest-first from the backend.
+    // data.summary is the aggregate over the whole period.
+    renderSummary(data.summary);
+    renderHistoryList(data.days);
+  } catch (err) {
+    console.error('Error loading history:', err);
+    showError('Network error. Please check your connection and try again.');
+  } finally {
+    showLoading(false);
+  }
+}
+
+// ── Summary stats row ─────────────────────────────────────────────────────────
+function renderSummary(summary) {
+  const summaryRow = document.getElementById('summaryRow');
+  if (!summaryRow) return;
+
+  if (!summary || summary.total === 0) {
+    summaryRow.innerHTML = `<div class="summary-card" style="grid-column:1/-1; text-align:center;">
+      <div class="stat-label" style="color:#8A8578;">No medication history yet.</div>
+    </div>`;
+    return;
+  }
+
+  const adh = summary.adherence_percent ?? 0;
+  const missed = summary.missed ?? 0;
+  const taken = summary.taken ?? 0;
+
   summaryRow.innerHTML = `
     <div class="summary-card">
-      <div class="stat-value">${adherenceRate}%</div>
+      <div class="stat-value">${adh}%</div>
       <div class="stat-label">Overall adherence</div>
     </div>
     <div class="summary-card">
-      <div class="stat-value">${totalTaken}</div>
+      <div class="stat-value">${taken}</div>
       <div class="stat-label">Doses taken</div>
     </div>
     <div class="summary-card">
-      <div class="stat-value">${missedCount}</div>
+      <div class="stat-value">${missed}</div>
       <div class="stat-label">Doses missed</div>
     </div>
   `;
 }
 
-function renderHistoryList() {
-  const list = document.getElementById("historyList");
-  list.innerHTML = "";
+// ── Daily history list ────────────────────────────────────────────────────────
+function renderHistoryList(days) {
+  const list = document.getElementById('historyList');
+  if (!list) return;
+  list.innerHTML = '';
 
-  // Show most recent day first
-  [...historyLog].reverse().forEach(day => {
-    const row = document.createElement("div");
-    row.className = "history-row";
+  // Filter to days that actually had doses
+  const activeDays = (days || []).filter((d) => d.total > 0);
 
-    const doseEntries = day.doses.map(dose => `
-      <div class="dose-entry">
-        <span class="dose-med">${dose.med}</span>
-        <span class="status-pill ${dose.status}">${dose.status === "taken" ? "Taken" : "Missed"}</span>
-      </div>
-    `).join("");
+  if (activeDays.length === 0) {
+    list.innerHTML = `
+      <div style="color:#8A8578; font-size:14px; padding:20px 0; text-align:center;">
+        No dose history yet. Mark doses as taken or missed on the
+        <a href="dashboard.html" style="color:#7FA98E;">Dashboard</a> to see your history here.
+      </div>`;
+    return;
+  }
+
+  // Days come newest-first from the backend — display that way (most recent at top).
+  activeDays.forEach((day) => {
+    const row = document.createElement('div');
+    row.className = 'history-row';
+
+    const dateLabel = formatHistoryDate(day.date);
+
+    // Build individual dose entries if the API included them, otherwise show counts only.
+    let doseEntries = '';
+    if (Array.isArray(day.doses) && day.doses.length > 0) {
+      doseEntries = day.doses
+        .map((dose) => {
+          const statusClass =
+            dose.status === 'TAKEN'
+              ? 'taken'
+              : dose.status === 'MISSED'
+                ? 'missed'
+                : dose.status === 'SKIPPED'
+                  ? 'skipped'
+                  : 'pending';
+          const statusText =
+            dose.status === 'TAKEN'
+              ? 'Taken'
+              : dose.status === 'MISSED'
+                ? 'Missed'
+                : dose.status === 'SKIPPED'
+                  ? 'Skipped'
+                  : 'Pending';
+          const timeStr = dose.scheduled_for
+            ? new Date(dose.scheduled_for).toLocaleTimeString('en-IN', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+              })
+            : '';
+
+          return `
+          <div class="dose-entry">
+            <span class="dose-med">${dose.medicine_name}${timeStr ? ` <small style="color:#aaa;">(${timeStr})</small>` : ''}</span>
+            <span class="status-pill ${statusClass}">${statusText}</span>
+          </div>`;
+        })
+        .join('');
+    } else {
+      // No per-dose breakdown — show counts
+      doseEntries = `
+        <div class="dose-entry">
+          <span class="dose-med">${day.taken} taken · ${day.missed} missed · ${day.skipped} skipped</span>
+          <span class="status-pill ${day.adherence_percent >= 80 ? 'taken' : day.adherence_percent > 0 ? 'partial' : 'missed'}">
+            ${day.adherence_percent}%
+          </span>
+        </div>`;
+    }
 
     row.innerHTML = `
-      <div class="h-date">${day.date}</div>
+      <div class="h-date">${dateLabel}</div>
       ${doseEntries}
     `;
-
     list.appendChild(row);
   });
 }
 
-renderSummary();
-renderHistoryList();
+function formatHistoryDate(dateStr) {
+  try {
+    const d = new Date(dateStr + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diff = Math.round((today - d) / 86400000);
+    if (diff === 0) return 'Today';
+    if (diff === 1) return 'Yesterday';
+    return d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+  } catch (_) {
+    return dateStr;
+  }
+}
+
+// ── Loading / error states ────────────────────────────────────────────────────
+function showLoading(on) {
+  const list = document.getElementById('historyList');
+  if (!list) return;
+  if (on) {
+    list.innerHTML = `<div style="color:#8A8578; font-size:14px; padding:20px 0; text-align:center;">
+      Loading history…
+    </div>`;
+  }
+}
+
+function showError(msg) {
+  const list = document.getElementById('historyList');
+  if (list) {
+    list.innerHTML = `<div style="color:#d97b5b; font-size:14px; padding:20px 0; text-align:center;">${msg}</div>`;
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init() {
+  await loadHistorySidebar();
+  await loadHistory();
+}
+
+init();
+
+
+
