@@ -14,7 +14,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -164,7 +165,8 @@ input {
   font-weight: 600;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   width: 100%;
   padding: 14px 16px;
   border: 1px solid #475569;
@@ -174,7 +176,12 @@ input {
   outline: none;
 }
 
-.form-group input:focus {
+.form-group select {
+  cursor: pointer;
+}
+
+.form-group input:focus,
+.form-group select:focus {
   border-color: #8b5cf6;
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
 }
@@ -190,6 +197,16 @@ input {
   border-radius: 10px;
   background: rgba(127, 29, 29, 0.25);
   color: #fca5a5;
+  font-size: 14px;
+}
+
+.success-message {
+  margin: 18px 0;
+  padding: 12px 15px;
+  border: 1px solid #166534;
+  border-radius: 10px;
+  background: rgba(22, 101, 52, 0.18);
+  color: #86efac;
   font-size: 14px;
 }
 
@@ -326,6 +343,17 @@ input {
   font-size: 24px;
 }
 
+.section-subtitle {
+  margin: -10px 0 20px;
+  color: #94a3b8;
+}
+
+.section-heading-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
 .feature-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -357,37 +385,276 @@ input {
   line-height: 1.5;
 }
 
-@media (max-width: 800px) {
-  .role-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .feature-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .welcome-card {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .dashboard-header {
-    padding: 0 20px;
-  }
+.dashboard-message {
+  padding: 25px;
+  border: 1px solid #1e293b;
+  border-radius: 16px;
+  background: #0f172a;
+  color: #94a3b8;
+  text-align: center;
 }
 
-@media (max-width: 500px) {
-  .login-card {
-    padding: 25px;
-  }
+.dashboard-message.compact {
+  padding: 15px;
+}
 
-  .brand-section h1 {
-    font-size: 38px;
-  }
+/* Medicine and Refill */
 
-  .feature-grid {
-    grid-template-columns: 1fr;
-  }
+.management-section {
+  margin-top: 45px;
+}
+
+.medicine-selector-card {
+  padding: 25px;
+  border: 1px solid #334155;
+  border-radius: 18px;
+  background: #0f172a;
+  display: grid;
+  grid-template-columns: 1fr 240px;
+  gap: 25px;
+  align-items: end;
+}
+
+.medicine-selector-card .form-group {
+  margin-bottom: 0;
+}
+
+.stock-summary {
+  min-height: 105px;
+  padding: 18px;
+  border: 1px solid #312e81;
+  border-radius: 14px;
+  background: rgba(49, 46, 129, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.stock-icon {
+  font-size: 35px;
+}
+
+.summary-label {
+  display: block;
+  color: #94a3b8;
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+.stock-number {
+  font-size: 28px;
+  margin-right: 7px;
+}
+
+.stock-unit {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.refill-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 18px;
+}
+
+.refill-card {
+  padding: 25px;
+  border: 1px solid #334155;
+  border-radius: 18px;
+  background: #0f172a;
+}
+
+.refill-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.refill-card-header span {
+  font-size: 27px;
+}
+
+.refill-card-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.refill-card > p {
+  color: #94a3b8;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.stock-form {
+  margin-top: 20px;
+}
+
+.primary-action-button,
+.notification-action-button {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #7c3aed;
+  border-radius: 9px;
+  background: #7c3aed;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.primary-action-button:hover:not(:disabled),
+.notification-action-button:hover:not(:disabled) {
+  background: #8b5cf6;
+}
+
+.primary-action-button:disabled,
+.notification-action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.refill-alert {
+  padding: 15px;
+  margin: 18px 0;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  font-size: 14px;
+}
+
+.refill-required {
+  border: 1px solid #92400e;
+  background: rgba(146, 64, 14, 0.18);
+  color: #fbbf24;
+}
+
+.refill-normal {
+  border: 1px solid #166534;
+  background: rgba(22, 101, 52, 0.18);
+  color: #86efac;
+}
+
+.prediction-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.prediction-item {
+  padding: 15px;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  background: #111827;
+}
+
+.prediction-item span {
+  display: block;
+  margin-bottom: 7px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.prediction-item strong {
+  font-size: 15px;
+  color: #e2e8f0;
+}
+
+.refill-notification-message {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.12);
+  color: #93c5fd;
+  font-size: 13px;
+}
+
+/* Adherence */
+
+.adherence-section {
+  margin-top: 45px;
+}
+
+.adherence-card {
+  padding: 25px;
+  border: 1px solid #334155;
+  border-radius: 18px;
+  background: #0f172a;
+}
+
+.adherence-main {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.adherence-circle {
+  width: 135px;
+  height: 135px;
+  flex-shrink: 0;
+  border: 8px solid #7c3aed;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.adherence-circle strong {
+  font-size: 28px;
+}
+
+.adherence-circle span {
+  margin-top: 3px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.adherence-description h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.adherence-description p {
+  margin: 0;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.adherence-stats {
+  margin-top: 25px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.adherence-stat {
+  padding: 18px;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  background: #111827;
+}
+
+.adherence-stat .stat-icon {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 22px;
+}
+
+.adherence-stat span:not(.stat-icon) {
+  display: block;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.adherence-stat strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 24px;
 }
 
 /* Reminders */
@@ -490,19 +757,7 @@ input {
   text-align: center;
 }
 
-@media (max-width: 900px) {
-  .reminder-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 600px) {
-  .reminder-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Medication History */
+/* History and Notifications */
 
 .history-section {
   margin-top: 45px;
@@ -587,18 +842,6 @@ input {
   text-align: center;
 }
 
-@media (max-width: 900px) {
-  .history-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 600px) {
-  .history-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* Reminder Actions */
 
 .reminder-actions {
@@ -644,8 +887,88 @@ input {
   background: rgba(59, 130, 246, 0.15);
 }
 
+/* Responsive */
+
+@media (max-width: 1000px) {
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .refill-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .medicine-selector-card {
+    grid-template-columns: 1fr;
+  }
+
+  .adherence-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .reminder-grid,
+  .history-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 800px) {
+  .role-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .welcome-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dashboard-header {
+    padding: 0 20px;
+  }
+
+  .adherence-main {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 @media (max-width: 600px) {
+  .reminder-grid,
+  .history-grid,
+  .feature-grid,
+  .adherence-stats,
+  .prediction-grid {
+    grid-template-columns: 1fr;
+  }
+
   .reminder-action-button {
     flex: 1 1 100%;
+  }
+
+  .login-card {
+    padding: 25px;
+  }
+
+  .brand-section h1 {
+    font-size: 38px;
+  }
+
+  .dashboard-content {
+    padding: 30px 18px;
+  }
+
+  .dashboard-header {
+    height: 65px;
+  }
+
+  .refill-alert {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

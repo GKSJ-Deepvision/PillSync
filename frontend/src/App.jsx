@@ -238,19 +238,45 @@ function Dashboard({ user, onLogout }) {
     useState(true)
   const [notificationError, setNotificationError] = useState('')
 
+  const [medicines, setMedicines] = useState([])
+  const [medicineLoading, setMedicineLoading] = useState(true)
+  const [medicineError, setMedicineError] = useState('')
+  const [selectedMedicineId, setSelectedMedicineId] = useState(null)
+
+  const [refillPrediction, setRefillPrediction] = useState(null)
+  const [refillLoading, setRefillLoading] = useState(false)
+  const [refillError, setRefillError] = useState('')
+
+  const [stockAmount, setStockAmount] = useState('')
+  const [stockLoading, setStockLoading] = useState(false)
+  const [stockMessage, setStockMessage] = useState('')
+
+  const [refillNotificationLoading, setRefillNotificationLoading] =
+    useState(false)
+  const [refillNotificationMessage, setRefillNotificationMessage] =
+    useState('')
+
+  const [adherence, setAdherence] = useState(null)
+  const [adherenceLoading, setAdherenceLoading] = useState(true)
+  const [adherenceError, setAdherenceError] = useState('')
+
   const [actionLoading, setActionLoading] = useState(null)
+
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('pillsync_token')
+
+    return {
+      Authorization: `Bearer ${token}`,
+    }
+  }
 
   const fetchReminders = async () => {
     try {
       setReminderLoading(true)
       setReminderError('')
 
-      const token = localStorage.getItem('pillsync_token')
-
       const response = await axios.get(`${API_URL}/reminders`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: getAuthHeaders(),
       })
 
       setReminders(response.data)
@@ -269,14 +295,10 @@ function Dashboard({ user, onLogout }) {
       setHistoryLoading(true)
       setHistoryError('')
 
-      const token = localStorage.getItem('pillsync_token')
-
       const response = await axios.get(
         `${API_URL}/medication-history`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: getAuthHeaders(),
         },
       )
 
@@ -296,14 +318,10 @@ function Dashboard({ user, onLogout }) {
       setNotificationLoading(true)
       setNotificationError('')
 
-      const token = localStorage.getItem('pillsync_token')
-
       const response = await axios.get(
         `${API_URL}/notifications`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: getAuthHeaders(),
         },
       )
 
@@ -318,12 +336,97 @@ function Dashboard({ user, onLogout }) {
     }
   }
 
+  const fetchMedicines = async () => {
+    try {
+      setMedicineLoading(true)
+      setMedicineError('')
+
+      const response = await axios.get(`${API_URL}/medicines`, {
+        headers: getAuthHeaders(),
+      })
+
+      const medicineList = response.data
+
+      setMedicines(medicineList)
+
+      if (medicineList.length > 0) {
+        setSelectedMedicineId((currentId) => {
+          const stillExists = medicineList.some(
+            (medicine) => medicine.id === currentId,
+          )
+
+          return stillExists ? currentId : medicineList[0].id
+        })
+      } else {
+        setSelectedMedicineId(null)
+        setRefillPrediction(null)
+      }
+    } catch (err) {
+      setMedicineError(
+        err.response?.data?.detail ||
+          'Unable to load medicines.',
+      )
+    } finally {
+      setMedicineLoading(false)
+    }
+  }
+
+  const fetchRefillPrediction = async (medicineId) => {
+    if (!medicineId) {
+      setRefillPrediction(null)
+      return
+    }
+
+    try {
+      setRefillLoading(true)
+      setRefillError('')
+
+      const response = await axios.get(
+        `${API_URL}/refill-predictions/${medicineId}`,
+        {
+          headers: getAuthHeaders(),
+        },
+      )
+
+      setRefillPrediction(response.data)
+    } catch (err) {
+      setRefillError(
+        err.response?.data?.detail ||
+          'Unable to load refill prediction.',
+      )
+      setRefillPrediction(null)
+    } finally {
+      setRefillLoading(false)
+    }
+  }
+
+  const fetchAdherence = async () => {
+    try {
+      setAdherenceLoading(true)
+      setAdherenceError('')
+
+      const response = await axios.get(
+        `${API_URL}/medication-history/adherence`,
+        {
+          headers: getAuthHeaders(),
+        },
+      )
+
+      setAdherence(response.data)
+    } catch (err) {
+      setAdherenceError(
+        err.response?.data?.detail ||
+          'Unable to load adherence summary.',
+      )
+    } finally {
+      setAdherenceLoading(false)
+    }
+  }
+
   const handleReminderAction = async (reminderId, action) => {
     try {
       setActionLoading(`${reminderId}-${action}`)
       setReminderError('')
-
-      const token = localStorage.getItem('pillsync_token')
 
       if (action === 'snooze') {
         const snoozedUntil = new Date(
@@ -334,9 +437,7 @@ function Dashboard({ user, onLogout }) {
           `${API_URL}/reminders/${reminderId}/snooze`,
           null,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: getAuthHeaders(),
             params: {
               snoozed_until: snoozedUntil,
             },
@@ -347,9 +448,7 @@ function Dashboard({ user, onLogout }) {
           `${API_URL}/reminders/${reminderId}/${action}`,
           null,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: getAuthHeaders(),
           },
         )
       }
@@ -358,7 +457,13 @@ function Dashboard({ user, onLogout }) {
         fetchReminders(),
         fetchMedicationHistory(),
         fetchNotifications(),
+        fetchMedicines(),
+        fetchAdherence(),
       ])
+
+      if (selectedMedicineId) {
+        await fetchRefillPrediction(selectedMedicineId)
+      }
     } catch (err) {
       setReminderError(
         err.response?.data?.detail ||
@@ -369,17 +474,119 @@ function Dashboard({ user, onLogout }) {
     }
   }
 
+  const handleMedicineChange = async (event) => {
+    const medicineId = Number(event.target.value)
+
+    setSelectedMedicineId(medicineId)
+    setStockMessage('')
+    setRefillNotificationMessage('')
+
+    await fetchRefillPrediction(medicineId)
+  }
+
+  const handleAddStock = async (event) => {
+    event.preventDefault()
+
+    const quantity = Number(stockAmount)
+
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+      setStockMessage('Enter a whole number greater than zero.')
+      return
+    }
+
+    if (!selectedMedicineId) {
+      setStockMessage('Please select a medicine first.')
+      return
+    }
+
+    try {
+      setStockLoading(true)
+      setStockMessage('')
+
+      const response = await axios.post(
+        `${API_URL}/medicines/${selectedMedicineId}/stock`,
+        {
+          quantity,
+        },
+        {
+          headers: getAuthHeaders(),
+        },
+      )
+
+      setStockMessage(
+        `Stock updated successfully. Current quantity: ${response.data.current_quantity}.`,
+      )
+
+      setStockAmount('')
+
+      await Promise.all([
+        fetchMedicines(),
+        fetchRefillPrediction(selectedMedicineId),
+      ])
+    } catch (err) {
+      setStockMessage(
+        err.response?.data?.detail ||
+          'Unable to update medicine stock.',
+      )
+    } finally {
+      setStockLoading(false)
+    }
+  }
+
+  const handleCreateRefillNotification = async () => {
+    if (!selectedMedicineId) {
+      setRefillNotificationMessage(
+        'Please select a medicine first.',
+      )
+      return
+    }
+
+    try {
+      setRefillNotificationLoading(true)
+      setRefillNotificationMessage('')
+
+      const response = await axios.post(
+        `${API_URL}/refill-predictions/${selectedMedicineId}/notification`,
+        null,
+        {
+          headers: getAuthHeaders(),
+        },
+      )
+
+      setRefillNotificationMessage(response.data.message)
+
+      await fetchNotifications()
+    } catch (err) {
+      setRefillNotificationMessage(
+        err.response?.data?.detail ||
+          'Unable to create refill notification.',
+      )
+    } finally {
+      setRefillNotificationLoading(false)
+    }
+  }
+
   useEffect(() => {
     if (user.role === 'patient') {
       fetchReminders()
       fetchMedicationHistory()
       fetchNotifications()
+      fetchMedicines()
+      fetchAdherence()
     } else {
       setReminderLoading(false)
       setHistoryLoading(false)
       setNotificationLoading(false)
+      setMedicineLoading(false)
+      setAdherenceLoading(false)
     }
   }, [user.role])
+
+  useEffect(() => {
+    if (selectedMedicineId && user.role === 'patient') {
+      fetchRefillPrediction(selectedMedicineId)
+    }
+  }, [selectedMedicineId, user.role])
 
   const dashboardData = {
     patient: {
@@ -423,6 +630,18 @@ function Dashboard({ user, onLogout }) {
   }
 
   const data = dashboardData[user.role]
+
+  const selectedMedicine = medicines.find(
+    (medicine) => medicine.id === selectedMedicineId,
+  )
+
+  const formatDate = (value) => {
+    if (!value) {
+      return 'Not available'
+    }
+
+    return new Date(`${value}T00:00:00`).toLocaleDateString()
+  }
 
   return (
     <div className="dashboard">
@@ -494,6 +713,356 @@ function Dashboard({ user, onLogout }) {
 
         {user.role === 'patient' && (
           <>
+            {/* ==================== MEDICINE & REFILL ==================== */}
+
+            <section className="management-section">
+              <div className="section-heading-row">
+                <div>
+                  <h2 className="section-title">
+                    Medicine & Refill Management
+                  </h2>
+
+                  <p className="section-subtitle">
+                    Monitor medicine stock and predict when a refill may be needed.
+                  </p>
+                </div>
+              </div>
+
+              {medicineLoading && (
+                <div className="dashboard-message">
+                  Loading medicines...
+                </div>
+              )}
+
+              {medicineError && (
+                <div className="error-message">
+                  {medicineError}
+                </div>
+              )}
+
+              {!medicineLoading &&
+                !medicineError &&
+                medicines.length === 0 && (
+                  <div className="dashboard-message">
+                    No medicines found.
+                  </div>
+                )}
+
+              {!medicineLoading &&
+                !medicineError &&
+                medicines.length > 0 && (
+                  <>
+                    <div className="medicine-selector-card">
+                      <div className="form-group">
+                        <label htmlFor="medicine-select">
+                          Select Medicine
+                        </label>
+
+                        <select
+                          id="medicine-select"
+                          value={selectedMedicineId || ''}
+                          onChange={handleMedicineChange}
+                        >
+                          {medicines.map((medicine) => (
+                            <option
+                              key={medicine.id}
+                              value={medicine.id}
+                            >
+                              {medicine.name}
+                              {medicine.dosage
+                                ? ` — ${medicine.dosage}`
+                                : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {selectedMedicine && (
+                        <div className="stock-summary">
+                          <div className="stock-icon">
+                            💊
+                          </div>
+
+                          <div>
+                            <span className="summary-label">
+                              Current Stock
+                            </span>
+
+                            <strong className="stock-number">
+                              {selectedMedicine.quantity}
+                            </strong>
+
+                            <span className="stock-unit">
+                              units
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {stockMessage && (
+                      <div className="success-message">
+                        {stockMessage}
+                      </div>
+                    )}
+
+                    <div className="refill-grid">
+                      <div className="refill-card">
+                        <div className="refill-card-header">
+                          <span>📦</span>
+                          <h3>Stock Management</h3>
+                        </div>
+
+                        <p>
+                          Add newly purchased medicine to your current stock.
+                        </p>
+
+                        <form
+                          onSubmit={handleAddStock}
+                          className="stock-form"
+                        >
+                          <div className="form-group">
+                            <label htmlFor="stock-amount">
+                              Quantity to Add
+                            </label>
+
+                            <input
+                              id="stock-amount"
+                              type="number"
+                              min="1"
+                              step="1"
+                              placeholder="Enter quantity"
+                              value={stockAmount}
+                              onChange={(event) =>
+                                setStockAmount(event.target.value)
+                              }
+                            />
+                          </div>
+
+                          <button
+                            type="submit"
+                            className="primary-action-button"
+                            disabled={stockLoading}
+                          >
+                            {stockLoading
+                              ? 'Updating...'
+                              : '+ Add Stock'}
+                          </button>
+                        </form>
+                      </div>
+
+                      <div className="refill-card">
+                        <div className="refill-card-header">
+                          <span>🔮</span>
+                          <h3>Refill Prediction</h3>
+                        </div>
+
+                        {refillLoading && (
+                          <div className="dashboard-message compact">
+                            Calculating prediction...
+                          </div>
+                        )}
+
+                        {refillError && (
+                          <div className="error-message">
+                            {refillError}
+                          </div>
+                        )}
+
+                        {!refillLoading &&
+                          !refillError &&
+                          refillPrediction && (
+                            <>
+                              <div
+                                className={`refill-alert ${
+                                  refillPrediction.refill_required
+                                    ? 'refill-required'
+                                    : 'refill-normal'
+                                }`}
+                              >
+                                <span>
+                                  {refillPrediction.refill_required
+                                    ? '⚠️ Refill Required'
+                                    : '✓ Stock Level OK'}
+                                </span>
+
+                                <strong>
+                                  {refillPrediction.estimated_days_remaining ===
+                                  null
+                                    ? 'No schedule'
+                                    : `${refillPrediction.estimated_days_remaining} days remaining`}
+                                </strong>
+                              </div>
+
+                              <div className="prediction-grid">
+                                <div className="prediction-item">
+                                  <span>
+                                    Current Stock
+                                  </span>
+                                  <strong>
+                                    {refillPrediction.current_stock}
+                                  </strong>
+                                </div>
+
+                                <div className="prediction-item">
+                                  <span>
+                                    Daily Consumption
+                                  </span>
+                                  <strong>
+                                    {refillPrediction.daily_consumption}
+                                  </strong>
+                                </div>
+
+                                <div className="prediction-item">
+                                  <span>
+                                    Depletion Date
+                                  </span>
+                                  <strong>
+                                    {formatDate(
+                                      refillPrediction.estimated_depletion_date,
+                                    )}
+                                  </strong>
+                                </div>
+
+                                <div className="prediction-item">
+                                  <span>
+                                    Recommended Refill
+                                  </span>
+                                  <strong>
+                                    {formatDate(
+                                      refillPrediction.recommended_refill_date,
+                                    )}
+                                  </strong>
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                className="notification-action-button"
+                                onClick={
+                                  handleCreateRefillNotification
+                                }
+                                disabled={
+                                  refillNotificationLoading ||
+                                  !refillPrediction.refill_required
+                                }
+                              >
+                                {refillNotificationLoading
+                                  ? 'Creating...'
+                                  : refillPrediction.refill_required
+                                    ? '🔔 Create Refill Notification'
+                                    : '✓ No Refill Needed'}
+                              </button>
+
+                              {refillNotificationMessage && (
+                                <div className="refill-notification-message">
+                                  {refillNotificationMessage}
+                                </div>
+                              )}
+                            </>
+                          )}
+                      </div>
+                    </div>
+                  </>
+                )}
+            </section>
+
+            {/* ==================== ADHERENCE ==================== */}
+
+            <section className="adherence-section">
+              <div className="section-heading-row">
+                <div>
+                  <h2 className="section-title">
+                    Medication Adherence
+                  </h2>
+
+                  <p className="section-subtitle">
+                    Track your medication-taking activity.
+                  </p>
+                </div>
+              </div>
+
+              {adherenceLoading && (
+                <div className="dashboard-message">
+                  Loading adherence summary...
+                </div>
+              )}
+
+              {adherenceError && (
+                <div className="error-message">
+                  {adherenceError}
+                </div>
+              )}
+
+              {!adherenceLoading &&
+                !adherenceError &&
+                adherence && (
+                  <div className="adherence-card">
+                    <div className="adherence-main">
+                      <div className="adherence-circle">
+                        <strong>
+                          {adherence.adherence_percentage}%
+                        </strong>
+                        <span>Adherence</span>
+                      </div>
+
+                      <div className="adherence-description">
+                        <h3>
+                          Medication Adherence Summary
+                        </h3>
+
+                        <p>
+                          This summary is calculated from your recorded
+                          medication history.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="adherence-stats">
+                      <div className="adherence-stat">
+                        <span className="stat-icon">
+                          💊
+                        </span>
+                        <span>Total Doses</span>
+                        <strong>
+                          {adherence.total_doses}
+                        </strong>
+                      </div>
+
+                      <div className="adherence-stat">
+                        <span className="stat-icon">
+                          ✓
+                        </span>
+                        <span>Taken</span>
+                        <strong>
+                          {adherence.taken_doses}
+                        </strong>
+                      </div>
+
+                      <div className="adherence-stat">
+                        <span className="stat-icon">
+                          ✕
+                        </span>
+                        <span>Missed</span>
+                        <strong>
+                          {adherence.missed_doses}
+                        </strong>
+                      </div>
+
+                      <div className="adherence-stat">
+                        <span className="stat-icon">
+                          ⏰
+                        </span>
+                        <span>Snoozed</span>
+                        <strong>
+                          {adherence.snoozed_doses}
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+                )}
+            </section>
+
             {/* ==================== REMINDERS ==================== */}
 
             <section className="reminders-section">
@@ -689,7 +1258,7 @@ function Dashboard({ user, onLogout }) {
                   </h2>
 
                   <p className="history-subtitle">
-                    View your medication reminder notifications.
+                    View your medication and refill notifications.
                   </p>
                 </div>
               </div>
