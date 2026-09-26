@@ -14,6 +14,7 @@ from app.api.medication_history import router as medication_history_router
 from app.api.notification import router as notification_router
 from app.api.refill_prediction import router as refill_prediction_router
 from app.api.stock import router as stock_router
+from app.api.ocr import router as ocr_router
 from app.core.config import settings
 from app.services.reminder_scheduler import (
     start_scheduler,
@@ -66,6 +67,7 @@ app.include_router(medication_history_router)
 app.include_router(notification_router)
 app.include_router(refill_prediction_router)
 app.include_router(stock_router)
+app.include_router(ocr_router)
 
 
 @app.get("/")
