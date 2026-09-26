@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from datetime import date, datetime, time, timedelta
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_user
@@ -6,7 +8,11 @@ from app.db.session import get_db
 from app.models.medicine import Medicine
 from app.models.medication_history import MedicationHistory
 from app.models.user import User
-from app.schemas.adherence import AdherenceResponse
+from app.schemas.adherence import (
+    AdherenceResponse,
+    AdherenceTrendResponse,
+    DailyAdherenceResponse,
+)
 from app.schemas.medication_history import MedicationHistoryResponse
 
 
@@ -117,6 +123,186 @@ def get_adherence_summary(
         "snoozed_doses": snoozed_doses,
         "adherence_percentage": adherence_percentage,
     }
+
+
+def build_daily_adherence(
+    history_records: list[MedicationHistory],
+    start_date: date,
+    end_date: date,
+) -> list[DailyAdherenceResponse]:
+    daily_data = {}
+
+    current_date = start_date
+
+    while current_date <= end_date:
+        daily_data[current_date] = {
+            "date": current_date,
+            "total_doses": 0,
+            "taken_doses": 0,
+            "missed_doses": 0,
+            "snoozed_doses": 0,
+        }
+
+        current_date += timedelta(days=1)
+
+    for history in history_records:
+        scheduled_date = history.scheduled_time.date()
+
+        if scheduled_date < start_date or scheduled_date > end_date:
+            continue
+
+        daily_data[scheduled_date]["total_doses"] += 1
+
+        if history.status == "taken":
+            daily_data[scheduled_date]["taken_doses"] += 1
+        elif history.status == "missed":
+            daily_data[scheduled_date]["missed_doses"] += 1
+        elif history.status == "snoozed":
+            daily_data[scheduled_date]["snoozed_doses"] += 1
+
+    daily_history = []
+
+    for current_date in sorted(daily_data):
+        data = daily_data[current_date]
+
+        if data["total_doses"] == 0:
+            adherence_percentage = 0.0
+        else:
+            adherence_percentage = round(
+                (
+                    data["taken_doses"]
+                    / data["total_doses"]
+                )
+                * 100,
+                2,
+            )
+
+        daily_history.append(
+            DailyAdherenceResponse(
+                date=data["date"],
+                total_doses=data["total_doses"],
+                taken_doses=data["taken_doses"],
+                missed_doses=data["missed_doses"],
+                snoozed_doses=data["snoozed_doses"],
+                adherence_percentage=adherence_percentage,
+            )
+        )
+
+    return daily_history
+
+
+@router.get(
+    "/adherence/daily",
+    response_model=list[DailyAdherenceResponse],
+)
+def get_daily_adherence(
+    days: int = Query(
+        default=7,
+        ge=1,
+        le=90,
+        description="Number of days to include.",
+    ),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    end_date = date.today()
+    start_date = end_date - timedelta(days=days - 1)
+
+    history_records = (
+        db.query(MedicationHistory)
+        .join(
+            Medicine,
+            MedicationHistory.medicine_id == Medicine.id,
+        )
+        .filter(
+            MedicationHistory.patient_id == current_user.id,
+            Medicine.patient_id == current_user.id,
+            MedicationHistory.scheduled_time >= datetime.combine(
+                start_date,
+                time.min,
+            ),
+            MedicationHistory.scheduled_time <= datetime.combine(
+                end_date,
+                time.max,
+            ),
+        )
+        .all()
+    )
+
+    return build_daily_adherence(
+        history_records,
+        start_date,
+        end_date,
+    )
+
+
+@router.get(
+    "/adherence/trend",
+    response_model=AdherenceTrendResponse,
+)
+def get_adherence_trend(
+    days: int = Query(
+        default=7,
+        ge=1,
+        le=90,
+        description="Number of days to include.",
+    ),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    end_date = date.today()
+    start_date = end_date - timedelta(days=days - 1)
+
+    history_records = (
+        db.query(MedicationHistory)
+        .join(
+            Medicine,
+            MedicationHistory.medicine_id == Medicine.id,
+        )
+        .filter(
+            MedicationHistory.patient_id == current_user.id,
+            Medicine.patient_id == current_user.id,
+            MedicationHistory.scheduled_time >= datetime.combine(
+                start_date,
+                time.min,
+            ),
+            MedicationHistory.scheduled_time <= datetime.combine(
+                end_date,
+                time.max,
+            ),
+        )
+        .all()
+    )
+
+    daily_history = build_daily_adherence(
+        history_records,
+        start_date,
+        end_date,
+    )
+
+    days_with_doses = [
+        day
+        for day in daily_history
+        if day.total_doses > 0
+    ]
+
+    if not days_with_doses:
+        average_adherence_percentage = 0.0
+    else:
+        average_adherence_percentage = round(
+            sum(
+                day.adherence_percentage
+                for day in days_with_doses
+            )
+            / len(days_with_doses),
+            2,
+        )
+
+    return AdherenceTrendResponse(
+        period_days=days,
+        average_adherence_percentage=average_adherence_percentage,
+        daily_history=daily_history,
+    )
 
 
 @router.get(
