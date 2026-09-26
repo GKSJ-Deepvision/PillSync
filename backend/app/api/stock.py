@@ -7,7 +7,6 @@ from app.models.medicine import Medicine
 from app.models.user import User
 from app.schemas.stock import StockResponse, StockUpdate
 
-
 router = APIRouter(
     prefix="/medicines",
     tags=["Medicine Stock"],

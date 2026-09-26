@@ -1,8 +1,8 @@
 from app.services.medicine_extraction import (
+    extract_dosage,
     extract_frequency,
     extract_medicine_information,
     extract_quantity,
-    extract_dosage,
 )
 
 

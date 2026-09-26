@@ -7,19 +7,19 @@ Context API, Firebase Cloud Messaging for push, Jest + React Testing Library.
 
 ## Layout
 
-| Path | Purpose |
-|---|---|
-| `src/api/` | Axios instance, interceptors, one module per backend resource |
-| `src/features/` | One folder per spec module (auth, medications, ocr, reminders, adherence, refills, notifications, analytics, caregiver, admin) |
-| `src/components/` | Reusable UI — `common/`, `layout/`, `charts/` |
-| `src/pages/` | Route-level screens composed from features |
-| `src/routes/` | Router setup and role-protected routes |
-| `src/store/` | Redux store and slices (skip if you use Context) |
-| `src/context/` | React contexts (auth, theme, notifications) |
-| `src/hooks/` | Shared custom hooks |
-| `src/utils/` | Formatters, date helpers, validators |
-| `src/styles/` | Tailwind entry CSS and design tokens |
-| `tests/` | Cross-cutting `unit/` and `integration/` tests |
+| Path              | Purpose                                                                                                                        |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `src/api/`        | Axios instance, interceptors, one module per backend resource                                                                  |
+| `src/features/`   | One folder per spec module (auth, medications, ocr, reminders, adherence, refills, notifications, analytics, caregiver, admin) |
+| `src/components/` | Reusable UI — `common/`, `layout/`, `charts/`                                                                                  |
+| `src/pages/`      | Route-level screens composed from features                                                                                     |
+| `src/routes/`     | Router setup and role-protected routes                                                                                         |
+| `src/store/`      | Redux store and slices (skip if you use Context)                                                                               |
+| `src/context/`    | React contexts (auth, theme, notifications)                                                                                    |
+| `src/hooks/`      | Shared custom hooks                                                                                                            |
+| `src/utils/`      | Formatters, date helpers, validators                                                                                           |
+| `src/styles/`     | Tailwind entry CSS and design tokens                                                                                           |
+| `tests/`          | Cross-cutting `unit/` and `integration/` tests                                                                                 |
 
 ## Scaffolding (do this once, on your own branch)
 

@@ -1,28 +1,28 @@
-import { useEffect, useState } from 'react'
-import axios from 'axios'
-import './App.css'
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import './App.css';
 
-const API_URL = 'http://127.0.0.1:8000'
+const API_URL = 'http://127.0.0.1:8000';
 
 function App() {
-  const [role, setRole] = useState('patient')
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [role, setRole] = useState('patient');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (event) => {
-    event.preventDefault()
+    event.preventDefault();
 
-    setLoading(true)
-    setError('')
+    setLoading(true);
+    setError('');
 
     try {
-      const formData = new URLSearchParams()
+      const formData = new URLSearchParams();
 
-      formData.append('username', username)
-      formData.append('password', password)
+      formData.append('username', username);
+      formData.append('password', password);
 
       const loginResponse = await axios.post(
         `${API_URL}/auth/login`,
@@ -32,54 +32,51 @@ function App() {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
         },
-      )
+      );
 
-      const token = loginResponse.data.access_token
+      const token = loginResponse.data.access_token;
 
       const userResponse = await axios.get(`${API_URL}/auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
+      });
 
-      const loggedInUser = userResponse.data
+      const loggedInUser = userResponse.data;
 
       if (loggedInUser.role !== role) {
         setError(
           `This account belongs to the ${loggedInUser.role} role. Please select the correct role.`,
-        )
-        return
+        );
+        return;
       }
 
-      localStorage.setItem('pillsync_token', token)
-      localStorage.setItem(
-        'pillsync_user',
-        JSON.stringify(loggedInUser),
-      )
+      localStorage.setItem('pillsync_token', token);
+      localStorage.setItem('pillsync_user', JSON.stringify(loggedInUser));
 
-      setUser(loggedInUser)
+      setUser(loggedInUser);
     } catch (err) {
       setError(
         err.response?.data?.detail ||
           'Login failed. Please check your username and password.',
-      )
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleLogout = () => {
-    localStorage.removeItem('pillsync_token')
-    localStorage.removeItem('pillsync_user')
+    localStorage.removeItem('pillsync_token');
+    localStorage.removeItem('pillsync_user');
 
-    setUser(null)
-    setUsername('')
-    setPassword('')
-    setError('')
-  }
+    setUser(null);
+    setUsername('');
+    setPassword('');
+    setError('');
+  };
 
   if (user) {
-    return <Dashboard user={user} onLogout={handleLogout} />
+    return <Dashboard user={user} onLogout={handleLogout} />;
   }
 
   return (
@@ -92,8 +89,7 @@ function App() {
 
           <p>
             Intelligent Medicine Reminder
-            <br />
-            & Medication Tracking Platform
+            <br />& Medication Tracking Platform
           </p>
         </div>
 
@@ -101,26 +97,20 @@ function App() {
           <div className="role-section">
             <h2>Welcome to PillSync</h2>
 
-            <p className="subtitle">
-              Select your role to continue
-            </p>
+            <p className="subtitle">Select your role to continue</p>
 
             <div className="role-grid">
               <button
                 type="button"
-                className={`role-card ${
-                  role === 'patient' ? 'selected' : ''
-                }`}
+                className={`role-card ${role === 'patient' ? 'selected' : ''}`}
                 onClick={() => {
-                  setRole('patient')
-                  setError('')
+                  setRole('patient');
+                  setError('');
                 }}
               >
                 <span className="role-icon">👤</span>
                 <span className="role-name">Patient</span>
-                <span className="role-description">
-                  Manage your medication
-                </span>
+                <span className="role-description">Manage your medication</span>
               </button>
 
               <button
@@ -129,32 +119,26 @@ function App() {
                   role === 'caregiver' ? 'selected' : ''
                 }`}
                 onClick={() => {
-                  setRole('caregiver')
-                  setError('')
+                  setRole('caregiver');
+                  setError('');
                 }}
               >
                 <span className="role-icon">🩺</span>
                 <span className="role-name">Caregiver</span>
-                <span className="role-description">
-                  Monitor patients
-                </span>
+                <span className="role-description">Monitor patients</span>
               </button>
 
               <button
                 type="button"
-                className={`role-card ${
-                  role === 'admin' ? 'selected' : ''
-                }`}
+                className={`role-card ${role === 'admin' ? 'selected' : ''}`}
                 onClick={() => {
-                  setRole('admin')
-                  setError('')
+                  setRole('admin');
+                  setError('');
                 }}
               >
                 <span className="role-icon">⚙️</span>
                 <span className="role-name">Admin</span>
-                <span className="role-description">
-                  Manage the platform
-                </span>
+                <span className="role-description">Manage the platform</span>
               </button>
             </div>
           </div>
@@ -170,9 +154,7 @@ function App() {
                 type="text"
                 placeholder="Enter your username"
                 value={username}
-                onChange={(event) =>
-                  setUsername(event.target.value)
-                }
+                onChange={(event) => setUsername(event.target.value)}
                 required
               />
             </div>
@@ -185,35 +167,21 @@ function App() {
                 type="password"
                 placeholder="Enter your password"
                 value={password}
-                onChange={(event) =>
-                  setPassword(event.target.value)
-                }
+                onChange={(event) => setPassword(event.target.value)}
                 required
               />
             </div>
 
-            {error && (
-              <div className="error-message">
-                {error}
-              </div>
-            )}
+            {error && <div className="error-message">{error}</div>}
 
-            <button
-              type="submit"
-              className="login-button"
-              disabled={loading}
-            >
+            <button type="submit" className="login-button" disabled={loading}>
               {loading
                 ? 'Signing in...'
-                : `Login as ${
-                    role.charAt(0).toUpperCase() + role.slice(1)
-                  }`}
+                : `Login as ${role.charAt(0).toUpperCase() + role.slice(1)}`}
             </button>
           </form>
 
-          <p className="security-note">
-            🔒 Secure role-based authentication
-          </p>
+          <p className="security-note">🔒 Secure role-based authentication</p>
         </div>
 
         <p className="footer">
@@ -221,266 +189,247 @@ function App() {
         </p>
       </div>
     </div>
-  )
+  );
 }
 
 function Dashboard({ user, onLogout }) {
-  const [reminders, setReminders] = useState([])
-  const [reminderLoading, setReminderLoading] = useState(true)
-  const [reminderError, setReminderError] = useState('')
+  const [reminders, setReminders] = useState([]);
+  const [reminderLoading, setReminderLoading] = useState(true);
+  const [reminderError, setReminderError] = useState('');
 
-  const [medicationHistory, setMedicationHistory] = useState([])
-  const [historyLoading, setHistoryLoading] = useState(true)
-  const [historyError, setHistoryError] = useState('')
+  const [medicationHistory, setMedicationHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState('');
 
-  const [notifications, setNotifications] = useState([])
-  const [notificationLoading, setNotificationLoading] =
-    useState(true)
-  const [notificationError, setNotificationError] = useState('')
+  const [notifications, setNotifications] = useState([]);
+  const [notificationLoading, setNotificationLoading] = useState(true);
+  const [notificationError, setNotificationError] = useState('');
 
-  const [medicines, setMedicines] = useState([])
-  const [medicineLoading, setMedicineLoading] = useState(true)
-  const [medicineError, setMedicineError] = useState('')
-  const [selectedMedicineId, setSelectedMedicineId] = useState(null)
+  const [medicines, setMedicines] = useState([]);
+  const [medicineLoading, setMedicineLoading] = useState(true);
+  const [medicineError, setMedicineError] = useState('');
+  const [selectedMedicineId, setSelectedMedicineId] = useState(null);
 
-  const [refillPrediction, setRefillPrediction] = useState(null)
-  const [refillLoading, setRefillLoading] = useState(false)
-  const [refillError, setRefillError] = useState('')
+  const [refillPrediction, setRefillPrediction] = useState(null);
+  const [refillLoading, setRefillLoading] = useState(false);
+  const [refillError, setRefillError] = useState('');
 
-  const [stockAmount, setStockAmount] = useState('')
-  const [stockLoading, setStockLoading] = useState(false)
-  const [stockMessage, setStockMessage] = useState('')
+  const [stockAmount, setStockAmount] = useState('');
+  const [stockLoading, setStockLoading] = useState(false);
+  const [stockMessage, setStockMessage] = useState('');
 
   const [refillNotificationLoading, setRefillNotificationLoading] =
-    useState(false)
+    useState(false);
   const [refillNotificationMessage, setRefillNotificationMessage] =
-    useState('')
+    useState('');
 
-  const [adherence, setAdherence] = useState(null)
-  const [adherenceLoading, setAdherenceLoading] = useState(true)
-  const [adherenceError, setAdherenceError] = useState('')
-  const [adherenceTrend, setAdherenceTrend] = useState(null)
-  const [adherenceTrendLoading, setAdherenceTrendLoading] = useState(true)
-  const [adherenceTrendError, setAdherenceTrendError] = useState('')
+  const [adherence, setAdherence] = useState(null);
+  const [adherenceLoading, setAdherenceLoading] = useState(true);
+  const [adherenceError, setAdherenceError] = useState('');
+  const [adherenceTrend, setAdherenceTrend] = useState(null);
+  const [adherenceTrendLoading, setAdherenceTrendLoading] = useState(true);
+  const [adherenceTrendError, setAdherenceTrendError] = useState('');
 
-  const [actionLoading, setActionLoading] = useState(null)
+  const [actionLoading, setActionLoading] = useState(null);
 
   const getAuthHeaders = () => {
-    const token = localStorage.getItem('pillsync_token')
+    const token = localStorage.getItem('pillsync_token');
 
     return {
       Authorization: `Bearer ${token}`,
-    }
-  }
+    };
+  };
 
   const fetchReminders = async () => {
     try {
-      setReminderLoading(true)
-      setReminderError('')
+      setReminderLoading(true);
+      setReminderError('');
 
       const response = await axios.get(`${API_URL}/reminders`, {
         headers: getAuthHeaders(),
-      })
+      });
 
-      setReminders(response.data)
+      setReminders(response.data);
     } catch (err) {
       setReminderError(
-        err.response?.data?.detail ||
-          'Unable to load reminders.',
-      )
+        err.response?.data?.detail || 'Unable to load reminders.',
+      );
     } finally {
-      setReminderLoading(false)
+      setReminderLoading(false);
     }
-  }
+  };
 
   const fetchMedicationHistory = async () => {
     try {
-      setHistoryLoading(true)
-      setHistoryError('')
+      setHistoryLoading(true);
+      setHistoryError('');
 
-      const response = await axios.get(
-        `${API_URL}/medication-history`,
-        {
-          headers: getAuthHeaders(),
-        },
-      )
+      const response = await axios.get(`${API_URL}/medication-history`, {
+        headers: getAuthHeaders(),
+      });
 
-      setMedicationHistory(response.data)
+      setMedicationHistory(response.data);
     } catch (err) {
       setHistoryError(
-        err.response?.data?.detail ||
-          'Unable to load medication history.',
-      )
+        err.response?.data?.detail || 'Unable to load medication history.',
+      );
     } finally {
-      setHistoryLoading(false)
+      setHistoryLoading(false);
     }
-  }
+  };
 
   const fetchNotifications = async () => {
     try {
-      setNotificationLoading(true)
-      setNotificationError('')
+      setNotificationLoading(true);
+      setNotificationError('');
 
-      const response = await axios.get(
-        `${API_URL}/notifications`,
-        {
-          headers: getAuthHeaders(),
-        },
-      )
+      const response = await axios.get(`${API_URL}/notifications`, {
+        headers: getAuthHeaders(),
+      });
 
-      setNotifications(response.data)
+      setNotifications(response.data);
     } catch (err) {
       setNotificationError(
-        err.response?.data?.detail ||
-          'Unable to load notifications.',
-      )
+        err.response?.data?.detail || 'Unable to load notifications.',
+      );
     } finally {
-      setNotificationLoading(false)
+      setNotificationLoading(false);
     }
-  }
+  };
 
   const fetchMedicines = async () => {
     try {
-      setMedicineLoading(true)
-      setMedicineError('')
+      setMedicineLoading(true);
+      setMedicineError('');
 
       const response = await axios.get(`${API_URL}/medicines`, {
         headers: getAuthHeaders(),
-      })
+      });
 
-      const medicineList = response.data
+      const medicineList = response.data;
 
-      setMedicines(medicineList)
+      setMedicines(medicineList);
 
       if (medicineList.length > 0) {
         setSelectedMedicineId((currentId) => {
           const stillExists = medicineList.some(
             (medicine) => medicine.id === currentId,
-          )
+          );
 
-          return stillExists ? currentId : medicineList[0].id
-        })
+          return stillExists ? currentId : medicineList[0].id;
+        });
       } else {
-        setSelectedMedicineId(null)
-        setRefillPrediction(null)
+        setSelectedMedicineId(null);
+        setRefillPrediction(null);
       }
     } catch (err) {
       setMedicineError(
-        err.response?.data?.detail ||
-          'Unable to load medicines.',
-      )
+        err.response?.data?.detail || 'Unable to load medicines.',
+      );
     } finally {
-      setMedicineLoading(false)
+      setMedicineLoading(false);
     }
-  }
+  };
 
   const fetchRefillPrediction = async (medicineId) => {
     if (!medicineId) {
-      setRefillPrediction(null)
-      return
+      setRefillPrediction(null);
+      return;
     }
 
     try {
-      setRefillLoading(true)
-      setRefillError('')
+      setRefillLoading(true);
+      setRefillError('');
 
       const response = await axios.get(
         `${API_URL}/refill-predictions/${medicineId}`,
         {
           headers: getAuthHeaders(),
         },
-      )
+      );
 
-      setRefillPrediction(response.data)
+      setRefillPrediction(response.data);
     } catch (err) {
       setRefillError(
-        err.response?.data?.detail ||
-          'Unable to load refill prediction.',
-      )
-      setRefillPrediction(null)
+        err.response?.data?.detail || 'Unable to load refill prediction.',
+      );
+      setRefillPrediction(null);
     } finally {
-      setRefillLoading(false)
+      setRefillLoading(false);
     }
-  }
+  };
 
   const fetchAdherence = async () => {
     try {
-      setAdherenceLoading(true)
-      setAdherenceError('')
+      setAdherenceLoading(true);
+      setAdherenceError('');
 
       const response = await axios.get(
         `${API_URL}/medication-history/adherence`,
         {
           headers: getAuthHeaders(),
         },
-      )
+      );
 
-      setAdherence(response.data)
+      setAdherence(response.data);
     } catch (err) {
       setAdherenceError(
-        err.response?.data?.detail ||
-          'Unable to load adherence summary.',
-      )
+        err.response?.data?.detail || 'Unable to load adherence summary.',
+      );
     } finally {
-      setAdherenceLoading(false)
+      setAdherenceLoading(false);
     }
-  }
-
+  };
 
   const fetchAdherenceTrend = async () => {
-  try {
-    setAdherenceTrendLoading(true)
-    setAdherenceTrendError('')
+    try {
+      setAdherenceTrendLoading(true);
+      setAdherenceTrendError('');
 
-    const response = await axios.get(
-      `${API_URL}/medication-history/adherence/trend`,
-      {
-        headers: getAuthHeaders(),
-        params: {
-          days: 7,
+      const response = await axios.get(
+        `${API_URL}/medication-history/adherence/trend`,
+        {
+          headers: getAuthHeaders(),
+          params: {
+            days: 7,
+          },
         },
-      },
-    )
+      );
 
-    setAdherenceTrend(response.data)
-  } catch (err) {
-    setAdherenceTrendError(
-      err.response?.data?.detail ||
-        'Unable to load adherence analytics.',
-    )
-  } finally {
-    setAdherenceTrendLoading(false)
-  }
-}
+      setAdherenceTrend(response.data);
+    } catch (err) {
+      setAdherenceTrendError(
+        err.response?.data?.detail || 'Unable to load adherence analytics.',
+      );
+    } finally {
+      setAdherenceTrendLoading(false);
+    }
+  };
 
   const handleReminderAction = async (reminderId, action) => {
     try {
-      setActionLoading(`${reminderId}-${action}`)
-      setReminderError('')
+      setActionLoading(`${reminderId}-${action}`);
+      setReminderError('');
 
       if (action === 'snooze') {
+        // This runs from an event handler, not during render.
+        // The React purity rule is intentionally disabled for this
+        // time calculation because snooze duration must use current time.
         const snoozedUntil = new Date(
+          // eslint-disable-next-line react-hooks/purity
           Date.now() + 30 * 60 * 1000,
-        ).toISOString()
+        ).toISOString();
 
-        await axios.post(
-          `${API_URL}/reminders/${reminderId}/snooze`,
-          null,
-          {
-            headers: getAuthHeaders(),
-            params: {
-              snoozed_until: snoozedUntil,
-            },
+        await axios.post(`${API_URL}/reminders/${reminderId}/snooze`, null, {
+          headers: getAuthHeaders(),
+          params: {
+            snoozed_until: snoozedUntil,
           },
-        )
+        });
       } else {
-        await axios.post(
-          `${API_URL}/reminders/${reminderId}/${action}`,
-          null,
-          {
-            headers: getAuthHeaders(),
-          },
-        )
+        await axios.post(`${API_URL}/reminders/${reminderId}/${action}`, null, {
+          headers: getAuthHeaders(),
+        });
       }
 
       await Promise.all([
@@ -490,49 +439,48 @@ function Dashboard({ user, onLogout }) {
         fetchMedicines(),
         fetchAdherence(),
         fetchAdherenceTrend(),
-      ])
+      ]);
 
       if (selectedMedicineId) {
-        await fetchRefillPrediction(selectedMedicineId)
+        await fetchRefillPrediction(selectedMedicineId);
       }
     } catch (err) {
       setReminderError(
-        err.response?.data?.detail ||
-          'Unable to update the reminder.',
-      )
+        err.response?.data?.detail || 'Unable to update the reminder.',
+      );
     } finally {
-      setActionLoading(null)
+      setActionLoading(null);
     }
-  }
+  };
 
   const handleMedicineChange = async (event) => {
-    const medicineId = Number(event.target.value)
+    const medicineId = Number(event.target.value);
 
-    setSelectedMedicineId(medicineId)
-    setStockMessage('')
-    setRefillNotificationMessage('')
+    setSelectedMedicineId(medicineId);
+    setStockMessage('');
+    setRefillNotificationMessage('');
 
-    await fetchRefillPrediction(medicineId)
-  }
+    await fetchRefillPrediction(medicineId);
+  };
 
   const handleAddStock = async (event) => {
-    event.preventDefault()
+    event.preventDefault();
 
-    const quantity = Number(stockAmount)
+    const quantity = Number(stockAmount);
 
     if (!Number.isInteger(quantity) || quantity <= 0) {
-      setStockMessage('Enter a whole number greater than zero.')
-      return
+      setStockMessage('Enter a whole number greater than zero.');
+      return;
     }
 
     if (!selectedMedicineId) {
-      setStockMessage('Please select a medicine first.')
-      return
+      setStockMessage('Please select a medicine first.');
+      return;
     }
 
     try {
-      setStockLoading(true)
-      setStockMessage('')
+      setStockLoading(true);
+      setStockMessage('');
 
       const response = await axios.post(
         `${API_URL}/medicines/${selectedMedicineId}/stock`,
@@ -542,39 +490,36 @@ function Dashboard({ user, onLogout }) {
         {
           headers: getAuthHeaders(),
         },
-      )
+      );
 
       setStockMessage(
         `Stock updated successfully. Current quantity: ${response.data.current_quantity}.`,
-      )
+      );
 
-      setStockAmount('')
+      setStockAmount('');
 
       await Promise.all([
         fetchMedicines(),
         fetchRefillPrediction(selectedMedicineId),
-      ])
+      ]);
     } catch (err) {
       setStockMessage(
-        err.response?.data?.detail ||
-          'Unable to update medicine stock.',
-      )
+        err.response?.data?.detail || 'Unable to update medicine stock.',
+      );
     } finally {
-      setStockLoading(false)
+      setStockLoading(false);
     }
-  }
+  };
 
   const handleCreateRefillNotification = async () => {
     if (!selectedMedicineId) {
-      setRefillNotificationMessage(
-        'Please select a medicine first.',
-      )
-      return
+      setRefillNotificationMessage('Please select a medicine first.');
+      return;
     }
 
     try {
-      setRefillNotificationLoading(true)
-      setRefillNotificationMessage('')
+      setRefillNotificationLoading(true);
+      setRefillNotificationMessage('');
 
       const response = await axios.post(
         `${API_URL}/refill-predictions/${selectedMedicineId}/notification`,
@@ -582,51 +527,63 @@ function Dashboard({ user, onLogout }) {
         {
           headers: getAuthHeaders(),
         },
-      )
+      );
 
-      setRefillNotificationMessage(response.data.message)
+      setRefillNotificationMessage(response.data.message);
 
-      await fetchNotifications()
+      await fetchNotifications();
     } catch (err) {
       setRefillNotificationMessage(
-        err.response?.data?.detail ||
-          'Unable to create refill notification.',
-      )
+        err.response?.data?.detail || 'Unable to create refill notification.',
+      );
     } finally {
-      setRefillNotificationLoading(false)
+      setRefillNotificationLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (user.role === 'patient') {
-      fetchReminders()
-      fetchMedicationHistory()
-      fetchNotifications()
-      fetchMedicines()
-      fetchAdherence()
-      fetchAdherenceTrend()
+      // These functions perform async API requests and update state when
+      // the requests complete. The effect intentionally triggers the
+      // initial dashboard data load when the user's role changes.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchReminders();
+      fetchMedicationHistory();
+      fetchNotifications();
+      fetchMedicines();
+      fetchAdherence();
+      fetchAdherenceTrend();
     } else {
-      setReminderLoading(false)
-      setHistoryLoading(false)
-      setNotificationLoading(false)
-      setMedicineLoading(false)
-      setAdherenceLoading(false)
-      setAdherenceTrendLoading(false)
+      setReminderLoading(false);
+      setHistoryLoading(false);
+      setNotificationLoading(false);
+      setMedicineLoading(false);
+      setAdherenceLoading(false);
+      setAdherenceTrendLoading(false);
     }
-  }, [user.role])
+    // The fetch functions are intentionally omitted because they are
+    // recreated on each render and including them would retrigger the
+    // effect continuously. The effect is scoped to the role change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.role]);
 
   useEffect(() => {
     if (selectedMedicineId && user.role === 'patient') {
-      fetchRefillPrediction(selectedMedicineId)
+      // This is an intentional async data fetch triggered by the selected
+      // medicine changing. State updates happen after the request completes.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchRefillPrediction(selectedMedicineId);
     }
-  }, [selectedMedicineId, user.role])
+    // The fetch function is recreated on render, so it is intentionally
+    // omitted from this dependency list.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMedicineId, user.role]);
 
   const dashboardData = {
     patient: {
       icon: '👤',
       title: 'Patient Dashboard',
-      description:
-        'Manage your profile and medication journey.',
+      description: 'Manage your profile and medication journey.',
       features: [
         'My Profile',
         'Medicine Management',
@@ -638,8 +595,7 @@ function Dashboard({ user, onLogout }) {
     caregiver: {
       icon: '🩺',
       title: 'Caregiver Dashboard',
-      description:
-        'Monitor assigned patients and medication activities.',
+      description: 'Monitor assigned patients and medication activities.',
       features: [
         'Assigned Patients',
         'Medication Monitoring',
@@ -651,8 +607,7 @@ function Dashboard({ user, onLogout }) {
     admin: {
       icon: '⚙️',
       title: 'Admin Dashboard',
-      description:
-        'Manage users, caregivers and platform operations.',
+      description: 'Manage users, caregivers and platform operations.',
       features: [
         'User Management',
         'Patient Management',
@@ -660,21 +615,21 @@ function Dashboard({ user, onLogout }) {
         'Platform Analytics',
       ],
     },
-  }
+  };
 
-  const data = dashboardData[user.role]
+  const data = dashboardData[user.role];
 
   const selectedMedicine = medicines.find(
     (medicine) => medicine.id === selectedMedicineId,
-  )
+  );
 
   const formatDate = (value) => {
     if (!value) {
-      return 'Not available'
+      return 'Not available';
     }
 
-    return new Date(`${value}T00:00:00`).toLocaleDateString()
-  }
+    return new Date(`${value}T00:00:00`).toLocaleDateString();
+  };
 
   return (
     <div className="dashboard">
@@ -684,48 +639,31 @@ function Dashboard({ user, onLogout }) {
           <strong>PillSync</strong>
         </div>
 
-        <button
-          type="button"
-          className="logout-button"
-          onClick={onLogout}
-        >
+        <button type="button" className="logout-button" onClick={onLogout}>
           Logout
         </button>
       </header>
 
       <main className="dashboard-content">
         <div className="welcome-card">
-          <div className="dashboard-icon">
-            {data.icon}
-          </div>
+          <div className="dashboard-icon">{data.icon}</div>
 
           <div>
-            <p className="welcome-label">
-              Welcome back
-            </p>
+            <p className="welcome-label">Welcome back</p>
 
             <h1>{user.username}</h1>
 
-            <span className="role-badge">
-              {user.role.toUpperCase()}
-            </span>
+            <span className="role-badge">{user.role.toUpperCase()}</span>
 
-            <p className="dashboard-description">
-              {data.description}
-            </p>
+            <p className="dashboard-description">{data.description}</p>
           </div>
         </div>
 
-        <h2 className="section-title">
-          Your PillSync Workspace
-        </h2>
+        <h2 className="section-title">Your PillSync Workspace</h2>
 
         <div className="feature-grid">
           {data.features.map((feature) => (
-            <div
-              className="feature-card"
-              key={feature}
-            >
+            <div className="feature-card" key={feature}>
               <div className="feature-icon">
                 {user.role === 'patient'
                   ? '💊'
@@ -736,10 +674,7 @@ function Dashboard({ user, onLogout }) {
 
               <h3>{feature}</h3>
 
-              <p>
-                Feature planned for the upcoming
-                PillSync milestone.
-              </p>
+              <p>Feature planned for the upcoming PillSync milestone.</p>
             </div>
           ))}
         </div>
@@ -756,248 +691,199 @@ function Dashboard({ user, onLogout }) {
                   </h2>
 
                   <p className="section-subtitle">
-                    Monitor medicine stock and predict when a refill may be needed.
+                    Monitor medicine stock and predict when a refill may be
+                    needed.
                   </p>
                 </div>
               </div>
 
               {medicineLoading && (
-                <div className="dashboard-message">
-                  Loading medicines...
-                </div>
+                <div className="dashboard-message">Loading medicines...</div>
               )}
 
               {medicineError && (
-                <div className="error-message">
-                  {medicineError}
-                </div>
+                <div className="error-message">{medicineError}</div>
               )}
 
-              {!medicineLoading &&
-                !medicineError &&
-                medicines.length === 0 && (
-                  <div className="dashboard-message">
-                    No medicines found.
-                  </div>
-                )}
+              {!medicineLoading && !medicineError && medicines.length === 0 && (
+                <div className="dashboard-message">No medicines found.</div>
+              )}
 
-              {!medicineLoading &&
-                !medicineError &&
-                medicines.length > 0 && (
-                  <>
-                    <div className="medicine-selector-card">
-                      <div className="form-group">
-                        <label htmlFor="medicine-select">
-                          Select Medicine
-                        </label>
+              {!medicineLoading && !medicineError && medicines.length > 0 && (
+                <>
+                  <div className="medicine-selector-card">
+                    <div className="form-group">
+                      <label htmlFor="medicine-select">Select Medicine</label>
 
-                        <select
-                          id="medicine-select"
-                          value={selectedMedicineId || ''}
-                          onChange={handleMedicineChange}
-                        >
-                          {medicines.map((medicine) => (
-                            <option
-                              key={medicine.id}
-                              value={medicine.id}
-                            >
-                              {medicine.name}
-                              {medicine.dosage
-                                ? ` — ${medicine.dosage}`
-                                : ''}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {selectedMedicine && (
-                        <div className="stock-summary">
-                          <div className="stock-icon">
-                            💊
-                          </div>
-
-                          <div>
-                            <span className="summary-label">
-                              Current Stock
-                            </span>
-
-                            <strong className="stock-number">
-                              {selectedMedicine.quantity}
-                            </strong>
-
-                            <span className="stock-unit">
-                              units
-                            </span>
-                          </div>
-                        </div>
-                      )}
+                      <select
+                        id="medicine-select"
+                        value={selectedMedicineId || ''}
+                        onChange={handleMedicineChange}
+                      >
+                        {medicines.map((medicine) => (
+                          <option key={medicine.id} value={medicine.id}>
+                            {medicine.name}
+                            {medicine.dosage ? ` — ${medicine.dosage}` : ''}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
-                    {stockMessage && (
-                      <div className="success-message">
-                        {stockMessage}
+                    {selectedMedicine && (
+                      <div className="stock-summary">
+                        <div className="stock-icon">💊</div>
+
+                        <div>
+                          <span className="summary-label">Current Stock</span>
+
+                          <strong className="stock-number">
+                            {selectedMedicine.quantity}
+                          </strong>
+
+                          <span className="stock-unit">units</span>
+                        </div>
                       </div>
                     )}
+                  </div>
 
-                    <div className="refill-grid">
-                      <div className="refill-card">
-                        <div className="refill-card-header">
-                          <span>📦</span>
-                          <h3>Stock Management</h3>
+                  {stockMessage && (
+                    <div className="success-message">{stockMessage}</div>
+                  )}
+
+                  <div className="refill-grid">
+                    <div className="refill-card">
+                      <div className="refill-card-header">
+                        <span>📦</span>
+                        <h3>Stock Management</h3>
+                      </div>
+
+                      <p>Add newly purchased medicine to your current stock.</p>
+
+                      <form onSubmit={handleAddStock} className="stock-form">
+                        <div className="form-group">
+                          <label htmlFor="stock-amount">Quantity to Add</label>
+
+                          <input
+                            id="stock-amount"
+                            type="number"
+                            min="1"
+                            step="1"
+                            placeholder="Enter quantity"
+                            value={stockAmount}
+                            onChange={(event) =>
+                              setStockAmount(event.target.value)
+                            }
+                          />
                         </div>
 
-                        <p>
-                          Add newly purchased medicine to your current stock.
-                        </p>
-
-                        <form
-                          onSubmit={handleAddStock}
-                          className="stock-form"
+                        <button
+                          type="submit"
+                          className="primary-action-button"
+                          disabled={stockLoading}
                         >
-                          <div className="form-group">
-                            <label htmlFor="stock-amount">
-                              Quantity to Add
-                            </label>
+                          {stockLoading ? 'Updating...' : '+ Add Stock'}
+                        </button>
+                      </form>
+                    </div>
 
-                            <input
-                              id="stock-amount"
-                              type="number"
-                              min="1"
-                              step="1"
-                              placeholder="Enter quantity"
-                              value={stockAmount}
-                              onChange={(event) =>
-                                setStockAmount(event.target.value)
-                              }
-                            />
+                    <div className="refill-card">
+                      <div className="refill-card-header">
+                        <span>🔮</span>
+                        <h3>Refill Prediction</h3>
+                      </div>
+
+                      {refillLoading && (
+                        <div className="dashboard-message compact">
+                          Calculating prediction...
+                        </div>
+                      )}
+
+                      {refillError && (
+                        <div className="error-message">{refillError}</div>
+                      )}
+
+                      {!refillLoading && !refillError && refillPrediction && (
+                        <>
+                          <div
+                            className={`refill-alert ${
+                              refillPrediction.refill_required
+                                ? 'refill-required'
+                                : 'refill-normal'
+                            }`}
+                          >
+                            <span>
+                              {refillPrediction.refill_required
+                                ? '⚠️ Refill Required'
+                                : '✓ Stock Level OK'}
+                            </span>
+
+                            <strong>
+                              {refillPrediction.estimated_days_remaining ===
+                              null
+                                ? 'No schedule'
+                                : `${refillPrediction.estimated_days_remaining} days remaining`}
+                            </strong>
+                          </div>
+
+                          <div className="prediction-grid">
+                            <div className="prediction-item">
+                              <span>Current Stock</span>
+                              <strong>{refillPrediction.current_stock}</strong>
+                            </div>
+
+                            <div className="prediction-item">
+                              <span>Daily Consumption</span>
+                              <strong>
+                                {refillPrediction.daily_consumption}
+                              </strong>
+                            </div>
+
+                            <div className="prediction-item">
+                              <span>Depletion Date</span>
+                              <strong>
+                                {formatDate(
+                                  refillPrediction.estimated_depletion_date,
+                                )}
+                              </strong>
+                            </div>
+
+                            <div className="prediction-item">
+                              <span>Recommended Refill</span>
+                              <strong>
+                                {formatDate(
+                                  refillPrediction.recommended_refill_date,
+                                )}
+                              </strong>
+                            </div>
                           </div>
 
                           <button
-                            type="submit"
-                            className="primary-action-button"
-                            disabled={stockLoading}
+                            type="button"
+                            className="notification-action-button"
+                            onClick={handleCreateRefillNotification}
+                            disabled={
+                              refillNotificationLoading ||
+                              !refillPrediction.refill_required
+                            }
                           >
-                            {stockLoading
-                              ? 'Updating...'
-                              : '+ Add Stock'}
+                            {refillNotificationLoading
+                              ? 'Creating...'
+                              : refillPrediction.refill_required
+                                ? '🔔 Create Refill Notification'
+                                : '✓ No Refill Needed'}
                           </button>
-                        </form>
-                      </div>
 
-                      <div className="refill-card">
-                        <div className="refill-card-header">
-                          <span>🔮</span>
-                          <h3>Refill Prediction</h3>
-                        </div>
-
-                        {refillLoading && (
-                          <div className="dashboard-message compact">
-                            Calculating prediction...
-                          </div>
-                        )}
-
-                        {refillError && (
-                          <div className="error-message">
-                            {refillError}
-                          </div>
-                        )}
-
-                        {!refillLoading &&
-                          !refillError &&
-                          refillPrediction && (
-                            <>
-                              <div
-                                className={`refill-alert ${
-                                  refillPrediction.refill_required
-                                    ? 'refill-required'
-                                    : 'refill-normal'
-                                }`}
-                              >
-                                <span>
-                                  {refillPrediction.refill_required
-                                    ? '⚠️ Refill Required'
-                                    : '✓ Stock Level OK'}
-                                </span>
-
-                                <strong>
-                                  {refillPrediction.estimated_days_remaining ===
-                                  null
-                                    ? 'No schedule'
-                                    : `${refillPrediction.estimated_days_remaining} days remaining`}
-                                </strong>
-                              </div>
-
-                              <div className="prediction-grid">
-                                <div className="prediction-item">
-                                  <span>
-                                    Current Stock
-                                  </span>
-                                  <strong>
-                                    {refillPrediction.current_stock}
-                                  </strong>
-                                </div>
-
-                                <div className="prediction-item">
-                                  <span>
-                                    Daily Consumption
-                                  </span>
-                                  <strong>
-                                    {refillPrediction.daily_consumption}
-                                  </strong>
-                                </div>
-
-                                <div className="prediction-item">
-                                  <span>
-                                    Depletion Date
-                                  </span>
-                                  <strong>
-                                    {formatDate(
-                                      refillPrediction.estimated_depletion_date,
-                                    )}
-                                  </strong>
-                                </div>
-
-                                <div className="prediction-item">
-                                  <span>
-                                    Recommended Refill
-                                  </span>
-                                  <strong>
-                                    {formatDate(
-                                      refillPrediction.recommended_refill_date,
-                                    )}
-                                  </strong>
-                                </div>
-                              </div>
-
-                              <button
-                                type="button"
-                                className="notification-action-button"
-                                onClick={
-                                  handleCreateRefillNotification
-                                }
-                                disabled={
-                                  refillNotificationLoading ||
-                                  !refillPrediction.refill_required
-                                }
-                              >
-                                {refillNotificationLoading
-                                  ? 'Creating...'
-                                  : refillPrediction.refill_required
-                                    ? '🔔 Create Refill Notification'
-                                    : '✓ No Refill Needed'}
-                              </button>
-
-                              {refillNotificationMessage && (
-                                <div className="refill-notification-message">
-                                  {refillNotificationMessage}
-                                </div>
-                              )}
-                            </>
+                          {refillNotificationMessage && (
+                            <div className="refill-notification-message">
+                              {refillNotificationMessage}
+                            </div>
                           )}
-                      </div>
+                        </>
+                      )}
                     </div>
-                  </>
-                )}
+                  </div>
+                </>
+              )}
             </section>
 
             {/* ==================== ADHERENCE ==================== */}
@@ -1005,9 +891,7 @@ function Dashboard({ user, onLogout }) {
             <section className="adherence-section">
               <div className="section-heading-row">
                 <div>
-                  <h2 className="section-title">
-                    Medication Adherence
-                  </h2>
+                  <h2 className="section-title">Medication Adherence</h2>
 
                   <p className="section-subtitle">
                     Track your medication-taking activity.
@@ -1022,79 +906,55 @@ function Dashboard({ user, onLogout }) {
               )}
 
               {adherenceError && (
-                <div className="error-message">
-                  {adherenceError}
-                </div>
+                <div className="error-message">{adherenceError}</div>
               )}
 
-              {!adherenceLoading &&
-                !adherenceError &&
-                adherence && (
-                  <div className="adherence-card">
-                    <div className="adherence-main">
-                      <div className="adherence-circle">
-                        <strong>
-                          {adherence.adherence_percentage}%
-                        </strong>
-                        <span>Adherence</span>
-                      </div>
-
-                      <div className="adherence-description">
-                        <h3>
-                          Medication Adherence Summary
-                        </h3>
-
-                        <p>
-                          This summary is calculated from your recorded
-                          medication history.
-                        </p>
-                      </div>
+              {!adherenceLoading && !adherenceError && adherence && (
+                <div className="adherence-card">
+                  <div className="adherence-main">
+                    <div className="adherence-circle">
+                      <strong>{adherence.adherence_percentage}%</strong>
+                      <span>Adherence</span>
                     </div>
 
-                    <div className="adherence-stats">
-                      <div className="adherence-stat">
-                        <span className="stat-icon">
-                          💊
-                        </span>
-                        <span>Total Doses</span>
-                        <strong>
-                          {adherence.total_doses}
-                        </strong>
-                      </div>
+                    <div className="adherence-description">
+                      <h3>Medication Adherence Summary</h3>
 
-                      <div className="adherence-stat">
-                        <span className="stat-icon">
-                          ✓
-                        </span>
-                        <span>Taken</span>
-                        <strong>
-                          {adherence.taken_doses}
-                        </strong>
-                      </div>
-
-                      <div className="adherence-stat">
-                        <span className="stat-icon">
-                          ✕
-                        </span>
-                        <span>Missed</span>
-                        <strong>
-                          {adherence.missed_doses}
-                        </strong>
-                      </div>
-
-                      <div className="adherence-stat">
-                        <span className="stat-icon">
-                          ⏰
-                        </span>
-                        <span>Snoozed</span>
-                        <strong>
-                          {adherence.snoozed_doses}
-                        </strong>
-                      </div>
+                      <p>
+                        This summary is calculated from your recorded medication
+                        history.
+                      </p>
                     </div>
                   </div>
-                )}
-                              {!adherenceTrendLoading &&
+
+                  <div className="adherence-stats">
+                    <div className="adherence-stat">
+                      <span className="stat-icon">💊</span>
+                      <span>Total Doses</span>
+                      <strong>{adherence.total_doses}</strong>
+                    </div>
+
+                    <div className="adherence-stat">
+                      <span className="stat-icon">✓</span>
+                      <span>Taken</span>
+                      <strong>{adherence.taken_doses}</strong>
+                    </div>
+
+                    <div className="adherence-stat">
+                      <span className="stat-icon">✕</span>
+                      <span>Missed</span>
+                      <strong>{adherence.missed_doses}</strong>
+                    </div>
+
+                    <div className="adherence-stat">
+                      <span className="stat-icon">⏰</span>
+                      <span>Snoozed</span>
+                      <strong>{adherence.snoozed_doses}</strong>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {!adherenceTrendLoading &&
                 !adherenceTrendError &&
                 adherenceTrend && (
                   <div className="adherence-analytics">
@@ -1122,18 +982,13 @@ function Dashboard({ user, onLogout }) {
                           weekday: 'short',
                           month: 'short',
                           day: 'numeric',
-                        })
+                        });
 
                         return (
-                          <div
-                            className="trend-day"
-                            key={day.date}
-                          >
+                          <div className="trend-day" key={day.date}>
                             <div className="trend-day-header">
                               <span>{dateLabel}</span>
-                              <strong>
-                                {day.adherence_percentage}%
-                              </strong>
+                              <strong>{day.adherence_percentage}%</strong>
                             </div>
 
                             <div className="trend-bar">
@@ -1146,18 +1001,12 @@ function Dashboard({ user, onLogout }) {
                             </div>
 
                             <div className="trend-day-stats">
-                              <span>
-                                Taken: {day.taken_doses}
-                              </span>
-                              <span>
-                                Missed: {day.missed_doses}
-                              </span>
-                              <span>
-                                Snoozed: {day.snoozed_doses}
-                              </span>
+                              <span>Taken: {day.taken_doses}</span>
+                              <span>Missed: {day.missed_doses}</span>
+                              <span>Snoozed: {day.snoozed_doses}</span>
                             </div>
                           </div>
-                        )
+                        );
                       })}
                     </div>
                   </div>
@@ -1170,9 +1019,7 @@ function Dashboard({ user, onLogout }) {
               )}
 
               {adherenceTrendError && (
-                <div className="error-message">
-                  {adherenceTrendError}
-                </div>
+                <div className="error-message">{adherenceTrendError}</div>
               )}
             </section>
 
@@ -1181,9 +1028,7 @@ function Dashboard({ user, onLogout }) {
             <section className="reminders-section">
               <div className="reminders-header">
                 <div>
-                  <h2 className="section-title">
-                    Upcoming Reminders
-                  </h2>
+                  <h2 className="section-title">Upcoming Reminders</h2>
 
                   <p className="reminders-subtitle">
                     Keep track of your scheduled medicines.
@@ -1192,173 +1037,126 @@ function Dashboard({ user, onLogout }) {
               </div>
 
               {reminderLoading && (
-                <div className="reminder-message">
-                  Loading reminders...
-                </div>
+                <div className="reminder-message">Loading reminders...</div>
               )}
 
               {reminderError && (
-                <div className="error-message">
-                  {reminderError}
-                </div>
+                <div className="error-message">{reminderError}</div>
               )}
 
-              {!reminderLoading &&
-                !reminderError &&
-                reminders.length === 0 && (
-                  <div className="reminder-message">
-                    No reminders found.
-                  </div>
-                )}
+              {!reminderLoading && !reminderError && reminders.length === 0 && (
+                <div className="reminder-message">No reminders found.</div>
+              )}
 
-              {!reminderLoading &&
-                !reminderError &&
-                reminders.length > 0 && (
-                  <div className="reminder-grid">
-                    {reminders.map((reminder) => (
-                      <div
-                        className="reminder-card"
-                        key={reminder.id}
-                      >
-                        <div className="reminder-card-top">
-                          <span className="reminder-icon">
-                            💊
-                          </span>
+              {!reminderLoading && !reminderError && reminders.length > 0 && (
+                <div className="reminder-grid">
+                  {reminders.map((reminder) => (
+                    <div className="reminder-card" key={reminder.id}>
+                      <div className="reminder-card-top">
+                        <span className="reminder-icon">💊</span>
 
-                          <span
-                            className={`reminder-status status-${reminder.status}`}
-                          >
-                            {reminder.status}
-                          </span>
-                        </div>
-
-                        <h3>
-                          {reminder.medicine_name ||
-                            'Medication Reminder'}
-                        </h3>
-
-                        {reminder.medicine_dosage && (
-                          <p>
-                            <strong>Dosage:</strong>{' '}
-                            {reminder.medicine_dosage}
-                          </p>
-                        )}
-
-                        {reminder.dosage_amount && (
-                          <p>
-                            <strong>Dose:</strong>{' '}
-                            {reminder.dosage_amount}
-                          </p>
-                        )}
-
-                        {reminder.frequency && (
-                          <p>
-                            <strong>Frequency:</strong>{' '}
-                            {reminder.frequency}
-                          </p>
-                        )}
-
-                        <p>
-                          <strong>Scheduled:</strong>{' '}
-                          {new Date(
-                            reminder.scheduled_at,
-                          ).toLocaleString()}
-                        </p>
-
-                        {reminder.time_of_day && (
-                          <p>
-                            <strong>Time:</strong>{' '}
-                            {reminder.time_of_day}
-                          </p>
-                        )}
-
-                        {reminder.snoozed_until && (
-                          <p>
-                            <strong>Snoozed until:</strong>{' '}
-                            {new Date(
-                              reminder.snoozed_until,
-                            ).toLocaleString()}
-                          </p>
-                        )}
-
-                        {reminder.action_at && (
-                          <p>
-                            <strong>Action recorded:</strong>{' '}
-                            {new Date(
-                              reminder.action_at,
-                            ).toLocaleString()}
-                          </p>
-                        )}
-
-                        <p>
-                          <strong>Reminder ID:</strong>{' '}
-                          {reminder.id}
-                        </p>
-
-                        {reminder.status === 'pending' && (
-                          <div className="reminder-actions">
-                            <button
-                              type="button"
-                              className="reminder-action-button taken-button"
-                              onClick={() =>
-                                handleReminderAction(
-                                  reminder.id,
-                                  'taken',
-                                )
-                              }
-                              disabled={
-                                actionLoading !== null
-                              }
-                            >
-                              {actionLoading ===
-                              `${reminder.id}-taken`
-                                ? 'Saving...'
-                                : '✓ Taken'}
-                            </button>
-
-                            <button
-                              type="button"
-                              className="reminder-action-button missed-button"
-                              onClick={() =>
-                                handleReminderAction(
-                                  reminder.id,
-                                  'missed',
-                                )
-                              }
-                              disabled={
-                                actionLoading !== null
-                              }
-                            >
-                              {actionLoading ===
-                              `${reminder.id}-missed`
-                                ? 'Saving...'
-                                : '✕ Missed'}
-                            </button>
-
-                            <button
-                              type="button"
-                              className="reminder-action-button snooze-button"
-                              onClick={() =>
-                                handleReminderAction(
-                                  reminder.id,
-                                  'snooze',
-                                )
-                              }
-                              disabled={
-                                actionLoading !== null
-                              }
-                            >
-                              {actionLoading ===
-                              `${reminder.id}-snooze`
-                                ? 'Saving...'
-                                : '⏰ Snooze 30m'}
-                            </button>
-                          </div>
-                        )}
+                        <span
+                          className={`reminder-status status-${reminder.status}`}
+                        >
+                          {reminder.status}
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                )}
+
+                      <h3>{reminder.medicine_name || 'Medication Reminder'}</h3>
+
+                      {reminder.medicine_dosage && (
+                        <p>
+                          <strong>Dosage:</strong> {reminder.medicine_dosage}
+                        </p>
+                      )}
+
+                      {reminder.dosage_amount && (
+                        <p>
+                          <strong>Dose:</strong> {reminder.dosage_amount}
+                        </p>
+                      )}
+
+                      {reminder.frequency && (
+                        <p>
+                          <strong>Frequency:</strong> {reminder.frequency}
+                        </p>
+                      )}
+
+                      <p>
+                        <strong>Scheduled:</strong>{' '}
+                        {new Date(reminder.scheduled_at).toLocaleString()}
+                      </p>
+
+                      {reminder.time_of_day && (
+                        <p>
+                          <strong>Time:</strong> {reminder.time_of_day}
+                        </p>
+                      )}
+
+                      {reminder.snoozed_until && (
+                        <p>
+                          <strong>Snoozed until:</strong>{' '}
+                          {new Date(reminder.snoozed_until).toLocaleString()}
+                        </p>
+                      )}
+
+                      {reminder.action_at && (
+                        <p>
+                          <strong>Action recorded:</strong>{' '}
+                          {new Date(reminder.action_at).toLocaleString()}
+                        </p>
+                      )}
+
+                      <p>
+                        <strong>Reminder ID:</strong> {reminder.id}
+                      </p>
+
+                      {reminder.status === 'pending' && (
+                        <div className="reminder-actions">
+                          <button
+                            type="button"
+                            className="reminder-action-button taken-button"
+                            onClick={() =>
+                              handleReminderAction(reminder.id, 'taken')
+                            }
+                            disabled={actionLoading !== null}
+                          >
+                            {actionLoading === `${reminder.id}-taken`
+                              ? 'Saving...'
+                              : '✓ Taken'}
+                          </button>
+
+                          <button
+                            type="button"
+                            className="reminder-action-button missed-button"
+                            onClick={() =>
+                              handleReminderAction(reminder.id, 'missed')
+                            }
+                            disabled={actionLoading !== null}
+                          >
+                            {actionLoading === `${reminder.id}-missed`
+                              ? 'Saving...'
+                              : '✕ Missed'}
+                          </button>
+
+                          <button
+                            type="button"
+                            className="reminder-action-button snooze-button"
+                            onClick={() =>
+                              handleReminderAction(reminder.id, 'snooze')
+                            }
+                            disabled={actionLoading !== null}
+                          >
+                            {actionLoading === `${reminder.id}-snooze`
+                              ? 'Saving...'
+                              : '⏰ Snooze 30m'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
 
             {/* ==================== NOTIFICATIONS ==================== */}
@@ -1366,9 +1164,7 @@ function Dashboard({ user, onLogout }) {
             <section className="history-section">
               <div className="history-header">
                 <div>
-                  <h2 className="section-title">
-                    Notifications
-                  </h2>
+                  <h2 className="section-title">Notifications</h2>
 
                   <p className="history-subtitle">
                     View your medication and refill notifications.
@@ -1377,23 +1173,17 @@ function Dashboard({ user, onLogout }) {
               </div>
 
               {notificationLoading && (
-                <div className="history-message">
-                  Loading notifications...
-                </div>
+                <div className="history-message">Loading notifications...</div>
               )}
 
               {notificationError && (
-                <div className="error-message">
-                  {notificationError}
-                </div>
+                <div className="error-message">{notificationError}</div>
               )}
 
               {!notificationLoading &&
                 !notificationError &&
                 notifications.length === 0 && (
-                  <div className="history-message">
-                    No notifications found.
-                  </div>
+                  <div className="history-message">No notifications found.</div>
                 )}
 
               {!notificationLoading &&
@@ -1401,14 +1191,9 @@ function Dashboard({ user, onLogout }) {
                 notifications.length > 0 && (
                   <div className="history-grid">
                     {notifications.map((notification) => (
-                      <div
-                        className="history-card"
-                        key={notification.id}
-                      >
+                      <div className="history-card" key={notification.id}>
                         <div className="history-card-top">
-                          <span className="history-icon">
-                            🔔
-                          </span>
+                          <span className="history-icon">🔔</span>
 
                           <span
                             className={`history-status status-${notification.status}`}
@@ -1417,33 +1202,25 @@ function Dashboard({ user, onLogout }) {
                           </span>
                         </div>
 
-                        <h3>
-                          {notification.title}
-                        </h3>
+                        <h3>{notification.title}</h3>
 
                         <p>
-                          <strong>Message:</strong>{' '}
-                          {notification.message}
+                          <strong>Message:</strong> {notification.message}
                         </p>
 
                         <p>
-                          <strong>Channel:</strong>{' '}
-                          {notification.channel}
+                          <strong>Channel:</strong> {notification.channel}
                         </p>
 
                         <p>
                           <strong>Created:</strong>{' '}
-                          {new Date(
-                            notification.created_at,
-                          ).toLocaleString()}
+                          {new Date(notification.created_at).toLocaleString()}
                         </p>
 
                         {notification.sent_at && (
                           <p>
                             <strong>Sent:</strong>{' '}
-                            {new Date(
-                              notification.sent_at,
-                            ).toLocaleString()}
+                            {new Date(notification.sent_at).toLocaleString()}
                           </p>
                         )}
 
@@ -1455,8 +1232,7 @@ function Dashboard({ user, onLogout }) {
                         )}
 
                         <p>
-                          <strong>Notification ID:</strong>{' '}
-                          {notification.id}
+                          <strong>Notification ID:</strong> {notification.id}
                         </p>
                       </div>
                     ))}
@@ -1469,9 +1245,7 @@ function Dashboard({ user, onLogout }) {
             <section className="history-section">
               <div className="history-header">
                 <div>
-                  <h2 className="section-title">
-                    Medication History
-                  </h2>
+                  <h2 className="section-title">Medication History</h2>
 
                   <p className="history-subtitle">
                     Review your previous medication activities.
@@ -1486,9 +1260,7 @@ function Dashboard({ user, onLogout }) {
               )}
 
               {historyError && (
-                <div className="error-message">
-                  {historyError}
-                </div>
+                <div className="error-message">{historyError}</div>
               )}
 
               {!historyLoading &&
@@ -1504,14 +1276,9 @@ function Dashboard({ user, onLogout }) {
                 medicationHistory.length > 0 && (
                   <div className="history-grid">
                     {medicationHistory.map((history) => (
-                      <div
-                        className="history-card"
-                        key={history.id}
-                      >
+                      <div className="history-card" key={history.id}>
                         <div className="history-card-top">
-                          <span className="history-icon">
-                            💊
-                          </span>
+                          <span className="history-icon">💊</span>
 
                           <span
                             className={`history-status status-${history.status}`}
@@ -1520,34 +1287,26 @@ function Dashboard({ user, onLogout }) {
                           </span>
                         </div>
 
-                        <h3>
-                          {history.medicine_name}
-                        </h3>
+                        <h3>{history.medicine_name}</h3>
 
                         <p>
-                          <strong>Dosage:</strong>{' '}
-                          {history.dosage}
+                          <strong>Dosage:</strong> {history.dosage}
                         </p>
 
                         <p>
                           <strong>Scheduled:</strong>{' '}
-                          {new Date(
-                            history.scheduled_time,
-                          ).toLocaleString()}
+                          {new Date(history.scheduled_time).toLocaleString()}
                         </p>
 
                         <p>
                           <strong>Action:</strong>{' '}
                           {history.action_at
-                            ? new Date(
-                                history.action_at,
-                              ).toLocaleString()
+                            ? new Date(history.action_at).toLocaleString()
                             : 'No action recorded'}
                         </p>
 
                         <p>
-                          <strong>History ID:</strong>{' '}
-                          {history.id}
+                          <strong>History ID:</strong> {history.id}
                         </p>
                       </div>
                     ))}
@@ -1558,7 +1317,7 @@ function Dashboard({ user, onLogout }) {
         )}
       </main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

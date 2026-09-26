@@ -5,16 +5,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.api.auth import router as auth_router
-from app.api.rbac import router as rbac_router
-from app.api.profile import router as profile_router
-from app.api.medicine import router as medicine_router
 from app.api.dosage_schedule import router as dosage_schedule_router
-from app.api.reminder import router as reminder_router
 from app.api.medication_history import router as medication_history_router
+from app.api.medicine import router as medicine_router
 from app.api.notification import router as notification_router
-from app.api.refill_prediction import router as refill_prediction_router
-from app.api.stock import router as stock_router
 from app.api.ocr import router as ocr_router
+from app.api.profile import router as profile_router
+from app.api.rbac import router as rbac_router
+from app.api.refill_prediction import router as refill_prediction_router
+from app.api.reminder import router as reminder_router
+from app.api.stock import router as stock_router
 from app.core.config import settings
 from app.services.reminder_scheduler import (
     start_scheduler,

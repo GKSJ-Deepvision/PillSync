@@ -2,7 +2,6 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 
-
 client = TestClient(app)
 
 
@@ -91,9 +90,7 @@ def test_logout():
     logout_response = client.post("/auth/logout")
 
     assert logout_response.status_code == 200
-    assert logout_response.json() == {
-        "message": "Successfully logged out"
-    }
+    assert logout_response.json() == {"message": "Successfully logged out"}
 
     session_response = client.get("/auth/session")
 
@@ -151,6 +148,7 @@ def test_patient_cannot_access_admin_rbac():
     )
 
     assert response.status_code == 403
+
 
 def test_caregiver_rbac_access():
     token = get_access_token("caregiver_test", "Caregiver@123")
@@ -218,6 +216,7 @@ def test_admin_cannot_access_caregiver_rbac():
     )
 
     assert response.status_code == 403
+
 
 def test_create_profile():
     token = get_access_token("vaishnavi", "Test@123")

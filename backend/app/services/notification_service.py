@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 
 from app.models.notification import Notification
 
-
 SUPPORTED_CHANNELS = {
     "push",
     "email",
@@ -31,9 +30,7 @@ def create_notification(
     normalized_channel = channel.strip().lower()
 
     if normalized_channel not in SUPPORTED_CHANNELS:
-        raise ValueError(
-            f"Unsupported notification channel: {channel}"
-        )
+        raise ValueError(f"Unsupported notification channel: {channel}")
 
     notification = Notification(
         patient_id=patient_id,

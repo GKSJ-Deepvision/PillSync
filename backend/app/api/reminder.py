@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 from app.api.auth import get_current_user
 from app.db.session import get_db
 from app.models.dosage_schedule import DosageSchedule
-from app.models.medicine import Medicine
 from app.models.medication_history import MedicationHistory
+from app.models.medicine import Medicine
 from app.models.reminder import Reminder
 from app.models.user import User
 from app.schemas.reminder import (
@@ -15,7 +15,6 @@ from app.schemas.reminder import (
     ReminderResponse,
     ReminderUpdate,
 )
-
 
 router = APIRouter(
     prefix="/reminders",
@@ -83,9 +82,7 @@ def reminder_response_data(
     db: Session,
 ) -> dict:
     schedule = (
-        db.query(DosageSchedule)
-        .filter(DosageSchedule.id == reminder.dosage_schedule_id)
-        .first()
+        db.query(DosageSchedule).filter(DosageSchedule.id == reminder.dosage_schedule_id).first()
     )
 
     if schedule is None:
@@ -94,11 +91,7 @@ def reminder_response_data(
             detail="Dosage schedule not found",
         )
 
-    medicine = (
-        db.query(Medicine)
-        .filter(Medicine.id == schedule.medicine_id)
-        .first()
-    )
+    medicine = db.query(Medicine).filter(Medicine.id == schedule.medicine_id).first()
 
     if medicine is None:
         raise HTTPException(
@@ -127,9 +120,7 @@ def get_schedule_and_medicine(
     db: Session,
 ) -> tuple[DosageSchedule, Medicine]:
     schedule = (
-        db.query(DosageSchedule)
-        .filter(DosageSchedule.id == reminder.dosage_schedule_id)
-        .first()
+        db.query(DosageSchedule).filter(DosageSchedule.id == reminder.dosage_schedule_id).first()
     )
 
     if schedule is None:
@@ -138,11 +129,7 @@ def get_schedule_and_medicine(
             detail="Dosage schedule not found",
         )
 
-    medicine = (
-        db.query(Medicine)
-        .filter(Medicine.id == schedule.medicine_id)
-        .first()
-    )
+    medicine = db.query(Medicine).filter(Medicine.id == schedule.medicine_id).first()
 
     if medicine is None:
         raise HTTPException(
@@ -200,9 +187,7 @@ def create_medication_history(
     db: Session,
 ) -> MedicationHistory:
     schedule = (
-        db.query(DosageSchedule)
-        .filter(DosageSchedule.id == reminder.dosage_schedule_id)
-        .first()
+        db.query(DosageSchedule).filter(DosageSchedule.id == reminder.dosage_schedule_id).first()
     )
 
     if schedule is None:
@@ -277,10 +262,7 @@ def list_reminders(
         .all()
     )
 
-    return [
-        reminder_response_data(reminder, db)
-        for reminder in reminders
-    ]
+    return [reminder_response_data(reminder, db) for reminder in reminders]
 
 
 @router.get(
@@ -332,10 +314,7 @@ def update_reminder(
             )
 
         # Only consume stock when changing INTO taken.
-        if (
-            reminder_data.status == "taken"
-            and reminder.status != "taken"
-        ):
+        if reminder_data.status == "taken" and reminder.status != "taken":
             consume_medicine_stock(reminder, db)
 
         reminder.status = reminder_data.status

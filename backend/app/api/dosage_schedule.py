@@ -13,7 +13,6 @@ from app.schemas.dosage_schedule import (
     DosageScheduleUpdate,
 )
 
-
 router = APIRouter(
     prefix="/dosage-schedules",
     tags=["Dosage Scheduling"],
@@ -162,9 +161,7 @@ def update_dosage_schedule(
         db,
     )
 
-    update_data = schedule_data.model_dump(
-        exclude_unset=True
-    )
+    update_data = schedule_data.model_dump(exclude_unset=True)
 
     for field, value in update_data.items():
         setattr(schedule, field, value)

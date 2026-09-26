@@ -3,7 +3,6 @@ from fastapi import Depends, HTTPException, status
 from app.api.auth import get_current_user
 from app.models.user import User
 
-
 VALID_ROLES = {"patient", "caregiver", "admin"}
 
 

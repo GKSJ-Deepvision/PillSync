@@ -2,7 +2,6 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 
-
 client = TestClient(app)
 
 USERNAME = "vaishnavi"
@@ -107,8 +106,7 @@ def test_taken_reminder_creates_medication_history():
     matching_records = [
         record
         for record in history
-        if record["medicine_id"] == medicine_id
-        and record["status"] == "taken"
+        if record["medicine_id"] == medicine_id and record["status"] == "taken"
     ]
 
     assert matching_records
@@ -146,8 +144,7 @@ def test_missed_reminder_creates_medication_history():
     matching_records = [
         record
         for record in history
-        if record["medicine_id"] == medicine_id
-        and record["status"] == "missed"
+        if record["medicine_id"] == medicine_id and record["status"] == "missed"
     ]
 
     assert matching_records
@@ -188,8 +185,7 @@ def test_snoozed_reminder_creates_medication_history():
     matching_records = [
         record
         for record in history
-        if record["medicine_id"] == medicine_id
-        and record["status"] == "snoozed"
+        if record["medicine_id"] == medicine_id and record["status"] == "snoozed"
     ]
 
     assert matching_records
@@ -227,8 +223,7 @@ def test_get_medication_history_by_id():
     matching_records = [
         record
         for record in history
-        if record["medicine_id"] == medicine_id
-        and record["status"] == "taken"
+        if record["medicine_id"] == medicine_id and record["status"] == "taken"
     ]
 
     assert matching_records
@@ -261,6 +256,8 @@ def test_medication_history_not_found():
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Medication history not found"
+
+
 def test_patient_cannot_access_another_patients_history():
     owner_headers = get_auth_headers()
 
@@ -281,8 +278,7 @@ def test_patient_cannot_access_another_patients_history():
     matching_history = [
         item
         for item in history_response.json()
-        if item["medicine_id"] == medicine_id
-        and item["status"] == "taken"
+        if item["medicine_id"] == medicine_id and item["status"] == "taken"
     ]
 
     assert matching_history
@@ -312,9 +308,7 @@ def test_patient_cannot_access_another_patients_history():
 
     other_user_token = login_response.json()["access_token"]
 
-    other_user_headers = {
-        "Authorization": f"Bearer {other_user_token}"
-    }
+    other_user_headers = {"Authorization": f"Bearer {other_user_token}"}
 
     response = client.get(
         f"/medication-history/{history_id}",

@@ -10,7 +10,6 @@ from app.schemas.refill_prediction import RefillPredictionResponse
 from app.services.notification_service import create_notification
 from app.services.refill_prediction import calculate_refill_prediction
 
-
 router = APIRouter(
     prefix="/refill-predictions",
     tags=["Refill Prediction"],
@@ -123,9 +122,7 @@ def create_refill_notification(
             "medicine_id": medicine.id,
             "medicine_name": medicine.name,
             "current_stock": prediction["current_stock"],
-            "estimated_days_remaining": prediction[
-                "estimated_days_remaining"
-            ],
+            "estimated_days_remaining": prediction["estimated_days_remaining"],
         }
 
     notification = create_notification(
@@ -150,10 +147,6 @@ def create_refill_notification(
         "medicine_id": medicine.id,
         "medicine_name": medicine.name,
         "current_stock": prediction["current_stock"],
-        "estimated_days_remaining": prediction[
-            "estimated_days_remaining"
-        ],
-        "recommended_refill_date": prediction[
-            "recommended_refill_date"
-        ],
+        "estimated_days_remaining": prediction["estimated_days_remaining"],
+        "recommended_refill_date": prediction["recommended_refill_date"],
     }

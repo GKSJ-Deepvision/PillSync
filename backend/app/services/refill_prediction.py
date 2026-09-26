@@ -4,7 +4,6 @@ from math import ceil
 from app.models.dosage_schedule import DosageSchedule
 from app.models.medicine import Medicine
 
-
 DEFAULT_REFILL_THRESHOLD_DAYS = 7
 
 
@@ -76,14 +75,10 @@ def calculate_refill_prediction(
         prediction_date = date.today()
 
     if refill_threshold_days < 0:
-        raise ValueError(
-            "Refill threshold cannot be negative."
-        )
+        raise ValueError("Refill threshold cannot be negative.")
 
     if medicine.quantity < 0:
-        raise ValueError(
-            "Medicine quantity cannot be negative."
-        )
+        raise ValueError("Medicine quantity cannot be negative.")
 
     daily_consumption = calculate_daily_consumption(schedules)
 
@@ -97,24 +92,13 @@ def calculate_refill_prediction(
             "refill_required": False,
         }
 
-    estimated_days_remaining = ceil(
-        medicine.quantity / daily_consumption
-    )
+    estimated_days_remaining = ceil(medicine.quantity / daily_consumption)
 
-    estimated_depletion_date = (
-        prediction_date
-        + timedelta(days=estimated_days_remaining)
-    )
+    estimated_depletion_date = prediction_date + timedelta(days=estimated_days_remaining)
 
-    recommended_refill_date = (
-        estimated_depletion_date
-        - timedelta(days=refill_threshold_days)
-    )
+    recommended_refill_date = estimated_depletion_date - timedelta(days=refill_threshold_days)
 
-    refill_required = (
-        estimated_days_remaining
-        <= refill_threshold_days
-    )
+    refill_required = estimated_days_remaining <= refill_threshold_days
 
     return {
         "current_stock": medicine.quantity,

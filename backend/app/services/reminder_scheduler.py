@@ -8,7 +8,6 @@ from app.models.dosage_schedule import DosageSchedule
 from app.models.medicine import Medicine
 from app.models.reminder import Reminder
 
-
 scheduler = BackgroundScheduler()
 
 
@@ -129,16 +128,10 @@ def generate_reminders():
             if medicine is None:
                 continue
 
-            if (
-                medicine.start_date is not None
-                and today < medicine.start_date
-            ):
+            if medicine.start_date is not None and today < medicine.start_date:
                 continue
 
-            if (
-                medicine.end_date is not None
-                and today > medicine.end_date
-            ):
+            if medicine.end_date is not None and today > medicine.end_date:
                 continue
 
             if not is_due_today(schedule, today):

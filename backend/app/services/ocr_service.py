@@ -5,7 +5,6 @@ import shutil
 import pytesseract
 from PIL import Image
 
-
 DEFAULT_TESSERACT_PATH = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 
@@ -56,8 +55,6 @@ def extract_text_from_image(image_bytes: bytes) -> str:
             lang="eng",
         )
     except pytesseract.TesseractError as exc:
-        raise RuntimeError(
-            f"Tesseract OCR failed: {exc}"
-        ) from exc
+        raise RuntimeError(f"Tesseract OCR failed: {exc}") from exc
 
     return text.strip()

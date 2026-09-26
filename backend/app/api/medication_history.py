@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_user
 from app.db.session import get_db
-from app.models.medicine import Medicine
 from app.models.medication_history import MedicationHistory
+from app.models.medicine import Medicine
 from app.models.user import User
 from app.schemas.adherence import (
     AdherenceResponse,
@@ -14,7 +14,6 @@ from app.schemas.adherence import (
     DailyAdherenceResponse,
 )
 from app.schemas.medication_history import MedicationHistoryResponse
-
 
 router = APIRouter(
     prefix="/medication-history",
@@ -90,23 +89,11 @@ def get_adherence_summary(
 
     total_doses = len(history_records)
 
-    taken_doses = sum(
-        1
-        for history in history_records
-        if history.status == "taken"
-    )
+    taken_doses = sum(1 for history in history_records if history.status == "taken")
 
-    missed_doses = sum(
-        1
-        for history in history_records
-        if history.status == "missed"
-    )
+    missed_doses = sum(1 for history in history_records if history.status == "missed")
 
-    snoozed_doses = sum(
-        1
-        for history in history_records
-        if history.status == "snoozed"
-    )
+    snoozed_doses = sum(1 for history in history_records if history.status == "snoozed")
 
     if total_doses == 0:
         adherence_percentage = 0.0
@@ -169,11 +156,7 @@ def build_daily_adherence(
             adherence_percentage = 0.0
         else:
             adherence_percentage = round(
-                (
-                    data["taken_doses"]
-                    / data["total_doses"]
-                )
-                * 100,
+                (data["taken_doses"] / data["total_doses"]) * 100,
                 2,
             )
 
@@ -217,11 +200,13 @@ def get_daily_adherence(
         .filter(
             MedicationHistory.patient_id == current_user.id,
             Medicine.patient_id == current_user.id,
-            MedicationHistory.scheduled_time >= datetime.combine(
+            MedicationHistory.scheduled_time
+            >= datetime.combine(
                 start_date,
                 time.min,
             ),
-            MedicationHistory.scheduled_time <= datetime.combine(
+            MedicationHistory.scheduled_time
+            <= datetime.combine(
                 end_date,
                 time.max,
             ),
@@ -262,11 +247,13 @@ def get_adherence_trend(
         .filter(
             MedicationHistory.patient_id == current_user.id,
             Medicine.patient_id == current_user.id,
-            MedicationHistory.scheduled_time >= datetime.combine(
+            MedicationHistory.scheduled_time
+            >= datetime.combine(
                 start_date,
                 time.min,
             ),
-            MedicationHistory.scheduled_time <= datetime.combine(
+            MedicationHistory.scheduled_time
+            <= datetime.combine(
                 end_date,
                 time.max,
             ),
@@ -280,21 +267,13 @@ def get_adherence_trend(
         end_date,
     )
 
-    days_with_doses = [
-        day
-        for day in daily_history
-        if day.total_doses > 0
-    ]
+    days_with_doses = [day for day in daily_history if day.total_doses > 0]
 
     if not days_with_doses:
         average_adherence_percentage = 0.0
     else:
         average_adherence_percentage = round(
-            sum(
-                day.adherence_percentage
-                for day in days_with_doses
-            )
-            / len(days_with_doses),
+            sum(day.adherence_percentage for day in days_with_doses) / len(days_with_doses),
             2,
         )
 

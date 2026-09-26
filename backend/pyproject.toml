@@ -27,6 +27,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 "tests/*" = ["B011"]
+"app/db/init_db.py" = ["F401"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"

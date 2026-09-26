@@ -2,7 +2,6 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 
-
 client = TestClient(app)
 
 USERNAME = "vaishnavi"
@@ -120,10 +119,7 @@ def test_get_reminders():
     reminders = response.json()
 
     assert isinstance(reminders, list)
-    assert any(
-        reminder["id"] == reminder_id
-        for reminder in reminders
-    )
+    assert any(reminder["id"] == reminder_id for reminder in reminders)
 
 
 def test_get_reminder_by_id():

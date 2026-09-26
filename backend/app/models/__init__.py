@@ -3,11 +3,11 @@ from app.models.dosage_schedule import DosageSchedule
 from app.models.medical_condition import MedicalCondition
 from app.models.medication_history import MedicationHistory
 from app.models.medicine import Medicine
+from app.models.notification import Notification
 from app.models.patient_profile import PatientProfile
 from app.models.prescription import Prescription
-from app.models.user import User
 from app.models.reminder import Reminder
-from app.models.notification import Notification
+from app.models.user import User
 
 __all__ = [
     "User",

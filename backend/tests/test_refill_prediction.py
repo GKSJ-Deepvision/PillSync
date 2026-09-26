@@ -68,9 +68,7 @@ def test_calculate_daily_consumption_for_multiple_schedules():
         frequency="daily",
     )
 
-    result = calculate_daily_consumption(
-        [morning, night]
-    )
+    result = calculate_daily_consumption([morning, night])
 
     assert result == 2
 

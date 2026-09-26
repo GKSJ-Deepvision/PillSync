@@ -2,7 +2,6 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 
-
 client = TestClient(app)
 
 USERNAME = "vaishnavi"
@@ -91,10 +90,7 @@ def test_get_notifications():
     notifications = response.json()
 
     assert isinstance(notifications, list)
-    assert any(
-        notification["id"] == notification_id
-        for notification in notifications
-    )
+    assert any(notification["id"] == notification_id for notification in notifications)
 
 
 def test_get_notification_by_id():

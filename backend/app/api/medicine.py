@@ -11,7 +11,6 @@ from app.schemas.medicine import (
     MedicineUpdate,
 )
 
-
 router = APIRouter(
     prefix="/medicines",
     tags=["Medicine Management"],
@@ -65,11 +64,7 @@ def get_medicines(
 ):
     require_patient(current_user)
 
-    return (
-        db.query(Medicine)
-        .filter(Medicine.patient_id == current_user.id)
-        .all()
-    )
+    return db.query(Medicine).filter(Medicine.patient_id == current_user.id).all()
 
 
 @router.get(

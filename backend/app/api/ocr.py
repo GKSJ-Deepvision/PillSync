@@ -4,7 +4,6 @@ from app.schemas.ocr import OCRResponse
 from app.services.medicine_extraction import extract_medicine_information
 from app.services.ocr_service import extract_text_from_image
 
-
 router = APIRouter(
     prefix="/ocr",
     tags=["OCR Recognition"],
@@ -32,8 +31,7 @@ async def recognize_medicine_image(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(
-                "Unsupported file type. Please upload a JPEG, PNG, "
-                "WEBP, BMP, or TIFF image."
+                "Unsupported file type. Please upload a JPEG, PNG, " "WEBP, BMP, or TIFF image."
             ),
         )
 
@@ -58,9 +56,7 @@ async def recognize_medicine_image(
             detail=str(exc),
         ) from exc
 
-    medicine_information = extract_medicine_information(
-        extracted_text
-    )
+    medicine_information = extract_medicine_information(extracted_text)
 
     return OCRResponse(
         filename=file.filename or "uploaded_image",

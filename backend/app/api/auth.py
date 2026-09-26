@@ -12,7 +12,6 @@ from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import Token, UserCreate, UserResponse
 
-
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/auth/login",
 )
@@ -33,11 +32,7 @@ def register_user(
     user: UserCreate,
     db: Session = Depends(get_db),
 ):
-    existing_username = (
-        db.query(User)
-        .filter(User.username == user.username)
-        .first()
-    )
+    existing_username = db.query(User).filter(User.username == user.username).first()
 
     if existing_username:
         raise HTTPException(
@@ -45,11 +40,7 @@ def register_user(
             detail="Username already registered",
         )
 
-    existing_email = (
-        db.query(User)
-        .filter(User.email == user.email)
-        .first()
-    )
+    existing_email = db.query(User).filter(User.email == user.email).first()
 
     if existing_email:
         raise HTTPException(
@@ -81,11 +72,7 @@ def login_user(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
 ):
-    user = (
-        db.query(User)
-        .filter(User.username == form_data.username)
-        .first()
-    )
+    user = db.query(User).filter(User.username == form_data.username).first()
 
     if not user:
         raise HTTPException(
@@ -137,11 +124,7 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = (
-        db.query(User)
-        .filter(User.id == int(user_id))
-        .first()
-    )
+    user = db.query(User).filter(User.id == int(user_id)).first()
 
     if user is None:
         raise HTTPException(

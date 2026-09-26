@@ -6,9 +6,7 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     environment: str = "development"
 
-    database_url: str = (
-        "postgresql://username:password@localhost:5432/pillsync"
-    )
+    database_url: str = "postgresql://username:password@localhost:5432/pillsync"
 
     jwt_secret_key: str = "change-this-in-production"
     jwt_algorithm: str = "HS256"

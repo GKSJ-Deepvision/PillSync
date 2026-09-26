@@ -1,9 +1,7 @@
 import re
 
-
 DOSAGE_PATTERN = re.compile(
-    r"\b\d+(?:\.\d+)?\s*"
-    r"(?:mg|mcg|g|kg|ml|l|iu|%|mg/ml|mcg/ml)\b",
+    r"\b\d+(?:\.\d+)?\s*" r"(?:mg|mcg|g|kg|ml|l|iu|%|mg/ml|mcg/ml)\b",
     re.IGNORECASE,
 )
 
@@ -193,11 +191,7 @@ def extract_medicine_name(lines: list[str]) -> str | None:
     The method favors lines near dosage information because medicine
     names on packages are commonly located close to their dosage.
     """
-    candidates = [
-        line.strip(" ,.;:|-_")
-        for line in lines
-        if looks_like_medicine_name(line)
-    ]
+    candidates = [line.strip(" ,.;:|-_") for line in lines if looks_like_medicine_name(line)]
 
     if not candidates:
         return None
@@ -231,10 +225,7 @@ def extract_prescription_details(lines: list[str]) -> str | None:
     for line in lines:
         lowered = line.lower()
 
-        has_instruction_keyword = any(
-            keyword in lowered
-            for keyword in PRESCRIPTION_KEYWORDS
-        )
+        has_instruction_keyword = any(keyword in lowered for keyword in PRESCRIPTION_KEYWORDS)
 
         has_frequency = FREQUENCY_PATTERN.search(line) is not None
 

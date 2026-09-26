@@ -2,7 +2,6 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 
-
 client = TestClient(app)
 
 USERNAME = "vaishnavi"
@@ -94,10 +93,7 @@ def test_get_dosage_schedules():
     schedules = response.json()
 
     assert isinstance(schedules, list)
-    assert any(
-        schedule["medicine_id"] == medicine_id
-        for schedule in schedules
-    )
+    assert any(schedule["medicine_id"] == medicine_id for schedule in schedules)
 
 
 def test_get_dosage_schedule_by_id():

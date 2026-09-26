@@ -7,7 +7,6 @@ from app.models.patient_profile import PatientProfile
 from app.models.user import User
 from app.schemas.profile import ProfileCreate, ProfileResponse, ProfileUpdate
 
-
 router = APIRouter(prefix="/profile", tags=["User Profile"])
 
 
@@ -22,9 +21,7 @@ def create_profile(
     db: Session = Depends(get_db),
 ):
     existing_profile = (
-        db.query(PatientProfile)
-        .filter(PatientProfile.user_id == current_user.id)
-        .first()
+        db.query(PatientProfile).filter(PatientProfile.user_id == current_user.id).first()
     )
 
     if existing_profile:
@@ -53,11 +50,7 @@ def get_profile(
     current_user: User = Depends(patient_only),
     db: Session = Depends(get_db),
 ):
-    profile = (
-        db.query(PatientProfile)
-        .filter(PatientProfile.user_id == current_user.id)
-        .first()
-    )
+    profile = db.query(PatientProfile).filter(PatientProfile.user_id == current_user.id).first()
 
     if not profile:
         raise HTTPException(
@@ -74,11 +67,7 @@ def update_profile(
     current_user: User = Depends(patient_only),
     db: Session = Depends(get_db),
 ):
-    profile = (
-        db.query(PatientProfile)
-        .filter(PatientProfile.user_id == current_user.id)
-        .first()
-    )
+    profile = db.query(PatientProfile).filter(PatientProfile.user_id == current_user.id).first()
 
     if not profile:
         raise HTTPException(
