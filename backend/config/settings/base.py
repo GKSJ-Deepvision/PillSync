@@ -1,7 +1,13 @@
 import os
+import sys
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Add repository root to sys.path
+REPO_ROOT = BASE_DIR.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 SECRET_KEY = os.getenv("SECRET_KEY", "pillsync-default-dev-secret-key-change-in-prod")
 
@@ -25,6 +31,10 @@ INSTALLED_APPS = [
     "apps.medications",
     "apps.reminders",
     "apps.adherence",
+    "apps.refills",
+    "apps.analytics",
+    "apps.ocr",
+    "apps.notifications",
 ]
 
 MIDDLEWARE = [

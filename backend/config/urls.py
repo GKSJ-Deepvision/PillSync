@@ -16,6 +16,10 @@ def api_root(request):
                 "medications": "/api/medications/",
                 "reminders": "/api/reminders/",
                 "adherence": "/api/adherence/",
+                "refills": "/api/refills/",
+                "analytics": "/api/analytics/",
+                "ocr": "/api/ocr/",
+                "notifications": "/api/notifications/",
             },
         }
     )
@@ -30,4 +34,8 @@ urlpatterns = [
     path("api/medications/", include("apps.medications.urls")),
     path("api/reminders/", include("apps.reminders.urls")),
     path("api/adherence/", include("apps.adherence.urls")),
+    path("api/refills/", include("apps.refills.urls")),
+    path("api/analytics/", include("apps.analytics.urls")),
+    path("api/ocr/", include("apps.ocr.urls")),
+    path("api/notifications/", include("apps.notifications.urls")),
 ]
