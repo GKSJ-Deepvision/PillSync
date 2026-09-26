@@ -161,6 +161,7 @@ def test_mark_reminder_taken():
     assert data["status"] == "taken"
     assert data["action_at"] is not None
 
+
 def test_mark_reminder_missed():
     headers = get_auth_headers()
     reminder_id, _ = create_test_reminder(headers)
@@ -188,7 +189,7 @@ def test_snooze_reminder():
         headers=headers,
         json={
             "status": "snoozed",
-            "snoozed_until": "2026-09-26T00:30:00",
+            "snoozed_until": "2026-12-31T23:59:00",
         },
     )
 
@@ -197,7 +198,7 @@ def test_snooze_reminder():
     data = response.json()
 
     assert data["status"] == "snoozed"
-    assert data["snoozed_until"] == "2026-09-26T00:30:00"
+    assert data["snoozed_until"] == "2026-12-31T23:59:00"
     assert data["action_at"] is not None
 
 
@@ -247,6 +248,7 @@ def test_delete_reminder():
     assert get_response.status_code == 404
     assert get_response.json()["detail"] == "Reminder not found"
 
+
 def test_taken_action_endpoint():
     headers = get_auth_headers()
     reminder_id, _ = create_test_reminder(headers)
@@ -293,7 +295,7 @@ def test_snooze_action_endpoint():
         f"/reminders/{reminder_id}/snooze",
         headers=headers,
         params={
-            "snoozed_until": "2026-09-26T00:30:00",
+            "snoozed_until": "2026-12-31T23:59:00",
         },
     )
 
@@ -304,7 +306,8 @@ def test_snooze_action_endpoint():
     assert data["id"] == reminder_id
     assert data["status"] == "snoozed"
     assert data["action_at"] is not None
-    assert data["snoozed_until"] == "2026-09-26T00:30:00"
+    assert data["snoozed_until"] == "2026-12-31T23:59:00"
+
 
 def test_cannot_modify_another_patients_reminder():
     owner_headers = get_auth_headers()
