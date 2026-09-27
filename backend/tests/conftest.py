@@ -35,9 +35,7 @@ def reset_test_user_password(username: str) -> None:
             )
             db.add(user)
         else:
-            user.hashed_password = hash_password(
-                os.environ["TEST_USER_PASSWORD"]
-            )
+            user.hashed_password = hash_password(os.environ["TEST_USER_PASSWORD"])
 
         db.commit()
     finally:
