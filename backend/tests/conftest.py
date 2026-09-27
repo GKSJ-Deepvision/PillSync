@@ -37,7 +37,7 @@ def seed_test_users() -> None:
     users = [
         (
             "vaishnavi",
-            "vaishnavi@test.com",
+            "vaishnavi@example.com",
             "patient",
             os.environ["TEST_USER_PASSWORD"],
         ),
@@ -69,6 +69,7 @@ def seed_test_users() -> None:
                 )
                 db.add(user)
             else:
+                user.email = email
                 user.hashed_password = hash_password(password)
                 user.role = role
                 user.is_active = True
