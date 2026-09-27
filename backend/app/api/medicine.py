@@ -5,11 +5,7 @@ from app.api.auth import get_current_user
 from app.db.session import get_db
 from app.models.medicine import Medicine
 from app.models.user import User
-from app.schemas.medicine import (
-    MedicineCreate,
-    MedicineResponse,
-    MedicineUpdate,
-)
+from app.schemas.medicine import MedicineCreate, MedicineResponse, MedicineUpdate
 
 router = APIRouter(
     prefix="/medicines",

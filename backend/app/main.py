@@ -16,10 +16,7 @@ from app.api.refill_prediction import router as refill_prediction_router
 from app.api.reminder import router as reminder_router
 from app.api.stock import router as stock_router
 from app.core.config import settings
-from app.services.reminder_scheduler import (
-    start_scheduler,
-    stop_scheduler,
-)
+from app.services.reminder_scheduler import start_scheduler, stop_scheduler
 
 
 @asynccontextmanager

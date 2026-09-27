@@ -8,10 +8,7 @@ from app.models.medicine import Medicine
 from app.models.notification import Notification
 from app.models.reminder import Reminder
 from app.models.user import User
-from app.schemas.notification import (
-    NotificationCreate,
-    NotificationResponse,
-)
+from app.schemas.notification import NotificationCreate, NotificationResponse
 from app.services.notification_service import create_notification
 
 router = APIRouter(

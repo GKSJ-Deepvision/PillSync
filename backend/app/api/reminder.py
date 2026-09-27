@@ -10,11 +10,7 @@ from app.models.medication_history import MedicationHistory
 from app.models.medicine import Medicine
 from app.models.reminder import Reminder
 from app.models.user import User
-from app.schemas.reminder import (
-    ReminderCreate,
-    ReminderResponse,
-    ReminderUpdate,
-)
+from app.schemas.reminder import ReminderCreate, ReminderResponse, ReminderUpdate
 
 router = APIRouter(
     prefix="/reminders",

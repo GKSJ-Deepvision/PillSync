@@ -8,11 +8,7 @@ from app.db.session import get_db
 from app.models.medication_history import MedicationHistory
 from app.models.medicine import Medicine
 from app.models.user import User
-from app.schemas.adherence import (
-    AdherenceResponse,
-    AdherenceTrendResponse,
-    DailyAdherenceResponse,
-)
+from app.schemas.adherence import AdherenceResponse, AdherenceTrendResponse, DailyAdherenceResponse
 from app.schemas.medication_history import MedicationHistoryResponse
 
 router = APIRouter(

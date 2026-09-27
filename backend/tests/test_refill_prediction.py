@@ -2,10 +2,7 @@ from datetime import date, time
 
 from app.models.dosage_schedule import DosageSchedule
 from app.models.medicine import Medicine
-from app.services.refill_prediction import (
-    calculate_daily_consumption,
-    calculate_refill_prediction,
-)
+from app.services.refill_prediction import calculate_daily_consumption, calculate_refill_prediction
 
 
 def create_medicine(quantity: int = 60) -> Medicine:
