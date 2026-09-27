@@ -1,3 +1,5 @@
+import os
+
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -26,7 +28,7 @@ def test_protected_endpoint_without_token():
 def test_login():
     response = client.post(
         "/auth/login",
-        data={"username": "vaishnavi", "password": "Test@123"},
+        data={"username": "vaishnavi", "password": os.environ["TEST_USER_PASSWORD"]},
     )
 
     assert response.status_code == 200
@@ -40,7 +42,7 @@ def test_login():
 def test_protected_endpoint_with_token():
     login_response = client.post(
         "/auth/login",
-        data={"username": "vaishnavi", "password": "Test@123"},
+        data={"username": "vaishnavi", "password": os.environ["TEST_USER_PASSWORD"]},
     )
 
     assert login_response.status_code == 200
@@ -64,7 +66,7 @@ def test_protected_endpoint_with_token():
 def test_session_after_login():
     login_response = client.post(
         "/auth/login",
-        data={"username": "vaishnavi", "password": "Test@123"},
+        data={"username": "vaishnavi", "password": os.environ["TEST_USER_PASSWORD"]},
     )
 
     assert login_response.status_code == 200
@@ -82,7 +84,7 @@ def test_session_after_login():
 def test_logout():
     login_response = client.post(
         "/auth/login",
-        data={"username": "vaishnavi", "password": "Test@123"},
+        data={"username": "vaishnavi", "password": os.environ["TEST_USER_PASSWORD"]},
     )
 
     assert login_response.status_code == 200
@@ -117,7 +119,7 @@ def test_rbac_requires_authentication():
 
 
 def test_patient_rbac_access():
-    token = get_access_token("vaishnavi", "Test@123")
+    token = get_access_token("vaishnavi", os.environ["TEST_USER_PASSWORD"])
 
     response = client.get(
         "/rbac/patient",
@@ -129,7 +131,7 @@ def test_patient_rbac_access():
 
 
 def test_patient_cannot_access_caregiver_rbac():
-    token = get_access_token("vaishnavi", "Test@123")
+    token = get_access_token("vaishnavi", os.environ["TEST_USER_PASSWORD"])
 
     response = client.get(
         "/rbac/caregiver",
@@ -140,7 +142,7 @@ def test_patient_cannot_access_caregiver_rbac():
 
 
 def test_patient_cannot_access_admin_rbac():
-    token = get_access_token("vaishnavi", "Test@123")
+    token = get_access_token("vaishnavi", os.environ["TEST_USER_PASSWORD"])
 
     response = client.get(
         "/rbac/admin",
@@ -219,7 +221,7 @@ def test_admin_cannot_access_caregiver_rbac():
 
 
 def test_create_profile():
-    token = get_access_token("vaishnavi", "Test@123")
+    token = get_access_token("vaishnavi", os.environ["TEST_USER_PASSWORD"])
 
     response = client.post(
         "/profile",
@@ -241,7 +243,7 @@ def test_create_profile():
 
 
 def test_get_profile():
-    token = get_access_token("vaishnavi", "Test@123")
+    token = get_access_token("vaishnavi", os.environ["TEST_USER_PASSWORD"])
 
     response = client.get(
         "/profile",
@@ -256,7 +258,7 @@ def test_get_profile():
 
 
 def test_update_profile():
-    token = get_access_token("vaishnavi", "Test@123")
+    token = get_access_token("vaishnavi", os.environ["TEST_USER_PASSWORD"])
 
     response = client.put(
         "/profile",

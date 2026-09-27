@@ -1,11 +1,14 @@
+import os
+
 from fastapi.testclient import TestClient
 
 from app.main import app
+from tests.conftest import reset_test_user_password
 
 client = TestClient(app)
 
 USERNAME = "vaishnavi"
-PASSWORD = "Test@123"
+PASSWORD = os.environ["TEST_USER_PASSWORD"]
 
 
 def get_auth_headers():
@@ -267,12 +270,14 @@ def test_patient_cannot_access_another_patients_history():
         f"/reminders/{reminder_id}/taken",
         headers=owner_headers,
     )
+
     assert action_response.status_code == 200
 
     history_response = client.get(
         "/medication-history",
         headers=owner_headers,
     )
+
     assert history_response.status_code == 200
 
     matching_history = [
@@ -290,17 +295,19 @@ def test_patient_cannot_access_another_patients_history():
         json={
             "username": "history_other_user",
             "email": "history_other_user@example.com",
-            "password": "Test@123",
+            "password": os.environ["TEST_USER_PASSWORD"],
         },
     )
 
     assert register_response.status_code in {201, 400}
 
+    reset_test_user_password("history_other_user")
+
     login_response = client.post(
         "/auth/login",
         data={
             "username": "history_other_user",
-            "password": "Test@123",
+            "password": os.environ["TEST_USER_PASSWORD"],
         },
     )
 

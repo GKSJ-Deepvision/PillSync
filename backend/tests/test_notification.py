@@ -1,11 +1,14 @@
+import os
+
 from fastapi.testclient import TestClient
 
 from app.main import app
+from tests.conftest import reset_test_user_password
 
 client = TestClient(app)
 
 USERNAME = "vaishnavi"
-PASSWORD = "Test@123"
+PASSWORD = os.environ["TEST_USER_PASSWORD"]
 
 
 def get_auth_headers():
@@ -197,17 +200,19 @@ def test_notification_ownership():
         json={
             "username": "notification_other_user",
             "email": "notification_other_user@example.com",
-            "password": "Test@123",
+            "password": os.environ["TEST_USER_PASSWORD"],
         },
     )
 
     assert register_response.status_code in {201, 400}
 
+    reset_test_user_password("notification_other_user")
+
     login_response = client.post(
         "/auth/login",
         data={
             "username": "notification_other_user",
-            "password": "Test@123",
+            "password": os.environ["TEST_USER_PASSWORD"],
         },
     )
 
@@ -279,17 +284,19 @@ def test_cannot_create_notification_for_another_patients_reminder():
         json={
             "username": "notification_reminder_other",
             "email": "notification_reminder_other@example.com",
-            "password": "Test@123",
+            "password": os.environ["TEST_USER_PASSWORD"],
         },
     )
 
     assert register_response.status_code in {201, 400}
 
+    reset_test_user_password("notification_reminder_other")
+
     login_response = client.post(
         "/auth/login",
         data={
             "username": "notification_reminder_other",
-            "password": "Test@123",
+            "password": os.environ["TEST_USER_PASSWORD"],
         },
     )
 

@@ -1,11 +1,14 @@
+import os
+
 from fastapi.testclient import TestClient
 
 from app.main import app
+from tests.conftest import reset_test_user_password
 
 client = TestClient(app)
 
 USERNAME = "vaishnavi"
-PASSWORD = "Test@123"
+PASSWORD = os.environ["TEST_USER_PASSWORD"]
 
 
 def get_auth_headers():
@@ -315,17 +318,19 @@ def test_cannot_modify_another_patients_reminder():
         json={
             "username": "reminder_other_user",
             "email": "reminder_other_user@example.com",
-            "password": "Test@123",
+            "password": os.environ["TEST_USER_PASSWORD"],
         },
     )
 
     assert register_response.status_code in {201, 400}
 
+    reset_test_user_password("reminder_other_user")
+
     login_response = client.post(
         "/auth/login",
         data={
             "username": "reminder_other_user",
-            "password": "Test@123",
+            "password": os.environ["TEST_USER_PASSWORD"],
         },
     )
 

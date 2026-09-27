@@ -1,3 +1,5 @@
+import os
+
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -24,7 +26,7 @@ def test_medicine_requires_authentication():
 
 
 def test_create_medicine():
-    token = get_access_token("vaishnavi", "Test@123")
+    token = get_access_token("vaishnavi", os.environ["TEST_USER_PASSWORD"])
 
     response = client.post(
         "/medicines",
@@ -51,7 +53,7 @@ def test_create_medicine():
 
 
 def test_get_medicines():
-    token = get_access_token("vaishnavi", "Test@123")
+    token = get_access_token("vaishnavi", os.environ["TEST_USER_PASSWORD"])
 
     response = client.get(
         "/medicines",
@@ -66,7 +68,7 @@ def test_get_medicines():
 
 
 def test_get_medicine_by_id():
-    token = get_access_token("vaishnavi", "Test@123")
+    token = get_access_token("vaishnavi", os.environ["TEST_USER_PASSWORD"])
 
     create_response = client.post(
         "/medicines",
@@ -94,7 +96,7 @@ def test_get_medicine_by_id():
 
 
 def test_update_medicine():
-    token = get_access_token("vaishnavi", "Test@123")
+    token = get_access_token("vaishnavi", os.environ["TEST_USER_PASSWORD"])
 
     create_response = client.post(
         "/medicines",
@@ -131,7 +133,7 @@ def test_update_medicine():
 
 
 def test_delete_medicine():
-    token = get_access_token("vaishnavi", "Test@123")
+    token = get_access_token("vaishnavi", os.environ["TEST_USER_PASSWORD"])
 
     create_response = client.post(
         "/medicines",
@@ -164,7 +166,7 @@ def test_delete_medicine():
 
 
 def test_create_medicine_rejects_invalid_quantity():
-    token = get_access_token("vaishnavi", "Test@123")
+    token = get_access_token("vaishnavi", os.environ["TEST_USER_PASSWORD"])
 
     response = client.post(
         "/medicines",
@@ -181,7 +183,7 @@ def test_create_medicine_rejects_invalid_quantity():
 
 
 def test_create_medicine_rejects_invalid_dates():
-    token = get_access_token("vaishnavi", "Test@123")
+    token = get_access_token("vaishnavi", os.environ["TEST_USER_PASSWORD"])
 
     response = client.post(
         "/medicines",
@@ -200,7 +202,7 @@ def test_create_medicine_rejects_invalid_dates():
 
 
 def test_medicine_not_found():
-    token = get_access_token("vaishnavi", "Test@123")
+    token = get_access_token("vaishnavi", os.environ["TEST_USER_PASSWORD"])
 
     response = client.get(
         "/medicines/999999",

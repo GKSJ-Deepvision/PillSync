@@ -28,5 +28,5 @@ Example:
 
 ```env
 
-DATABASE\_URL=postgresql://username:password@localhost:5432/pillsync
+DATABASE\_URL=
 

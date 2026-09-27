@@ -1,3 +1,5 @@
+import os
+
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -5,7 +7,7 @@ from app.main import app
 client = TestClient(app)
 
 USERNAME = "vaishnavi"
-PASSWORD = "Test@123"
+PASSWORD = os.environ["TEST_USER_PASSWORD"]
 
 
 def get_auth_headers():
