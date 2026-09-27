@@ -25,8 +25,20 @@ def reset_test_user_password(username: str) -> None:
     try:
         user = db.query(User).filter(User.username == username).first()
 
-        if user:
-            user.hashed_password = hash_password(os.environ["TEST_USER_PASSWORD"])
-            db.commit()
+        if user is None:
+            user = User(
+                username=username,
+                email=f"{username}@example.com",
+                hashed_password=hash_password(os.environ["TEST_USER_PASSWORD"]),
+                role="patient",
+                is_active=True,
+            )
+            db.add(user)
+        else:
+            user.hashed_password = hash_password(
+                os.environ["TEST_USER_PASSWORD"]
+            )
+
+        db.commit()
     finally:
         db.close()
