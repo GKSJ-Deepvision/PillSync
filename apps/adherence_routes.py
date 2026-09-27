@@ -68,10 +68,18 @@ def log_adherence(
             detail="You are not authorized to log adherence for this medicine"
         )
     
+    # Determine adherence status value
+    status_value = log_data.status.value if hasattr(log_data.status, "value") else str(log_data.status)
+
+    # Automatically deplete inventory when dose is TAKEN
+    if status_value.upper() == "TAKEN":
+        medicine.total_quantity = max(0, medicine.total_quantity - 1)
+        db.add(medicine)
+
     # Create the adherence log entry
     adherence_log = AdherenceLog(
         medicine_id=log_data.medicine_id,
-        status=log_data.status.value if hasattr(log_data.status, "value") else str(log_data.status)
+        status=status_value
     )
     
     db.add(adherence_log)

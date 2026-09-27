@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from apps.database import SessionLocal
 from apps.models import Medicine, AdherenceLog
-from apps.notifications import send_medication_reminder
+from apps.notifications import send_medication_reminder, send_refill_alert
 
 logger = logging.getLogger("scheduler")
 
@@ -17,6 +17,8 @@ def check_due_medicines():
     Background job that checks for medicines due for a dose today.
     Opens a database session, queries all active medicines, and checks
     if they have required doses that have not been logged as 'TAKEN' today.
+    Additionally evaluates inventory for all active medicines and triggers
+    refill alerts if remaining supply is 5 days or fewer.
     """
     db: Session = SessionLocal()
     try:
@@ -51,7 +53,23 @@ def check_due_medicines():
                     )
                     due_count += 1
 
-        logger.info(f"check_due_medicines completed: checked {len(medicines)} medicines, {due_count} due reminders triggered.")
+        # Evaluate inventory of all active medicines for refill requirements
+        refill_alert_count = 0
+        for medicine in medicines:
+            if medicine.daily_frequency and medicine.daily_frequency > 0:
+                raw_days = medicine.total_quantity / medicine.daily_frequency
+                days_left = int(raw_days) if raw_days.is_integer() else round(raw_days, 2)
+            else:
+                days_left = 0
+
+            if days_left <= 5:
+                send_refill_alert(medicine_name=medicine.name, days_left=days_left)
+                refill_alert_count += 1
+
+        logger.info(
+            f"check_due_medicines completed: checked {len(medicines)} medicines, "
+            f"{due_count} due reminders triggered, {refill_alert_count} refill alerts triggered."
+        )
     except Exception as e:
         logger.error(f"Error executing check_due_medicines: {e}", exc_info=True)
     finally:

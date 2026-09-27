@@ -24,3 +24,18 @@ def send_medication_reminder(user_id: int, medicine_name: str, dosage: str) -> s
         ascii_message = message.encode("ascii", errors="backslashreplace").decode("ascii")
         logger.warning(ascii_message)
     return message
+
+def send_refill_alert(medicine_name: str, days_left: float | int) -> str:
+    """
+    Outputs a refill warning alert to the terminal via logging when a medication
+    has 5 or fewer days of supply remaining.
+    """
+    message = f"⚠️ REFILL REQUIRED | [{medicine_name}] only has [{days_left}] days of supply remaining!"
+    try:
+        logger.warning(message)
+    except UnicodeEncodeError:
+        # Fallback for consoles with limited character encodings (e.g. legacy cp1252 stdout)
+        ascii_message = message.encode("ascii", errors="backslashreplace").decode("ascii")
+        logger.warning(ascii_message)
+    return message
+

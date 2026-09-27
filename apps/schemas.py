@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List
+from typing import Optional, List, Union
 from enum import Enum
 from datetime import datetime
 
@@ -72,3 +72,7 @@ class AdherenceReportOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+class RefillStatusResponse(BaseModel):
+    days_remaining: Union[int, float]
+    needs_refill: bool

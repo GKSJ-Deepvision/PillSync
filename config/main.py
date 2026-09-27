@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from apps.database import engine
 import apps.models as models
@@ -51,6 +52,14 @@ app.include_router(auth_router)
 app.include_router(medicine_router)
 app.include_router(adherence_router)
 
-@app.get("/")
+@app.get("/health")
 def health_check():
     return {"status": "online", "message": "PillSync FastAPI Server is running smoothly!"}
+
+# Mount static frontend directory to serve UI at root /
+import os
+from fastapi.staticfiles import StaticFiles
+
+public_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "public")
+if os.path.exists(public_dir):
+    app.mount("/", StaticFiles(directory=public_dir, html=True), name="public")

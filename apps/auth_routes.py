@@ -6,7 +6,14 @@ from apps.models import User
 from apps.schemas import UserCreate, UserOut, Token
 from apps.security import hash_password, verify_password, create_access_token
 
+from apps.dependencies import get_current_user
+
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+@router.get("/me", response_model=UserOut)
+def get_me(current_user: User = Depends(get_current_user)):
+    """Return the profile of the currently authenticated user."""
+    return current_user
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
