@@ -224,6 +224,9 @@ jobs:
             echo "No manage.py yet - skipping Django checks."
           fi
 
+      - name: Initialize test database
+        run: python -c "from app.db.init_db import init_db; init_db()"
+
       - name: Pytest
         shell: bash
         run: |
