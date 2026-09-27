@@ -181,7 +181,7 @@ jobs:
       # Composed at runtime rather than written out above, so no connection
       # string with a password ever appears in a committed file.
       - name: Point the test database at the service container
-        run: echo "DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}" >> "$GITHUB_ENV"
+        run: echo "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}" >> "$GITHUB_ENV"
 
       - name: Install Tesseract (only if the branch uses OCR)
         shell: bash
