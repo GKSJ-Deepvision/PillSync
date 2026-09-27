@@ -198,12 +198,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements/dev.txt ]; then
-            pip install -r requirements/dev.txt
+            python -m pip install -r requirements/dev.txt
           elif [ -f requirements.txt ]; then
-            pip install -r requirements.txt
+            python -m pip install -r requirements.txt
           fi
-          # Guarantee the tools CI needs, even if the branch has not listed them.
-          pip install ruff black isort pytest pytest-cov
+          # Guarantee the tools CI needs, even if the branch has not
+          # listed them.
+          python -m pip install ruff black isort pytest pytest-cov
 
       - name: Ruff (lint)
         run: ruff check . --output-format=github
@@ -227,7 +228,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          pytest --cov=. --cov-report=term-missing --cov-report=xml --junitxml=pytest-report.xml
+          python -m pytest --cov=. --cov-report=term-missing --cov-report=xml --junitxml=pytest-report.xml
           code=$?
           set -e
           if [ "$code" -eq 5 ]; then
