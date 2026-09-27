@@ -153,7 +153,7 @@ def test_patient_cannot_access_admin_rbac():
 
 
 def test_caregiver_rbac_access():
-    token = get_access_token("caregiver_test", "Caregiver@123")
+    token = get_access_token("caregiver_test", os.environ["TEST_CAREGIVER_PASSWORD"])
 
     response = client.get(
         "/rbac/caregiver",
@@ -165,7 +165,7 @@ def test_caregiver_rbac_access():
 
 
 def test_caregiver_cannot_access_patient_rbac():
-    token = get_access_token("caregiver_test", "Caregiver@123")
+    token = get_access_token("caregiver_test", os.environ["TEST_CAREGIVER_PASSWORD"])
 
     response = client.get(
         "/rbac/patient",
@@ -176,7 +176,7 @@ def test_caregiver_cannot_access_patient_rbac():
 
 
 def test_caregiver_cannot_access_admin_rbac():
-    token = get_access_token("caregiver_test", "Caregiver@123")
+    token = get_access_token("caregiver_test", os.environ["TEST_CAREGIVER_PASSWORD"])
 
     response = client.get(
         "/rbac/admin",
@@ -187,7 +187,7 @@ def test_caregiver_cannot_access_admin_rbac():
 
 
 def test_admin_rbac_access():
-    token = get_access_token("admin_test", "Admin@123")
+    token = get_access_token("admin_test", os.environ["TEST_ADMIN_PASSWORD"])
 
     response = client.get(
         "/rbac/admin",
@@ -199,7 +199,7 @@ def test_admin_rbac_access():
 
 
 def test_admin_cannot_access_patient_rbac():
-    token = get_access_token("admin_test", "Admin@123")
+    token = get_access_token("admin_test", os.environ["TEST_ADMIN_PASSWORD"])
 
     response = client.get(
         "/rbac/patient",
@@ -210,7 +210,7 @@ def test_admin_cannot_access_patient_rbac():
 
 
 def test_admin_cannot_access_caregiver_rbac():
-    token = get_access_token("admin_test", "Admin@123")
+    token = get_access_token("admin_test", os.environ["TEST_ADMIN_PASSWORD"])
 
     response = client.get(
         "/rbac/caregiver",
