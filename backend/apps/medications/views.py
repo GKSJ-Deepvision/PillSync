@@ -3,11 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import Dosage, MedicationSchedule, Medicine
-from .serializers import (
-    DosageSerializer,
-    MedicationScheduleSerializer,
-    MedicineSerializer,
-)
+from .serializers import DosageSerializer, MedicationScheduleSerializer, MedicineSerializer
 
 
 class MedicineViewSet(viewsets.ModelViewSet):
