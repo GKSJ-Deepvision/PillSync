@@ -1,52 +1,104 @@
-# Milestone 3 — OCR Recognition & Refill Prediction (Week 5–6)
+# Milestone 3 — Prescription, OCR & Refill Integration
 
-- **Intern:** <your full name>
-- **Branch:** <intern/NN-your-name>
-- **Submitted on:** <YYYY-MM-DD>
+## 1. Overview
 
-## Evaluation criteria
+Milestone 3 extends the PillSync backend with prescription records, medicine-image OCR, refill prediction, and prescription expiry reminders. The implementation is integrated with the existing authenticated Django REST Framework API, reminder model, notification dispatcher, Celery tasks, and Celery Beat schedule.
 
-| Criterion | Status | Evidence (file, path or link) |
-|---|---|---|
-| OCR medicine recognition operational | ☐ Not started / ☐ In progress / ☐ Done | |
-| Extraction of name, dosage, quantity, frequency, prescription details | ☐ | |
-| AI refill prediction system functional | ☐ | |
-| Medication adherence tracking completed | ☐ | |
-| Refill notifications working correctly | ☐ | |
-| Low-stock alerts | ☐ | |
-| Adherence analytics (daily history, percentage, trends) | ☐ | |
+The work is implemented in the repository at commit `4f10367` (`feat: complete milestone 3 backend integration`), together with the preceding prescription and OCR implementation commits.
 
-## OCR pipeline
+## 2. Objectives
 
-<Preprocessing steps, OCR engine settings, parsing approach, and what you do
-when confidence is low.>
+- Store prescriptions and their clinical metadata under the owning user.
+- Extract structured medicine information from uploaded medicine images.
+- Provide a persisted refill prediction for medicines with active schedules.
+- Generate idempotent email notifications for prescriptions approaching expiry.
+- Protect prescription, OCR, and refill operations with authentication and ownership checks.
+- Validate the backend with Django migrations, tests, Ruff, Black, and isort.
 
-## Refill prediction logic
+## 3. Prescription Records
 
-Show the calculation on a worked example, including the spec's case:
-60 tablets at 2 per day should predict 30 days of supply.
+The `apps.prescriptions` application provides prescription upload and storage through a user-owned `Prescription` model. Each record stores the uploaded file, doctor name, issue date, expiry date, creation time, and update time. The API assigns ownership from the authenticated request rather than accepting it from the client.
 
-| Input | Value |
-|---|---|
-| Initial quantity | |
-| Daily dosage frequency | |
-| Quantity per dose | |
-| Missed doses accounted for | |
-| Predicted depletion date | |
-| Recommended refill date | |
+Prescription creation validates that the expiry date is later than the issue date. Authenticated users receive only their own prescription records; unauthenticated requests are rejected.
 
-## Accuracy
+Prescription model, API, parser, and task tests cover record creation, metadata, ownership filtering, date validation behavior, and the related expiry reminder workflow.
 
-- OCR field-level accuracy on your sample set:
-- Refill prediction error on your test cases:
-- Sample set used (must be synthetic or public domain — no real patient data):
+## 4. OCR and Medicine Recognition
 
-## Tests
+Authenticated clients can upload a medicine image through the OCR upload endpoint. The backend uses `pytesseract` and Pillow to extract text with Tesseract. The extracted text is passed to the deterministic parser in `apps.prescriptions.services.parser`, which uses regular expressions and keyword matching to identify:
 
-- Test files added:
-- What they cover:
-- `pytest` result:
+- medicine name
+- dosage
+- quantity
+- frequency
+- remaining prescription details
 
-## Blockers and open questions
+The OCR record stores the extracted text and parsed fields. Confidence is calculated as the proportion of the five structured fields that were populated. Records with confidence below `0.6` are marked with `is_uncertain=True`.
 
-<Anything you are stuck on, or say "None".>
+When extraction is incomplete or uncertain, the authenticated owner can patch the extracted fields through the manual correction endpoint. OCR records are protected by user ownership checks, and uploads are restricted to supported file types with a 5 MB size limit.
+
+This is the deterministic Tesseract and parser-based implementation present in the backend. No spaCy or OpenAI post-processing is wired into this flow.
+
+## 5. Refill Prediction Integration
+
+The `RefillPrediction` model stores the medicine, active-schedule consumption value, remaining days, predicted refill date, fallback status, and generation timestamp. `RefillPredictionService` calculates daily consumption from the count of active medication schedules, then calculates remaining days as:
+
+`ceil((medicine quantity - refill threshold) / active schedule count)`, bounded at zero.
+
+The predicted refill date is the current local date plus the calculated remaining days. Predictions are persisted with `update_or_create`, so a subsequent request updates the existing prediction for that medicine.
+
+The current production backend uses this deterministic fallback because no trained ML model is wired into the refill service. The response identifies this with `is_fallback=True`. A medicine without an active medication schedule is rejected with a validation error, and the endpoint only permits access to medicines owned by the authenticated user.
+
+## 6. Prescription Expiry Reminders
+
+Prescription expiry reminders are generated by the `generate_prescription_expiry_reminders` Celery task. The task uses the configurable `PRESCRIPTION_EXPIRY_REMINDER_DAYS` setting, which defaults to 30 days, and selects prescriptions whose expiry date is from today through the configured window. Expired prescriptions and prescriptions outside the window are ignored.
+
+The existing `Reminder` model supports either a medicine schedule or a prescription as its source. A database check constraint enforces exactly one source, and prescription reminders use a one-to-one relationship with the prescription. The task creates a morning reminder and an email `Notification` for each qualifying prescription. `get_or_create` makes repeated task execution idempotent.
+
+The existing notification dispatcher resolves the prescription owner for prescription reminders and routes the email through the configured email provider. Celery Beat schedules prescription expiry reminder generation hourly, alongside the existing reminder generation and pending-notification dispatcher schedules.
+
+Tests cover upcoming prescriptions, expired and outside-window prescriptions, repeated execution, user ownership, notification content, and dispatcher email recipient behavior.
+
+## 7. API Endpoints
+
+All endpoints below require authentication through the existing JWT-authenticated REST framework configuration.
+
+| Method | Endpoint | Purpose | Expected behavior |
+|---|---|---|---|
+| `GET` | `/api/prescriptions/` | List the current user's prescriptions | Returns only the authenticated user's records. |
+| `POST` | `/api/prescriptions/` | Upload and create a prescription record | Stores the file and metadata under the authenticated user; validates expiry after issue date. |
+| `POST` | `/api/ocr/upload/` | Upload a medicine image for OCR | Runs Tesseract extraction and deterministic parsing for medicine images, then returns the OCR record and parsed fields. |
+| `PATCH` | `/api/ocr/<pk>/` | Correct extracted OCR fields | Updates the selected OCR fields only when the record belongs to the authenticated user. |
+| `GET` | `/api/refills/medicines/<medicine_id>/prediction/` | Request a refill prediction | Returns and persists the deterministic prediction for an owned medicine; returns validation failure when no active schedule exists. |
+
+## 8. Testing and Validation
+
+The following checks were run with the project virtual environment:
+
+- `manage.py makemigrations --check`: passed; no changes detected.
+- `manage.py test`: passed; 133 tests ran successfully in 241.416 seconds.
+- `ruff check .`: passed; all checks passed.
+- `black --check .`: failed because 38 repository files would be reformatted.
+- `isort --check-only .`: failed because existing import-order issues were reported across repository files.
+
+The Django test run reported no system-check issues. Milestone-specific tests cover prescription APIs and parsing, OCR validation/upload/correction, refill service and API behavior, prescription expiry tasks, reminder generation, and notification dispatch behavior.
+
+## 9. Key Files and Components
+
+- `backend/apps/prescriptions/`: prescription model, serializer integration, list/create API, deterministic OCR parser, expiry reminder task, migrations, and tests.
+- `backend/apps/ocr/`: OCR record model, Tesseract extraction service, migrations, and OCR tests.
+- `backend/apps/refills/`: `RefillPrediction` model, serializer, deterministic prediction service, API view and URL configuration, migration, and tests.
+- `backend/apps/reminders/`: reminder source extension, exactly-one-source constraint, migration, and reminder generation integration.
+- `backend/apps/notifications/`: notification ownership resolution in the dispatcher and existing notification task/provider workflow.
+- `backend/apps/api/`: authenticated OCR upload and correction views, serializers, and API URL registration.
+- `backend/config/settings/base.py`: application registration, `PRESCRIPTION_EXPIRY_REMINDER_DAYS`, and Celery Beat schedules.
+
+## 10. Limitations and Future Improvements
+
+- Refill prediction currently uses a deterministic fallback and does not use a trained ML model in the production backend.
+- OCR parsing is implemented with the current Tesseract and regular-expression/keyword parser. It can be expanded to support more prescription layouts and extraction cases.
+- Repository-wide Black and isort checks still report existing issues; those files were outside the scope of this report update.
+
+## 11. Milestone 3 Completion Summary
+
+Milestone 3 backend implementation is complete for prescription records, deterministic OCR medicine recognition with manual correction, persisted fallback refill predictions, and prescription expiry email reminders. Authentication, ownership protection, validation, idempotent task behavior, Celery Beat scheduling, and the related test coverage are implemented. Migration checks, the full 133-test Django suite, and Ruff passed; Black and isort remain failing on repository-wide existing formatting and import-order issues.
