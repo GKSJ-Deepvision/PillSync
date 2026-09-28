@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase
 
 from apps.medicines.models import MedicationHistory, Medicine, MedicineSchedule
 
-from .services.adherence import calculate_adherence
+from .services import calculate_adherence
 
 User = get_user_model()
 

@@ -13,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.medications.services.adherence import calculate_adherence
+from apps.adherence.services import calculate_adherence
 from apps.medicines.models import MedicationHistory, Medicine, MedicineSchedule
 from apps.ocr.models import OCRRecord
 from apps.ocr.services.extractor import extract_text
