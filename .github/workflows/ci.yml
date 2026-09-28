@@ -54,7 +54,7 @@ jobs:
           set -uo pipefail
 
           has_backend=false
-          if find backend -name '*.py' -not -path '*/node_modules/*' | grep -q .; then
+          if find backend -name '*.py' -not -path '*/node_modules/*' -print -quit | grep -q .; then
             has_backend=true
           fi
 
@@ -64,7 +64,7 @@ jobs:
           fi
 
           has_ml=false
-          if find ml -name '*.py' | grep -q .; then
+          if find ml -name '*.py' -print -quit | grep -q .; then
             has_ml=true
           fi
 
