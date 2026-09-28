@@ -27,7 +27,9 @@ INSTALLED_APPS = [
     "apps.profiles",
     "apps.medications",
     "apps.reminders",
+    "apps.adherence",
     "apps.notifications",
+    "apps.ocr",
     "drf_spectacular",
 ]
 

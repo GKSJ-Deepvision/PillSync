@@ -1,6 +1,6 @@
 from django.db import models
 
-from apps.medications.models import Medication, MedicationSchedule
+from apps.medications.models import MedicationSchedule, Medicine
 
 
 class DoseEvent(models.Model):
@@ -9,7 +9,11 @@ class DoseEvent(models.Model):
         MISSED = "missed", "Missed"
         SNOOZED = "snoozed", "Snoozed"
 
-    medication = models.ForeignKey(Medication, on_delete=models.CASCADE, related_name="dose_events")
+    medication = models.ForeignKey(
+        Medicine,
+        on_delete=models.CASCADE,
+        related_name="dose_events",
+    )
     schedule = models.ForeignKey(
         MedicationSchedule,
         on_delete=models.SET_NULL,

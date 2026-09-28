@@ -16,6 +16,7 @@ urlpatterns = [
     path("api/medications/", include("apps.medications.urls")),
     path("api/reminders/", include("apps.reminders.urls")),
     path("api/adherence/", include("apps.adherence.urls")),
+    path("api/ocr/", include("apps.ocr.urls")),
     path("api/health/", health_check, name="health-check"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
