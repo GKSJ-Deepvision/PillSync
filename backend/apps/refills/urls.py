@@ -1,10 +1,6 @@
 ﻿from django.urls import path
 
-from .views import (
-    DosageAnalysisView,
-    RefillPredictionDetailView,
-    RefillPredictionView,
-)
+from .views import DosageAnalysisView, RefillPredictionDetailView, RefillPredictionView
 
 urlpatterns = [
     path(
