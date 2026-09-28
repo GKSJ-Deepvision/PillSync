@@ -23,4 +23,3 @@ urlpatterns = [
         name="dosage-analysis",
     ),
 ]
-

@@ -21,9 +21,7 @@ class RefillPredictionView(APIView):
             )
 
         try:
-            lead_days = int(
-                request.query_params.get("lead_days", REFILL_LEAD_DAYS)
-            )
+            lead_days = int(request.query_params.get("lead_days", REFILL_LEAD_DAYS))
             if not 0 <= lead_days <= 30:
                 raise ValueError
         except (TypeError, ValueError):

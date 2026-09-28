@@ -25,19 +25,12 @@ def analyze_dosage(medicine):
 
     for schedule in schedules:
         weekly_occurrences = sum(
-            schedule.occurs_on(
-                timezone.localdate() + timedelta(days=offset)
-            )
-            for offset in range(7)
+            schedule.occurs_on(timezone.localdate() + timedelta(days=offset)) for offset in range(7)
         )
         average_per_day = (
-            Decimal(str(weekly_occurrences)) / Decimal("7")
-            if weekly_occurrences
-            else Decimal("0")
+            Decimal(str(weekly_occurrences)) / Decimal("7") if weekly_occurrences else Decimal("0")
         )
-        consumption = (
-            Decimal(str(schedule.quantity_per_dose)) * average_per_day
-        )
+        consumption = Decimal(str(schedule.quantity_per_dose)) * average_per_day
 
         if weekly_occurrences:
             active_schedule_count += 1
@@ -96,11 +89,7 @@ def predict_refill(medicine, lead_days=REFILL_LEAD_DAYS):
         else:
             status = "OK"
 
-    refill_date = (
-        depletion_date - timedelta(days=lead_days)
-        if depletion_date is not None
-        else None
-    )
+    refill_date = depletion_date - timedelta(days=lead_days) if depletion_date is not None else None
 
     return {
         "medicine_id": str(medicine.id),
@@ -108,17 +97,9 @@ def predict_refill(medicine, lead_days=REFILL_LEAD_DAYS):
         "strength": analysis["strength"],
         "quantity_remaining": float(remaining),
         "daily_stock_consumption": float(daily_consumption),
-        "days_remaining": (
-            round(float(days_remaining), 2)
-            if days_remaining is not None
-            else None
-        ),
-        "predicted_depletion_date": (
-            depletion_date.isoformat() if depletion_date else None
-        ),
-        "recommended_refill_date": (
-            refill_date.isoformat() if refill_date else None
-        ),
+        "days_remaining": (round(float(days_remaining), 2) if days_remaining is not None else None),
+        "predicted_depletion_date": (depletion_date.isoformat() if depletion_date else None),
+        "recommended_refill_date": (refill_date.isoformat() if refill_date else None),
         "refill_lead_days": lead_days,
         "status": status,
         "low_stock_threshold": float(medicine.low_stock_threshold),

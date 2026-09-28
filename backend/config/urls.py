@@ -8,4 +8,3 @@ urlpatterns = [
     path("api/reminders/", include("apps.reminders.urls")),
     path("api/refills/", include("apps.refills.urls")),
 ]
-
