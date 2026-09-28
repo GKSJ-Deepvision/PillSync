@@ -52,9 +52,7 @@ class MedicationScheduleSerializer(serializers.ModelSerializer):
         days = attrs.get("days_of_week") or []
 
         if any(day < 0 or day > 6 for day in days):
-            raise serializers.ValidationError(
-                {"days_of_week": "Days must be between 0 and 6."}
-            )
+            raise serializers.ValidationError({"days_of_week": "Days must be between 0 and 6."})
 
         return attrs
 
@@ -146,9 +144,7 @@ class MedicineSerializer(serializers.ModelSerializer):
                 )
 
             if "dose_amount" in schedule_data:
-                schedule_data["quantity_per_dose"] = schedule_data.pop(
-                    "dose_amount"
-                )
+                schedule_data["quantity_per_dose"] = schedule_data.pop("dose_amount")
 
             if "time_of_day" not in schedule_data:
                 schedule_data["time_of_day"] = "08:00:00"
