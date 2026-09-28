@@ -1,0 +1,68 @@
+/* Medication Form Page Styles */
+.med-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 48rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.med-form-card {
+  border-radius: 1.25rem;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  padding: 1.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.med-form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .med-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.med-form-full {
+  grid-column: 1 / -1;
+}
+
+.med-form-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.375rem;
+}
+
+.med-form-input {
+  width: 100%;
+  border-radius: 0.875rem;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.8125rem;
+  color: #0f172a;
+  outline: none;
+  transition: all 120ms ease;
+}
+
+.med-form-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.med-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1.25rem;
+}

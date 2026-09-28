@@ -1,47 +1,16 @@
-# PillSync — Frontend
+# React + Vite
 
-React.js single-page app for patients, caregivers and admins.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-**Stack (from the project spec):** React.js, Tailwind CSS, Axios, Redux Toolkit or
-Context API, Firebase Cloud Messaging for push, Jest + React Testing Library.
+Currently, two official plugins are available:
 
-## Layout
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-| Path | Purpose |
-|---|---|
-| `src/api/` | Axios instance, interceptors, one module per backend resource |
-| `src/features/` | One folder per spec module (auth, medications, ocr, reminders, adherence, refills, notifications, analytics, caregiver, admin) |
-| `src/components/` | Reusable UI — `common/`, `layout/`, `charts/` |
-| `src/pages/` | Route-level screens composed from features |
-| `src/routes/` | Router setup and role-protected routes |
-| `src/store/` | Redux store and slices (skip if you use Context) |
-| `src/context/` | React contexts (auth, theme, notifications) |
-| `src/hooks/` | Shared custom hooks |
-| `src/utils/` | Formatters, date helpers, validators |
-| `src/styles/` | Tailwind entry CSS and design tokens |
-| `tests/` | Cross-cutting `unit/` and `integration/` tests |
+## React Compiler
 
-## Scaffolding (do this once, on your own branch)
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-```bash
-cd frontend
-npm create vite@latest . -- --template react
-npm install
-npm install axios react-router-dom @reduxjs/toolkit react-redux
-npm install -D tailwindcss postcss autoprefixer eslint prettier vitest @testing-library/react @testing-library/jest-dom jsdom
-```
+## Expanding the ESLint configuration
 
-Keep the folders above — move the generated files into them rather than starting
-a new layout.
-
-## Checks CI will run on your branch
-
-```bash
-npm run lint
-npm run format:check
-npm test
-npm run build
-```
-
-Define those four scripts in `package.json`. CI skips any script you have not
-defined yet, so add them as soon as the tooling is installed.
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.

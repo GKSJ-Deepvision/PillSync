@@ -1,0 +1,49 @@
+/* Shell Layout Styles */
+.layout-shell {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: #f8fafc;
+  overflow: hidden;
+}
+
+.layout-main-wrapper {
+  display: flex;
+  flex: 1 1 0%;
+  flex-direction: column;
+  height: 100vh;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.layout-content-scroll {
+  flex: 1 1 0%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 5rem;
+}
+
+@media (min-width: 768px) {
+  .layout-content-scroll {
+    padding-bottom: 2.5rem;
+  }
+}
+
+.layout-container {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 80rem;
+  padding: 1.5rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .layout-container {
+    padding: 1.75rem 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .layout-container {
+    padding: 2rem 2rem;
+  }
+}
