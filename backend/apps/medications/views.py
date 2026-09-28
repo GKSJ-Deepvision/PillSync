@@ -1,7 +1,13 @@
-from rest_framework import viewsets
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from .models import Dosage, MedicationSchedule, Medicine
-from .serializers import DosageSerializer, MedicationScheduleSerializer, MedicineSerializer
+from .serializers import (
+    DosageSerializer,
+    MedicationScheduleSerializer,
+    MedicineSerializer,
+)
 
 
 class MedicineViewSet(viewsets.ModelViewSet):
@@ -22,6 +28,25 @@ class MedicineViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(is_active=active.lower() == "true")
 
         return queryset
+
+    @action(detail=True, methods=["post"], url_path="schedules")
+    def schedules(self, request, pk=None):
+        medicine = self.get_object()
+
+        serializer = MedicationScheduleSerializer(data=request.data)
+
+        if serializer.is_valid():
+            schedule = serializer.save(medicine=medicine)
+
+            return Response(
+                MedicationScheduleSerializer(schedule).data,
+                status=status.HTTP_201_CREATED,
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 class DosageViewSet(viewsets.ModelViewSet):
