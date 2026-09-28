@@ -3,6 +3,7 @@ from rest_framework import serializers
 from apps.accounts.models import User
 from apps.medicines.models import MedicationHistory, Medicine, MedicineSchedule
 from apps.ocr.models import OCRRecord
+from apps.prescriptions.models import Prescription
 from apps.profiles.models import Profile
 from apps.reminders.models import Reminder
 
@@ -284,3 +285,31 @@ class OCRRecordSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Unsupported file type.")
 
         return value
+
+
+class PrescriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Prescription
+        fields = [
+            "id",
+            "file",
+            "doctor_name",
+            "issue_date",
+            "expiry_date",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "id",
+            "created_at",
+            "updated_at",
+        ]
+
+    def validate(self, attrs):
+        issue_date = attrs.get("issue_date")
+        expiry_date = attrs.get("expiry_date")
+
+        if issue_date and expiry_date and expiry_date <= issue_date:
+            raise serializers.ValidationError("Expiry date must be after issue date.")
+
+        return attrs

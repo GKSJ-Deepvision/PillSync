@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from apps.medications.views import DosageListCreateView, MedicationScheduleListCreateView
@@ -80,5 +80,9 @@ urlpatterns = [
         "ocr/upload/",
         OCRUploadView.as_view(),
         name="ocr-upload",
+    ),
+    path(
+        "prescriptions/",
+        include("apps.prescriptions.urls"),
     ),
 ]
