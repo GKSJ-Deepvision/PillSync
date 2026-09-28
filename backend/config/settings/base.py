@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "apps.profiles",
     "apps.medications",
     "apps.reminders",
+    "apps.refills",
 ]
 
 MIDDLEWARE = [
@@ -88,3 +89,4 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.AllowAny",
     ],
 }
+

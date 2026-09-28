@@ -1,52 +1,95 @@
 # Milestone 3 — OCR Recognition & Refill Prediction (Week 5–6)
 
-- **Intern:** <your full name>
-- **Branch:** <intern/NN-your-name>
-- **Submitted on:** <YYYY-MM-DD>
+- **Intern:** Ashritha Gowthami Nelakurthi
+- **Branch:** `intern/24-nelakurthi-ashritha-gowthami`
+- **Submitted on:** 28 September 2026
 
 ## Evaluation criteria
 
-| Criterion | Status | Evidence (file, path or link) |
+| Criterion | Status | Evidence |
 |---|---|---|
-| OCR medicine recognition operational | ☐ Not started / ☐ In progress / ☐ Done | |
-| Extraction of name, dosage, quantity, frequency, prescription details | ☐ | |
-| AI refill prediction system functional | ☐ | |
-| Medication adherence tracking completed | ☐ | |
-| Refill notifications working correctly | ☐ | |
-| Low-stock alerts | ☐ | |
-| Adherence analytics (daily history, percentage, trends) | ☐ | |
-
-## OCR pipeline
-
-<Preprocessing steps, OCR engine settings, parsing approach, and what you do
-when confidence is low.>
+| OCR medicine recognition operational | Not my assigned task | — |
+| Extraction of name, dosage, quantity, frequency, prescription details | Not my assigned task | — |
+| **AI refill prediction system functional** | **Done** | `backend/apps/refills/services/prediction.py`, `backend/apps/refills/views.py` |
+| **Dosage analysis workflow implemented** | **Done** | `backend/apps/refills/services/prediction.py` |
+| Refill notifications working correctly | Not my assigned task | — |
+| Low-stock alerts | **Implemented in prediction status** | `backend/apps/refills/services/prediction.py` |
+| Medication adherence analytics | Not my assigned task | — |
 
 ## Refill prediction logic
 
-Show the calculation on a worked example, including the spec's case:
-60 tablets at 2 per day should predict 30 days of supply.
+Inputs:
+- Current medicine quantity
+- Active medication schedules
+- Quantity per dose
+- Schedule frequency / selected days
+- Low-stock threshold
 
-| Input | Value |
-|---|---|
-| Initial quantity | |
-| Daily dosage frequency | |
-| Quantity per dose | |
-| Missed doses accounted for | |
-| Predicted depletion date | |
-| Recommended refill date | |
+Formula:
 
-## Accuracy
+`Daily stock consumption = sum(quantity per dose × average daily schedule occurrences)`
 
-- OCR field-level accuracy on your sample set:
-- Refill prediction error on your test cases:
-- Sample set used (must be synthetic or public domain — no real patient data):
+`Days remaining = quantity remaining / daily stock consumption`
+
+`Predicted depletion date = today + floor(days remaining)`
+
+`Recommended refill date = predicted depletion date - 5 days`
+
+Required specification example:
+
+`60 tablets ÷ 2 tablets/day = 30 days of supply`
+
+The API returns `OK`, `LOW_STOCK`, `REFILL_DUE`, `OUT_OF_STOCK`, or `NO_ACTIVE_DOSAGE`.
+
+## Dosage analysis workflow
+
+Medication → Active Schedule → Frequency → Weekly Occurrences → Average Daily Dose → Daily Stock Consumption → Refill Prediction
+
+The dosage analysis response contains:
+- medicine
+- strength
+- dose quantity
+- slot
+- scheduled time
+- frequency
+- selected days
+- weekly occurrences
+- average daily doses
+- daily stock consumption
+- remaining quantity
+
+## API
+
+- `GET /api/refills/predictions/?patient=<patient_id>`
+- `GET /api/refills/predictions/<medicine_id>/?patient=<patient_id>`
+- `GET /api/refills/dosage-analysis/?patient=<patient_id>`
+
+Optional prediction parameter:
+
+`lead_days=5` (valid range 0–30)
 
 ## Tests
 
-- Test files added:
-- What they cover:
-- `pytest` result:
+`backend/apps/refills/tests/test_prediction.py`
 
-## Blockers and open questions
+Covers:
+- 60 tablets / 2 per day specification case
+- multiple daily schedules
+- refill-due threshold
+- low stock
+- out of stock
+- missing active dosage
+- refill prediction API
+- dosage analysis API
 
-<Anything you are stuck on, or say "None".>
+Run:
+
+```powershell
+cd backend
+python -m pytest apps/refills/tests/test_prediction.py -q
+python manage.py check
+```
+
+## Accuracy
+
+This implementation is a deterministic schedule/stock prediction engine rather than a trained ML model. It is intentionally transparent and testable for the milestone's refill-prediction workflow.

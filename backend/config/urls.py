@@ -1,4 +1,4 @@
-from django.contrib import admin
+﻿from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
@@ -6,4 +6,6 @@ urlpatterns = [
     path("", include("apps.profiles.urls")),
     path("api/", include("apps.medications.api_urls")),
     path("api/reminders/", include("apps.reminders.urls")),
+    path("api/refills/", include("apps.refills.urls")),
 ]
+
