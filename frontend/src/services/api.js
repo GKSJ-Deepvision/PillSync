@@ -224,3 +224,107 @@ export async function fetchAnalyticsOverview() {
   if (!response.ok) throw new Error("Failed to load analytics.");
   return await response.json();
 }
+
+/* OCR Medicine Recognition API */
+export async function scanPrescriptionOcrApi(formDataOrText) {
+  let options = {};
+  if (typeof formDataOrText === "string") {
+    options = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ raw_text: formDataOrText }),
+    };
+  } else if (formDataOrText instanceof FormData) {
+    options = {
+      method: "POST",
+      body: formDataOrText,
+    };
+  } else {
+    options = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formDataOrText),
+    };
+  }
+
+  const response = await fetch(`${API_BASE_URL}/ocr/scan/`, options);
+  if (!response.ok) throw new Error("OCR Scanning failed.");
+  return await response.json();
+}
+
+export async function confirmOcrMedicationApi(confirmData) {
+  const response = await fetch(`${API_BASE_URL}/ocr/confirm/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(confirmData),
+  });
+  if (!response.ok) throw new Error("Failed to confirm OCR medication.");
+  return await response.json();
+}
+
+/* Refill Prediction API */
+export async function fetchRefillPredictionsApi() {
+  const response = await fetch(`${API_BASE_URL}/refills/predictions/`);
+  if (!response.ok) throw new Error("Failed to fetch refill predictions.");
+  return await response.json();
+}
+
+export async function updateStockApi(medicationId, newStock) {
+  const response = await fetch(`${API_BASE_URL}/refills/update-stock/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ medication_id: medicationId, new_stock: newStock }),
+  });
+  if (!response.ok) throw new Error("Failed to update stock.");
+  return await response.json();
+}
+
+export async function requestRefillApi(medicationId, quantity = 60, notes = "") {
+  const response = await fetch(`${API_BASE_URL}/refills/request-refill/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ medication_id: medicationId, quantity, notes }),
+  });
+  if (!response.ok) throw new Error("Failed to place refill order request.");
+  return await response.json();
+}
+
+/* Adherence Tracking API */
+export async function fetchAdherenceMetricsApi() {
+  const response = await fetch(`${API_BASE_URL}/adherence/metrics/`);
+  if (!response.ok) throw new Error("Failed to fetch adherence metrics.");
+  return await response.json();
+}
+
+export async function logAdherenceDoseApi({ medicationId, reminderId, status, period, scheduledTime, notes }) {
+  const response = await fetch(`${API_BASE_URL}/adherence/log/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      medication_id: medicationId,
+      reminder_id: reminderId,
+      status,
+      period,
+      scheduled_time: scheduledTime,
+      notes,
+    }),
+  });
+  if (!response.ok) throw new Error("Failed to log dose adherence.");
+  return await response.json();
+}
+
+/* Notifications API */
+export async function fetchNotificationsApi() {
+  const response = await fetch(`${API_BASE_URL}/notifications/`);
+  if (!response.ok) throw new Error("Failed to fetch notifications.");
+  return await response.json();
+}
+
+export async function markNotificationReadApi(notificationId) {
+  const response = await fetch(`${API_BASE_URL}/notifications/${notificationId}/read/`, {
+    method: "POST",
+  });
+  if (!response.ok) throw new Error("Failed to mark notification as read.");
+  return await response.json();
+}
+

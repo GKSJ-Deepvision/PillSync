@@ -1,9 +1,11 @@
 import os
+import sys
 from pathlib import Path
 
 import dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(BASE_DIR.parent))
 dotenv.load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-pillsync-dev-key-2026-super-secret")
@@ -24,10 +26,15 @@ INSTALLED_APPS = [
     "corsheaders",
     # Local apps
     "apps.accounts",
+    "apps.profiles",
     "apps.medications",
+    "apps.prescriptions",
+    "apps.ocr",
     "apps.reminders",
-    "apps.analytics",
+    "apps.adherence",
     "apps.refills",
+    "apps.notifications",
+    "apps.analytics",
 ]
 
 MIDDLEWARE = [
