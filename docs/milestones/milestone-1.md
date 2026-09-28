@@ -1,42 +1,47 @@
-# Milestone 1 — Requirements, Database Design & Core Setup (Week 1–2)
+# M1 - Requirements, Database Design & Core Setup (Week 1–2)
 
-- **Intern:** <your full name>
-- **Branch:** <intern/NN-your-name>
-- **Submitted on:** <YYYY-MM-DD>
+## Objective
 
-## Evaluation criteria
+Establish the backend foundation for PillSync: define the initial architecture and data schema, configure Django with Django REST Framework and PostgreSQL, and provide the first authenticated API surface.
 
-| Criterion | Status | Evidence (file, path or link) |
-|---|---|---|
-| Backend initialization completed | ☐ Not started / ☐ In progress / ☐ Done | |
-| Authentication workflows implemented (JWT, OAuth2, sessions, password management) | ☐ | |
-| Database schema finalized | ☐ | |
-| Frontend setup completed | ☐ | |
-| Role-based access control (Patient / Caregiver / Admin) | ☐ | |
-| User profile management | ☐ | |
-| UI wireframes and workflow planning | ☐ | |
-| PostgreSQL configured | ☐ | |
+## Work completed
 
-## What I built
+- Documented the initial repository structure, requirements, database schema, and backend architecture.
+- Set up the Django project, Django REST Framework, environment-based settings, and backend tooling.
+- Configured the development database for PostgreSQL and added the PostgreSQL driver and database settings.
+- Established the core Django project and app structure, including the configuration, accounts, profiles, medicines, and API modules.
+- Added a custom user model with Patient, Caregiver, and Admin roles, unique email addresses, and profile support.
+- Implemented registration, JWT login, JWT refresh, authenticated user details, and profile read/update endpoints.
+- Added the initial models and migrations used by the backend schema.
+- Added the `/api/` URL root and initial health, authentication, profile, and API routing.
+- Added backend tests and configured CI/code-quality checks for Ruff, Black, isort, Django checks, and pytest.
 
-<Short description — two or three paragraphs.>
+## APIs/features implemented
 
-## Database design
+- `GET /api/health/`
+- `POST /api/auth/register/`
+- `POST /api/auth/login/`
+- `POST /api/auth/token/refresh/`
+- `GET /api/auth/me/`
+- `GET` and `PUT /api/profile/`
 
-<Link to the ER diagram in docs/database/ and describe the main tables and relations.>
+## Database/models introduced
 
-## How to run and verify it
+- Custom `accounts.User` model with role choices and a unique email field.
+- `profiles.Profile` model linked one-to-one with the user and containing contact and emergency-contact fields.
+- Initial Django migrations and database schema documentation for the backend foundation.
 
-```bash
-<commands a reviewer can run to see it working>
-```
+## Testing and validation
 
-## Tests
+- Django and pytest tests were added for accounts, API behavior, medicines, and profiles.
+- API tests cover registration, authentication, permissions, profile behavior, health checks, and core API responses.
+- CI runs Ruff, Black, isort, Django system checks, and pytest with coverage reporting.
+- The repository contains configuration for all four tools and CI validation; this report does not claim a new local run result.
 
-- Test files added:
-- What they cover:
-- `pytest` result:
+## Git/branch and development workflow
 
-## Blockers and open questions
+Milestone 1 backend work was completed in the repository history by the commit titled `feat: complete milestone 1 backend APIs and tests` (`44daaf0`). Development uses intern branches; the current branch is `intern/12-dushyant-singh-sisodiya`. Pushes trigger the repository CI workflow, which validates structure, secrets, formatting, linting, imports, Django checks, and tests.
 
-<Anything you are stuck on, or say "None".>
+## Final outcome/status
+
+Milestone 1 backend setup is complete. PillSync has a Django/DRF foundation, PostgreSQL configuration, role-aware user authentication with JWT, initial schema migrations, core routing, tests, and automated quality checks.
