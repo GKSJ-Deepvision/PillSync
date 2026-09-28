@@ -13,6 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.medications.services.adherence import calculate_adherence
 from apps.medicines.models import MedicationHistory, Medicine, MedicineSchedule
 from apps.ocr.models import OCRRecord
 from apps.ocr.services.extractor import extract_text
@@ -21,6 +22,8 @@ from apps.profiles.models import Profile
 from apps.reminders.models import Reminder
 
 from .serializers import (
+    AdherenceQuerySerializer,
+    AdherenceSerializer,
     MedicationHistorySerializer,
     MedicineScheduleSerializer,
     MedicineSerializer,
@@ -110,6 +113,46 @@ class ProfileView(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+class AdherenceView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        query_serializer = AdherenceQuerySerializer(data=request.query_params)
+        if not query_serializer.is_valid():
+            return Response(query_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        data = calculate_adherence(request.user, **query_serializer.validated_data)
+        return Response(AdherenceSerializer(data).data)
+
+
+class MedicineAdherenceView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, medicine_id):
+        medicine = Medicine.objects.filter(id=medicine_id, user=request.user).first()
+        if medicine is None:
+            return Response(
+                {"detail": "Medicine not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        query_serializer = AdherenceQuerySerializer(data=request.query_params)
+        if not query_serializer.is_valid():
+            return Response(query_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        data = calculate_adherence(
+            request.user,
+            medicine=medicine,
+            **query_serializer.validated_data,
+        )
+        data = {
+            "medicine": medicine.id,
+            "medicine_name": medicine.name,
+            **data,
+        }
+        return Response(AdherenceSerializer(data).data)
 
 
 class MedicineListCreateView(APIView):

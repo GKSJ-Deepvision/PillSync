@@ -4,9 +4,11 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from apps.medications.views import DosageListCreateView, MedicationScheduleListCreateView
 
 from .views import (
+    AdherenceView,
     HealthCheckView,
     MedicationHistoryDetailView,
     MedicationHistoryListCreateView,
+    MedicineAdherenceView,
     MedicineListCreateView,
     MedicineScheduleDetailView,
     MedicineScheduleListCreateView,
@@ -29,6 +31,12 @@ urlpatterns = [
     path("auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("auth/me/", MeView.as_view(), name="me"),
     path("profile/", ProfileView.as_view(), name="profile"),
+    path("adherence/", AdherenceView.as_view(), name="adherence"),
+    path(
+        "adherence/medicines/<int:medicine_id>/",
+        MedicineAdherenceView.as_view(),
+        name="medicine-adherence",
+    ),
     path("medicines/", MedicineListCreateView.as_view(), name="medicines"),
     path(
         "medicines/<int:medicine_id>/schedules/",

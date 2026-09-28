@@ -244,6 +244,32 @@ class ReminderSnoozeSerializer(serializers.Serializer):
     minutes = serializers.IntegerField(min_value=1)
 
 
+class AdherenceQuerySerializer(serializers.Serializer):
+    start_date = serializers.DateField(required=False)
+    end_date = serializers.DateField(required=False)
+
+    def validate(self, attrs):
+        start_date = attrs.get("start_date")
+        end_date = attrs.get("end_date")
+
+        if start_date and end_date and start_date > end_date:
+            raise serializers.ValidationError(
+                {"end_date": "End date must be on or after start date."}
+            )
+
+        return attrs
+
+
+class AdherenceSerializer(serializers.Serializer):
+    medicine = serializers.IntegerField(required=False)
+    medicine_name = serializers.CharField(required=False)
+    total_scheduled = serializers.IntegerField()
+    taken = serializers.IntegerField()
+    missed = serializers.IntegerField()
+    adherence_percentage = serializers.FloatField()
+    daily_breakdown = serializers.ListField(child=serializers.DictField())
+
+
 class OCRRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = OCRRecord
