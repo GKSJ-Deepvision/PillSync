@@ -1,5 +1,5 @@
 import re
-from typing import Any, Dict
+from typing import Any
 try:
     from PIL import Image
     HAS_PIL = True
@@ -37,7 +37,7 @@ COMMON_MEDICATIONS = [
 class PrescriptionOcrExtractor:
     """Extracts medicine, dosage, quantity, and prescription metadata from text/images."""
 
-    def extract_from_image(self, image: Image.Image) -> Dict[str, Any]:
+    def extract_from_image(self, image: Image.Image) -> dict[str, Any]:
         extracted_text = ""
         ocr_confidence = 85.0
 
@@ -56,7 +56,7 @@ class PrescriptionOcrExtractor:
 
         return self.parse_prescription_text(extracted_text, ocr_confidence)
 
-    def parse_prescription_text(self, text: str, base_confidence: float = 90.0) -> Dict[str, Any]:
+    def parse_prescription_text(self, text: str, base_confidence: float = 90.0) -> dict[str, Any]:
         clean_text = text.replace("\n", " ").strip()
 
         # 1. Medicine Name

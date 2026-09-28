@@ -25,16 +25,24 @@ export default function OcrPreviewCard({ ocrResult, onConfirm }) {
         <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
           <Pill className="w-5 h-5 text-brand-600" />
           <div>
-            <div className="text-slate-400 text-xs font-medium">Medicine Name</div>
-            <div className="font-bold text-slate-900 dark:text-white">{ocrResult.medicineName}</div>
+            <div className="text-slate-400 text-xs font-medium">
+              Medicine Name
+            </div>
+            <div className="font-bold text-slate-900 dark:text-white">
+              {ocrResult.medicineName}
+            </div>
           </div>
         </div>
 
         <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
           <Hash className="w-5 h-5 text-brand-600" />
           <div>
-            <div className="text-slate-400 text-xs font-medium">Dosage & Stock</div>
-            <div className="font-bold text-slate-900 dark:text-white">{ocrResult.dosage} • {ocrResult.quantity} Units</div>
+            <div className="text-slate-400 text-xs font-medium">
+              Dosage & Stock
+            </div>
+            <div className="font-bold text-slate-900 dark:text-white">
+              {ocrResult.dosage} • {ocrResult.quantity} Units
+            </div>
           </div>
         </div>
 
@@ -42,15 +50,21 @@ export default function OcrPreviewCard({ ocrResult, onConfirm }) {
           <Clock className="w-5 h-5 text-brand-600" />
           <div>
             <div className="text-slate-400 text-xs font-medium">Frequency</div>
-            <div className="font-bold text-slate-900 dark:text-white">{ocrResult.frequency}</div>
+            <div className="font-bold text-slate-900 dark:text-white">
+              {ocrResult.frequency}
+            </div>
           </div>
         </div>
 
         <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
           <User className="w-5 h-5 text-brand-600" />
           <div>
-            <div className="text-slate-400 text-xs font-medium">Prescribing Physician</div>
-            <div className="font-bold text-slate-900 dark:text-white">{ocrResult.doctorName}</div>
+            <div className="text-slate-400 text-xs font-medium">
+              Prescribing Physician
+            </div>
+            <div className="font-bold text-slate-900 dark:text-white">
+              {ocrResult.doctorName}
+            </div>
           </div>
         </div>
       </div>
@@ -60,7 +74,8 @@ export default function OcrPreviewCard({ ocrResult, onConfirm }) {
           onClick={onConfirm}
           className="w-full py-3 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md transition-all"
         >
-          <CheckCircle2 className="w-4 h-4" /> Save Extracted Medicine to Schedule
+          <CheckCircle2 className="w-4 h-4" /> Save Extracted Medicine to
+          Schedule
         </button>
       )}
     </div>

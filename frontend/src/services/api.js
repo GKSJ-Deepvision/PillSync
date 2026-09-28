@@ -279,7 +279,11 @@ export async function updateStockApi(medicationId, newStock) {
   return await response.json();
 }
 
-export async function requestRefillApi(medicationId, quantity = 60, notes = "") {
+export async function requestRefillApi(
+  medicationId,
+  quantity = 60,
+  notes = "",
+) {
   const response = await fetch(`${API_BASE_URL}/refills/request-refill/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -296,7 +300,14 @@ export async function fetchAdherenceMetricsApi() {
   return await response.json();
 }
 
-export async function logAdherenceDoseApi({ medicationId, reminderId, status, period, scheduledTime, notes }) {
+export async function logAdherenceDoseApi({
+  medicationId,
+  reminderId,
+  status,
+  period,
+  scheduledTime,
+  notes,
+}) {
   const response = await fetch(`${API_BASE_URL}/adherence/log/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -321,10 +332,12 @@ export async function fetchNotificationsApi() {
 }
 
 export async function markNotificationReadApi(notificationId) {
-  const response = await fetch(`${API_BASE_URL}/notifications/${notificationId}/read/`, {
-    method: "POST",
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/notifications/${notificationId}/read/`,
+    {
+      method: "POST",
+    },
+  );
   if (!response.ok) throw new Error("Failed to mark notification as read.");
   return await response.json();
 }
-

@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Any, Dict
+from typing import Any
 
 
 class RefillPredictor:
@@ -13,7 +13,7 @@ class RefillPredictor:
         missed_doses: int = 0,
         refill_lead_days: int = 5,
         reference_date: datetime | None = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if reference_date is None:
             reference_date = datetime.now()
 

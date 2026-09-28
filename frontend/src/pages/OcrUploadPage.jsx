@@ -1,5 +1,9 @@
 import React, { useState } from "react";
-import { searchFdaDrugs, addMedication, scanPrescriptionOcrApi, confirmOcrMedicationApi } from "../services/api";
+import {
+  searchFdaDrugs,
+  scanPrescriptionOcrApi,
+  confirmOcrMedicationApi,
+} from "../services/api";
 import { useNavigate } from "react-router-dom";
 import {
   UploadCloud,
@@ -85,7 +89,7 @@ export default function OcrUploadPage() {
       let scanResult;
       if (selectedDatasetSample) {
         scanResult = await scanPrescriptionOcrApi(
-          `Rx: ${selectedDatasetSample.medicineName} ${selectedDatasetSample.dosage}. Take 1 tablet ${selectedDatasetSample.frequency}. Total 60 tablets. ${selectedDatasetSample.doctorName}`
+          `Rx: ${selectedDatasetSample.medicineName} ${selectedDatasetSample.dosage}. Take 1 tablet ${selectedDatasetSample.frequency}. Total 60 tablets. ${selectedDatasetSample.doctorName}`,
         );
       } else if (selectedFile) {
         const formData = new FormData();
@@ -93,7 +97,9 @@ export default function OcrUploadPage() {
         try {
           scanResult = await scanPrescriptionOcrApi(formData);
         } catch {
-          scanResult = await scanPrescriptionOcrApi("Rx: Metformin 500 mg. Take 1 tablet 2 times daily. Total 60 tablets. Dr. Vance");
+          scanResult = await scanPrescriptionOcrApi(
+            "Rx: Metformin 500 mg. Take 1 tablet 2 times daily. Total 60 tablets. Dr. Vance",
+          );
         }
       }
 
@@ -133,7 +139,9 @@ export default function OcrUploadPage() {
         diseaseCategory: ocrResult.extractedDisease || "General",
         doctorName: ocrResult.doctorName,
       });
-      alert("Medicine successfully parsed & added into live database schedule!");
+      alert(
+        "Medicine successfully parsed & added into live database schedule!",
+      );
       navigate("/medications");
     } catch (err) {
       alert(`Error saving medicine: ${err.message}`);
