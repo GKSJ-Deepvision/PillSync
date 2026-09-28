@@ -22,6 +22,7 @@ api_v1 = [
     path("reference/", include("apps.common.urls")),
     path("", include("apps.medications.urls")),
     path("", include("apps.prescriptions.urls")),
+    path("", include("apps.ocr.urls")),
     path("", include("apps.reminders.urls")),
     path("notifications/", include("apps.notifications.urls")),
 ]

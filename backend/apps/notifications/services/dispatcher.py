@@ -141,7 +141,7 @@ def notify_dose_due(dose) -> list[NotificationLog]:
     """The reminder itself."""
     medicine = dose.medicine
     instructions = f" ({medicine.instructions})" if medicine.instructions else ""
-    body = f"Time to take {dose.quantity_expected:g} × {medicine.display_name}" f"{instructions}."
+    body = f"Time to take {dose.quantity_expected:g} × {medicine.display_name}{instructions}."
 
     logs: list[NotificationLog] = []
     for recipient in _patient_recipients(dose.patient):

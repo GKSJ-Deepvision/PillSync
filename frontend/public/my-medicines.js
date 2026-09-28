@@ -5,12 +5,19 @@ let searchTerm = '';
 
 const categoryColors = {
   'Blood Pressure': '#D97B5B',
+  BLOOD_PRESSURE: '#D97B5B',
   Diabetes: '#7FA98E',
+  DIABETES: '#7FA98E',
   Thyroid: '#C9A96E',
+  THYROID: '#C9A96E',
   Antibiotics: '#8E7CC3',
+  ANTIBIOTICS: '#8E7CC3',
   Vitamins: '#C9A96E',
+  VITAMINS: '#C9A96E',
   'Heart Medications': '#D97B5B',
+  HEART: '#D97B5B',
   Other: '#8A8578',
+  OTHER: '#8A8578',
 };
 
 async function fetchMedicines() {

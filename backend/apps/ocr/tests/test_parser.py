@@ -1,5 +1,6 @@
 from apps.ocr.services.parser import parse_ocr_text
 
+
 def test_parse_empty_text():
     result = parse_ocr_text("")
     assert result["medicine_name"] is None
@@ -7,6 +8,7 @@ def test_parse_empty_text():
     assert result["quantity"] is None
     assert result["frequency"] is None
     assert result["prescription_details"] is None
+
 
 def test_parse_basic_prescription():
     text = """
@@ -22,6 +24,7 @@ def test_parse_basic_prescription():
     assert result["frequency"] == "DAILY"
     assert "Lisinopril 10mg" in result["prescription_details"]
 
+
 def test_parse_variations_1():
     text = """
     Amoxicillin 500 mg
@@ -33,6 +36,7 @@ def test_parse_variations_1():
     assert result["dosage"] == "500 mg"
     assert result["quantity"] == 21
     assert result["frequency"] == "THREE_TIMES_DAILY"
+
 
 def test_parse_variations_2():
     text = """
@@ -47,6 +51,7 @@ def test_parse_variations_2():
     assert result["quantity"] == 1
     assert result["frequency"] == "TWICE_DAILY"
 
+
 def test_parse_variations_3():
     text = """
     Vitamin D3 50mcg
@@ -58,6 +63,7 @@ def test_parse_variations_3():
     assert result["dosage"] == "50mcg"
     assert result["quantity"] == 30
     assert result["frequency"] == "DAILY"
+
 
 def test_missing_fields():
     text = """
