@@ -16,6 +16,7 @@ CELERY_BROKER_URL = "redis://localhost:6379/0"
 CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 
 FIREBASE_CREDENTIALS_PATH = os.getenv("FIREBASE_CREDENTIALS_PATH")
+PRESCRIPTION_EXPIRY_REMINDER_DAYS = int(os.getenv("PRESCRIPTION_EXPIRY_REMINDER_DAYS", "30"))
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -35,6 +36,7 @@ INSTALLED_APPS = [
     "apps.api",
     "apps.reminders",
     "apps.notifications",
+    "apps.refills",
 ]
 
 MIDDLEWARE = [
@@ -111,6 +113,10 @@ SIMPLE_JWT = {
 CELERY_BEAT_SCHEDULE = {
     "generate-upcoming-reminders": {
         "task": "apps.reminders.tasks.generate_upcoming_reminders",
+        "schedule": 60 * 60,
+    },
+    "generate-prescription-expiry-reminders": {
+        "task": "apps.prescriptions.tasks.generate_prescription_expiry_reminders",
         "schedule": 60 * 60,
     },
     "dispatch-pending-notifications": {

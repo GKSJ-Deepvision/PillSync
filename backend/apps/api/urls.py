@@ -86,5 +86,6 @@ urlpatterns = [
         "prescriptions/",
         include("apps.prescriptions.urls"),
     ),
+    path("refills/", include("apps.refills.urls")),
     path("ocr/<int:pk>/", OCRCorrectionView.as_view(), name="ocr-correction"),
 ]

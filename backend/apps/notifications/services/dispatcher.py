@@ -28,7 +28,11 @@ class NotificationDispatcher:
         )
 
     def _get_recipient(self, notification: Notification) -> str:
-        user = notification.reminder.schedule.medicine.user
+        reminder = notification.reminder
+        if reminder.prescription_id:
+            user = reminder.prescription.user
+        else:
+            user = reminder.schedule.medicine.user
 
         if notification.channel == Notification.Channel.EMAIL:
             return user.email

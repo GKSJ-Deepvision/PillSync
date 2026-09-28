@@ -1,6 +1,8 @@
 from django.db import models
+from django.db.models import Q
 
 from apps.medicines.models import MedicineSchedule
+from apps.prescriptions.models import Prescription
 
 
 class Reminder(models.Model):
@@ -19,6 +21,15 @@ class Reminder(models.Model):
         MedicineSchedule,
         on_delete=models.CASCADE,
         related_name="reminders",
+        null=True,
+        blank=True,
+    )
+    prescription = models.OneToOneField(
+        Prescription,
+        on_delete=models.CASCADE,
+        related_name="expiry_reminder",
+        null=True,
+        blank=True,
     )
     scheduled_at = models.DateTimeField()
     period = models.CharField(
@@ -43,7 +54,16 @@ class Reminder(models.Model):
                 fields=["schedule", "scheduled_at"],
                 name="unique_reminder_occurrence",
             ),
+            models.CheckConstraint(
+                check=(
+                    Q(schedule__isnull=False, prescription__isnull=True)
+                    | Q(schedule__isnull=True, prescription__isnull=False)
+                ),
+                name="reminder_has_one_source",
+            ),
         ]
 
     def __str__(self):
+        if self.prescription_id:
+            return f"Prescription expiry - {self.scheduled_at}"
         return f"{self.schedule.medicine.name} - {self.scheduled_at}"
