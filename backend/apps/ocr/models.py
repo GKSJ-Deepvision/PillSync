@@ -30,6 +30,12 @@ class OCRRecord(models.Model):
     )
     extracted_text = models.TextField(blank=True)
     confidence = models.FloatField(null=True, blank=True)
+    is_uncertain = models.BooleanField(default=False)
+    medicine_name = models.CharField(max_length=255, blank=True)
+    dosage = models.CharField(max_length=100, blank=True)
+    quantity = models.CharField(max_length=100, blank=True)
+    frequency = models.CharField(max_length=255, blank=True)
+    prescription_details = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

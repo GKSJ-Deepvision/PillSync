@@ -6,6 +6,7 @@ from django.test import TestCase
 from rest_framework.test import APITestCase
 
 from apps.prescriptions.models import Prescription
+from apps.prescriptions.services.parser import parse_ocr_text
 
 
 class PrescriptionModelTests(TestCase):
@@ -117,3 +118,38 @@ class PrescriptionAPITests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["doctor_name"], "My Doctor")
+
+
+class PrescriptionParserTests(TestCase):
+    def test_parse_ocr_text_extracts_medicine_details(self):
+        text = """
+        Paracetamol Tablets IP
+        500 mg
+        10 x 10 Tablets
+        For Fever and Mild to Moderate Pain
+        """
+
+        result = parse_ocr_text(text)
+
+        self.assertEqual(result["medicine_name"], "Paracetamol Tablets IP")
+        self.assertEqual(result["dosage"], "500 mg")
+        self.assertEqual(result["quantity"], "10 x 10 Tablets")
+        self.assertIsNone(result["frequency"])
+        self.assertEqual(
+            result["prescription_details"],
+            "For Fever and Mild to Moderate Pain",
+        )
+
+    def test_parse_ocr_text_handles_empty_text(self):
+        result = parse_ocr_text("")
+
+        self.assertEqual(
+            result,
+            {
+                "medicine_name": None,
+                "dosage": None,
+                "quantity": None,
+                "frequency": None,
+                "prescription_details": None,
+            },
+        )

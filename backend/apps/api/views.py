@@ -16,6 +16,7 @@ from rest_framework.views import APIView
 from apps.medicines.models import MedicationHistory, Medicine, MedicineSchedule
 from apps.ocr.models import OCRRecord
 from apps.ocr.services.extractor import extract_text
+from apps.prescriptions.services.parser import parse_ocr_text
 from apps.profiles.models import Profile
 from apps.reminders.models import Reminder
 
@@ -23,6 +24,7 @@ from .serializers import (
     MedicationHistorySerializer,
     MedicineScheduleSerializer,
     MedicineSerializer,
+    OCRCorrectionSerializer,
     OCRRecordSerializer,
     ProfileSerializer,
     ReminderSerializer,
@@ -613,9 +615,47 @@ class OCRUploadView(APIView):
             record.save(update_fields=["status"])
 
             try:
+                # Step 1: Extract raw text using Tesseract
                 record.extracted_text = extract_text(record.file.path)
+
+                # Step 2: Parse the OCR text into structured medicine data
+                parsed_data = parse_ocr_text(record.extracted_text)
+                extracted_fields = [
+                    parsed_data["medicine_name"],
+                    parsed_data["dosage"],
+                    parsed_data["quantity"],
+                    parsed_data["frequency"],
+                    parsed_data["prescription_details"],
+                ]
+
+                filled_fields = sum(bool(field) for field in extracted_fields)
+
+                record.confidence = filled_fields / len(extracted_fields)
+                record.is_uncertain = record.confidence < 0.6
+
+                # Step 3: Save the structured data
+                record.medicine_name = parsed_data["medicine_name"] or ""
+                record.dosage = parsed_data["dosage"] or ""
+                record.quantity = parsed_data["quantity"] or ""
+                record.frequency = parsed_data["frequency"] or ""
+                record.prescription_details = parsed_data["prescription_details"] or ""
+
                 record.status = OCRRecord.Status.COMPLETED
-                record.save(update_fields=["extracted_text", "status"])
+
+                record.save(
+                    update_fields=[
+                        "extracted_text",
+                        "medicine_name",
+                        "dosage",
+                        "quantity",
+                        "frequency",
+                        "confidence",
+                        "is_uncertain",
+                        "prescription_details",
+                        "status",
+                    ]
+                )
+
             except Exception:
                 record.status = OCRRecord.Status.FAILED
                 record.save(update_fields=["status"])
@@ -623,4 +663,39 @@ class OCRUploadView(APIView):
         return Response(
             OCRRecordSerializer(record).data,
             status=status.HTTP_201_CREATED,
+        )
+
+
+class OCRCorrectionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            record = OCRRecord.objects.get(
+                pk=pk,
+                user=request.user,
+            )
+        except OCRRecord.DoesNotExist:
+            return Response(
+                {"detail": "OCR record not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = OCRCorrectionSerializer(
+            record,
+            data=request.data,
+            partial=True,
+        )
+
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        record = serializer.save()
+
+        return Response(
+            OCRRecordSerializer(record).data,
+            status=status.HTTP_200_OK,
         )

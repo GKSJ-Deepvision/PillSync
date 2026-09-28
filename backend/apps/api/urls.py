@@ -11,6 +11,7 @@ from .views import (
     MedicineScheduleDetailView,
     MedicineScheduleListCreateView,
     MeView,
+    OCRCorrectionView,
     OCRUploadView,
     ProfileView,
     RegisterView,
@@ -85,4 +86,5 @@ urlpatterns = [
         "prescriptions/",
         include("apps.prescriptions.urls"),
     ),
+    path("ocr/<int:pk>/", OCRCorrectionView.as_view(), name="ocr-correction"),
 ]

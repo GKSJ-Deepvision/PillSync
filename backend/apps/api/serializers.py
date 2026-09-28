@@ -254,6 +254,12 @@ class OCRRecordSerializer(serializers.ModelSerializer):
             "status",
             "extracted_text",
             "confidence",
+            "is_uncertain",
+            "medicine_name",
+            "dosage",
+            "quantity",
+            "frequency",
+            "prescription_details",
             "created_at",
             "updated_at",
         ]
@@ -285,6 +291,18 @@ class OCRRecordSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Unsupported file type.")
 
         return value
+
+
+class OCRCorrectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OCRRecord
+        fields = [
+            "medicine_name",
+            "dosage",
+            "quantity",
+            "frequency",
+            "prescription_details",
+        ]
 
 
 class PrescriptionSerializer(serializers.ModelSerializer):
