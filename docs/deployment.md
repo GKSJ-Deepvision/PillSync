@@ -121,6 +121,52 @@ Things to know about Render:
 
 ---
 
+## Option 2b — Free: Render + a free database + a free cron  *(demo only; not deployed)*
+
+For showing the project, not for real patients. [`render.free.yaml`](../render.free.yaml) is the
+blueprint. Free tiers change, so confirm each provider's current limits before relying on them.
+
+**What you give up**
+
+| Free-tier limit | Effect |
+|---|---|
+| No free background worker | Reminders are sent by an outside cron calling the API (below) instead of Celery |
+| The free Render database has expired after 30 days | Use a free Postgres that does not (Neon or Supabase) |
+| Free web services sleep when idle | The first request after a quiet spell takes about a minute. The 5-minute cron below also keeps it awake |
+| No disk | Uploaded prescription photos are lost on each deploy; OCR still works |
+| About 512 MB of memory | `WEB_CONCURRENCY=1`; a very large photo may fail |
+| Reminders reach the console, not phones | Until you add SendGrid / Firebase / Twilio credentials |
+
+**Steps**
+
+1. Create a free Postgres on [Neon](https://neon.tech) (or Supabase). Copy its connection string
+   (a `postgresql://` URL ending in `?sslmode=require`).
+2. In Render choose **New → Blueprint**, pick the repository, and set the blueprint file path to
+   `render.free.yaml`. When asked for `DATABASE_URL`, paste the string from step 1.
+3. Apply. Two services are created: `pillsync-api` (Docker, free) and `pillsync-web` (static site).
+   If a name is taken, rename it in the file and update `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS` and
+   both rewrite `destination` lines to match.
+4. When the API is live, check `https://<api>.onrender.com/health/ready/` returns `ok`, then open the
+   web app, register, and run `python scripts/smoke_test.py https://<web>.onrender.com`.
+5. Copy `CRON_SECRET` from the API service's **Environment** tab.
+6. On a free cron service such as [cron-job.org](https://cron-job.org), create two jobs, each an HTTP
+   **POST** with the header `X-Cron-Secret: <the secret>`:
+
+   | URL | Schedule | Does |
+   |---|---|---|
+   | `https://<api>.onrender.com/internal/run-jobs/?group=frequent` | every 5 minutes | Sends due reminders; marks unanswered doses missed |
+   | `https://<api>.onrender.com/internal/run-jobs/?group=daily` | once a day | Generates upcoming doses, refreshes refill forecasts, warns of expiring prescriptions, deletes stale scans |
+
+   Reminders can be up to five minutes late, because that is how often the cron calls.
+7. Create an admin login with `python manage.py createsuperuser` against the same database, from your own
+   machine: `DATABASE_URL=<neon string> DJANGO_SETTINGS_MODULE=config.settings.prod SECRET_KEY=x ALLOWED_HOSTS=x python manage.py createsuperuser`
+   (Render's free tier has no shell).
+
+The endpoint `POST /internal/run-jobs/` runs the same task functions Celery beat would. It answers 404
+unless `CRON_SECRET` is set, and 403 for a wrong secret, so a deployment with a real worker exposes nothing.
+
+---
+
 ## Option 3 — AWS  *(reference architecture; not deployed)*
 
 | Component | AWS service | Notes |
@@ -212,6 +258,7 @@ Optional:
 | `MAX_UPLOAD_SIZE_BYTES` | `10485760` | Largest accepted photo |
 | `REFILL_LEAD_TIME_DAYS` | `5` | How many days before running out the refill warning starts |
 | `THROTTLE_USER_RATE` | `5000/day` | Per-user API rate limit |
+| `CRON_SECRET` | — | Enables `POST /internal/run-jobs/` for hosts with no Celery worker. Unset = endpoint disabled |
 | `SLOW_REQUEST_MS` | `500` | Requests slower than this are logged |
 | `TIME_ZONE`, `LOG_LEVEL` | `UTC`, `INFO` | |
 | `JWT_ACCESS_TOKEN_LIFETIME_MINUTES`, `JWT_REFRESH_TOKEN_LIFETIME_DAYS` | `30`, `7` | Token lifetimes |
@@ -262,7 +309,7 @@ every push against the full stack.
   mail and HTTPS switches are covered by tests.
 
 **Written from documentation, not exercised:**
-- `render.yaml`, and the AWS and Azure sections. No cloud account was used, so
+- `render.yaml`, `render.free.yaml` (the cron endpoint behind it is tested), and the AWS and Azure sections. No cloud account was used, so
   there is **no live URL**. Expect to adjust names, plan sizes and regions.
 - Real delivery of push, SMS and email. Providers fall back to the console
   without credentials; the delivery pipeline is tested, actual delivery to a phone

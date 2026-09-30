@@ -14,6 +14,7 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+from apps.common.scheduled import run_jobs
 from apps.common.views import health, ready
 
 api_v1 = [
@@ -34,6 +35,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("health/", health, name="health"),
     path("health/ready/", ready, name="ready"),
+    path("internal/run-jobs/", run_jobs, name="run-jobs"),
     path("api/v1/", include((api_v1, "v1"))),
     # Interactive API documentation - the Milestone 1 deliverable for docs/api.
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
