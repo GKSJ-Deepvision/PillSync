@@ -358,6 +358,9 @@ OCR_RETENTION_DAYS = env_int("OCR_RETENTION_DAYS", 30)
 # Warn this many days before a medicine is predicted to run out. It is the time a
 # patient needs to get to a pharmacy, so it is the buffer, not a forecast.
 REFILL_LEAD_TIME_DAYS = env_int("REFILL_LEAD_TIME_DAYS", 5)
+# Shared secret for POST /internal/run-jobs/, used where there is no Celery worker (a free
+# hosting tier). Empty means the endpoint does not exist.
+CRON_SECRET = env("CRON_SECRET")
 SLOW_REQUEST_MS = env_int("SLOW_REQUEST_MS", 500)
 
 # How far ahead dose events are materialised from schedules.
