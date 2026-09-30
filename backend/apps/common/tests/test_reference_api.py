@@ -211,3 +211,25 @@ class TestSeedRetirement:
             reverse("v1:medicine-reference-list"), {"search": "metformin"}
         )
         assert response.data["count"] == 0
+
+
+class TestReadiness:
+    def test_ready_when_the_database_answers(self, api_client):
+        response = api_client.get(reverse("ready"))
+        assert response.status_code == 200
+        assert response.data["status"] == "ok"
+
+    def test_not_ready_when_the_database_is_down(self, api_client, monkeypatch):
+        from django.db import connection
+
+        def broken(*args, **kwargs):
+            raise RuntimeError("connection refused")
+
+        monkeypatch.setattr(connection, "ensure_connection", broken)
+        response = api_client.get(reverse("ready"))
+
+        assert response.status_code == 503
+        assert response.data["status"] == "unavailable"
+
+    def test_readiness_is_public_so_a_load_balancer_can_probe_it(self, api_client):
+        assert api_client.get(reverse("ready")).status_code != 401

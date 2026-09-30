@@ -100,14 +100,14 @@ Report templates are in [`docs/milestones/`](docs/milestones/).
 
 ## Current state
 
-**Milestones 1 and 2 are complete on `main`** and serve as the reference
+**All four milestones are implemented on `main`**, and serve as the reference
 implementation.
 
 **Milestone 1** — authentication with JWT and Google OAuth2, role-based access
 for patient / caregiver / admin, patient and family profiles, the finalised
 database schema, and a medicine catalogue seeded from the FDA National Drug Code
-Directory (1,742 presentations across 369 generics, in the six condition groups
-the specification names).
+Directory (3,111 presentations across 833 generics, in the six condition groups
+the specification names plus an *other* group for everyday medicines).
 [Report](docs/milestones/milestone-1.md)
 
 **Milestone 2** — medicines with stock and disease grouping, dosage scheduling
@@ -117,10 +117,34 @@ push, email and SMS with per-user preferences.
 [Report](docs/milestones/milestone-2.md) ·
 [Pipeline design](docs/architecture/reminder-pipeline.md)
 
-245 backend tests (89% coverage), 56 frontend tests, 22 dataset tests.
+**Milestone 3** — prescription OCR (Tesseract, a rule-based parser, matching to the
+catalogue, human review before anything is saved), refill prediction that learns
+from what the patient actually takes, a stock ledger, refill and low-stock alerts
+that reach caregivers too, and adherence analytics with weekly and monthly
+reports.
+[Report](docs/milestones/milestone-3.md) ·
+[Design](docs/architecture/ocr-and-refills.md)
 
-Milestones 3 and 4 are not started: the `ocr`, `adherence`, `refills` and
-`analytics` app folders hold only their README.
+**Milestone 4** — patient, caregiver and administrator dashboards, refill and
+adherence charts, API performance metrics, production packaging (gunicorn, nginx,
+Celery, Docker Compose) with a smoke test that runs in CI, and the performance,
+testing and final reports.
+[Report](docs/milestones/milestone-4.md) ·
+[Deployment](docs/deployment.md) ·
+[Performance](docs/reports/performance.md) ·
+[Testing](docs/reports/testing-report.md) ·
+[Final report](docs/reports/final-report.md) ·
+[Demo](docs/demo/demo-script.md)
+
+**Not done, stated plainly:** there is **no live deployment** (it needs a hosting
+account; the stack is built, tested and documented for Render, AWS and Azure);
+reminders reach the console rather than a phone until notification credentials are
+set; handwritten prescriptions are unsupported; and the accuracy figures for OCR and
+refill prediction are on synthetic data. See the
+[final report](docs/reports/final-report.md#7-limitations-and-risks).
+
+**Numbers:** 628 backend tests (89.7% coverage), 142 frontend tests, 31 ML and
+dataset tests, and a 20-check smoke test of the production stack.
 
 ## Quick start
 
@@ -162,6 +186,16 @@ cp backend/.env.example backend/.env
 docker compose up --build
 ```
 
+A self-contained demo with a month of invented history (no Docker, no Redis):
+
+```bash
+python backend/scripts/run_demo.py          # API on :8010, own database
+cd frontend && npm run dev:demo             # the app on :5173
+```
+
+Then follow [`docs/demo/demo-script.md`](docs/demo/demo-script.md). To run the
+production topology instead, see [`docs/deployment.md`](docs/deployment.md).
+
 API documentation: `http://localhost:8000/api/docs/`
 
 ---
@@ -171,7 +205,7 @@ API documentation: `http://localhost:8000/api/docs/`
 Every push to any branch runs [`CI`](.github/workflows/ci.yml):
 branch policy · file hygiene · secret scan · structure and progress · YAML/JSON syntax ·
 backend lint, format and tests · frontend lint, tests and build · notebook hygiene ·
-Docker image build.
+Docker image build · a smoke test of the full production stack.
 
 Checks skip themselves when the code they cover does not exist yet, so an early-week
 branch is not punished for being early. See

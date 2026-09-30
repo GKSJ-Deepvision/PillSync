@@ -76,6 +76,10 @@ INSTALLED_APPS = [
     "apps.prescriptions",
     "apps.reminders",
     "apps.notifications",
+    "apps.ocr",
+    "apps.refills",
+    "apps.adherence",
+    "apps.analytics",
 ]
 
 MIDDLEWARE = [
@@ -88,6 +92,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "apps.analytics.middleware.RequestTimingMiddleware",
 ]
 
 TEMPLATES = [
@@ -213,7 +218,10 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.UserRateThrottle",
     ),
     "DEFAULT_THROTTLE_RATES": {
-        "user": "1000/day",
+        # Per authenticated user. 5,000 a day is ~3.5 a minute around the clock: generous for
+        # a person, low enough to stop a runaway client. Load tests raise it (see
+        # docs/performance.md) - measuring a rate limiter is not measuring the app.
+        "user": env("THROTTLE_USER_RATE", "5000/day"),
         # Credential endpoints are the ones worth rate limiting: they are the
         # only place an attacker gains anything by trying repeatedly.
         "login": "10/min",
@@ -237,13 +245,18 @@ SIMPLE_JWT = {
     "TOKEN_OBTAIN_SERIALIZER": "apps.accounts.serializers.PillSyncTokenObtainPairSerializer",
 }
 
+#: One place for the release number: the API schema and the health probes report it.
+API_VERSION = "1.0.0"
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "PillSync API",
     "DESCRIPTION": (
         "Intelligent medicine reminder and medication tracking platform. "
-        "Milestone 1 covers authentication, role-based access and patient profiles."
+        "Authentication and roles, patient profiles, medicines and dosage schedules, "
+        "reminders and notifications, prescription OCR, refill prediction, adherence "
+        "analytics and dashboards."
     ),
-    "VERSION": "0.1.0",
+    "VERSION": API_VERSION,
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
     "SCHEMA_PATH_PREFIX": "/api/v1",
@@ -259,6 +272,11 @@ SPECTACULAR_SETTINGS = {
         "CaregiverRelationshipEnum": "apps.common.choices.CaregiverRelationship.choices",
         "MedicineCategoryEnum": "apps.common.choices.MedicineCategory.choices",
         "AssignmentStatusEnum": "apps.common.choices.AssignmentStatus.choices",
+        "OcrJobStatusEnum": "apps.ocr.models.JobStatus.choices",
+        "OcrItemStatusEnum": "apps.ocr.models.ItemStatus.choices",
+        "OcrJobKindEnum": "apps.ocr.models.JobKind.choices",
+        "RefillStatusEnum": "apps.refills.models.PredictionStatus.choices",
+        "StockEventKindEnum": "apps.refills.models.StockEventKind.choices",
     },
     "TAGS": [
         {"name": "auth", "description": "Registration, login, tokens and passwords"},
@@ -294,6 +312,18 @@ GOOGLE_OAUTH2_CLIENT_SECRET = env("GOOGLE_OAUTH2_CLIENT_SECRET")
 
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "noreply@pillsync.local")
 EMAIL_BACKEND = env("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+
+# SMTP, used when EMAIL_BACKEND is the smtp backend (the production default once
+# anything below is set). SendGrid needs only its API key: the SMTP user is the
+# literal word "apikey" and the password is the key.
+_SENDGRID = env("SENDGRID_API_KEY")
+EMAIL_HOST = env("EMAIL_HOST", "smtp.sendgrid.net" if _SENDGRID else "localhost")
+EMAIL_PORT = env_int("EMAIL_PORT", 587)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", "apikey" if _SENDGRID else "")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", _SENDGRID)
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
+# A dead mail server must fail a delivery, not hang a worker.
+EMAIL_TIMEOUT = env_int("EMAIL_TIMEOUT_SECONDS", 10)
 FRONTEND_BASE_URL = env("FRONTEND_BASE_URL", "http://localhost:5173")
 PASSWORD_RESET_TIMEOUT = env_int("PASSWORD_RESET_TIMEOUT_SECONDS", 60 * 60 * 2)
 
@@ -309,6 +339,26 @@ TWILIO_ACCOUNT_SID = env("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = env("TWILIO_AUTH_TOKEN")
 TWILIO_FROM_NUMBER = env("TWILIO_FROM_NUMBER")
 SENDGRID_API_KEY = env("SENDGRID_API_KEY")
+
+# --- OCR -------------------------------------------------------------------
+# The engine is a dotted path so tests inject a fake and a hosted engine (Google
+# Vision, Azure Document Intelligence) can replace Tesseract without touching the
+# pipeline - useful for handwritten prescriptions, which Tesseract reads poorly.
+OCR_ENGINE = env("OCR_ENGINE", "apps.ocr.services.engines.TesseractEngine")
+TESSERACT_CMD = env("TESSERACT_CMD")
+# Off by default: a scan takes a few seconds, and a deployment without a Celery
+# worker must still work. Turn on once a worker runs.
+OCR_ASYNC = env_bool("OCR_ASYNC", False)
+# ~8000 x 5000. A crafted file can be kilobytes on disk and gigabytes decoded.
+OCR_MAX_IMAGE_PIXELS = env_int("OCR_MAX_IMAGE_PIXELS", 40_000_000)
+# Scans never added to a medicine list are deleted after this long, images included.
+OCR_RETENTION_DAYS = env_int("OCR_RETENTION_DAYS", 30)
+
+# --- Refills -----------------------------------------------------------------
+# Warn this many days before a medicine is predicted to run out. It is the time a
+# patient needs to get to a pharmacy, so it is the buffer, not a forecast.
+REFILL_LEAD_TIME_DAYS = env_int("REFILL_LEAD_TIME_DAYS", 5)
+SLOW_REQUEST_MS = env_int("SLOW_REQUEST_MS", 500)
 
 # How far ahead dose events are materialised from schedules.
 DOSE_HORIZON_DAYS = env_int("DOSE_HORIZON_DAYS", 14)
@@ -344,6 +394,14 @@ CELERY_BEAT_SCHEDULE = {
     "notify-expiring-prescriptions": {
         "task": "reminders.notify_expiring_prescriptions",
         "schedule": crontab(hour=8, minute=0),
+    },
+    "recompute-refill-predictions": {
+        "task": "refills.recompute_predictions",
+        "schedule": crontab(hour=6, minute=0),
+    },
+    "purge-stale-ocr-jobs": {
+        "task": "ocr.purge_stale_ocr_jobs",
+        "schedule": crontab(hour=3, minute=30),
     },
 }
 

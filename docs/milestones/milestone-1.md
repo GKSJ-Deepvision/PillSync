@@ -44,9 +44,12 @@ by role in the router and again by the API.
 
 **Datasets.** ~116,000 FDA National Drug Code products downloaded, filtered to
 home-administered human medicines, and categorised into the six condition
-groups the specification names. 2,562 categorised presentations, of which
-1,742 across 369 generics are committed as the seed catalogue, plus 20
-conditions.
+groups the specification names. 4,265 categorised presentations, of which
+3,111 across 833 generics are committed as the seed catalogue, plus 20
+conditions. (Milestone 1 committed 1,742 across 369 generics. Milestone 3
+rebuilt it, keeping more presentations per generic and adding an *other* group
+for everyday medicines such as paracetamol, which prescription OCR has to be
+able to match.)
 
 ## Database design
 
@@ -71,8 +74,8 @@ patient at most one primary emergency contact.
 | Output | Rows | Tracked? |
 |---|---|---|
 | `ml/data/raw/product.txt` | 115,981 | No — rebuildable |
-| `ml/data/processed/medicines_catalogue.csv` | 2,562 | No |
-| `backend/apps/common/data/medicines_seed.csv` | 1,742 | Yes (288 KB) |
+| `ml/data/processed/medicines_catalogue.csv` | 4,265 | No |
+| `backend/apps/common/data/medicines_seed.csv` | 3,111 | Yes |
 | `backend/apps/common/data/conditions_seed.json` | 20 | Yes |
 | `ml/data/samples/medicines_sample.csv` | 120 | Yes |
 

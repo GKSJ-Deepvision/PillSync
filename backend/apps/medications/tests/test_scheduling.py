@@ -126,6 +126,7 @@ class TestDosesPerDay:
         assert schedule.doses_per_day() == Decimal("0.5")
 
 
+@pytest.mark.usefixtures("pinned_now")
 class TestGeneration:
     def test_creates_one_dose_per_day_in_the_horizon(self, medicine):
         schedule = make_schedule(medicine)
@@ -207,10 +208,17 @@ class TestGeneration:
 
 class TestRegeneration:
     def test_editing_a_schedule_moves_the_untouched_future_doses(self, medicine):
-        schedule = make_schedule(medicine, time_of_day=time(8, 0))
+        # Times are chosen relative to now, never fixed: with a fixed 08:00 this test
+        # failed for the hour after 08:00 (a dose that has just passed is not "future",
+        # so it legitimately stays), i.e. sporadically on a CI server in UTC.
+        now = timezone.localtime()
+        old = (now - timedelta(hours=3)).time().replace(second=0, microsecond=0)
+        new = (now + timedelta(hours=5)).time().replace(second=0, microsecond=0)
+
+        schedule = make_schedule(medicine, time_of_day=old)
         generation.generate_for_schedule(schedule, horizon_days=5)
 
-        schedule.time_of_day = time(21, 30)
+        schedule.time_of_day = new
         schedule.save(update_fields=["time_of_day"])
         generation.regenerate_for_schedule(schedule, horizon_days=5)
 
@@ -218,7 +226,7 @@ class TestRegeneration:
             timezone.localtime(d.scheduled_for).hour
             for d in DoseEvent.objects.filter(schedule=schedule, status=DoseStatus.PENDING)
         }
-        assert hours == {21}
+        assert hours == {new.hour}
 
     def test_a_dose_already_answered_survives_regeneration(self, medicine):
         schedule = make_schedule(medicine)

@@ -16,6 +16,7 @@ google-auth==2.57.1
 
 # --- Database ---
 psycopg[binary]==3.3.5
+argon2-cffi==25.1.0
 dj-database-url==3.1.2
 
 # --- Background jobs (wired in Milestone 1, used from Milestone 2) ---
@@ -34,7 +35,7 @@ gunicorn==26.2.0
 python-dotenv==1.2.3
 
 # --- Added in Milestone 3 (OCR and AI) ---
-# pytesseract==0.3.13
+pytesseract==0.3.13
 # opencv-python-headless==4.11.0.86
 # spacy==3.8.4
 # openai==1.99.1

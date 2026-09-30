@@ -14,7 +14,7 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
-from apps.common.views import health
+from apps.common.views import health, ready
 
 api_v1 = [
     path("", include("apps.accounts.urls")),
@@ -24,11 +24,16 @@ api_v1 = [
     path("", include("apps.prescriptions.urls")),
     path("", include("apps.reminders.urls")),
     path("notifications/", include("apps.notifications.urls")),
+    path("ocr/", include("apps.ocr.urls")),
+    path("refills/", include("apps.refills.urls")),
+    path("adherence/", include("apps.adherence.urls")),
+    path("analytics/", include("apps.analytics.urls")),
 ]
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("health/", health, name="health"),
+    path("health/ready/", ready, name="ready"),
     path("api/v1/", include((api_v1, "v1"))),
     # Interactive API documentation - the Milestone 1 deliverable for docs/api.
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

@@ -12,5 +12,12 @@ Milestone 4 requires a deployed application. Record the live URL and the deploym
 steps you actually used in `docs/demo/` — a deployment nobody else can reproduce
 does not count.
 
+**The reference implementation's deployment assets live at the repository root, not
+here:** [`docker-compose.prod.yml`](../docker-compose.prod.yml) (the production
+topology), [`render.yaml`](../render.yaml) (a Render blueprint),
+[`backend/Dockerfile`](../backend/Dockerfile), [`frontend/nginx.conf`](../frontend/nginx.conf),
+[`scripts/smoke_test.py`](../scripts/smoke_test.py), and the guide
+[`docs/deployment.md`](../docs/deployment.md). Read them before writing your own.
+
 Deployment credentials belong in GitHub Secrets or your cloud provider's secret
 store. Never in this folder.

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from django.conf import settings
 from django.db.models import Count
 from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets
@@ -108,4 +109,28 @@ def enums(request):
 @permission_classes([AllowAny])
 def health(request):
     """Liveness probe for the load balancer and the deployment pipeline."""
-    return Response({"status": "ok", "service": "pillsync-api", "version": "0.1.0"})
+    return Response({"status": "ok", "service": "pillsync-api", "version": settings.API_VERSION})
+
+
+@extend_schema(tags=["reference"], responses={200: HealthSerializer, 503: HealthSerializer})
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def ready(request):
+    """Readiness probe: can this instance actually serve requests?
+
+    Liveness (`/health/`) only says the process is up. Readiness also checks the
+    database, so an instance that lost its connection is taken out of rotation
+    instead of answering every request with a 500.
+    """
+    from django.db import connection
+
+    try:
+        connection.ensure_connection()
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+    except Exception:  # noqa: BLE001 - any failure here means "not ready"
+        return Response(
+            {"status": "unavailable", "service": "pillsync-api", "version": settings.API_VERSION},
+            status=503,
+        )
+    return Response({"status": "ok", "service": "pillsync-api", "version": settings.API_VERSION})

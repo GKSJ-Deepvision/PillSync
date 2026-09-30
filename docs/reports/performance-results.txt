@@ -1,0 +1,181 @@
+PillSync load test - raw output
+Stack: docker-compose.prod.yml (gunicorn x2 workers, nginx, Postgres 16, Redis, Celery worker + beat), Docker Desktop on a Windows laptop; client on the same machine
+Data: 305 users, ~54k dose events, ~840 medicines (seed_demo --extra-patients 300)
+Server rate limiter raised (THROTTLE_USER_RATE) so the app, not the limiter, is measured; the script flags the run INVALID if any request is throttled.
+Date: 2026-09-30
+
+
+1 concurrent users for 20s against http://localhost:8088
+
+  requests        565  (28.2/s)
+  latency         p50 32.9 ms   p95 60.6 ms   p99 78.7 ms   max 85.6 ms
+  errors          0.0%
+  login (median)  264.1 ms
+
+  endpoint             requests      p50      p95      p99   errors
+  dashboard                 136     43.0     76.6     84.8     0.0%
+  today's doses             132     36.1     60.6     70.7     0.0%
+  medicine list              66     31.9     55.7     81.0     0.0%
+  refill forecast            99     23.9     51.8     56.4     0.0%
+  adherence (30d)            99     23.3     44.3     52.9     0.0%
+  adherence report           33     22.0     42.3     44.1     0.0%
+
+
+5 concurrent users for 20s against http://localhost:8088
+
+  requests        1717  (85.7/s)
+  latency         p50 53.8 ms   p95 97.7 ms   p99 129.1 ms   max 164.8 ms
+  errors          0.0%
+  login (median)  102.4 ms
+
+  endpoint             requests      p50      p95      p99   errors
+  dashboard                 407     71.1    122.3    145.5     0.0%
+  today's doses             410     58.9     91.9    110.8     0.0%
+  medicine list             200     53.2     90.0    116.9     0.0%
+  adherence (30d)           300     41.9     81.1    104.5     0.0%
+  refill forecast           300     43.1     78.6     92.1     0.0%
+  adherence report          100     43.5     71.3     78.6     0.0%
+
+
+10 concurrent users for 20s against http://localhost:8088
+
+  requests        1570  (78.2/s)
+  latency         p50 122.7 ms   p95 188.5 ms   p99 236.2 ms   max 263.7 ms
+  errors          0.0%
+  login (median)  153.0 ms
+
+  endpoint             requests      p50      p95      p99   errors
+  dashboard                 369    133.3    200.4    250.5     0.0%
+  today's doses             376    126.5    197.0    240.5     0.0%
+  medicine list             180    125.7    185.3    247.7     0.0%
+  adherence report           90    116.2    175.0    189.6     0.0%
+  adherence (30d)           275    110.8    168.6    199.5     0.0%
+  refill forecast           280    114.3    163.0    210.0     0.0%
+
+
+25 concurrent users for 20s against http://localhost:8088
+
+  requests        1551  (76.6/s)
+  latency         p50 318.0 ms   p95 456.0 ms   p99 546.8 ms   max 573.5 ms
+  errors          0.0%
+  login (median)  99.4 ms
+
+  endpoint             requests      p50      p95      p99   errors
+  dashboard                 377    336.8    527.9    566.1     0.0%
+  today's doses             376    323.9    457.3    527.1     0.0%
+  medicine list             172    314.9    434.7    533.8     0.0%
+  adherence report           86    292.4    432.4    538.6     0.0%
+  refill forecast           280    308.4    425.5    515.7     0.0%
+  adherence (30d)           260    304.9    414.8    516.6     0.0%
+
+
+50 concurrent users for 20s against http://localhost:8088
+
+  requests        1807  (87.7/s)
+  latency         p50 528.2 ms   p95 845.7 ms   p99 1277.0 ms   max 1368.9 ms
+  errors          0.0%
+  login (median)  84.3 ms
+
+  endpoint             requests      p50      p95      p99   errors
+  dashboard                 474    652.3   1198.9   1356.2     0.0%
+  refill forecast           308    451.2    782.0   1001.2     0.0%
+  medicine list             204    541.7    730.3   1083.6     0.0%
+  today's doses             411    536.6    719.8    937.1     0.0%
+  adherence (30d)           308    422.8    682.2   1062.8     0.0%
+  adherence report          102    471.0    680.8   1054.6     0.0%
+
+
+100 concurrent users for 20s against http://localhost:8088
+
+  requests        1543  (72.7/s)
+  latency         p50 1329.6 ms   p95 2010.2 ms   p99 2233.8 ms   max 2268.2 ms
+  errors          0.0%
+  login (median)  216.2 ms
+
+  endpoint             requests      p50      p95      p99   errors
+  today's doses             396   1633.5   2225.7   2256.7     0.0%
+  adherence report           16   1247.4   2089.7   2089.7     0.0%
+  dashboard                 396   1605.2   2005.4   2062.9     0.0%
+  medicine list             141   1285.6   1674.5   2070.3     0.0%
+  adherence (30d)           297    992.1   1660.6   2077.0     0.0%
+  refill forecast           297    858.8   1655.4   2123.4     0.0%
+
+### administrator endpoints
+
+1 concurrent users for 15s against http://localhost:8088
+
+  requests        65  (4.3/s)
+  latency         p50 283.4 ms   p95 357.4 ms   p99 397.5 ms   max 397.5 ms
+  errors          0.0%
+  login (median)  225.0 ms
+
+  endpoint             requests      p50      p95      p99   errors
+  platform analytics         49    300.5    365.6    397.5     0.0%
+  api performance            16     14.2     38.2     38.2     0.0%
+
+=================== Same stack, WEB_CONCURRENCY=6 (gunicorn workers) ===================
+
+
+10 concurrent users for 20s against http://localhost:8088
+
+  requests        3599  (179.5/s)
+  latency         p50 53.1 ms   p95 83.5 ms   p99 102.8 ms   max 192.2 ms
+  errors          0.0%
+  login (median)  114.5 ms
+
+  endpoint             requests      p50      p95      p99   errors
+  dashboard                 844     69.0     93.7    108.2     0.0%
+  today's doses             849     56.3     83.7    117.3     0.0%
+  medicine list             422     52.7     75.1     82.6     0.0%
+  refill forecast           638     42.8     65.1     92.2     0.0%
+  adherence (30d)           636     44.5     64.5     90.6     0.0%
+  adherence report          210     38.3     56.4     66.9     0.0%
+
+
+25 concurrent users for 20s against http://localhost:8088
+
+  requests        3546  (176.1/s)
+  latency         p50 138.4 ms   p95 189.7 ms   p99 215.5 ms   max 338.6 ms
+  errors          0.0%
+  login (median)  101.1 ms
+
+  endpoint             requests      p50      p95      p99   errors
+  dashboard                 854    153.9    201.1    224.3     0.0%
+  medicine list             414    138.7    200.0    226.4     0.0%
+  today's doses             836    141.9    190.5    219.1     0.0%
+  adherence (30d)           618    128.1    174.0    188.4     0.0%
+  refill forecast           617    125.6    170.8    185.3     0.0%
+  adherence report          207    121.6    164.0    190.6     0.0%
+
+
+50 concurrent users for 20s against http://localhost:8088
+
+  requests        3740  (184.5/s)
+  latency         p50 261.2 ms   p95 376.1 ms   p99 408.9 ms   max 508.0 ms
+  errors          0.0%
+  login (median)  115.9 ms
+
+  endpoint             requests      p50      p95      p99   errors
+  dashboard                 960    324.1    403.3    425.7     0.0%
+  today's doses             917    274.1    339.4    396.7     0.0%
+  refill forecast           622    229.2    325.1    388.4     0.0%
+  medicine list             413    251.6    322.4    387.9     0.0%
+  adherence report          207    219.5    321.4    369.1     0.0%
+  adherence (30d)           621    217.3    315.2    383.1     0.0%
+
+
+100 concurrent users for 20s against http://localhost:8088
+
+  requests        3432  (168.4/s)
+  latency         p50 587.7 ms   p95 889.0 ms   p99 975.4 ms   max 1021.3 ms
+  errors          0.0%
+  login (median)  130.0 ms
+
+  endpoint             requests      p50      p95      p99   errors
+  dashboard                 824    721.1    961.6    994.1     0.0%
+  today's doses             802    706.8    874.2    911.0     0.0%
+  medicine list             402    506.4    708.1    868.3     0.0%
+  adherence (30d)           602    394.2    698.5    871.6     0.0%
+  refill forecast           601    445.8    698.4    838.3     0.0%
+  adherence report          201    472.3    679.5    859.1     0.0%
+

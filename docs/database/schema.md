@@ -289,8 +289,124 @@ generating at once, cannot produce a doubled dose.
 only its untouched future doses; a prescription is archived so the medicines
 pointing at it keep their link.
 
-## What Milestone 3 adds
+## Milestone 3 tables
 
-`RefillPrediction` alongside `Medicine`, and OCR extraction results against
-`Prescription`. Adherence analytics aggregate `DOSE_EVENT` and need no new
-tables.
+Four tables in two new apps. **Adherence and analytics need no tables**: they are
+computed from `DOSE_EVENT`, the rows that drove the reminders.
+
+```mermaid
+erDiagram
+    PATIENT_PROFILE ||--o{ OCR_JOB : "scanned for"
+    OCR_JOB ||--o{ EXTRACTED_MEDICINE : "found in"
+    OCR_JOB }o--o| PRESCRIPTION : "became"
+    EXTRACTED_MEDICINE }o--o| MEDICINE_REFERENCE : "matched to"
+    EXTRACTED_MEDICINE }o--o| MEDICINE : "confirmed as"
+    MEDICINE ||--o{ STOCK_EVENT : "ledger"
+    MEDICINE ||--o| REFILL_PREDICTION : "forecast"
+    PATIENT_PROFILE ||--o{ REFILL_PREDICTION : "denormalised"
+
+    OCR_JOB {
+        uuid id PK
+        uuid patient_id FK
+        uuid created_by_id FK
+        varchar kind "PRESCRIPTION | MEDICINE_LABEL"
+        varchar source "IMAGE | TEXT"
+        image image "null for typed text; per-patient directory"
+        varchar status "QUEUED | PROCESSING | COMPLETED | FAILED | CONFIRMED | REJECTED"
+        varchar engine "tesseract | text"
+        text raw_text
+        float ocr_confidence "engine mean word confidence, 0-1"
+        float confidence "mean item confidence"
+        jsonb header "doctor, clinic, dates, reference"
+        jsonb warnings
+        text error "plain-language reason when FAILED"
+        int processing_ms
+        uuid prescription_id FK "set when confirmed"
+        timestamptz confirmed_at
+    }
+
+    EXTRACTED_MEDICINE {
+        uuid id PK
+        uuid job_id FK
+        varchar name
+        varchar form
+        varchar strength
+        varchar strength_unit
+        jsonb slots "[{slot, quantity}]"
+        varchar frequency "DAILY | SPECIFIC_DAYS | INTERVAL"
+        jsonb days_of_week
+        bool as_needed
+        int duration_days
+        decimal total_quantity
+        uuid reference_id FK "only when the match is applied"
+        varchar match_level "AUTO | POSSIBLE | NONE"
+        float match_score
+        jsonb suggestions "candidates offered to the patient"
+        float confidence
+        jsonb reasons "why a field is doubtful"
+        varchar status "PENDING | CONFIRMED | REJECTED"
+        uuid medicine_id FK "the Medicine it became"
+    }
+
+    STOCK_EVENT {
+        uuid id PK
+        uuid medicine_id FK
+        varchar kind "INITIAL | REFILL | ADJUSTMENT"
+        decimal quantity_delta
+        decimal quantity_after
+        varchar reason
+        uuid actor_id FK
+    }
+
+    REFILL_PREDICTION {
+        uuid id PK
+        uuid medicine_id FK "one per medicine"
+        uuid patient_id FK "denormalised"
+        varchar status "OK | COVERED | UNKNOWN | LOW | CRITICAL | OUT"
+        decimal remaining_stock
+        decimal scheduled_daily
+        decimal observed_daily
+        decimal average_daily "the blend used"
+        float observed_weight "0 = schedule only, 1 = history only"
+        smallint sample_days
+        int resolved_doses
+        decimal days_remaining
+        date depletion_date "indexed"
+        date recommended_refill_date
+        bool covers_course
+        float confidence
+        smallint alert_level "worst level already announced, 0-3"
+        timestamptz last_alerted_at
+    }
+```
+
+### Decisions
+
+**A scan is a *job*, not a prescription.** `OCR_JOB` holds what the engine and
+parser produced, and `EXTRACTED_MEDICINE` holds each line for the patient to
+review and correct. A `Prescription`, `Medicine` and `MedicationSchedule` exist
+only after the patient confirms. Nothing the reader guessed can reach the medicine
+list without a person deciding, and a discarded scan leaves no trace beyond the
+job (which the nightly cleanup deletes with its image after 30 days).
+
+**`reference` is null unless the match was applied.** A doubtful match lives in
+`suggestions` and waits. Wrongly attaching a catalogue entry attaches its strength
+and category too, so the column means "a match the system was sure of, or one the
+patient chose".
+
+**`REFILL_PREDICTION` is recomputed, not versioned.** One row per medicine, always
+the current forecast. It stores its own inputs (`scheduled_daily`, `observed_daily`,
+`observed_weight`) so a forecast can be explained. `alert_level` is the memory that
+makes each warning fire once per level and reset after a refill.
+
+**`STOCK_EVENT` is an append-only ledger** of everything that changes stock other
+than a dose (doses already have their own record). Without it a manual "I counted 12
+left" is an invisible overwrite, and a forecast that jumped could not be explained.
+`PATCH /medicines/{id}/` refuses to change `quantity_remaining`; use `refill` or
+`adjust-stock`.
+
+**`patient_id` is denormalised onto `REFILL_PREDICTION`**, as on `DOSE_EVENT`, so
+"every forecast I may see" needs no join through the medicine.
+
+**Migrations are additive.** The two new apps create tables; nothing existing is
+altered, so rolling the code back leaves a compatible database.

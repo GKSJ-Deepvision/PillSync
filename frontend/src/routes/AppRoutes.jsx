@@ -1,6 +1,8 @@
 import { Route, Routes } from 'react-router-dom';
 
 import AppShell from '../components/layout/AppShell.jsx';
+import AdherencePage from '../pages/AdherencePage.jsx';
+import AdminAnalyticsPage from '../pages/AdminAnalyticsPage.jsx';
 import AdminUsersPage from '../pages/AdminUsersPage.jsx';
 import CaregiversPage from '../pages/CaregiversPage.jsx';
 import DashboardPage from '../pages/DashboardPage.jsx';
@@ -14,7 +16,9 @@ import MyPatientsPage from '../pages/MyPatientsPage.jsx';
 import NotificationsPage from '../pages/NotificationsPage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
 import ProfilePage from '../pages/ProfilePage.jsx';
+import RefillsPage from '../pages/RefillsPage.jsx';
 import RegisterPage from '../pages/RegisterPage.jsx';
+import ScanPage from '../pages/ScanPage.jsx';
 import TodayPage from '../pages/TodayPage.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
 
@@ -35,6 +39,16 @@ export default function AppRoutes() {
         <Route index element={<DashboardPage />} />
         <Route path="today" element={<TodayPage />} />
         <Route path="history" element={<HistoryPage />} />
+        <Route path="adherence" element={<AdherencePage />} />
+        <Route path="refills" element={<RefillsPage />} />
+        <Route
+          path="scan"
+          element={
+            <ProtectedRoute roles={['PATIENT', 'ADMIN']}>
+              <ScanPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="medications" element={<MedicationsPage />} />
         <Route path="notifications" element={<NotificationsPage />} />
         <Route path="profile" element={<ProfilePage />} />
@@ -60,6 +74,14 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute roles={['CAREGIVER']}>
               <MyPatientsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="admin/analytics"
+          element={
+            <ProtectedRoute roles={['ADMIN']}>
+              <AdminAnalyticsPage />
             </ProtectedRoute>
           }
         />

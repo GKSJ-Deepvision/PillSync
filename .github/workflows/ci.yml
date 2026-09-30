@@ -35,6 +35,7 @@ jobs:
       has_ml: ${{ steps.detect.outputs.has_ml }}
       has_backend_docker: ${{ steps.detect.outputs.has_backend_docker }}
       has_frontend_docker: ${{ steps.detect.outputs.has_frontend_docker }}
+      has_prod_stack: ${{ steps.detect.outputs.has_prod_stack }}
     steps:
       - uses: actions/checkout@v4
 
@@ -79,12 +80,20 @@ jobs:
             has_frontend_docker=true
           fi
 
+          # The full production topology, once someone has written it down and a
+          # smoke test to prove it works.
+          has_prod_stack=false
+          if [ "$has_backend_docker" = true ] && [ "$has_frontend_docker" = true ]              && [ -f docker-compose.prod.yml ] && [ -f scripts/smoke_test.py ]; then
+            has_prod_stack=true
+          fi
+
           {
             echo "has_backend=$has_backend"
             echo "has_frontend=$has_frontend"
             echo "has_ml=$has_ml"
             echo "has_backend_docker=$has_backend_docker"
             echo "has_frontend_docker=$has_frontend_docker"
+            echo "has_prod_stack=$has_prod_stack"
           } >> "$GITHUB_OUTPUT"
 
           {
@@ -404,12 +413,57 @@ jobs:
           tags: pillsync-frontend:ci
 
   # ---------------------------------------------------------------------------
+  # The production topology: Postgres, Redis, gunicorn, Celery and nginx together,
+  # exercised from outside over HTTP. Unit tests cannot catch a missing runtime
+  # dependency (the Argon2 hasher was configured but not installed, so every
+  # deployed registration returned a 500) or a proxy limit that rejects uploads.
+  # ---------------------------------------------------------------------------
+  stack:
+    name: Production stack smoke test
+    needs: identify
+    if: needs.identify.outputs.has_prod_stack == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Write a throwaway environment file
+        shell: bash
+        run: |
+          {
+            echo "SECRET_KEY=$(openssl rand -hex 40)"
+            echo "POSTGRES_PASSWORD=$(openssl rand -hex 16)"
+            echo "ALLOWED_HOSTS=localhost,127.0.0.1,web,backend"
+            echo "USE_HTTPS=false"
+            echo "WEB_PORT=8088"
+            echo "WEB_CONCURRENCY=2"
+          } > .env.prod
+
+      - name: Build and start the stack
+        run: docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build --wait --wait-timeout 300
+
+      - name: Smoke test
+        run: python scripts/smoke_test.py http://localhost:8088
+
+      - name: Container logs
+        if: failure()
+        run: docker compose -f docker-compose.prod.yml --env-file .env.prod logs --tail 200
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.prod.yml --env-file .env.prod down -v
+
+  # ---------------------------------------------------------------------------
   # One job to look at when you want to know whether the push passed.
   # ---------------------------------------------------------------------------
   ci-status:
     name: CI status
     runs-on: ubuntu-latest
-    needs: [identify, repo-checks, backend, frontend, ml, docker]
+    needs: [identify, repo-checks, backend, frontend, ml, docker, stack]
     if: always()
     steps:
       - name: Summarise
@@ -421,6 +475,7 @@ jobs:
           FRONTEND: ${{ needs.frontend.result }}
           ML_CHECKS: ${{ needs.ml.result }}
           DOCKER: ${{ needs.docker.result }}
+          STACK: ${{ needs.stack.result }}
           BRANCH: ${{ github.ref_name }}
         run: |
           {
@@ -434,12 +489,13 @@ jobs:
             echo "| Frontend | $FRONTEND |"
             echo "| ML / OCR | $ML_CHECKS |"
             echo "| Docker | $DOCKER |"
+            echo "| Production stack | $STACK |"
             echo ""
             echo "\`skipped\` means that area has no code on this branch yet - that is expected early on."
           } >> "$GITHUB_STEP_SUMMARY"
 
           failed=0
-          for result in "$IDENTIFY" "$REPO_CHECKS" "$BACKEND" "$FRONTEND" "$ML_CHECKS" "$DOCKER"; do
+          for result in "$IDENTIFY" "$REPO_CHECKS" "$BACKEND" "$FRONTEND" "$ML_CHECKS" "$DOCKER" "$STACK"; do
             case "$result" in
               failure|cancelled) failed=1 ;;
             esac

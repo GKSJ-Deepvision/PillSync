@@ -86,16 +86,17 @@ class TestMarkTaken:
             actions.mark_taken(dose)
 
     def test_it_warns_when_the_pack_runs_low(self, dose, medicine):
+        # 4 left at 2 a day: two days of stock, inside the refill lead time.
         medicine.quantity_remaining = Decimal("6")
         medicine.save(update_fields=["quantity_remaining"])
 
         actions.mark_taken(dose)
 
-        assert NotificationLog.objects.filter(category=NotificationCategory.LOW_STOCK).exists()
+        assert NotificationLog.objects.filter(category=NotificationCategory.REFILL_DUE).exists()
 
     def test_it_does_not_warn_while_stock_is_healthy(self, dose):
         actions.mark_taken(dose)
-        assert not NotificationLog.objects.filter(category=NotificationCategory.LOW_STOCK).exists()
+        assert not NotificationLog.objects.filter(category=NotificationCategory.REFILL_DUE).exists()
 
     def test_the_low_stock_warning_is_not_repeated_all_day(self, schedule, medicine):
         """Every dose below the threshold would otherwise raise another alert."""
@@ -112,7 +113,9 @@ class TestMarkTaken:
             )
             actions.mark_taken(dose)
 
-        warnings = NotificationLog.objects.filter(category=NotificationCategory.LOW_STOCK)
+        warnings = NotificationLog.objects.filter(
+            category=NotificationCategory.REFILL_DUE, channel="PUSH"
+        )
         assert warnings.count() == 1
 
 
@@ -249,3 +252,68 @@ class TestSweepOverdue:
         assert actions.sweep_overdue() == 1
         dose.refresh_from_db()
         assert dose.status == DoseStatus.MISSED
+
+
+class TestMissedDoseDetectionAccuracy:
+    """Measured, not asserted: 300 doses scattered across the four-hour boundary.
+
+    A dose left unanswered for MISSED_AFTER becomes Missed; one still inside the
+    window must be left alone. This checks the classification for every dose,
+    including those a minute either side of the line, and reports precision and
+    recall (docs/reports/performance.md).
+    """
+
+    def test_every_dose_is_classified_correctly_around_the_boundary(self, schedule, medicine):
+        import random
+
+        rng = random.Random(42)
+        now = timezone.now().replace(second=0, microsecond=0)
+        expected_missed, expected_open = set(), set()
+
+        for i in range(300):
+            # -8h to +1h around the moment a dose becomes overdue, in whole minutes.
+            minutes_past_due = rng.randint(-60, 8 * 60)
+            when = now - MISSED_AFTER - timedelta(minutes=minutes_past_due) - timedelta(seconds=1)
+            status = DoseStatus.SNOOZED if i % 5 == 0 else DoseStatus.PENDING
+            dose = DoseEvent.objects.create(
+                schedule=schedule,
+                medicine=medicine,
+                patient=medicine.patient,
+                scheduled_for=when + timedelta(microseconds=i),  # unique per schedule
+                slot=DoseSlot.MORNING,
+                quantity_expected=Decimal("1"),
+                status=status,
+                snooze_until=now + timedelta(minutes=10) if status == DoseStatus.SNOOZED else None,
+            )
+            (expected_missed if minutes_past_due >= 0 else expected_open).add(dose.pk)
+
+        actions.sweep_overdue(now=now, alert_caregivers=False)
+
+        flagged = set(
+            DoseEvent.objects.filter(status=DoseStatus.MISSED).values_list("pk", flat=True)
+        )
+        untouched = set(
+            DoseEvent.objects.exclude(status=DoseStatus.MISSED).values_list("pk", flat=True)
+        )
+        true_positive = len(flagged & expected_missed)
+        precision = true_positive / len(flagged)
+        recall = true_positive / len(expected_missed)
+
+        assert precision == 1.0, "a dose still inside the window was marked missed"
+        assert recall == 1.0, "an overdue dose was not marked missed"
+        assert untouched == expected_open
+
+    def test_a_dose_exactly_at_the_boundary_is_still_open(self, schedule, medicine):
+        """The window is strict: 'left unanswered for MISSED_AFTER', not 'at least'."""
+        now = timezone.now().replace(microsecond=0)
+        dose = DoseEvent.objects.create(
+            schedule=schedule,
+            medicine=medicine,
+            patient=medicine.patient,
+            scheduled_for=now - MISSED_AFTER,
+            slot=DoseSlot.MORNING,
+            quantity_expected=Decimal("1"),
+        )
+        actions.sweep_overdue(now=now, alert_caregivers=False)
+        dose.refresh_from_db()
+        assert dose.status == DoseStatus.PENDING

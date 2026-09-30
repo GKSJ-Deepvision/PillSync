@@ -1,0 +1,113 @@
+# Render Blueprint for PillSync.
+#
+# Render dashboard -> New -> Blueprint -> pick this repository. It creates the
+# database, the key-value store, the API, the background worker and the web app,
+# wired together. See docs/deployment.md for the step-by-step and what it costs.
+#
+# This file describes the deployment; it does not perform one. Nothing here runs
+# until you connect the repository to a Render account you own.
+
+databases:
+  - name: pillsync-db
+    databaseName: pillsync
+    user: pillsync
+    plan: basic-256mb        # the free database expires after 30 days; do not use it for real data
+
+services:
+  # Redis: the Celery broker and result store.
+  - type: keyvalue
+    name: pillsync-redis
+    plan: starter
+    maxmemoryPolicy: noeviction   # a broker must never silently drop queued reminders
+    ipAllowList: []               # internal network only
+
+  # The API: gunicorn, plus migrations and catalogue seeding on start.
+  - type: web
+    name: pillsync-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: starter
+    healthCheckPath: /health/ready/      # readiness: fails if the database is unreachable
+    autoDeploy: true
+    disk:
+      # Original prescription photos. Without a disk they vanish on each deploy;
+      # scans still work (the extracted text is in the database), but the
+      # "view original photo" link would 404.
+      name: pillsync-media
+      mountPath: /app/media
+      sizeGB: 1
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: RUN_MIGRATIONS
+        value: "true"                    # only this service migrates
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase: { name: pillsync-db, property: connectionString }
+      - key: CELERY_BROKER_URL
+        fromService: { type: keyvalue, name: pillsync-redis, property: connectionString }
+      - key: CELERY_RESULT_BACKEND
+        fromService: { type: keyvalue, name: pillsync-redis, property: connectionString }
+      - key: ALLOWED_HOSTS
+        value: pillsync-api.onrender.com  # change if you rename the service or add a domain
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://pillsync-web.onrender.com
+      - key: DEFAULT_FROM_EMAIL
+        value: noreply@pillsync.example.com
+      - key: WEB_CONCURRENCY
+        value: "2"
+
+  # Celery worker with the beat scheduler embedded (-B): dose generation,
+  # reminders, the missed-dose sweep and the nightly refill run. One process is
+  # enough at this scale; split beat out before running more than one worker,
+  # or every schedule fires once per worker.
+  - type: worker
+    name: pillsync-worker
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    dockerCommand: celery -A config worker -B -l info --schedule /tmp/celerybeat-schedule
+    plan: starter
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: SECRET_KEY
+        fromService: { type: web, name: pillsync-api, envVarKey: SECRET_KEY }
+      - key: DATABASE_URL
+        fromDatabase: { name: pillsync-db, property: connectionString }
+      - key: CELERY_BROKER_URL
+        fromService: { type: keyvalue, name: pillsync-redis, property: connectionString }
+      - key: CELERY_RESULT_BACKEND
+        fromService: { type: keyvalue, name: pillsync-redis, property: connectionString }
+      - key: ALLOWED_HOSTS
+        value: pillsync-api.onrender.com
+      - key: DEFAULT_FROM_EMAIL
+        value: noreply@pillsync.example.com
+
+  # The web app: the built SPA, with /api and /admin forwarded to the API so the
+  # browser sees a single origin (no CORS, no cookie problems).
+  - type: web
+    name: pillsync-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://pillsync-api.onrender.com/api/*
+      - type: rewrite
+        source: /admin/*
+        destination: https://pillsync-api.onrender.com/admin/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff

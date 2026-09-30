@@ -6,6 +6,8 @@ per-app `apps/<app>/tests/` packages alike.
 
 from __future__ import annotations
 
+from datetime import UTC
+
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -168,3 +170,23 @@ def medicine_reference(db) -> MedicineReference:
         pharm_class="Calcium Channel Blocker [EPC]",
         requires_prescription=True,
     )
+
+
+@pytest.fixture
+def pinned_now(monkeypatch):
+    """Pin "now" to 06:00 UTC on a fixed day, so tests do not depend on when they run.
+
+    Several tests schedule doses for 08:00 and count how many are generated. Dose
+    generation deliberately skips a time that has already passed, so with a live
+    clock the answer changed with the hour: those tests failed for most of the day
+    on a UTC CI server. With "now" at 06:00 an 08:00 dose is always still ahead
+    today; and 06:00 is nowhere near midnight, so nothing lands on a neighbouring
+    date either.
+    """
+    from datetime import datetime
+
+    from django.utils import timezone
+
+    fixed = datetime(2026, 3, 2, 6, 0, tzinfo=UTC)
+    monkeypatch.setattr(timezone, "now", lambda: fixed)
+    return fixed

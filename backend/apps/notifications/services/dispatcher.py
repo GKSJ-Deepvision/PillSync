@@ -242,6 +242,57 @@ def notify_low_stock(medicine) -> list[NotificationLog]:
     return logs
 
 
+_REFILL_SUBJECTS = {"LOW": "Running low", "CRITICAL": "Almost out", "OUT": "Out of stock"}
+
+
+def notify_refill(medicine, prediction, message: str) -> list[NotificationLog]:
+    """Tell the patient - and any caregiver who asked - that a refill is due.
+
+    The specification lists "caregiver refill notifications" separately from the
+    patient's own, because the person who has to act is often not the patient: an
+    elderly parent does not go to the pharmacy, their daughter does.
+    """
+    payload = {
+        "type": "refill_due",
+        "status": prediction.status,
+        "medicine_id": str(medicine.pk),
+        "patient_id": str(medicine.patient_id),
+    }
+    subject = _REFILL_SUBJECTS.get(prediction.status, "Refill needed")
+
+    logs: list[NotificationLog] = []
+    for recipient in _patient_recipients(medicine.patient):
+        logs += send(
+            recipient=recipient,
+            category=NotificationCategory.REFILL_DUE,
+            subject=subject,
+            body=message,
+            payload=payload,
+        )
+
+    patient = medicine.patient
+    if prediction.status == "OUT":
+        caregiver_body = f"{patient.full_name} has run out of {medicine.display_name}."
+    elif prediction.depletion_date:
+        days = (prediction.depletion_date - timezone.localdate()).days
+        caregiver_body = (
+            f"{patient.full_name} is expected to run out of {medicine.display_name} "
+            f"in {days} day{'s' if days != 1 else ''}."
+        )
+    else:
+        caregiver_body = f"{patient.full_name} needs a refill of {medicine.display_name}."
+
+    for caregiver in _caregivers_for(patient):
+        logs += send(
+            recipient=caregiver,
+            category=NotificationCategory.REFILL_DUE,
+            subject=f"{patient.full_name}: {subject.lower()}",
+            body=caregiver_body,
+            payload=payload,
+        )
+    return logs
+
+
 def notify_prescription_expiring(prescription, days_left: int) -> list[NotificationLog]:
     body = (
         f"The prescription from {prescription.doctor_name or 'your doctor'} expires in "

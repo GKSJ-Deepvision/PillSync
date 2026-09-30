@@ -29,6 +29,7 @@ services:
   backend:
     build:
       context: ./backend
+      target: dev
     env_file:
       - ./backend/.env
     volumes:
@@ -44,6 +45,7 @@ services:
   worker:
     build:
       context: ./backend
+      target: dev
     command: celery -A config worker -l info
     env_file:
       - ./backend/.env
@@ -56,6 +58,7 @@ services:
   beat:
     build:
       context: ./backend
+      target: dev
     command: celery -A config beat -l info
     env_file:
       - ./backend/.env
