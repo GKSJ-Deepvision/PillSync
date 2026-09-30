@@ -8,6 +8,9 @@ const LINKS = [
   { to: '/', label: 'Dashboard', roles: ['PATIENT', 'CAREGIVER', 'ADMIN'], end: true },
   { to: '/today', label: "Today's medicines", roles: ['PATIENT', 'CAREGIVER', 'ADMIN'] },
   { to: '/medications', label: 'My medicines', roles: ['PATIENT', 'CAREGIVER', 'ADMIN'] },
+  { to: '/scan', label: 'Scan a prescription', roles: ['PATIENT', 'ADMIN'] },
+  { to: '/refills', label: 'Refills', roles: ['PATIENT', 'CAREGIVER', 'ADMIN'] },
+  { to: '/adherence', label: 'Adherence', roles: ['PATIENT', 'CAREGIVER', 'ADMIN'] },
   { to: '/history', label: 'History', roles: ['PATIENT', 'CAREGIVER', 'ADMIN'] },
   { to: '/family', label: 'Family profiles', roles: ['PATIENT', 'ADMIN'] },
   { to: '/caregivers', label: 'Caregivers', roles: ['PATIENT'] },
@@ -15,6 +18,7 @@ const LINKS = [
   { to: '/medicines', label: 'Medicine catalogue', roles: ['PATIENT', 'CAREGIVER', 'ADMIN'] },
   { to: '/notifications', label: 'Notifications', roles: ['PATIENT', 'CAREGIVER', 'ADMIN'] },
   { to: '/profile', label: 'My profile', roles: ['PATIENT', 'CAREGIVER', 'ADMIN'] },
+  { to: '/admin/analytics', label: 'Platform analytics', roles: ['ADMIN'] },
   { to: '/admin/users', label: 'User management', roles: ['ADMIN'] },
 ];
 

@@ -261,6 +261,28 @@ CATEGORY_RULES: list[tuple[str, tuple[str, ...], tuple[str, ...]]] = [
             "vitamin",
         ),
     ),
+    # Not one of the specification's six groups, and deliberately last so it can
+    # only ever claim a drug the six did not. It exists because prescriptions are
+    # not limited to chronic-disease drugs: without it, paracetamol - the most
+    # prescribed medicine in the platform's target market - could not be matched
+    # by the OCR pipeline at all.
+    (
+        "OTHER",
+        (),
+        (
+            "acetaminophen", "ibuprofen", "naproxen", "diclofenac", "tramadol", "cetirizine",
+            "levocetirizine", "loratadine", "fexofenadine", "chlorpheniramine", "montelukast",
+            "omeprazole", "pantoprazole", "esomeprazole", "rabeprazole", "lansoprazole",
+            "famotidine", "ranitidine", "ondansetron", "domperidone", "metoclopramide",
+            "loperamide", "albuterol", "salbutamol", "prednisone", "prednisolone",
+            "dexamethasone", "methylprednisolone", "hydroxychloroquine", "sertraline",
+            "escitalopram", "fluoxetine", "amitriptyline", "gabapentin", "pregabalin",
+            "clonazepam", "alprazolam", "levetiracetam", "carbamazepine", "phenytoin",
+            "allopurinol", "colchicine", "cyclobenzaprine", "methocarbamol", "fluconazole",
+            "acyclovir", "ivermectin", "albendazole", "tamsulosin", "finasteride",
+            "sildenafil", "folic acid", "ranolazine", "guaifenesin", "dextromethorphan",
+        ),  # fmt: skip
+    ),
 ]
 
 CATEGORY_LABELS = {
@@ -270,11 +292,16 @@ CATEGORY_LABELS = {
     "ANTIBIOTICS": "Antibiotics",
     "VITAMINS": "Vitamins",
     "HEART": "Heart Medications",
+    "OTHER": "Other",
 }
 
 # How many products to keep per category in the committed seed file. Enough to
 # make search and autocomplete feel real without adding megabytes to git.
-SEED_PER_CATEGORY = 350
+SEED_PER_CATEGORY = 700
+# Without a per-generic cap, one heavily marketed drug (acetaminophen has 70
+# presentations) uses up a category's whole budget and pushes out every other
+# drug in it. Sixteen keeps a full strength range - levothyroxine has twelve.
+MAX_PRESENTATIONS_PER_GENERIC = 16
 SAMPLE_ROWS = 120
 
 FIELDNAMES = [
@@ -477,9 +504,14 @@ def build() -> dict[str, int]:
         for _generic, group in ranked:
             if taken >= SEED_PER_CATEGORY:
                 break
-            group.sort(key=lambda r: (r["requires_prescription"] != "true", r["strength"]))
-            seed.extend(group)
-            taken += len(group)
+            # Plain "Tablet" before "Tablet, Film Coated, Extended Release", so
+            # the presentations kept are the ones a patient actually recognises.
+            group.sort(
+                key=lambda r: (r["requires_prescription"] != "true", len(r["dosage_form"]), r["strength"])
+            )
+            chosen = group[:MAX_PRESENTATIONS_PER_GENERIC]
+            seed.extend(chosen)
+            taken += len(chosen)
     seed.sort(key=lambda r: (r["category"], r["generic_name"], r["strength"]))
     write_csv(SEED_DIR / "medicines_seed.csv", seed)
 
@@ -554,10 +586,7 @@ def write_conditions() -> None:
     ]
 
     payload = {
-        "categories": [
-            {"code": code, "label": label} for code, label in CATEGORY_LABELS.items()
-        ]
-        + [{"code": "OTHER", "label": "Other"}],
+        "categories": [{"code": code, "label": label} for code, label in CATEGORY_LABELS.items()],
         "conditions": conditions,
     }
     path = SEED_DIR / "conditions_seed.json"

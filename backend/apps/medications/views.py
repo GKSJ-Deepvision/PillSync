@@ -11,6 +11,8 @@ from rest_framework.response import Response
 
 from apps.common.choices import MedicineCategory
 from apps.common.permissions import IsProfileOwnerOrAssignedCaregiver
+from apps.refills.serializers import AdjustStockSerializer, StockEventSerializer
+from apps.refills.services import alerts, stock
 
 from .models import MedicationSchedule, Medicine
 from .serializers import (
@@ -58,6 +60,7 @@ class MedicineViewSet(viewsets.ModelViewSet):
 
         for schedule in instance.schedules.all():
             drop_future_events(schedule)
+        alerts.after_stock_change(instance, notify=False)  # a stopped medicine has no forecast
 
     @extend_schema(request=RefillSerializer, responses={200: MedicineSerializer})
     @action(detail=True, methods=["post"])
@@ -67,8 +70,35 @@ class MedicineViewSet(viewsets.ModelViewSet):
         serializer = RefillSerializer(data=request.data, context={"medicine": medicine})
         serializer.is_valid(raise_exception=True)
 
-        medicine.restock(serializer.validated_data["quantity"])
+        stock.restock(medicine, serializer.validated_data["quantity"], request.user)
         return Response(MedicineSerializer(medicine, context=self.get_serializer_context()).data)
+
+    @extend_schema(request=AdjustStockSerializer, responses={200: MedicineSerializer})
+    @action(detail=True, methods=["post"], url_path="adjust-stock")
+    def adjust_stock(self, request, pk=None):
+        """Set stock to a counted figure ("I checked, there are 12 left")."""
+        medicine = self.get_object()
+        serializer = AdjustStockSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        stock.adjust(
+            medicine,
+            serializer.validated_data["quantity"],
+            request.user,
+            serializer.validated_data.get("reason", ""),
+        )
+        return Response(MedicineSerializer(medicine, context=self.get_serializer_context()).data)
+
+    @extend_schema(responses={200: StockEventSerializer(many=True)})
+    @action(detail=True, methods=["get"], url_path="stock-history")
+    def stock_history(self, request, pk=None):
+        """The ledger: starting stock, refills and corrections."""
+        medicine = self.get_object()
+        return Response(StockEventSerializer(medicine.stock_events.all()[:100], many=True).data)
+
+    def perform_update(self, serializer):
+        medicine = serializer.save()
+        # End date, active flag and the like change the forecast.
+        alerts.after_stock_change(medicine, notify=False)
 
     @extend_schema(responses={200: None})
     @action(detail=False, methods=["get"], url_path="by-condition")
@@ -141,12 +171,14 @@ class MedicationScheduleViewSet(viewsets.ModelViewSet):
         from apps.reminders.services.generation import generate_for_schedule
 
         generate_for_schedule(schedule)
+        alerts.after_stock_change(schedule.medicine, notify=False)
 
     def perform_update(self, serializer):
         schedule = serializer.save()
         from apps.reminders.services.generation import regenerate_for_schedule
 
         regenerate_for_schedule(schedule)
+        alerts.after_stock_change(schedule.medicine, notify=False)
 
     def perform_destroy(self, instance: MedicationSchedule) -> None:
         from apps.reminders.services.generation import drop_future_events
@@ -154,6 +186,7 @@ class MedicationScheduleViewSet(viewsets.ModelViewSet):
         drop_future_events(instance)
         instance.is_active = False
         instance.save(update_fields=["is_active", "updated_at"])
+        alerts.after_stock_change(instance.medicine, notify=False)
 
     @extend_schema(responses={200: None})
     @action(detail=True, methods=["post"], url_path="regenerate")

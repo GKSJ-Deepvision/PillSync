@@ -168,9 +168,11 @@ def sweep_overdue(*, now=None, alert_caregivers: bool = True) -> int:
 
 
 def _maybe_warn_low_stock(medicine) -> None:
-    """Raise a low-stock notification once the pack runs down."""
-    if not medicine.is_low_stock:
-        return
-    from apps.notifications.services.dispatcher import notify_low_stock
+    """Refresh the refill forecast and warn if it has got worse.
 
-    notify_low_stock(medicine)
+    The forecast supersedes the plain threshold check: it warns by days left, not
+    by a fixed count, and only once per level (see refills.services.alerts).
+    """
+    from apps.refills.services.alerts import after_stock_change
+
+    after_stock_change(medicine, notify=True)

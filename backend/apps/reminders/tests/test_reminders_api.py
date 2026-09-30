@@ -138,6 +138,7 @@ class TestDoseActionsApi:
         assert response.status_code == 404
 
 
+@pytest.mark.usefixtures("pinned_now")
 class TestTodayView:
     def test_it_groups_doses_by_slot(self, patient_client, schedule, medicine):
         morning = MedicationSchedule.objects.create(
@@ -170,6 +171,7 @@ class TestTodayView:
         assert dose["medicine_name"] == "Metformin"
 
 
+@pytest.mark.usefixtures("pinned_now")
 class TestUpcomingAndHistory:
     def test_upcoming_only_returns_open_future_doses(self, patient_client, schedule):
         make_dose(schedule, when=timezone.now() + timedelta(days=1))
@@ -246,7 +248,7 @@ class TestReminderTasks:
         stale.refresh_from_db()
         assert stale.status == DoseStatus.MISSED
 
-    def test_generation_tops_up_the_horizon(self, schedule):
+    def test_generation_tops_up_the_horizon(self, schedule, pinned_now):
         created = tasks.generate_dose_events(horizon_days=3)
         assert created == 4
         assert tasks.generate_dose_events(horizon_days=3) == 0

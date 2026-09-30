@@ -14,7 +14,15 @@ approach works before wiring it in.
 | `data/raw/`, `data/processed/` | Working data — **git-ignored**, never commit |
 | `data/samples/` | A few small, non-sensitive sample images that tests may use |
 | `models/` | Trained artefacts — git-ignored; store large files elsewhere and link them |
-| `tests/` | Pytest tests for the pipelines above |
+| `tests/` | Pytest tests for the pipelines above; `test_evaluations.py` turns the two evaluations into regression gates |
+
+**Evaluations** (these produce the figures in `docs/reports/`):
+
+```bash
+python ml/src/refill_prediction/evaluate.py --write docs/reports/refill-evaluation.md
+python ml/src/ocr/evaluate.py --no-ocr                 # parser only, no Tesseract needed
+docker run --rm -v "$PWD:/repo" -e PYTHONPATH=/repo/backend pillsync-backend-dev \n    python /repo/ml/src/ocr/evaluate.py --write /repo/docs/reports/ocr-evaluation.md   # with real Tesseract
+```
 
 **Never commit real prescriptions, or any image containing a real person's medical
 data or identity.** Use synthetic or public-domain samples only.

@@ -38,6 +38,7 @@ frontend/coverage/
 # ---- Secrets and environment ----
 .env
 .env.*
+!.env.demo
 !.env.example
 !.env.*.example
 *.pem

@@ -4,9 +4,21 @@
     {
       "name": "frontend",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev:demo"
+      ],
       "cwd": "frontend",
       "port": 5173
+    },
+    {
+      "name": "backend-demo",
+      "runtimeExecutable": ".venv/Scripts/python.exe",
+      "runtimeArgs": [
+        "scripts/run_demo.py"
+      ],
+      "cwd": "backend",
+      "port": 8010
     }
   ]
 }

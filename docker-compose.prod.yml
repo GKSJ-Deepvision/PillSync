@@ -1,0 +1,100 @@
+# The production topology, runnable on one machine.
+#
+#   cp .env.prod.example .env.prod      # fill in real values
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+#
+# One public port (WEB_PORT, default 80) serves everything: nginx returns the
+# single-page app and proxies /api, /admin, /static and /health to gunicorn.
+# Postgres and Redis are on the internal network only - nothing but nginx is
+# reachable from outside.
+#
+# For a laptop smoke test over plain http, set USE_HTTPS=false in .env.prod. Real
+# deployments terminate TLS in front of nginx (a load balancer, or the platform)
+# and leave USE_HTTPS at its default of true.
+
+x-backend: &backend
+  build:
+    context: ./backend
+    target: production
+  image: pillsync-backend:prod
+  env_file: [.env.prod]
+  environment: &backend-env
+    DJANGO_SETTINGS_MODULE: config.settings.prod
+    POSTGRES_HOST: db
+    POSTGRES_DB: ${POSTGRES_DB:-pillsync}
+    POSTGRES_USER: ${POSTGRES_USER:-pillsync}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env.prod}
+    CELERY_BROKER_URL: redis://redis:6379/0
+    CELERY_RESULT_BACKEND: redis://redis:6379/1
+  volumes:
+    - media:/app/media
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pillsync}
+      POSTGRES_USER: ${POSTGRES_USER:-pillsync}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env.prod}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pillsync}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  backend:
+    <<: *backend
+    environment:
+      <<: *backend-env
+      RUN_MIGRATIONS: "true"   # only this container migrates
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  worker:
+    <<: *backend
+    command: celery -A config worker -l info
+    # The image's HTTP healthcheck is meaningless here; ask Celery itself.
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A config inspect ping -d celery@$$HOSTNAME | grep -q pong"]
+      interval: 30s
+      timeout: 15s
+      start_period: 30s
+      retries: 3
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  beat:
+    <<: *backend
+    command: celery -A config beat -l info --schedule /tmp/celerybeat-schedule
+    healthcheck:
+      disable: true   # beat serves nothing; the HTTP check inherited from the image would always fail
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+    image: pillsync-frontend:prod
+    ports:
+      - "${WEB_PORT:-80}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  media:

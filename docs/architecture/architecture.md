@@ -18,10 +18,10 @@ flowchart TB
         auth["accounts<br/>JWT · OAuth2 · RBAC"]
         profiles["profiles<br/>patients · conditions · contacts"]
         common["common<br/>reference data · permissions"]
-        future["Milestone 2-4<br/>medications · ocr · reminders<br/>adherence · refills · analytics"]
+        future["medications · prescriptions · reminders<br/>notifications · ocr · refills<br/>adherence · analytics"]
     end
 
-    subgraph workers["Background (wired now, used from M2)"]
+    subgraph workers["Background"]
         celery["Celery worker"]
         beat["Celery beat<br/>reminder scheduling"]
     end
@@ -37,7 +37,7 @@ flowchart TB
         fcm["Firebase Cloud Messaging"]
         twilio["Twilio SMS"]
         sendgrid["SendGrid email"]
-        openai["OpenAI + Tesseract<br/>OCR pipeline"]
+        tess["Tesseract OCR<br/>(binary in the backend image)"]
     end
 
     browser -->|HTTPS| nginx
@@ -59,15 +59,17 @@ flowchart TB
     celery -.-> fcm
     celery -.-> twilio
     celery -.-> sendgrid
-    future -.-> openai
+    future --> tess
 
-    style future stroke-dasharray: 5 5
-    style workers stroke-dasharray: 5 5
     style external stroke-dasharray: 5 5
 ```
 
-Dashed boxes are wired but not yet exercised: Milestone 1 delivers the solid
-path — browser to API to PostgreSQL.
+All four milestones are live. The dashed box is external services: Google sign-in
+works when credentials are set; push, SMS and email providers fall back to the
+console without them, so reminders reach nobody until they are configured. Tesseract
+is a local binary, not a service. OCR, refill prediction and analytics are described in
+[`ocr-and-refills.md`](ocr-and-refills.md); the deployed topology is in
+[`docs/deployment.md`](../deployment.md).
 
 ## Request path: signing in
 

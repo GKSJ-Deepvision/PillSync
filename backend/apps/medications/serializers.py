@@ -180,6 +180,23 @@ class MedicineSerializer(serializers.ModelSerializer):
                 {"end_date": "The end date cannot be before the start date."}
             )
 
+        # After creation stock moves only through doses, refills and counted
+        # corrections, each of which is written to the stock ledger. A bare PATCH
+        # would overwrite the figure invisibly and leave the forecast unexplained.
+        if (
+            self.instance is not None
+            and "quantity_remaining" in attrs
+            and attrs["quantity_remaining"] != self.instance.quantity_remaining
+        ):
+            raise serializers.ValidationError(
+                {
+                    "quantity_remaining": (
+                        "Use the refill or adjust-stock action to change stock, "
+                        "so the change is recorded."
+                    )
+                }
+            )
+
         name = attrs.get("name", getattr(self.instance, "name", "")) or ""
         reference = attrs.get("reference", getattr(self.instance, "reference", None))
         if not name.strip() and reference is None:
@@ -239,6 +256,12 @@ class MedicineCreateSerializer(MedicineSerializer):
             from apps.reminders.services.generation import generate_for_medicine
 
             generate_for_medicine(medicine)
+
+        # The ledger starts here, so every later change to stock has a "before".
+        from apps.refills.services import stock
+
+        request = self.context.get("request")
+        stock.record_initial(medicine, getattr(request, "user", None))
         return medicine
 
 

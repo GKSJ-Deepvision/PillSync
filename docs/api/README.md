@@ -96,7 +96,92 @@ write access to a patient's profile.
 | GET | `categories/` | yes | Per-category medicine counts |
 | GET | `enums/` | — | Every dropdown option in one call |
 
-`GET /health/` (no prefix) is the liveness probe.
+### Medicines and schedules — `/api/v1/`
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET/POST | `medicines/` | yes | A patient's medicines; POST accepts schedules inline and records the starting stock |
+| GET/PATCH/DELETE | `medicines/{id}/` | owner/caregiver | One medicine; DELETE stops it (history is kept). `quantity_remaining` cannot be PATCHed |
+| GET | `medicines/by-condition/` | yes | Grouped by disease category |
+| GET | `medicines/low-stock/` | yes | At or below the low-stock threshold |
+| POST | `medicines/{id}/refill/` | manager | Add a pack (defaults to the pack size); written to the stock ledger |
+| POST | `medicines/{id}/adjust-stock/` | manager | Set stock to a counted figure `{quantity, reason}` |
+| GET | `medicines/{id}/stock-history/` | yes | The ledger: starting stock, refills, corrections |
+| GET/POST | `schedules/` | manager | Dose times; every write regenerates upcoming doses and the forecast |
+| GET/PATCH/DELETE | `schedules/{id}/` | manager | One schedule |
+| POST | `schedules/{id}/regenerate/` | manager | Rebuild upcoming doses |
+| GET/POST | `prescriptions/` | yes | Prescription records; `expiring/` lists those lapsing within 30 days |
+
+### Reminders — `/api/v1/doses/`
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET | `doses/today/` | yes | Today's doses grouped into morning / afternoon / evening / night |
+| GET | `doses/upcoming/`, `doses/history/` | yes | What is next; what happened, per day |
+| POST | `doses/{id}/take/` | yes | Taken — decrements stock and re-checks the forecast |
+| POST | `doses/{id}/miss/` | yes | Missed — alerts caregivers who opted in |
+| POST | `doses/{id}/skip/` | yes | Skipped on purpose — not an adherence failure |
+| POST | `doses/{id}/snooze/` | yes | Postpone (at most 3 times) |
+
+### Notifications — `/api/v1/notifications/`
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET/PATCH | `preferences/` | yes | Channels, quiet hours, categories |
+| GET/POST/DELETE | `devices/` | yes | Push-notification device tokens |
+| GET | `log/`, `log/delivery_stats/` | yes | What was sent, and the delivery success rate |
+
+### Prescription OCR — `/api/v1/ocr/` *(Milestone 3)*
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| POST | `jobs/` | manager | Upload a photo (multipart: `patient`, `image`, optional `kind`); returns the extracted medicines |
+| POST | `jobs/parse-text/` | manager | The same, from typed or pasted text |
+| GET | `jobs/`, `jobs/{id}/` | yes | Your scans and their results |
+| GET | `jobs/{id}/image/` | yes | The original photo — authenticated, never cached |
+| PATCH | `items/{id}/` | manager | Correct one extracted medicine, or choose a suggested catalogue match |
+| POST | `jobs/{id}/reparse/` | manager | Re-extract from corrected text |
+| POST | `jobs/{id}/confirm/` | manager | Add the reviewed medicines: creates prescription, medicines, schedules, doses, stock ledger and forecast |
+| POST | `jobs/{id}/reject/` | manager | Discard the scan |
+
+Limits: 10 MB, JPEG/PNG/WEBP/TIFF, at least 200 px a side. A failed read returns
+`201` with `status: FAILED` and a plain-language `error`, not a 5xx.
+
+### Refills — `/api/v1/refills/` *(Milestone 3)*
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET | `` | yes | Forecasts for every medicine you may see, most urgent first |
+| GET | `summary/` | yes | Counts by status, and how many need attention |
+| GET | `{id}/projection/` | yes | Day-by-day stock for 30 days, with the run-out and refill dates |
+| POST | `recompute/` | yes | Recalculate now |
+| GET | `accuracy/` | yes | How well the consumption forecast matched what was really taken |
+
+### Adherence — `/api/v1/adherence/` *(Milestone 3)*
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET | `summary/?days=&patient=&medicine=` | yes | Rate, on-time rate, streaks, consistency, trend, daily series, missed-dose patterns |
+| GET | `report/?period=weekly\|monthly[&export=csv]` | yes | A report with the previous period for comparison; CSV download |
+
+### Analytics — `/api/v1/analytics/` *(Milestone 4)*
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET | `dashboard/` | yes | The patient dashboard in one call |
+| GET | `caregiver/` | caregiver | Everyone you look after, ranked by who needs attention, with the reasons |
+| GET | `admin/` | admin | Users, usage, notification delivery, OCR, refills, forecast accuracy |
+| GET | `performance/` | admin | Latency percentiles and slowest routes (per server process) |
+
+### Health
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/health/` | Liveness: the process is up |
+| GET | `/health/ready/` | Readiness: the database answers (503 otherwise) |
+
+Every response carries a `Server-Timing` header. The per-user rate limit
+(`THROTTLE_USER_RATE`, default 5,000 a day) answers `429` when exceeded.
 
 ## Response shapes
 

@@ -297,22 +297,30 @@ class TestSchedules:
         assert response.status_code == 400
 
     def test_editing_the_time_moves_the_upcoming_doses(self, patient_client, medicine):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        # Relative to now, not fixed: a fixed 08:00 made this fail for the hour after
+        # 08:00, because a dose that has only just passed is not "upcoming" and stays.
+        now = timezone.localtime()
+        old = (now - timedelta(hours=3)).time().replace(second=0, microsecond=0)
+        new = (now + timedelta(hours=5)).time().replace(second=0, microsecond=0)
+
         schedule = MedicationSchedule.objects.create(
-            medicine=medicine, time_of_day=time(8, 0), quantity_per_dose=Decimal("1")
+            medicine=medicine, time_of_day=old, quantity_per_dose=Decimal("1")
         )
         patient_client.post(reverse("v1:schedule-regenerate", args=[schedule.id]))
 
         response = patient_client.patch(
             reverse("v1:schedule-detail", args=[schedule.id]),
-            {"time_of_day": "21:30"},
+            {"time_of_day": new.strftime("%H:%M")},
             format="json",
         )
         assert response.status_code == 200
-
-        from django.utils import timezone
 
         hours = {
             timezone.localtime(d.scheduled_for).hour
             for d in DoseEvent.objects.filter(schedule=schedule)
         }
-        assert hours == {21}
+        assert hours == {new.hour}
