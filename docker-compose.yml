@@ -31,6 +31,8 @@ services:
       context: ./backend
     env_file:
       - ./backend/.env
+    environment:
+      DB_HOST: db
     volumes:
       - ./backend:/app
     ports:
@@ -47,6 +49,8 @@ services:
     command: celery -A config worker -l info
     env_file:
       - ./backend/.env
+    environment:
+      DB_HOST: db
     volumes:
       - ./backend:/app
     depends_on:
@@ -59,6 +63,8 @@ services:
     command: celery -A config beat -l info
     env_file:
       - ./backend/.env
+    environment:
+      DB_HOST: db
     volumes:
       - ./backend:/app
     depends_on:

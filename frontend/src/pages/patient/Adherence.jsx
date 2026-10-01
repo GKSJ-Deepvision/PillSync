@@ -1,0 +1,17 @@
+import { useCallback, useEffect, useState } from 'react';
+import Card from '../../components/Card';
+import EmptyState from '../../components/EmptyState';
+import ErrorMessage from '../../components/ErrorMessage';
+import Input from '../../components/Input';
+import Loading from '../../components/Loading';
+import { getApiErrorMessage } from '../../services/api';
+import { medicationService } from '../../services/medicationService';
+
+const Adherence = () => {
+  const [data, setData] = useState(null); const [startDate, setStartDate] = useState(''); const [endDate, setEndDate] = useState(''); const [loading, setLoading] = useState(true); const [error, setError] = useState('');
+  const load = useCallback(async () => { setLoading(true); try { setData(await medicationService.getAdherence({ ...(startDate && { start_date: startDate }), ...(endDate && { end_date: endDate }) })); } catch (requestError) { setError(getApiErrorMessage(requestError, 'Unable to load adherence data.')); } finally { setLoading(false); } }, [startDate, endDate]);
+  useEffect(() => { const timer = setTimeout(load, 0); return () => clearTimeout(timer); }, [load]);
+  const apply = (event) => { event.preventDefault(); load(); };
+  return <div className="max-w-5xl mx-auto space-y-6 animate-fade-in" data-testid="adherence-page"><div><h1 className="text-xl font-extrabold text-slate-800 tracking-tight">Adherence Analytics</h1><p className="text-xs text-slate-450 mt-0.5">Review recorded taken and missed doses.</p></div><Card className="p-4"><form onSubmit={apply} className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end"><Input label="Start date" type="date" id="adherence-start" value={startDate} onChange={(e) => setStartDate(e.target.value)} /><Input label="End date" type="date" id="adherence-end" value={endDate} onChange={(e) => setEndDate(e.target.value)} /><button className="rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700" type="submit">Apply dates</button></form></Card>{error && <ErrorMessage message={error} onDismiss={() => setError('')} />}{loading ? <Loading text="Loading adherence..." /> : !data || data.total_scheduled === 0 ? <EmptyState title="No adherence data yet" description="Adherence will appear after schedules have recorded taken or missed doses." /> : <><div className="grid grid-cols-1 sm:grid-cols-4 gap-4"><Card title="Adherence" className="p-4"><strong className="text-3xl text-slate-800">{data.adherence_percentage}%</strong></Card><Card title="Scheduled" className="p-4"><strong className="text-3xl text-slate-800">{data.total_scheduled}</strong></Card><Card title="Taken" className="p-4"><strong className="text-3xl text-emerald-600">{data.taken}</strong></Card><Card title="Missed" className="p-4"><strong className="text-3xl text-red-600">{data.missed}</strong></Card></div><Card title="Daily breakdown" subtitle="Recorded doses by day" className="p-5"><div className="mt-4 space-y-3">{data.daily_breakdown.map((day) => <div key={day.date || day.day} className="flex items-center gap-3 text-xs"><span className="w-24 text-slate-500">{day.date || day.day}</span><div className="h-2 flex-1 rounded-full bg-slate-100"><div className="h-2 rounded-full bg-brand-500" style={{ width: `${day.total_scheduled ? (day.taken / day.total_scheduled) * 100 : 0}%` }} /></div><span className="w-20 text-right font-semibold text-slate-700">{day.taken} taken</span></div>)}</div></Card></>}</div>;
+};
+export default Adherence;

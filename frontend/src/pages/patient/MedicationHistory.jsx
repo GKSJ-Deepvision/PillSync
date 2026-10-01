@@ -1,0 +1,17 @@
+import { useEffect, useState } from 'react';
+import { CheckCircle, CircleSlash, Clock3, History } from 'lucide-react';
+import Card from '../../components/Card';
+import EmptyState from '../../components/EmptyState';
+import ErrorMessage from '../../components/ErrorMessage';
+import Loading from '../../components/Loading';
+import { getApiErrorMessage } from '../../services/api';
+import { medicationService } from '../../services/medicationService';
+
+const styles = { taken: ['Taken', CheckCircle, 'bg-emerald-50 text-emerald-700'], missed: ['Missed', Clock3, 'bg-red-50 text-red-700'], skipped: ['Skipped', CircleSlash, 'bg-slate-50 text-slate-600'] };
+const MedicationHistory = () => {
+  const [records, setRecords] = useState([]); const [loading, setLoading] = useState(true); const [error, setError] = useState(''); const [filter, setFilter] = useState('all');
+  useEffect(() => { const load = async () => { try { const medicines = await medicationService.listMedicines(); const groups = await Promise.all(medicines.map((medicine) => medicationService.listHistory(medicine.id))); setRecords(groups.flat().map((record, index) => ({ ...record, key: `${record.id}-${index}` }))); } catch (requestError) { setError(getApiErrorMessage(requestError, 'Unable to load medication history.')); } finally { setLoading(false); } }; const timer = setTimeout(load, 0); return () => clearTimeout(timer); }, []);
+  const visible = filter === 'all' ? records : records.filter((record) => record.status === filter);
+  return <div className="max-w-5xl mx-auto space-y-6 animate-fade-in" data-testid="medication-history-page"><div><h1 className="text-xl font-extrabold text-slate-800 tracking-tight">Medication History</h1><p className="text-xs text-slate-450 mt-0.5">Review recorded medication events.</p></div><div><label htmlFor="history-filter" className="mr-2 text-xs font-semibold text-slate-600">Status</label><select id="history-filter" value={filter} onChange={(e) => setFilter(e.target.value)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm"><option value="all">All</option><option value="taken">Taken</option><option value="missed">Missed</option><option value="skipped">Skipped</option></select></div>{error && <ErrorMessage message={error} onDismiss={() => setError('')} />}{loading ? <Loading text="Loading medication history..." /> : visible.length === 0 ? <EmptyState title="No medication history found" description="Recorded dose events will appear here after reminders are completed." /> : <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">{visible.map((record) => { const [label, Icon, classes] = styles[record.status] || styles.skipped; return <Card key={record.key} className="p-4"><div className="flex items-start justify-between gap-3"><div className="flex gap-3"><div className="rounded-lg bg-brand-50 p-2 text-brand-600"><History className="h-4 w-4" /></div><div><h2 className="text-sm font-bold text-slate-800">{record.medicine || 'Medicine'}</h2><p className="text-xs text-slate-500 mt-1">{record.dose} · {new Date(record.scheduled_at).toLocaleString()}</p></div></div><span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${classes}`}><Icon className="h-3.5 w-3.5" />{label}</span></div>{record.taken_at && <p className="mt-3 text-xs text-slate-500">Taken at {new Date(record.taken_at).toLocaleString()}</p>}{record.notes && <p className="mt-2 text-xs text-slate-500">{record.notes}</p>}</Card>; })}</div>}</div>;
+};
+export default MedicationHistory;

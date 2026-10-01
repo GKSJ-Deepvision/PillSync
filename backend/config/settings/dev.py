@@ -1,3 +1,5 @@
+import os
+
 from .base import *  # noqa: F403
 
 DEBUG = True
@@ -10,7 +12,7 @@ DATABASES = {
         "NAME": "pillsync",
         "USER": "pillsync",
         "PASSWORD": "pillsync",
-        "HOST": "localhost",
+        "HOST": os.getenv("DB_HOST", "localhost"),
         "PORT": "5432",
     }
 }

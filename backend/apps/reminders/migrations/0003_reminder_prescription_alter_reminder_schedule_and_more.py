@@ -25,6 +25,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='reminder',
-            constraint=models.CheckConstraint(check=models.Q(models.Q(('prescription__isnull', True), ('schedule__isnull', False)), models.Q(('prescription__isnull', False), ('schedule__isnull', True)), _connector='OR'), name='reminder_has_one_source'),
+            constraint=models.CheckConstraint(condition=models.Q(models.Q(('prescription__isnull', True), ('schedule__isnull', False)), models.Q(('prescription__isnull', False), ('schedule__isnull', True)), _connector='OR'), name='reminder_has_one_source'),
         ),
     ]
