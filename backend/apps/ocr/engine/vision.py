@@ -24,9 +24,11 @@ Privacy:
 from __future__ import annotations
 
 import base64
+import http.client
 import json
 import os
 import re
+import urllib.error
 import urllib.request
 from collections.abc import Callable
 
@@ -122,6 +124,16 @@ def _post(
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
             return json.loads(response.read())
+
+    except urllib.error.HTTPError as exc:
+        try:
+            error_body = exc.read().decode("utf-8", errors="replace")
+        except (OSError, http.client.HTTPException):
+            error_body = ""
+
+        raise VisionError(
+            f"vision request failed: HTTP {exc.code} {exc.reason}; " f"response: {error_body}"
+        ) from exc
 
     except Exception as exc:
         raise VisionError(f"vision request failed: {exc}") from exc
@@ -220,7 +232,10 @@ def call_vision_model(
         "",
     ).lower()
 
-    model = os.environ.get("PILLSYNC_VISION_MODEL") or DEFAULT_MODELS.get(provider, "")
+    model = os.environ.get("PILLSYNC_VISION_MODEL") or DEFAULT_MODELS.get(
+        provider,
+        "",
+    )
 
     if provider == "gemini":
         return _call_gemini(
@@ -344,7 +359,10 @@ def normalize(raw_json: str) -> dict:
     except json.JSONDecodeError as exc:
         raise VisionError(f"model did not return JSON: {exc}") from exc
 
-    if not isinstance(data, dict) or not isinstance(data.get("medicines"), list):
+    if not isinstance(data, dict) or not isinstance(
+        data.get("medicines"),
+        list,
+    ):
         raise VisionError("JSON missing 'medicines' list")
 
     medicines: list[Medicine] = []

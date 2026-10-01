@@ -45,6 +45,60 @@ export default function NotificationsPage() {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  // Get styling based on notification type
+  const getNotificationStyle = (notification) => {
+    const kind = String(notification.kind || "").toLowerCase();
+    const title = String(notification.title || "").toLowerCase();
+
+    // Low stock / refill notification
+    if (
+      kind === "refill" ||
+      title.includes("low stock") ||
+      title.includes("refill")
+    ) {
+      return {
+        background: notification.read ? "#FFFBEB" : "#FFF7ED",
+        iconBackground: notification.read ? "#FEF3C7" : "#FFEDD5",
+        iconColor: notification.read ? "#B45309" : "#EA580C",
+        borderColor: notification.read ? "#FDE68A" : "#FED7AA",
+        dotColor: "#F97316",
+        buttonBackground: "#FFF7ED",
+        buttonColor: "#C2410C",
+        buttonBorder: "#FED7AA",
+      };
+    }
+
+    // Missed dose notification
+    if (
+      kind === "missed-dose" ||
+      kind === "missed_dose" ||
+      title.includes("missed dose")
+    ) {
+      return {
+        background: notification.read ? "#FEF2F2" : "#FFF1F2",
+        iconBackground: notification.read ? "#FEE2E2" : "#FFE4E6",
+        iconColor: notification.read ? "#B91C1C" : "#DC2626",
+        borderColor: notification.read ? "#FECACA" : "#FECDD3",
+        dotColor: "#EF4444",
+        buttonBackground: "#FFF1F2",
+        buttonColor: "#B91C1C",
+        buttonBorder: "#FECDD3",
+      };
+    }
+
+    // Fallback
+    return {
+      background: notification.read ? "#FFFFFF" : "#F8FAFC",
+      iconBackground: notification.read ? "#F3F4F6" : "#DBEAFE",
+      iconColor: notification.read ? "#9CA3AF" : "#2563EB",
+      borderColor: "#E5E7EB",
+      dotColor: "#2563EB",
+      buttonBackground: "#EFF6FF",
+      buttonColor: "#2563EB",
+      buttonBorder: "#BFDBFE",
+    };
+  };
+
   return (
     <div className="w-full min-h-screen bg-gray-50">
       <div className="w-full px-6 py-6 md:px-8 lg:px-10">
@@ -65,7 +119,7 @@ export default function NotificationsPage() {
             </h1>
 
             <p className="text-sm text-gray-500 mt-1">
-              Stay updated with medication reminders and alerts.
+              Stay updated with medication alerts and refill warnings.
             </p>
           </div>
 
@@ -184,7 +238,7 @@ export default function NotificationsPage() {
         {loading && (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 text-center">
             <p className="text-sm text-gray-500">
-              Loading notifications…
+              Loading notifications...
             </p>
           </div>
         )}
@@ -213,7 +267,7 @@ export default function NotificationsPage() {
             </p>
 
             <p className="text-sm text-gray-500 mt-1">
-              Medication alerts and reminders will appear here.
+              Medication alerts and refill warnings will appear here.
             </p>
           </div>
         )}
@@ -229,113 +283,114 @@ export default function NotificationsPage() {
               </h2>
 
               <p className="text-sm text-gray-500 mt-1">
-                Your latest medication alerts and updates.
+                Your latest medication alerts and refill warnings.
               </p>
             </div>
 
             {/* Notification List */}
             <div className="divide-y divide-gray-100">
 
-              {notifications.map((n) => (
-                <div
-                  key={n.id}
-                  className="px-5 py-5 md:px-6 transition-colors"
-                  style={{
-                    backgroundColor: n.read ? "#FFFFFF" : "#F8FAFC",
-                  }}
-                >
-                  <div className="flex items-start gap-4">
+              {notifications.map((n) => {
+                const style = getNotificationStyle(n);
 
-                    {/* Notification Icon */}
-                    <div
-                      className="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center"
-                      style={{
-                        backgroundColor: n.read
-                          ? "#F3F4F6"
-                          : "#DBEAFE",
-                        color: n.read
-                          ? "#9CA3AF"
-                          : "#2563EB",
-                      }}
-                    >
-                      <AlertCircleIcon className="w-5 h-5" />
-                    </div>
+                return (
+                  <div
+                    key={n.id}
+                    className="px-5 py-5 md:px-6 transition-colors"
+                    style={{
+                      backgroundColor: style.background,
+                    }}
+                  >
+                    <div className="flex items-start gap-4">
 
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
+                      {/* Notification Icon */}
+                      <div
+                        className="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center"
+                        style={{
+                          backgroundColor: style.iconBackground,
+                          color: style.iconColor,
+                        }}
+                      >
+                        <AlertCircleIcon className="w-5 h-5" />
+                      </div>
 
-                      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
 
-                        <div className="min-w-0">
+                        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
 
-                          {/* Title */}
-                          <div className="flex items-center gap-2">
+                          <div className="min-w-0">
 
-                            {!n.read && (
-                              <span
-                                className="w-2 h-2 rounded-full shrink-0"
-                                style={{
-                                  backgroundColor: "#2563EB",
-                                }}
-                              />
+                            {/* Title */}
+                            <div className="flex items-center gap-2">
+
+                              {!n.read && (
+                                <span
+                                  className="w-2 h-2 rounded-full shrink-0"
+                                  style={{
+                                    backgroundColor: style.dotColor,
+                                  }}
+                                />
+                              )}
+
+                              <p className="font-semibold text-gray-900 text-sm">
+                                {n.title}
+                              </p>
+
+                            </div>
+
+                            {/* Body */}
+                            {n.body && (
+                              <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+                                {n.body}
+                              </p>
                             )}
 
-                            <p className="font-semibold text-gray-900 text-sm">
-                              {n.title}
+                            {/* Date */}
+                            <p className="text-xs text-gray-400 mt-2">
+                              {new Date(n.created_at).toLocaleString([], {
+                                dateStyle: "medium",
+                                timeStyle: "short",
+                              })}
                             </p>
 
                           </div>
 
-                          {/* Body */}
-                          {n.body && (
-                            <p className="text-sm text-gray-500 mt-1 leading-relaxed">
-                              {n.body}
-                            </p>
+                          {/* Mark as Read */}
+                          {!n.read && (
+                            <button
+                              onClick={() => markRead(n.id)}
+                              className="self-start shrink-0 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl transition-colors"
+                              style={{
+                                backgroundColor: style.buttonBackground,
+                                color: style.buttonColor,
+                                border: `1px solid ${style.buttonBorder}`,
+                              }}
+                            >
+                              <CheckIcon className="w-3.5 h-3.5" />
+                              Mark as read
+                            </button>
                           )}
 
-                          {/* Date */}
-                          <p className="text-xs text-gray-400 mt-2">
-                            {new Date(n.created_at).toLocaleString([], {
-                              dateStyle: "medium",
-                              timeStyle: "short",
-                            })}
-                          </p>
+                          {/* Read */}
+                          {n.read && (
+                            <span
+                              className="self-start shrink-0 text-xs font-medium px-3 py-2 rounded-xl"
+                              style={{
+                                backgroundColor: "#F3F4F6",
+                                color: "#6B7280",
+                              }}
+                            >
+                              Read
+                            </span>
+                          )}
+
                         </div>
-
-                        {/* Mark as Read */}
-                        {!n.read && (
-                          <button
-                            onClick={() => markRead(n.id)}
-                            className="self-start shrink-0 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl transition-colors"
-                            style={{
-                              backgroundColor: "#EFF6FF",
-                              color: "#2563EB",
-                              border: "1px solid #BFDBFE",
-                            }}
-                          >
-                            <CheckIcon className="w-3.5 h-3.5" />
-                            Mark as read
-                          </button>
-                        )}
-
-                        {/* Read */}
-                        {n.read && (
-                          <span
-                            className="self-start shrink-0 text-xs font-medium px-3 py-2 rounded-xl"
-                            style={{
-                              backgroundColor: "#F3F4F6",
-                              color: "#6B7280",
-                            }}
-                          >
-                            Read
-                          </span>
-                        )}
-
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
             </div>
           </div>

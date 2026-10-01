@@ -1,7 +1,7 @@
 ﻿# Milestone 3 — OCR Recognition & Refill Prediction (Week 5–6)
 
 - **Intern:** Advala Indhu
-- **Branch:** `intern/01-advala-indhu`
+- **Branch:** intern/01-advala-indhu
 - **Submitted on:** 24 September 2026
 
 ## Evaluation criteria

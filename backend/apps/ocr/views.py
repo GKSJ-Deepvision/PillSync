@@ -56,3 +56,47 @@ class PrescriptionScanUploadView(APIView):
             frequency=str(first.get("doses_per_day") or ""),
         )
         return Response({"id": str(scan.id), **result}, status=status.HTTP_201_CREATED)
+
+
+class AdminOCRMonitoringView(APIView):
+    """
+    Read-only OCR monitoring data for the admin dashboard.
+    """
+
+    authentication_classes = [SupabaseJWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        scans = PrescriptionScan.objects.all().order_by("-created_at")[:100]
+
+        data = []
+        for scan in scans:
+            result = scan.result or {}
+            medicines = result.get("medicines") or []
+
+            data.append(
+                {
+                    "id": str(scan.id),
+                    "patient_id": str(scan.patient_id),
+                    "source": scan.source,
+                    "medicine_name": scan.medicine_name,
+                    "dosage": scan.dosage,
+                    "quantity": scan.quantity,
+                    "frequency": scan.frequency,
+                    "medicine_count": result.get("medicine_count", len(medicines)),
+                    "created_at": scan.created_at.isoformat(),
+                }
+            )
+
+        total = PrescriptionScan.objects.count()
+        tesseract_count = PrescriptionScan.objects.filter(source="tesseract").count()
+        vision_count = PrescriptionScan.objects.filter(source="vision").count()
+
+        return Response(
+            {
+                "total": total,
+                "tesseract": tesseract_count,
+                "vision": vision_count,
+                "recent_scans": data,
+            }
+        )

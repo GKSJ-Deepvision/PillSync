@@ -21,7 +21,31 @@ export default function AppLayout({ children }) {
     navigate("/login");
   };
 
-  const visibleNav = role === "patient" ? NAV_ITEMS : NAV_ITEMS.slice(-2);
+  const CAREGIVER_NAV_ITEMS = [
+  { to: "/dashboard", label: "Dashboard", icon: PillIcon },
+  { to: "/caregiver/patients", label: "Patients", icon: UserIcon },
+  { to: "/caregiver/medications", label: "Medications", icon: PillIcon },
+  { to: "/caregiver/adherence", label: "Adherence", icon: ChartIcon },
+  { to: "/notifications", label: "Notifications", icon: BellIcon },
+  { to: "/profile", label: "Profile", icon: UserIcon },
+];
+
+const ADMIN_NAV_ITEMS = [
+  { to: "/dashboard", label: "Dashboard", icon: PillIcon },
+  { to: "/admin/users", label: "Users", icon: UserIcon },
+  { to: "/admin/patients", label: "Patients", icon: UserIcon },
+  { to: "/admin/caregivers", label: "Caregivers", icon: UserIcon },
+  { to: "/admin/medications", label: "Medications", icon: PillIcon },
+  { to: "/admin/ocr", label: "OCR Monitoring", icon: ChartIcon },
+  { to: "/profile", label: "Profile", icon: UserIcon },
+];
+
+const visibleNav =
+  role === "patient"
+    ? NAV_ITEMS
+    : role === "caregiver"
+      ? CAREGIVER_NAV_ITEMS
+      : ADMIN_NAV_ITEMS;
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-teal-50 via-white to-emerald-50">

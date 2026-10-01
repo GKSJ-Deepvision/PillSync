@@ -15,6 +15,14 @@ import NotificationsPage from "./features/notifications/NotificationsPage";
 import ScanPage from "./features/ocr/ScanPage";
 import RefillsPage from "./features/refills/RefillsPage";
 import AdherenceReportPage from "./features/adherence/AdherenceReportPage";
+import CaregiverMedicationsPage from "./features/caregiver/CaregiverMedicationsPage";
+import MyPatientsPage from "./features/caregiver/MyPatientsPage";
+import CaregiverAdherencePage from "./features/caregiver/CaregiverAdherencePage";
+import AdminUsersPage from "./features/admin/AdminUsersPage";
+import AdminPatientsPage from "./features/admin/AdminPatientsPage";
+import AdminCaregiversPage from "./features/admin/AdminCaregiversPage";
+import AdminMedicationsPage from "./features/admin/AdminMedicationsPage";
+import AdminOCRMonitoringPage from "./features/admin/AdminOCRMonitoringPage";
 
 export default function App() {
   return (
@@ -115,9 +123,73 @@ export default function App() {
     }
   />
 
+          <Route
+            path="/caregiver/medications"
+            element={
+              <ProtectedRoute allowedRoles={["caregiver"]}>
+                <CaregiverMedicationsPage />
+              </ProtectedRoute>
+            }
+          />
+
+
+          <Route
+            path="/caregiver/patients"
+            element={
+              <ProtectedRoute allowedRoles={["caregiver"]}>
+                <MyPatientsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/caregiver/adherence"
+            element={
+              <ProtectedRoute allowedRoles={["caregiver"]}>
+                <CaregiverAdherencePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminUsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/patients"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminPatientsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/caregivers"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminCaregiversPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/medications"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminMedicationsPage />
+              </ProtectedRoute>
+            }
+          />          <Route
+            path="/admin/ocr"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminOCRMonitoringPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
   );
 }
-

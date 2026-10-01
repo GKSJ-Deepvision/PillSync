@@ -61,6 +61,10 @@ export default function RefillsPage() {
       .eq("active", true)
       .is("quantity_on_hand", null);
 
+    if (meds.error) {
+      setError(meds.error.message);
+    }
+
     setUncounted(
       (meds.data ?? []).filter((m) => m.frequency_per_day > 0)
     );
@@ -69,15 +73,30 @@ export default function RefillsPage() {
   }, [user]);
 
   useEffect(() => {
-    load().then(async () => {
-      const { data } = user
-        ? await supabase.rpc("check_refills", {
-            p_patient: user.id,
-          })
-        : { data: 0 };
+    const initialize = async () => {
+      await load();
+
+      if (!user) {
+        setAlertsSent(0);
+        return;
+      }
+
+      const { data, error: alertError } = await supabase.rpc(
+        "check_refills",
+        {
+          p_patient: user.id,
+        }
+      );
+
+      if (alertError) {
+        console.error("Refill alert error:", alertError);
+        return;
+      }
 
       setAlertsSent(data ?? 0);
-    });
+    };
+
+    initialize();
   }, [load, user]);
 
   const setAmount = (id, value) => {
@@ -87,54 +106,84 @@ export default function RefillsPage() {
     }));
   };
 
+  // ADD PURCHASE
   const bought = async (id) => {
-    const n = Number(amounts[`b${id}`]);
+    const raw = amounts[`b${id}`];
 
-    if (!n) return;
+    if (raw === "" || raw === undefined || raw === null) {
+      setError("Please enter how many tablets you bought.");
+      return;
+    }
 
-    const { error: e } = await supabase
+    const quantity = Number(raw);
+
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      setError("Please enter a valid quantity greater than 0.");
+      return;
+    }
+
+    setError(null);
+
+    const { error: purchaseError } = await supabase
       .from("stock_adjustments")
       .insert({
         medication_id: id,
-        delta: n,
+        delta: Math.round(quantity),
         reason: "refill purchase",
       });
 
-    if (e) {
-      setError(e.message);
+    if (purchaseError) {
+      console.error("Refill purchase error:", purchaseError);
+      setError(purchaseError.message);
       return;
     }
 
     setAmount(`b${id}`, "");
-    load();
+
+    await load();
   };
 
+  // SET CURRENT STOCK
   const recount = async (id) => {
     const raw = amounts[`c${id}`];
 
-    if (raw === "" || raw === undefined) return;
+    if (raw === "" || raw === undefined || raw === null) {
+      setError("Please enter the current stock quantity.");
+      return;
+    }
 
-    const { error: e } = await supabase
+    const quantity = Number(raw);
+
+    if (!Number.isFinite(quantity) || quantity < 0) {
+      setError("Please enter a valid stock quantity.");
+      return;
+    }
+
+    setError(null);
+
+    const { error: recountError } = await supabase
       .from("medications")
       .update({
-        quantity_on_hand: Math.round(Number(raw)),
+        quantity_on_hand: Math.round(quantity),
+        stock_counted_at: new Date().toISOString(),
       })
       .eq("id", id);
 
-    if (e) {
-      setError(e.message);
+    if (recountError) {
+      console.error("Recount update error:", recountError);
+      setError(recountError.message);
       return;
     }
 
     setAmount(`c${id}`, "");
-    load();
+
+    await load();
   };
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50">
       <div className="w-full px-6 py-6 md:px-8 lg:px-10 space-y-6">
 
-        {/* Back */}
         <Link
           to="/medications"
           className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
@@ -143,7 +192,6 @@ export default function RefillsPage() {
           Medicines
         </Link>
 
-        {/* Header */}
         <div className="flex items-center justify-between gap-4">
           <div>
             <h1 className="heading text-2xl md:text-3xl font-bold text-gray-900">
@@ -161,22 +209,21 @@ export default function RefillsPage() {
           </div>
         </div>
 
-        {/* Explanation */}
         <div className="bg-white rounded-2xl border border-amber-100 shadow-sm p-4">
           <p className="text-sm text-gray-600">
-            Remaining stock is your last count minus the doses you marked as
-            taken. The run-out date adjusts to how many doses you really take.
+            Remaining stock is calculated from your latest stock count,
+            purchases, and recorded doses. Use <strong>Add</strong> when you
+            buy more medicine and <strong>Set</strong> when you physically
+            recount the tablets you have.
           </p>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="text-sm bg-red-50 border border-red-200 text-red-700 rounded-xl p-4">
             {error}
           </div>
         )}
 
-        {/* Alerts */}
         {alertsSent > 0 && (
           <div className="text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4">
             {alertsSent} low-stock alert
@@ -185,7 +232,6 @@ export default function RefillsPage() {
           </div>
         )}
 
-        {/* Loading */}
         {loading && (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <p className="text-sm text-gray-500">
@@ -194,7 +240,6 @@ export default function RefillsPage() {
           </div>
         )}
 
-        {/* Forecast */}
         {!loading && forecast.length > 0 && (
           <section className="space-y-4">
             <div>
@@ -217,7 +262,6 @@ export default function RefillsPage() {
                     key={f.medication_id}
                     className={`rounded-2xl p-5 shadow-sm border space-y-4 ${style.card}`}
                   >
-                    {/* Medicine name + urgency */}
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="font-semibold text-gray-900 text-lg">
@@ -240,7 +284,6 @@ export default function RefillsPage() {
                       </span>
                     </div>
 
-                    {/* Stock bar */}
                     <div className="h-3 rounded-full bg-white/70 overflow-hidden">
                       <div
                         className={`h-full ${style.bar}`}
@@ -250,7 +293,6 @@ export default function RefillsPage() {
                       />
                     </div>
 
-                    {/* Stock information */}
                     <div className="text-sm text-gray-700">
                       <p className="font-medium">
                         {daysLeftText(f.days_left)} ·{" "}
@@ -268,8 +310,9 @@ export default function RefillsPage() {
                       </p>
                     </div>
 
-                    {/* Actions */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+
+                      {/* ADD PURCHASE */}
                       <div className="flex gap-2 items-end">
                         <label className="flex-1 text-xs text-gray-500">
                           I bought
@@ -292,6 +335,7 @@ export default function RefillsPage() {
                         </label>
 
                         <button
+                          type="button"
                           onClick={() => bought(f.medication_id)}
                           className="bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
                         >
@@ -299,6 +343,7 @@ export default function RefillsPage() {
                         </button>
                       </div>
 
+                      {/* RECOUNT / SET */}
                       <div className="flex gap-2 items-end">
                         <label className="flex-1 text-xs text-gray-500">
                           Recount now
@@ -321,6 +366,7 @@ export default function RefillsPage() {
                         </label>
 
                         <button
+                          type="button"
                           onClick={() => recount(f.medication_id)}
                           className="bg-white border border-amber-300 text-amber-700 hover:bg-amber-50 text-sm font-medium px-4 py-2 rounded-lg transition"
                         >
@@ -335,7 +381,6 @@ export default function RefillsPage() {
           </section>
         )}
 
-        {/* Uncounted medicines */}
         {uncounted.length > 0 && (
           <section className="bg-white rounded-2xl border border-dashed border-amber-200 shadow-sm p-5 space-y-4">
             <div>
@@ -372,6 +417,7 @@ export default function RefillsPage() {
                     />
 
                     <button
+                      type="button"
                       onClick={() => recount(m.id)}
                       className="bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
                     >
@@ -384,7 +430,6 @@ export default function RefillsPage() {
           </section>
         )}
 
-        {/* Empty state */}
         {!loading &&
           !error &&
           forecast.length === 0 &&
