@@ -467,8 +467,7 @@ class ReminderListView(APIView):
     def get(self, request):
         reminders = (
             Reminder.objects.filter(
-                Q(schedule__medicine__user=request.user)
-                | Q(prescription__user=request.user)
+                Q(schedule__medicine__user=request.user) | Q(prescription__user=request.user)
             )
             .select_related("schedule", "schedule__medicine", "prescription")
             .order_by("scheduled_at", "id")
@@ -494,8 +493,7 @@ class ReminderDetailView(APIView):
                     "prescription",
                 )
                 .filter(
-                    Q(schedule__medicine__user=request.user)
-                    | Q(prescription__user=request.user),
+                    Q(schedule__medicine__user=request.user) | Q(prescription__user=request.user),
                     pk=pk,
                 )
                 .get()

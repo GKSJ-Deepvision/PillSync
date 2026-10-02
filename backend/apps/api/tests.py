@@ -1,7 +1,7 @@
 # Create your tests here.
 from django.contrib.auth import get_user_model
-from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase
 
 # from rest_framework.test import APITestCase
 from rest_framework.test import APIClient, APITestCase
