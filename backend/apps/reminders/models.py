@@ -55,7 +55,7 @@ class Reminder(models.Model):
                 name="unique_reminder_occurrence",
             ),
             models.CheckConstraint(
-                condition=(
+                check=(
                     Q(schedule__isnull=False, prescription__isnull=True)
                     | Q(schedule__isnull=True, prescription__isnull=False)
                 ),
