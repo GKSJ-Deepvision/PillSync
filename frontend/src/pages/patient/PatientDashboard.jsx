@@ -2,10 +2,16 @@ import { useEffect, useState } from 'react';
 import Card from '../../components/Card';
 import ErrorMessage from '../../components/ErrorMessage';
 import Loading from '../../components/Loading';
-import { Calendar, Pill, Activity, Bell, Award, ArrowRight, Clock, User } from 'lucide-react';
+import { Calendar, Pill, Activity, Bell, Award, ArrowRight, Clock, User, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getApiErrorMessage } from '../../services/api';
 import { medicationService } from '../../services/medicationService';
+
+const asList = (value) => {
+  if (Array.isArray(value)) return value;
+  if (Array.isArray(value?.results)) return value.results;
+  return [];
+};
 
 const PatientDashboard = () => {
   const [medicines, setMedicines] = useState([]);
@@ -23,8 +29,8 @@ const PatientDashboard = () => {
       ]);
       const [medicineResult, reminderResult, adherenceResult] = results;
 
-      if (medicineResult.status === 'fulfilled') setMedicines(medicineResult.value);
-      if (reminderResult.status === 'fulfilled') setReminders(reminderResult.value);
+      if (medicineResult.status === 'fulfilled') setMedicines(asList(medicineResult.value));
+      if (reminderResult.status === 'fulfilled') setReminders(asList(reminderResult.value));
       if (adherenceResult.status === 'fulfilled') setAdherence(adherenceResult.value);
 
       const failedResult = results.find((result) => result.status === 'rejected');
@@ -37,22 +43,26 @@ const PatientDashboard = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const pendingReminders = reminders.filter((reminder) => !['taken', 'missed'].includes(reminder.status));
+  const pendingReminders = reminders
+    .filter((reminder) => !['taken', 'missed'].includes(reminder.status))
+    .sort((left, right) => new Date(left.scheduled_at) - new Date(right.scheduled_at));
   const nextReminder = pendingReminders[0];
 
   return (
     <div className="space-y-6">
       {/* Welcome Banner Card */}
-      <div className="bg-gradient-to-r from-brand-655 to-primary-600 rounded-2xl p-6 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-soft">
+      <div className="relative overflow-hidden bg-gradient-to-br from-brand-700 via-brand-600 to-primary-700 rounded-2xl p-6 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-soft">
+        <div className="absolute -right-12 -top-16 h-40 w-40 rounded-full bg-white/10" aria-hidden="true" />
+        <div className="absolute -right-4 -bottom-20 h-44 w-44 rounded-full border-[18px] border-white/5" aria-hidden="true" />
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Welcome back!</h1>
-          <p className="text-xs text-brand-100 mt-1">Here is your medication tracking summary for today.</p>
+          <p className="text-sm text-brand-50/90 mt-1">Here is your medication tracking summary for today.</p>
         </div>
-        <div className="flex gap-2 bg-white/10 p-2.5 rounded-xl border border-white/10 backdrop-blur-md">
+        <div className="relative flex gap-2 bg-black/10 p-3 rounded-xl border border-white/20 backdrop-blur-md">
           <Award className="h-5 w-5 text-yellow-300 shrink-0" />
           <div className="text-xs">
             <span className="font-bold">Compliance Status: </span>
-            <span className="font-semibold text-brand-100">{adherence?.adherence_percentage ?? 0}% recorded adherence</span>
+            <span className="font-semibold text-white">{adherence?.adherence_percentage ?? 0}% recorded adherence</span>
           </div>
         </div>
       </div>
@@ -61,27 +71,27 @@ const PatientDashboard = () => {
       {loading ? <Loading text="Loading your dashboard..." /> : <>
       {/* Statistics deck */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card title="Adherence Rate" subtitle="This month" className="flex flex-col justify-between">
+        <Card title="Adherence Rate" subtitle="This month" className="flex flex-col justify-between border-l-4 border-l-brand-500">
           <div className="flex items-baseline gap-2 mt-2">
             <span className="text-3xl font-extrabold text-slate-800">{adherence?.adherence_percentage ?? 0}%</span>
-            <span className="text-xs text-slate-400 font-medium">recorded doses</span>
+            <span className="text-xs text-slate-500 font-medium">recorded doses</span>
           </div>
         </Card>
-        <Card title="Active Medicines" subtitle="Prescriptions logged" className="flex flex-col justify-between">
+        <Card title="Active Medicines" subtitle="Prescriptions logged" className="flex flex-col justify-between border-l-4 border-l-primary-500">
           <div className="flex items-baseline gap-2 mt-2">
             <span className="text-3xl font-extrabold text-slate-800">{medicines.length}</span>
-            <span className="text-xs text-slate-400 font-medium">prescribed drugs</span>
+            <span className="text-xs text-slate-500 font-medium">prescribed drugs</span>
           </div>
         </Card>
-        <Card title="Today's Dosages" subtitle="Compliance tracker" className="flex flex-col justify-between">
+        <Card title="Today's Dosages" subtitle="Compliance tracker" className="flex flex-col justify-between border-l-4 border-l-caregiver-500">
           <div className="flex items-baseline gap-2 mt-2">
             <span className="text-3xl font-extrabold text-slate-800">
               {adherence?.taken ?? 0}/{adherence?.total_scheduled ?? 0}
             </span>
-            <span className="text-xs text-slate-450 font-medium">taken today</span>
+            <span className="text-xs text-slate-500 font-medium">taken today</span>
           </div>
         </Card>
-        <Card title="Next Dosage" subtitle="Reminder" className="flex flex-col justify-between">
+        <Card title="Next Dosage" subtitle="Reminder" className="flex flex-col justify-between border-l-4 border-l-admin-500">
           <div className="flex items-baseline gap-2 mt-2">
             <span className="text-lg font-bold text-slate-800">{nextReminder ? new Date(nextReminder.scheduled_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : 'None'}</span>
             <span className="text-xs font-semibold text-primary-600 bg-primary-50 px-1.5 py-0.5 rounded">{nextReminder ? nextReminder.period : 'Up to date'}</span>
@@ -95,7 +105,12 @@ const PatientDashboard = () => {
           {/* Today's Schedule Card */}
           <Card title="Today's Schedule" subtitle="Your hourly dosage timeline">
             <div className="mt-4 divide-y divide-slate-100">
-              {pendingReminders.slice(0, 4).map((slot) => (
+              {pendingReminders.length === 0 ? (
+                <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
+                  <TrendingUp className="h-5 w-5 text-brand-600" />
+                  <span>Your schedule is clear. New reminders will appear here.</span>
+                </div>
+              ) : pendingReminders.slice(0, 4).map((slot) => (
                   <div key={slot.id} className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${
@@ -104,8 +119,8 @@ const PatientDashboard = () => {
                       <Clock className="h-5 w-5" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-850">Scheduled dose</h4>
-                      <p className="text-xs text-slate-450 mt-0.5">{new Date(slot.scheduled_at).toLocaleString()}</p>
+                      <h4 className="text-sm font-semibold text-slate-800">Scheduled dose</h4>
+                      <p className="text-xs text-slate-500 mt-0.5">{new Date(slot.scheduled_at).toLocaleString()}</p>
                     </div>
                   </div>
                   <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${
@@ -126,14 +141,20 @@ const PatientDashboard = () => {
           {/* Active Prescription Deck */}
           <Card title="Medication Details" subtitle="Active prescription dosages details">
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {medicines.slice(0, 4).map((med) => (
+              {medicines.length === 0 ? (
+                <div className="sm:col-span-2 rounded-xl border border-dashed border-slate-200 bg-slate-50/70 p-6 text-center">
+                  <Pill className="mx-auto h-7 w-7 text-brand-500" />
+                  <p className="mt-2 text-sm font-semibold text-slate-700">No medicines added yet</p>
+                  <p className="mt-1 text-xs text-slate-500">Add a prescription to start tracking your doses.</p>
+                </div>
+              ) : medicines.slice(0, 4).map((med) => (
                 <div key={med.id} className="p-4 border border-slate-100 rounded-xl bg-slate-50/50 flex flex-col justify-between space-y-3">
                   <div className="flex justify-between items-start">
                     <div>
                       <h4 className="text-sm font-bold text-slate-800">{med.name}</h4>
-                      <p className="text-xs text-slate-450 mt-0.5">{med.dosage || 'Dosage not specified'}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{med.dosage || 'Dosage not specified'}</p>
                     </div>
-                    <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
                       Stock: {med.quantity}
                     </span>
                   </div>

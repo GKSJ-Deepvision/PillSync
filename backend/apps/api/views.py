@@ -6,6 +6,7 @@
 
 from datetime import timedelta
 
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -464,9 +465,13 @@ class ReminderListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        reminders = Reminder.objects.filter(schedule__medicine__user=request.user).select_related(
-            "schedule",
-            "schedule__medicine",
+        reminders = (
+            Reminder.objects.filter(
+                Q(schedule__medicine__user=request.user)
+                | Q(prescription__user=request.user)
+            )
+            .select_related("schedule", "schedule__medicine", "prescription")
+            .order_by("scheduled_at", "id")
         )
 
         serializer = ReminderSerializer(
@@ -482,12 +487,18 @@ class ReminderDetailView(APIView):
 
     def get(self, request, pk):
         try:
-            reminder = Reminder.objects.select_related(
-                "schedule",
-                "schedule__medicine",
-            ).get(
-                pk=pk,
-                schedule__medicine__user=request.user,
+            reminder = (
+                Reminder.objects.select_related(
+                    "schedule",
+                    "schedule__medicine",
+                    "prescription",
+                )
+                .filter(
+                    Q(schedule__medicine__user=request.user)
+                    | Q(prescription__user=request.user),
+                    pk=pk,
+                )
+                .get()
             )
         except Reminder.DoesNotExist:
             return Response(

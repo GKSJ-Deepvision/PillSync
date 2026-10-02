@@ -31,6 +31,9 @@ python manage.py runserver
 
 On Windows the activate step is `.venv\Scripts\activate` instead.
 
+When using Docker Compose, the backend applies pending migrations automatically
+before starting the development server.
+
 ## Checks CI will run on your branch
 
 ```bash

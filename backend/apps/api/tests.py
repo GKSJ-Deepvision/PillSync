@@ -1,12 +1,14 @@
 # Create your tests here.
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 # from rest_framework.test import APITestCase
 from rest_framework.test import APIClient, APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.medicines.models import MedicationHistory, Medicine, MedicineSchedule
+from apps.prescriptions.models import Prescription
 from apps.reminders.models import Reminder
 
 from .serializers import MedicineScheduleSerializer
@@ -854,6 +856,33 @@ class ReminderAPITests(APITestCase):
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["id"], self.reminder.id)
         self.assertNotEqual(response.data[0]["id"], self.other_reminder.id)
+
+    def test_authenticated_user_can_list_prescription_reminders(self):
+        self.authenticate(self.user)
+        prescription = Prescription.objects.create(
+            user=self.user,
+            file=SimpleUploadedFile(
+                "prescription.pdf",
+                b"prescription",
+                content_type="application/pdf",
+            ),
+            doctor_name="Dr. Test",
+            issue_date="2026-09-01",
+            expiry_date="2026-10-01",
+        )
+        prescription_reminder = Reminder.objects.create(
+            prescription=prescription,
+            scheduled_at="2026-09-20T00:00:00Z",
+            period=Reminder.Period.MORNING,
+        )
+
+        response = self.client.get("/api/reminders/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            {item["id"] for item in response.data},
+            {self.reminder.id, prescription_reminder.id},
+        )
 
     def test_authenticated_user_can_get_own_reminder(self):
         self.authenticate(self.user)
