@@ -31,7 +31,7 @@ ignore = [
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-pythonpath = ["."]
+pythonpath = [".", ".."]
 DJANGO_SETTINGS_MODULE = "config.settings.base"
 testpaths = ["tests", "apps"]
 python_files = ["test_*.py", "*_test.py"]
