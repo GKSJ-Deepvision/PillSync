@@ -53,8 +53,9 @@ def main():
         print("PostgreSQL is already running and ready.")
 
     try:
-        # Run Django tests with --no-input
-        cmd = [sys.executable, "manage.py", "test", "authentication", "--no-input"]
+        # Determine test targets (passed as args or run full test suite)
+        test_targets = sys.argv[1:] if len(sys.argv) > 1 else ["authentication", "backend.tests.test_ocr_pipeline"]
+        cmd = [sys.executable, "manage.py", "test"] + test_targets + ["--no-input"]
         print(f"Running command: {' '.join(cmd)}")
         result = subprocess.run(cmd)
         sys.exit(result.returncode)

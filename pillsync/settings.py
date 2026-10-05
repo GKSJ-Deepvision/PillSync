@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import timedelta
+import socket
 from decouple import config, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -34,6 +35,8 @@ INSTALLED_APPS = [
 
     # Local apps
     'authentication',
+    'backend.apps.medications',
+    'backend.apps.ocr',
 ]
 
 MIDDLEWARE = [
@@ -69,16 +72,43 @@ WSGI_APPLICATION = 'pillsync.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DATABASE_NAME', default='pillsync_db'),
-        'USER': config('DATABASE_USER', default='postgres'),
-        'PASSWORD': config('DATABASE_PASSWORD', default=''),
-        'HOST': config('DATABASE_HOST', default='localhost'),
-        'PORT': config('DATABASE_PORT', default='5432'),
+def _check_db_server(host, port):
+    try:
+        with socket.create_connection((host, int(port)), timeout=0.3):
+            return True
+    except Exception:
+        return False
+
+DB_ENGINE = config('DATABASE_ENGINE', default='django.db.backends.postgresql')
+PG_HOST = config('DATABASE_HOST', default='localhost')
+PG_PORT = config('DATABASE_PORT', default='5432')
+
+if DB_ENGINE == 'django.db.backends.sqlite3' or config('USE_SQLITE', default=False, cast=bool):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+elif _check_db_server(PG_HOST, PG_PORT):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DATABASE_NAME', default='pillsync_db'),
+            'USER': config('DATABASE_USER', default='postgres'),
+            'PASSWORD': config('DATABASE_PASSWORD', default=''),
+            'HOST': PG_HOST,
+            'PORT': PG_PORT,
+        }
+    }
+else:
+    # PostgreSQL is offline, gracefully use SQLite so the server always works
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Custom User Model
 AUTH_USER_MODEL = 'authentication.User'
@@ -165,3 +195,11 @@ OAUTH2_PROVIDER = {
 # Email Configuration (Console Backend for Development)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'no-reply@pillsync.com'
+
+# Media Files Configuration
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Tesseract OCR Configuration (Environment override with local default)
+TESSERACT_CMD = config('TESSERACT_CMD', default=r'C:\Users\hp\tesseract-ocr\tesseract.exe')
+

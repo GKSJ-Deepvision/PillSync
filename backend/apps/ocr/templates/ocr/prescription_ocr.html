@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescription OCR — PillSync</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --primary-light: #e0f2fe;
+            --secondary: #0d9488;
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--slate-50);
+            color: var(--slate-800);
+            line-height: 1.5;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1060px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .brand-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.25rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--slate-900);
+        }
+
+        .subtitle {
+            font-size: 0.875rem;
+            color: var(--slate-600);
+        }
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.75rem;
+            background: #dcfce7;
+            color: #15803d;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            border: 1px solid #bbf7d0;
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--success);
+        }
+
+        /* Medical Safety Alert */
+        .safety-banner {
+            background-color: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 0.875rem 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            color: #92400e;
+        }
+
+        .safety-icon {
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        /* Card layout */
+        .card {
+            background: white;
+            border: 1px solid var(--slate-200);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--slate-100);
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--slate-900);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Upload Area */
+        .upload-dropzone {
+            border: 2px dashed var(--slate-300);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            background-color: var(--slate-50);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .upload-dropzone:hover, .upload-dropzone.dragover {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--slate-600);
+        }
+
+        .upload-text {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--slate-700);
+            margin-bottom: 0.25rem;
+        }
+
+        .upload-subtext {
+            font-size: 0.8rem;
+            color: var(--slate-600);
+            margin-bottom: 1rem;
+        }
+
+        .file-types {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .file-pill {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            background: white;
+            border: 1px solid var(--slate-200);
+            border-radius: 4px;
+            color: var(--slate-600);
+            font-weight: 600;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Preview Area */
+        .preview-container {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--slate-50);
+            border: 1px solid var(--slate-200);
+            border-radius: var(--radius-md);
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .preview-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .preview-thumbnail {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--slate-300);
+            background: white;
+        }
+
+        .preview-details {
+            font-size: 0.875rem;
+        }
+
+        .preview-filename {
+            font-weight: 600;
+            color: var(--slate-800);
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .preview-meta {
+            font-size: 0.75rem;
+            color: var(--slate-600);
+            margin-top: 0.25rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: var(--slate-700);
+            border: 1px solid var(--slate-300);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background-color: var(--slate-100);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background-color: #15803d;
+        }
+
+        .btn-danger {
+            background-color: white;
+            color: var(--danger);
+            border: 1px solid #fecaca;
+        }
+
+        .btn-danger:hover {
+            background-color: #fef2f2;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .action-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 0.875rem 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            border: 1px solid #fee2e2;
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            border: 1px solid #dcfce7;
+            color: #166534;
+            border-left: 4px solid var(--success);
+        }
+
+        /* Raw Text Collapsible */
+        .raw-text-box {
+            background: var(--slate-900);
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            font-family: monospace;
+            font-size: 0.825rem;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin-top: 0.75rem;
+        }
+
+        .confidence-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .conf-high {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .conf-med {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .conf-low {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        /* Table & Cards */
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        table.med-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        table.med-table th {
+            background: var(--slate-100);
+            color: var(--slate-700);
+            font-weight: 600;
+            text-align: left;
+            padding: 0.75rem 0.875rem;
+            border-bottom: 2px solid var(--slate-200);
+        }
+
+        table.med-table td {
+            padding: 0.75rem 0.875rem;
+            border-bottom: 1px solid var(--slate-200);
+            vertical-align: middle;
+        }
+
+        table.med-table tr:hover td {
+            background: var(--slate-50);
+        }
+
+        .table-input {
+            width: 100%;
+            padding: 0.4rem 0.6rem;
+            border: 1px solid var(--slate-300);
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-family: inherit;
+        }
+
+        .table-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        .not-detected {
+            color: var(--slate-600);
+            font-style: italic;
+        }
+
+        /* Sample Selector */
+        .sample-pill-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+            color: var(--slate-600);
+        }
+
+        .sample-btn {
+            background: white;
+            border: 1px solid var(--slate-300);
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .sample-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <header>
+        <div class="brand-title">
+            <div class="brand-icon">Rx</div>
+            <div>
+                <h1>Prescription OCR</h1>
+                <p class="subtitle">AI-assisted medicine recognition and prescription information extraction</p>
+            </div>
+        </div>
+        <div>
+            <span class="badge-status" id="engineStatusBadge">
+                <span class="badge-dot"></span>
+                Tesseract OCR 5.4 Active
+            </span>
+        </div>
+    </header>
+
+    <!-- Medical Safety Banner -->
+    <div class="safety-banner">
+        <div class="safety-icon">⚠️</div>
+        <div>
+            <strong>Medical Safety Notice:</strong> This feature is an automated OCR and data extraction tool.
+            It does <strong>NOT</strong> diagnose illnesses, recommend medications, alter dosages, or provide medical advice.
+            Please verify all extracted medicine records against your official doctor's prescription before confirming.
+        </div>
+    </div>
+
+    <!-- Alert Banners -->
+    <div class="alert alert-error" id="errorAlert"></div>
+    <div class="alert alert-success" id="successAlert"></div>
+
+    <!-- Upload & Preview Card -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Upload Prescription</div>
+            <span style="font-size: 0.8rem; color: var(--slate-600);">Max size: 10 MB</span>
+        </div>
+
+        <div class="upload-dropzone" id="dropZone">
+            <div class="upload-icon">📄</div>
+            <div class="upload-text">Drag and drop your prescription image here</div>
+            <div class="upload-subtext">or click to browse from your device</div>
+            <div class="file-types">
+                <span class="file-pill">JPG</span>
+                <span class="file-pill">JPEG</span>
+                <span class="file-pill">PNG</span>
+                <span class="file-pill">WEBP</span>
+            </div>
+            <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp">
+        </div>
+
+        <!-- Image Preview Container -->
+        <div class="preview-container" id="previewContainer">
+            <div class="preview-left">
+                <img id="imagePreview" class="preview-thumbnail" alt="Prescription preview">
+                <div class="preview-details">
+                    <div class="preview-filename" id="previewFilename">prescription.jpg</div>
+                    <div class="preview-meta" id="previewMeta">0 KB</div>
+                </div>
+            </div>
+            <button class="btn btn-danger" type="button" id="removeFileBtn">Remove</button>
+        </div>
+
+        <!-- Sample Prescriptions for quick testing -->
+        <div class="sample-pill-group">
+            <span>Quick test presets:</span>
+            <button type="button" class="sample-btn" id="sampleSingleBtn">Single Medicine (Paracetamol)</button>
+            <button type="button" class="sample-btn" id="sampleMultiBtn">Multiple Medicines (3 Rx items)</button>
+            <button type="button" class="sample-btn" id="sampleDosageBtn">Varied Dosages (mg, ml)</button>
+        </div>
+
+        <!-- Action Row -->
+        <div class="action-row">
+            <button class="btn btn-primary" id="extractBtn" disabled>
+                <span id="btnSpinner" class="spinner" style="display: none;"></span>
+                <span id="btnText">Extract Prescription</span>
+            </button>
+            <span id="processingNote" style="font-size: 0.825rem; color: var(--slate-600); display: none;">
+                Analyzing image with Tesseract OCR & clinical parser...
+            </span>
+        </div>
+    </div>
+
+    <!-- OCR Results Section -->
+    <div class="card" id="resultsSection" style="display: none;">
+        <div class="card-header">
+            <div class="card-title">
+                Extracted Medicine Information
+                <span class="badge-status" id="countBadge" style="background:#e0f2fe; color:var(--primary); border-color:#bae6fd;">
+                    0 Detected
+                </span>
+            </div>
+            <div>
+                <button class="btn btn-secondary" type="button" id="toggleRawBtn" style="font-size:0.75rem; padding: 0.35rem 0.65rem;">
+                    Show Raw OCR Text
+                </button>
+            </div>
+        </div>
+
+        <!-- Raw OCR Text (collapsible) -->
+        <div id="rawTextContainer" style="display: none; margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                <span style="font-size: 0.8rem; font-weight: 600; color: var(--slate-700);">Recognized Text</span>
+                <div>
+                    <span id="confidenceBadge" class="confidence-indicator conf-high">Confidence: High</span>
+                    <button type="button" id="copyRawBtn" class="sample-btn" style="margin-left: 0.5rem;">Copy Text</button>
+                </div>
+            </div>
+            <div class="raw-text-box" id="rawTextBox"></div>
+        </div>
+
+        <!-- Editable Medicines Table -->
+        <div class="table-responsive">
+            <table class="med-table" id="medTable">
+                <thead>
+                    <tr>
+                        <th style="width: 22%;">Medicine Name</th>
+                        <th style="width: 14%;">Dosage</th>
+                        <th style="width: 14%;">Quantity</th>
+                        <th style="width: 16%;">Frequency</th>
+                        <th style="width: 12%;">Duration</th>
+                        <th style="width: 16%;">Prescription Details</th>
+                        <th style="width: 6%;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="medTableBody">
+                    <!-- Populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <button type="button" class="btn btn-secondary" id="addMedRowBtn" style="font-size: 0.8rem;">
+                + Add Another Medicine
+            </button>
+
+            <div style="display: flex; gap: 0.75rem;">
+                <button type="button" class="btn btn-success" id="saveMedBtn">
+                    💾 Save to Medication Tracker
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // State
+    let selectedFile = null;
+    let extractedMedicines = [];
+
+    // DOM Elements
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const previewContainer = document.getElementById('previewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewFilename = document.getElementById('previewFilename');
+    const previewMeta = document.getElementById('previewMeta');
+    const removeFileBtn = document.getElementById('removeFileBtn');
+    const extractBtn = document.getElementById('extractBtn');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const btnText = document.getElementById('btnText');
+    const processingNote = document.getElementById('processingNote');
+    const errorAlert = document.getElementById('errorAlert');
+    const successAlert = document.getElementById('successAlert');
+    const resultsSection = document.getElementById('resultsSection');
+    const medTableBody = document.getElementById('medTableBody');
+    const rawTextContainer = document.getElementById('rawTextContainer');
+    const rawTextBox = document.getElementById('rawTextBox');
+    const toggleRawBtn = document.getElementById('toggleRawBtn');
+    const confidenceBadge = document.getElementById('confidenceBadge');
+    const copyRawBtn = document.getElementById('copyRawBtn');
+    const countBadge = document.getElementById('countBadge');
+    const addMedRowBtn = document.getElementById('addMedRowBtn');
+    const saveMedBtn = document.getElementById('saveMedBtn');
+
+    // Click to browse
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    // Drag and drop handlers
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            handleFileSelect(e.dataTransfer.files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFileSelect(e.target.files[0]);
+        }
+    });
+
+    function handleFileSelect(file) {
+        clearAlerts();
+        // Validation: format
+        const validExtensions = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!validExtensions.includes(file.type)) {
+            showError("Invalid file type. Please upload a JPG, PNG, or WEBP image.");
+            return;
+        }
+
+        // Validation: size (10 MB)
+        if (file.size > 10 * 1024 * 1024) {
+            showError("File size exceeds 10 MB limit.");
+            return;
+        }
+
+        selectedFile = file;
+        previewFilename.textContent = file.name;
+        previewMeta.textContent = `${(file.size / 1024).toFixed(1)} KB · ${file.type.split('/')[1].toUpperCase()}`;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.src = e.target.result;
+            previewContainer.style.display = 'flex';
+            extractBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    removeFileBtn.addEventListener('click', () => {
+        selectedFile = null;
+        fileInput.value = '';
+        previewContainer.style.display = 'none';
+        extractBtn.disabled = true;
+        resultsSection.style.display = 'none';
+        clearAlerts();
+    });
+
+    // Toggle Raw OCR Text
+    toggleRawBtn.addEventListener('click', () => {
+        const isHidden = rawTextContainer.style.display === 'none';
+        rawTextContainer.style.display = isHidden ? 'block' : 'none';
+        toggleRawBtn.textContent = isHidden ? 'Hide Raw OCR Text' : 'Show Raw OCR Text';
+    });
+
+    // Copy Raw Text
+    copyRawBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(rawTextBox.textContent).then(() => {
+            copyRawBtn.textContent = 'Copied!';
+            setTimeout(() => { copyRawBtn.textContent = 'Copy Text'; }, 2000);
+        });
+    });
+
+    // Extract Button Click
+    extractBtn.addEventListener('click', async () => {
+        if (!selectedFile) return;
+
+        clearAlerts();
+        setLoading(true);
+
+        const formData = new FormData();
+        formData.append('prescription_image', selectedFile);
+
+        try {
+            const res = await fetch('/api/ocr/extract/', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                showError(data.error || "Failed to process prescription.");
+                return;
+            }
+
+            renderResults(data);
+            showSuccess(data.message || "Prescription processed successfully!");
+        } catch (err) {
+            showError("A network error occurred while communicating with the OCR service.");
+        } finally {
+            setLoading(false);
+        }
+    });
+
+    function renderResults(data) {
+        resultsSection.style.display = 'block';
+
+        // Raw OCR text display (sanitized)
+        rawTextBox.textContent = data.raw_text || "No text detected.";
+        
+        // Confidence badge
+        const conf = data.confidence_level || 'Medium';
+        confidenceBadge.textContent = `Confidence: ${conf} (${data.mean_confidence || 0}%)`;
+        confidenceBadge.className = 'confidence-indicator ' + 
+            (conf === 'High' ? 'conf-high' : conf === 'Medium' ? 'conf-med' : 'conf-low');
+
+        extractedMedicines = data.medicines || [];
+        countBadge.textContent = `${extractedMedicines.length} Detected`;
+
+        medTableBody.innerHTML = '';
+
+        if (extractedMedicines.length === 0) {
+            medTableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align:center; padding: 2rem; color: var(--slate-600);">
+                        No specific medicines were recognized automatically. You can add them manually using the button below.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        extractedMedicines.forEach((med, idx) => {
+            appendMedicineRow(med, idx);
+        });
+    }
+
+    function appendMedicineRow(med, idx) {
+        const tr = document.createElement('tr');
+        tr.dataset.index = idx;
+        tr.innerHTML = `
+            <td><input class="table-input med-name" type="text" value="${escapeHtml(med.medicine_name || '')}" placeholder="e.g. Paracetamol"></td>
+            <td><input class="table-input med-dosage" type="text" value="${escapeHtml(med.dosage || '')}" placeholder="e.g. 500 mg"></td>
+            <td><input class="table-input med-quantity" type="text" value="${escapeHtml(med.quantity || '')}" placeholder="e.g. 10 tablets"></td>
+            <td><input class="table-input med-frequency" type="text" value="${escapeHtml(med.frequency || '')}" placeholder="e.g. Twice daily"></td>
+            <td><input class="table-input med-duration" type="text" value="${escapeHtml(med.duration || '')}" placeholder="e.g. 5 days"></td>
+            <td><input class="table-input med-details" type="text" value="${escapeHtml(med.prescription_details || '')}" placeholder="e.g. After food"></td>
+            <td style="text-align:center;">
+                <button type="button" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="removeRow(this)">✕</button>
+            </td>
+        `;
+        medTableBody.appendChild(tr);
+    }
+
+    // Add manual row
+    addMedRowBtn.addEventListener('click', () => {
+        appendMedicineRow({
+            medicine_name: '',
+            dosage: '',
+            quantity: '',
+            frequency: '',
+            duration: '',
+            prescription_details: ''
+        }, medTableBody.children.length);
+        countBadge.textContent = `${medTableBody.querySelectorAll('tr').length} Detected`;
+    });
+
+    window.removeRow = function(btn) {
+        const row = btn.closest('tr');
+        row.remove();
+        countBadge.textContent = `${medTableBody.querySelectorAll('tr').length} Detected`;
+    };
+
+    // Save to Medication Tracker
+    saveMedBtn.addEventListener('click', async () => {
+        clearAlerts();
+
+        const rows = medTableBody.querySelectorAll('tr');
+        const medsToSave = [];
+
+        rows.forEach(tr => {
+            const name = tr.querySelector('.med-name')?.value.trim();
+            if (name) {
+                medsToSave.push({
+                    medicine_name: name,
+                    dosage: tr.querySelector('.med-dosage')?.value.trim() || null,
+                    quantity: tr.querySelector('.med-quantity')?.value.trim() || null,
+                    frequency: tr.querySelector('.med-frequency')?.value.trim() || null,
+                    duration: tr.querySelector('.med-duration')?.value.trim() || null,
+                    prescription_details: tr.querySelector('.med-details')?.value.trim() || null,
+                });
+            }
+        });
+
+        if (medsToSave.length === 0) {
+            showError("No medicines to save. Please enter at least one medicine name.");
+            return;
+        }
+
+        saveMedBtn.disabled = true;
+        saveMedBtn.textContent = 'Saving...';
+
+        try {
+            const res = await fetch('/api/ocr/save/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ medicines: medsToSave })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                showError(data.error || "Failed to save medications.");
+                return;
+            }
+
+            showSuccess(data.message || `Saved ${data.saved_count} medication(s) to tracker successfully!`);
+        } catch (err) {
+            showError("A network error occurred while saving.");
+        } finally {
+            saveMedBtn.disabled = false;
+            saveMedBtn.textContent = '💾 Save to Medication Tracker';
+        }
+    });
+
+    // Sample Presets Generation (Creates real PNG images in-browser via canvas)
+    document.getElementById('sampleSingleBtn').addEventListener('click', () => {
+        createCanvasSample([
+            "Dr. Richard Lee, MD - Central Healthcare",
+            "Date: 28-Sep-2026",
+            "Rx:",
+            "1. Paracetamol 500 mg - 1 tablet twice daily for 5 days after food",
+        ], "sample_single_paracetamol.png");
+    });
+
+    document.getElementById('sampleMultiBtn').addEventListener('click', () => {
+        createCanvasSample([
+            "Dr. Emily Watson, MD - City Hospital",
+            "Patient: John Doe | Date: 28-Sep-2026",
+            "Rx:",
+            "1. Amoxicillin 500 mg - 1 capsule three times daily for 7 days after food",
+            "2. Cetirizine 10 mg - 1 tablet once daily at night for 10 days",
+            "3. Pantoprazole 40 mg - 1 tablet once daily before breakfast for 14 days"
+        ], "sample_multi_prescription.png");
+    });
+
+    document.getElementById('sampleDosageBtn').addEventListener('click', () => {
+        createCanvasSample([
+            "Metro Health Clinic - Prescription",
+            "Rx:",
+            "1. Azithromycin 250 mg - 1 tablet once daily for 5 days",
+            "2. Ambroxol 5 ml - twice daily for 5 days with warm water"
+        ], "sample_varied_dosage.png");
+    });
+
+    function createCanvasSample(lines, filename) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 900;
+        canvas.height = 70 + (lines.length * 45);
+        const ctx = canvas.getContext('2d');
+
+        // White background
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Header line
+        ctx.fillStyle = '#1e293b';
+        ctx.font = 'bold 20px Arial, sans-serif';
+        ctx.fillText(lines[0], 30, 45);
+
+        // Body lines
+        ctx.font = '18px Arial, sans-serif';
+        for (let i = 1; i < lines.length; i++) {
+            ctx.fillText(lines[i], 30, 45 + (i * 42));
+        }
+
+        canvas.toBlob((blob) => {
+            const file = new File([blob], filename, { type: 'image/png' });
+            handleFileSelect(file);
+        }, 'image/png');
+    }
+
+    function setLoading(isLoading) {
+        extractBtn.disabled = isLoading;
+        btnSpinner.style.display = isLoading ? 'inline-block' : 'none';
+        btnText.textContent = isLoading ? 'Processing...' : 'Extract Prescription';
+        processingNote.style.display = isLoading ? 'inline-block' : 'none';
+    }
+
+    function showError(msg) {
+        errorAlert.textContent = msg;
+        errorAlert.style.display = 'block';
+        successAlert.style.display = 'none';
+    }
+
+    function showSuccess(msg) {
+        successAlert.textContent = msg;
+        successAlert.style.display = 'block';
+        errorAlert.style.display = 'none';
+    }
+
+    function clearAlerts() {
+        errorAlert.style.display = 'none';
+        successAlert.style.display = 'none';
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+</script>
+
+</body>
+</html>
