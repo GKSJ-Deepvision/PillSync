@@ -20,4 +20,8 @@ Pillow>=12.3.0
 
 # Utilities
 python-dotenv==1.2.3
+requests>=2.31.0
+gunicorn>=21.2.0
+
+
 

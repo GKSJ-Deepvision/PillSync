@@ -4,3 +4,31 @@
 # gunicorn==23.0.0
 # whitenoise==6.8.2
 # sentry-sdk==2.19.2
+
+# Runtime dependencies for the PillSync backend.
+# Pin a version when you add a package so every branch installs the same thing.
+
+# Web framework
+Django==5.0.14
+djangorestframework==3.15.2
+django-cors-headers==4.9.0
+
+# Auth
+djangorestframework-simplejwt==5.5.1
+
+# Database
+psycopg2-binary==2.9.9
+dj-database-url==2.3.0
+pymongo>=4.6.0
+
+# OCR and NLP
+pytesseract>=0.3.13
+Pillow>=12.3.0
+
+# Utilities
+python-dotenv==1.2.3
+requests>=2.31.0
+gunicorn>=21.2.0
+
+
+

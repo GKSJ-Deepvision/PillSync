@@ -1,0 +1,54 @@
+# ---- Python / Virtual Environments ----
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# ---- Byte-compiled / cache ----
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# ---- Databases ----
+*.sqlite3
+*.db
+
+# ---- Environment and Secrets ----
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+secrets.json
+
+# ---- Django Static & Media ----
+staticfiles/
+media/*
+!media/.gitkeep
+
+# ---- Editors and OS ----
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Logs and Temporary Files ----
+*.log
+logs/
+tmp/
+temp/

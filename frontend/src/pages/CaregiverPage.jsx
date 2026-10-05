@@ -26,7 +26,145 @@ import {
   Download,
   Bell,
   ScanLine,
+  Trash2,
+  Mail,
+  Phone,
+  ShieldCheck,
 } from "lucide-react";
+
+const INITIAL_PATIENTS = [
+  {
+    id: "p1",
+    name: "Sarah Jenkins",
+    relation: "(Self / Primary)",
+    age: 68,
+    gender: "Female",
+    adherence: "94%",
+    adherenceNum: 94,
+    status: "Healthy",
+    missedDoses: 0,
+    lastTaken: "Today, 08:00 AM",
+    conditions: ["Diabetes", "Blood Pressure"],
+    allergies: "Penicillin",
+    emergencyContact: "+1 (555) 234-5678",
+    assignedDoctor: "Dr. Sarah Jenkins",
+    todaySchedule: [
+      { time: "08:00 AM", med: "Metformin 500 mg", status: "taken" },
+      { time: "01:00 PM", med: "Amlodipine 5 mg", status: "taken" },
+      { time: "08:00 PM", med: "Metformin 500 mg", status: "pending" },
+    ],
+    medications: [
+      {
+        name: "Metformin",
+        dosage: "500 mg",
+        frequency: "2x daily (08:00 AM, 08:00 PM)",
+        stock: 8,
+      },
+      {
+        name: "Amlodipine",
+        dosage: "5 mg",
+        frequency: "1x daily (08:00 AM)",
+        stock: 45,
+      },
+    ],
+  },
+  {
+    id: "p2",
+    name: "Eleanor Morgan",
+    relation: "(Mother)",
+    age: 84,
+    gender: "Female",
+    adherence: "78%",
+    adherenceNum: 78,
+    status: "Attention Needed",
+    missedDoses: 3,
+    lastTaken: "Yesterday, 09:00 PM",
+    conditions: ["Thyroid", "Heart"],
+    allergies: "Sulfa Drugs",
+    emergencyContact: "+1 (555) 876-5432",
+    assignedDoctor: "Mark Jenkins",
+    todaySchedule: [
+      { time: "08:00 AM", med: "Levothyroxine 50 mcg", status: "taken" },
+      { time: "01:00 PM", med: "Vitamin D 1000 IU", status: "taken" },
+      { time: "08:00 PM", med: "Atorvastatin 20 mg", status: "pending" },
+    ],
+    medications: [
+      {
+        name: "Levothyroxine",
+        dosage: "50 mcg",
+        frequency: "1x daily (08:00 AM)",
+        stock: 28,
+      },
+      {
+        name: "Atorvastatin",
+        dosage: "20 mg",
+        frequency: "1x daily (08:00 PM)",
+        stock: 14,
+      },
+    ],
+  },
+  {
+    id: "p3",
+    name: "Robert Morgan",
+    relation: "(Father)",
+    age: 86,
+    gender: "Male",
+    adherence: "95%",
+    adherenceNum: 95,
+    status: "Healthy",
+    missedDoses: 0,
+    lastTaken: "Today, 08:30 AM",
+    conditions: ["Vitamins", "Blood Pressure"],
+    allergies: "None",
+    emergencyContact: "+1 (555) 345-6789",
+    assignedDoctor: "Dr. Sarah Jenkins",
+    todaySchedule: [
+      { time: "08:00 AM", med: "Multivitamin 1 Tab", status: "taken" },
+      { time: "01:00 PM", med: "Lisinopril 10 mg", status: "taken" },
+    ],
+    medications: [
+      {
+        name: "Multivitamin",
+        dosage: "1 Tablet",
+        frequency: "1x daily (08:00 AM)",
+        stock: 30,
+      },
+      {
+        name: "Lisinopril",
+        dosage: "10 mg",
+        frequency: "1x daily (01:00 PM)",
+        stock: 50,
+      },
+    ],
+  },
+];
+
+const INITIAL_CAREGIVERS = [
+  {
+    id: "c1",
+    name: "Dr. Sarah Jenkins",
+    email: "sarah.jenkins@pillsync.com",
+    phone: "+1 (555) 234-5678",
+    relationship: "Doctor",
+    assignedPatientsCount: 2,
+    status: "Active Network",
+    alertMissedDose: true,
+    alertLowStock: true,
+    alertRefill: true,
+  },
+  {
+    id: "c2",
+    name: "Mark Jenkins",
+    email: "mark.jenkins@pillsync.com",
+    phone: "+1 (555) 876-5432",
+    relationship: "Family",
+    assignedPatientsCount: 1,
+    status: "Active Network",
+    alertMissedDose: true,
+    alertLowStock: true,
+    alertRefill: false,
+  },
+];
 
 export default function CaregiverPage() {
   const navigate = useNavigate();
@@ -78,113 +216,42 @@ export default function CaregiverPage() {
     },
   ]);
 
-  // Patients List
-  const [patientsList, setPatientsList] = useState([
-    {
-      id: "p1",
-      name: "Sarah Jenkins",
-      relation: "(Self / Primary)",
-      age: 68,
-      gender: "Female",
-      adherence: "94%",
-      adherenceNum: 94,
-      status: "Healthy",
-      missedDoses: 0,
-      lastTaken: "Today, 08:00 AM",
-      conditions: ["Diabetes", "Blood Pressure"],
-      allergies: "Penicillin",
-      emergencyContact: "+1 (555) 234-5678",
-      assignedDoctor: "Dr. Sarah Jenkins",
-      todaySchedule: [
-        { time: "08:00 AM", med: "Metformin 500 mg", status: "taken" },
-        { time: "01:00 PM", med: "Amlodipine 5 mg", status: "taken" },
-        { time: "08:00 PM", med: "Metformin 500 mg", status: "pending" },
-      ],
-      medications: [
-        {
-          name: "Metformin",
-          dosage: "500 mg",
-          frequency: "2x daily (08:00 AM, 08:00 PM)",
-          stock: 8,
-        },
-        {
-          name: "Amlodipine",
-          dosage: "5 mg",
-          frequency: "1x daily (08:00 AM)",
-          stock: 45,
-        },
-      ],
-    },
-    {
-      id: "p2",
-      name: "Eleanor Morgan",
-      relation: "(Mother)",
-      age: 84,
-      gender: "Female",
-      adherence: "78%",
-      adherenceNum: 78,
-      status: "Attention Needed",
-      missedDoses: 3,
-      lastTaken: "Yesterday, 09:00 PM",
-      conditions: ["Thyroid", "Heart"],
-      allergies: "Sulfa Drugs",
-      emergencyContact: "+1 (555) 876-5432",
-      assignedDoctor: "Mark Jenkins",
-      todaySchedule: [
-        { time: "08:00 AM", med: "Levothyroxine 50 mcg", status: "taken" },
-        { time: "01:00 PM", med: "Vitamin D 1000 IU", status: "taken" },
-        { time: "08:00 PM", med: "Atorvastatin 20 mg", status: "pending" },
-      ],
-      medications: [
-        {
-          name: "Levothyroxine",
-          dosage: "50 mcg",
-          frequency: "1x daily (08:00 AM)",
-          stock: 28,
-        },
-        {
-          name: "Atorvastatin",
-          dosage: "20 mg",
-          frequency: "1x daily (08:00 PM)",
-          stock: 14,
-        },
-      ],
-    },
-    {
-      id: "p3",
-      name: "Robert Morgan",
-      relation: "(Father)",
-      age: 86,
-      gender: "Male",
-      adherence: "95%",
-      adherenceNum: 95,
-      status: "Healthy",
-      missedDoses: 0,
-      lastTaken: "Today, 08:30 AM",
-      conditions: ["Vitamins", "Blood Pressure"],
-      allergies: "None",
-      emergencyContact: "+1 (555) 345-6789",
-      assignedDoctor: "Dr. Sarah Jenkins",
-      todaySchedule: [
-        { time: "08:00 AM", med: "Multivitamin 1 Tab", status: "taken" },
-        { time: "01:00 PM", med: "Lisinopril 10 mg", status: "taken" },
-      ],
-      medications: [
-        {
-          name: "Multivitamin",
-          dosage: "1 Tablet",
-          frequency: "1x daily (08:00 AM)",
-          stock: 30,
-        },
-        {
-          name: "Lisinopril",
-          dosage: "10 mg",
-          frequency: "1x daily (01:00 PM)",
-          stock: 50,
-        },
-      ],
-    },
-  ]);
+  // Persistent Patients List
+  const [patientsList, setPatientsList] = useState(() => {
+    const saved = localStorage.getItem("pillsync_patients");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {
+        console.error("Failed to parse saved patients", e);
+      }
+    }
+    return INITIAL_PATIENTS;
+  });
+
+  // Persistent Caregivers List
+  const [caregiversList, setCaregiversList] = useState(() => {
+    const saved = localStorage.getItem("pillsync_caregivers");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {
+        console.error("Failed to parse saved caregivers", e);
+      }
+    }
+    return INITIAL_CAREGIVERS;
+  });
+
+  // Sync to localStorage
+  useEffect(() => {
+    localStorage.setItem("pillsync_patients", JSON.stringify(patientsList));
+  }, [patientsList]);
+
+  useEffect(() => {
+    localStorage.setItem("pillsync_caregivers", JSON.stringify(caregiversList));
+  }, [caregiversList]);
 
   // Form states
   const [patientFormData, setPatientFormData] = useState({
@@ -239,18 +306,19 @@ export default function CaregiverPage() {
       adherenceNum: 100,
       status: "Healthy",
       missedDoses: 0,
-      lastTaken: "Today, 08:00 AM",
+      lastTaken: "Just Registered",
       conditions: patientFormData.conditions
         ? patientFormData.conditions.split(",").map((c) => c.trim())
         : ["General Monitoring"],
       allergies: patientFormData.allergies || "None",
       emergencyContact: patientFormData.emergencyContact || "+1 (555) 000-1122",
-      assignedDoctor: patientFormData.assignedCaregiver,
+      assignedDoctor: patientFormData.assignedCaregiver || "Dr. Sarah Jenkins",
       todaySchedule: [],
       medications: [],
     };
 
     setPatientsList((prev) => [newPatient, ...prev]);
+    setReportMsg(`Patient profile "${patientFormData.name}" added and saved successfully!`);
     setPatientFormData({
       name: "",
       age: "",
@@ -267,8 +335,22 @@ export default function CaregiverPage() {
     e.preventDefault();
     if (!caregiverFormData.name || !caregiverFormData.email) return;
 
+    const newCaregiver = {
+      id: `c-${Date.now()}`,
+      name: caregiverFormData.name,
+      email: caregiverFormData.email,
+      phone: caregiverFormData.phone || "+1 (555) 000-1122",
+      relationship: caregiverFormData.relationship || "Doctor",
+      assignedPatientsCount: 0,
+      status: "Active Network",
+      alertMissedDose: caregiverFormData.alertMissedDose,
+      alertLowStock: caregiverFormData.alertLowStock,
+      alertRefill: caregiverFormData.alertRefill,
+    };
+
+    setCaregiversList((prev) => [newCaregiver, ...prev]);
     setReportMsg(
-      `Caregiver ${caregiverFormData.name} registered successfully!`,
+      `Caregiver "${caregiverFormData.name}" registered and added to Caregiver Roster!`,
     );
     setCaregiverFormData({
       name: "",
@@ -280,6 +362,20 @@ export default function CaregiverPage() {
       alertRefill: true,
     });
     setIsAddCaregiverOpen(false);
+  };
+
+  const handleDeletePatient = (id, name) => {
+    if (window.confirm(`Are you sure you want to remove patient profile for ${name}?`)) {
+      setPatientsList((prev) => prev.filter((p) => p.id !== id));
+      setReportMsg(`Patient profile "${name}" removed.`);
+    }
+  };
+
+  const handleDeleteCaregiver = (id, name) => {
+    if (window.confirm(`Are you sure you want to remove caregiver ${name}?`)) {
+      setCaregiversList((prev) => prev.filter((c) => c.id !== id));
+      setReportMsg(`Caregiver "${name}" removed.`);
+    }
   };
 
   const handleAddMedicine = async (newMed) => {
@@ -597,91 +693,214 @@ export default function CaregiverPage() {
 
       {/* 3. Caregiver Patient List (My Patients) & Live Alerts Feed */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Patient Roster (2 columns wide) */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              <Users className="w-5 h-5 text-emerald-600" />
-              My Patients ({patientsList.length})
-            </h3>
+        {/* Patient & Caregiver Roster (2 columns wide) */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* 3a. My Patients Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <Users className="w-5 h-5 text-emerald-600" />
+                My Patients ({patientsList.length})
+              </h3>
+              <button
+                onClick={() => setIsAddPatientOpen(true)}
+                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+              >
+                <Plus className="w-3.5 h-3.5" /> Add Patient
+              </button>
+            </div>
+
+            {patientsList.length === 0 ? (
+              <div className="p-6 rounded-3xl glass-card text-center text-slate-500 text-xs">
+                No patient profiles found. Click "+ Add Patient Profile" to register one.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {patientsList.map((patient) => (
+                  <div
+                    key={patient.id}
+                    className="p-5 rounded-3xl glass-card border border-slate-200/80 dark:border-slate-800/80 space-y-4 hover:border-emerald-400/50 transition-all shadow-sm flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                            {patient.name}
+                          </h4>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            Age {patient.age} &bull;{" "}
+                            {Array.isArray(patient.conditions)
+                              ? patient.conditions.join(" • ")
+                              : patient.conditions}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          {patient.status === "Attention Needed" ||
+                          patient.missedDoses > 0 ? (
+                            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-300 flex items-center gap-1">
+                              🟠 Attention
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 flex items-center gap-1">
+                              🟢 Healthy
+                            </span>
+                          )}
+                          <button
+                            onClick={() => handleDeletePatient(patient.id, patient.name)}
+                            title="Remove patient"
+                            className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <span className="text-slate-400 block font-medium text-[10px]">
+                            Adherence Rate
+                          </span>
+                          <strong className="text-slate-900 dark:text-white text-base font-bold">
+                            {patient.adherence}
+                          </strong>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block font-medium text-[10px]">
+                            Missed Doses
+                          </span>
+                          <strong
+                            className={`text-base font-bold ${
+                              patient.missedDoses > 0
+                                ? "text-rose-600 dark:text-rose-400"
+                                : "text-emerald-600"
+                            }`}
+                          >
+                            {patient.missedDoses} missed
+                          </strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                      <button
+                        onClick={() => setSelectedPatientDetail(patient)}
+                        className="py-2.5 px-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-brand-500/20 transition-all active:scale-95"
+                      >
+                        <Users className="w-3.5 h-3.5" />
+                        View Patient
+                      </button>
+                      <button
+                        onClick={() => {
+                          setDefaultPatientIdForMedicine(patient.id);
+                          setIsAddMedicineOpen(true);
+                        }}
+                        className="py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 hover:text-emerald-700 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors border border-slate-200 dark:border-slate-700"
+                      >
+                        <Plus className="w-3.5 h-3.5 text-emerald-600" />+ Medicine
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {patientsList.map((patient) => (
-              <div
-                key={patient.id}
-                className="p-5 rounded-3xl glass-card border border-slate-200/80 dark:border-slate-800/80 space-y-4 hover:border-emerald-400/50 transition-all shadow-sm flex flex-col justify-between"
+          {/* 3b. Caregiver & Healthcare Network Section */}
+          <div className="space-y-4 pt-4 border-t border-slate-200/60 dark:border-slate-800">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-indigo-600" />
+                Caregivers & Healthcare Network ({caregiversList.length})
+              </h3>
+              <button
+                onClick={() => setIsAddCaregiverOpen(true)}
+                className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
               >
-                <div>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="text-base font-bold text-slate-900 dark:text-white">
-                        {patient.name}
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        Age {patient.age} &bull;{" "}
-                        {patient.conditions.join(" • ")}
-                      </p>
-                    </div>
+                <Plus className="w-3.5 h-3.5" /> Add Caregiver
+              </button>
+            </div>
 
-                    {patient.status === "Attention Needed" ||
-                    patient.missedDoses > 0 ? (
-                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-300 flex items-center gap-1">
-                        🟠 Attention
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 flex items-center gap-1">
-                        🟢 Healthy
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="mt-4 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <span className="text-slate-400 block font-medium text-[10px]">
-                        Adherence Rate
-                      </span>
-                      <strong className="text-slate-900 dark:text-white text-base font-bold">
-                        {patient.adherence}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block font-medium text-[10px]">
-                        Missed Doses
-                      </span>
-                      <strong
-                        className={`text-base font-bold ${
-                          patient.missedDoses > 0
-                            ? "text-rose-600 dark:text-rose-400"
-                            : "text-emerald-600"
-                        }`}
-                      >
-                        {patient.missedDoses} missed
-                      </strong>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                  <button
-                    onClick={() => setSelectedPatientDetail(patient)}
-                    className="py-2.5 px-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-brand-500/20 transition-all active:scale-95"
-                  >
-                    <Users className="w-3.5 h-3.5" />
-                    View Patient
-                  </button>
-                  <button
-                    onClick={() => {
-                      setDefaultPatientIdForMedicine(patient.id);
-                      setIsAddMedicineOpen(true);
-                    }}
-                    className="py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 hover:text-emerald-700 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors border border-slate-200 dark:border-slate-700"
-                  >
-                    <Plus className="w-3.5 h-3.5 text-emerald-600" />+ Medicine
-                  </button>
-                </div>
+            {caregiversList.length === 0 ? (
+              <div className="p-6 rounded-3xl glass-card text-center text-slate-500 text-xs">
+                No caregivers registered. Click "+ Add Caregiver" to invite a doctor or family member.
               </div>
-            ))}
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {caregiversList.map((cg) => (
+                  <div
+                    key={cg.id}
+                    className="p-5 rounded-3xl glass-card border border-slate-200/80 dark:border-slate-800/80 space-y-3 hover:border-indigo-400/50 transition-all shadow-sm flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                              {cg.name}
+                            </h4>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                              {cg.relationship}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
+                            <Mail className="w-3 h-3 text-slate-400" />
+                            {cg.email}
+                          </p>
+                          {cg.phone && (
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1.5">
+                              <Phone className="w-3 h-3 text-slate-400" />
+                              {cg.phone}
+                            </p>
+                          )}
+                        </div>
+
+                        <button
+                          onClick={() => handleDeleteCaregiver(cg.id, cg.name)}
+                          title="Remove caregiver"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Alert preferences badges */}
+                      <div className="mt-3 flex items-center gap-1.5 flex-wrap text-[10px] font-medium text-slate-600 dark:text-slate-400">
+                        {cg.alertMissedDose && (
+                          <span className="px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900">
+                            Missed Dose Alerts
+                          </span>
+                        )}
+                        {cg.alertLowStock && (
+                          <span className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900">
+                            Low Stock Warnings
+                          </span>
+                        )}
+                        {cg.alertRefill && (
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900">
+                            Refill Reminders
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+                      <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> {cg.status || "Active Network"}
+                      </span>
+                      <button
+                        onClick={() =>
+                          alert(`Sending notification to ${cg.name} (${cg.email})...`)
+                        }
+                        className="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold text-xs hover:bg-indigo-100 transition-colors border border-indigo-200 dark:border-indigo-800"
+                      >
+                        Contact
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
