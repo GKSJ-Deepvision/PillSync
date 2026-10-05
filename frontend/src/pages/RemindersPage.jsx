@@ -12,6 +12,7 @@ import {
   Mail,
   RefreshCw,
   Timer,
+  ScanLine,
 } from "lucide-react";
 
 export default function RemindersPage() {
@@ -40,7 +41,7 @@ export default function RemindersPage() {
       setReminders((prev) => prev.map((r) => (r.id === id ? updated : r)));
     } catch (err) {
       console.error("Failed to update status", err);
-      alert("Failed to update status in database.");
+      alert("Failed to update reminder status.");
     }
   };
 
@@ -86,7 +87,7 @@ export default function RemindersPage() {
       <div className="flex items-center justify-center min-h-[400px] text-slate-500 gap-2">
         <RefreshCw className="w-5 h-5 animate-spin text-brand-600" />
         <span className="font-semibold text-sm">
-          Loading reminder schedules from DB...
+          Loading reminder schedules...
         </span>
       </div>
     );
@@ -106,8 +107,16 @@ export default function RemindersPage() {
           </p>
         </div>
 
-        {/* Test Notification Action Buttons */}
-        <div className="flex items-center gap-2">
+        {/* Test Notification & OCR Action Buttons */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <a
+            href="/ocr-upload"
+            className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all active:scale-95"
+          >
+            <ScanLine className="w-3.5 h-3.5" />
+            OCR Prescription Scan
+          </a>
+
           <button
             onClick={() => triggerTestNotification("Push Notification")}
             className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"

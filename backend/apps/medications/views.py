@@ -12,39 +12,6 @@ from .serializers import MedicationSerializer
 @permission_classes([AllowAny])
 def medication_list_create(request):
     if request.method == "GET":
-        from config.mongo import list_documents
-
-        # Try fetching from MongoDB first if available
-        try:
-            mongo_meds = list_documents("developer", limit=100)
-            if not mongo_meds:
-                mongo_meds = list_documents("medications", limit=100)
-            if mongo_meds:
-                # Format MongoDB documents to match medication response schema
-                formatted = []
-                for m in mongo_meds:
-                    formatted.append(
-                        {
-                            "id": m.get("id") or m.get("_id"),
-                            "name": m.get("name", "Unknown"),
-                            "dosage": m.get("dosage", "500 mg"),
-                            "stock": m.get("stock", 30),
-                            "total_stock": m.get("total_stock", 60),
-                            "frequency": m.get("frequency", "1 time daily"),
-                            "disease_category": m.get("disease_category", "General"),
-                            "times_of_day": m.get("times_of_day", ["Morning"]),
-                            "stock_days": m.get("stock_days", 30),
-                            "refill_threshold": m.get("refill_threshold", 10),
-                            "fda_ndc": m.get("fda_ndc", ""),
-                            "manufacturer": m.get("manufacturer", ""),
-                            "active_ingredient": m.get("active_ingredient", ""),
-                            "created_at": m.get("created_at", ""),
-                        }
-                    )
-                return Response(formatted)
-        except Exception as e:
-            print("MongoDB fetch warning (falling back to local DB):", e)
-
         meds = Medication.objects.all().order_by("-id")
         serializer = MedicationSerializer(meds, many=True)
         return Response(serializer.data)
@@ -56,17 +23,7 @@ def medication_list_create(request):
             med.update_stock_days()
             med.save()
             sync_reminders_for_medication(med)
-
             med_data = MedicationSerializer(med).data
-            # Sync to MongoDB 'medicin' database (collections 'developer' and 'medications')
-            try:
-                from config.mongo import store_document
-
-                store_document("developer", dict(med_data))
-                store_document("medications", dict(med_data))
-            except Exception as err:
-                print("Failed to sync new medication to MongoDB:", err)
-
             return Response(med_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -122,36 +79,11 @@ def medication_detail(request, pk):
             updated_med.save()
             sync_reminders_for_medication(updated_med)
             med_data = MedicationSerializer(updated_med).data
-
-            # Sync update to MongoDB
-            try:
-                from config.mongo import get_mongo_db
-
-                db = get_mongo_db()
-                db["developer"].update_one(
-                    {"id": updated_med.id}, {"$set": dict(med_data)}, upsert=True
-                )
-                db["medications"].update_one(
-                    {"id": updated_med.id}, {"$set": dict(med_data)}, upsert=True
-                )
-            except Exception as err:
-                print("Failed to sync update to MongoDB:", err)
-
             return Response(med_data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == "DELETE":
-        med_id = med.id
         med.delete()
-        # Delete from MongoDB
-        try:
-            from config.mongo import delete_document
-
-            delete_document("developer", {"id": med_id})
-            delete_document("medications", {"id": med_id})
-        except Exception as err:
-            print("Failed to delete from MongoDB:", err)
-
         return Response({"status": "deleted"}, status=status.HTTP_204_NO_CONTENT)
 
 
@@ -167,17 +99,6 @@ def take_dose(request, pk):
     med.update_stock_days()
     med.save()
     med_data = MedicationSerializer(med).data
-
-    # Sync update to MongoDB
-    try:
-        from config.mongo import get_mongo_db
-
-        db = get_mongo_db()
-        db["developer"].update_one({"id": med.id}, {"$set": dict(med_data)}, upsert=True)
-        db["medications"].update_one({"id": med.id}, {"$set": dict(med_data)}, upsert=True)
-    except Exception as err:
-        print("Failed to sync dose update to MongoDB:", err)
-
     return Response(med_data)
 
 

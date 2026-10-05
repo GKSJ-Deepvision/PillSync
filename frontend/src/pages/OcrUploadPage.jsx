@@ -140,7 +140,7 @@ export default function OcrUploadPage() {
         doctorName: ocrResult.doctorName,
       });
       alert(
-        "Medicine successfully parsed & added into live database schedule!",
+        "Medicine successfully parsed & added to your active schedule!",
       );
       navigate("/medications");
     } catch (err) {
@@ -154,15 +154,14 @@ export default function OcrUploadPage() {
       <div>
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-100 dark:bg-brand-950 text-xs font-bold text-brand-700 dark:text-brand-300 mb-2 border border-brand-200 dark:border-brand-800">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          OCR Prescription Parser • OpenFDA Database Connected
+          OCR Prescription Parser • AI-Powered Verification
         </div>
         <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">
           Prescription Image OCR Extraction
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          Upload a handwritten or printed doctor prescription. Tesseract OCR &
-          OpenFDA live API will auto-extract and verify medicine names, dosage,
-          and frequency.
+          Upload a handwritten or printed doctor prescription. AI-powered smart recognition
+          will auto-extract and verify medicine names, dosage, and frequency.
         </p>
       </div>
 
@@ -246,7 +245,7 @@ export default function OcrUploadPage() {
               {isScanning ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Extracting & Verifying OpenFDA...
+                  Extracting Prescription Details...
                 </>
               ) : (
                 <>
@@ -266,7 +265,7 @@ export default function OcrUploadPage() {
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-500" />
               <h4 className="text-base font-bold text-slate-900 dark:text-white">
-                OCR Text Extraction & OpenFDA Verification Successful
+                Prescription Extraction & Verification Successful
               </h4>
             </div>
             <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
@@ -317,7 +316,7 @@ export default function OcrUploadPage() {
               onClick={handleSaveToSchedule}
               className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-md transition-all"
             >
-              <span>Save to Active Database Schedules</span>
+              <span>Save to Active Medication Schedule</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

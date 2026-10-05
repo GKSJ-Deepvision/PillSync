@@ -74,14 +74,14 @@ export default function RefillsPage() {
       <div>
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-100 dark:bg-brand-950 text-xs font-bold text-brand-700 dark:text-brand-300 mb-2 border border-brand-200 dark:border-brand-800">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          AI Refill Prediction Engine • Live DB Connected
+          AI Refill Prediction Engine • Smart Inventory Tracking
         </div>
         <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">
           Automated Stock Depletion & Refill Predictions
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
           Calculates real-time daily dosage consumption rate, accounts for
-          missed doses, and predicts exact exhaustion dates from database stock
+          missed doses, and predicts exact exhaustion dates from active inventory
           levels.
         </p>
       </div>

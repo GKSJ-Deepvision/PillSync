@@ -1,5 +1,6 @@
+from datetime import date
+
 from django.db import models
-from django.utils import timezone
 
 
 class Medication(models.Model):
@@ -19,7 +20,7 @@ class Medication(models.Model):
     disease_category = models.CharField(max_length=100, default="General")
     times_of_day = models.JSONField(default=list)
     food_timing = models.CharField(max_length=50, choices=FOOD_TIMING_CHOICES, default="after_food")
-    start_date = models.DateField(default=timezone.now)
+    start_date = models.DateField(default=date.today)
     end_date = models.DateField(blank=True, null=True)
     timing_details = models.JSONField(default=dict, blank=True)
     stock_days = models.IntegerField(default=30)

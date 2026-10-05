@@ -11,7 +11,13 @@ import {
   Pill,
 } from "lucide-react";
 
-export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
+export default function AddMedicineModal({
+  isOpen,
+  onClose,
+  onAddMedicine,
+  patientsList = [],
+  defaultPatientId = "",
+}) {
   const [formData, setFormData] = useState({
     name: "",
     dosageValue: "500",
@@ -33,6 +39,7 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
     activeIngredient: "",
     manufacturer: "",
     fdaNdc: "",
+    assignedPatientId: defaultPatientId || (patientsList[0]?.id || ""),
   });
 
   const [fdaResults, setFdaResults] = useState([]);
@@ -87,6 +94,10 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
       totalStock / (formData.timesOfDay.length || 1),
     );
 
+    const selectedPatientObj = patientsList.find(
+      (p) => p.id === formData.assignedPatientId,
+    );
+
     onAddMedicine({
       name: formData.name,
       dosage: fullDosage,
@@ -104,6 +115,8 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
       manufacturer: formData.manufacturer,
       fdaNdc: formData.fdaNdc,
       stockDays,
+      assignedPatientId: formData.assignedPatientId,
+      assignedPatientName: selectedPatientObj ? selectedPatientObj.name : "",
     });
 
     // Reset Form
@@ -128,6 +141,7 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
       activeIngredient: "",
       manufacturer: "",
       fdaNdc: "",
+      assignedPatientId: defaultPatientId || (patientsList[0]?.id || ""),
     });
     onClose();
   };
@@ -190,6 +204,28 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
         onSubmit={handleSubmit}
         className="space-y-4 max-h-[78vh] overflow-y-auto pr-1"
       >
+        {/* Patient Selector for Caregivers */}
+        {patientsList && patientsList.length > 0 && (
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+              Assign to Patient Profile
+            </label>
+            <select
+              value={formData.assignedPatientId || patientsList[0]?.id}
+              onChange={(e) =>
+                setFormData({ ...formData, assignedPatientId: e.target.value })
+              }
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
+            >
+              {patientsList.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {/* Medicine Name with Live OpenFDA Auto-complete */}
         <div className="relative">
           <div className="flex items-center justify-between mb-1">
@@ -197,7 +233,7 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
               Medicine Name
             </label>
             <span className="text-[11px] font-semibold text-brand-600 dark:text-brand-400 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-amber-400" /> OpenFDA Connected
+              <Sparkles className="w-3 h-3 text-amber-400" /> Verified Auto-complete
             </span>
           </div>
 
@@ -224,7 +260,7 @@ export default function AddMedicineModal({ isOpen, onClose, onAddMedicine }) {
           {showFdaResults && (
             <div className="absolute z-50 left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl max-h-56 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/60">
               <div className="px-3 py-1.5 bg-slate-50 dark:bg-slate-900/60 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                FDA National Drug Code Database Matches ({fdaResults.length})
+                Verified FDA Directory Matches ({fdaResults.length})
               </div>
               {fdaResults.map((drug) => (
                 <div

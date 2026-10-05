@@ -23,9 +23,23 @@ export const AuthProvider = ({ children }) => {
     () => localStorage.getItem("pillsync_token") || "dummy-jwt-token-xyz",
   );
 
+  const [viewMode, setViewMode] = useState(() => {
+    const savedUser = localStorage.getItem("pillsync_user");
+    if (savedUser) {
+      try {
+        const u = JSON.parse(savedUser);
+        return u.role || "patient";
+      } catch (e) {
+        return "patient";
+      }
+    }
+    return "patient";
+  });
+
   const saveAuthSession = (userData, authToken) => {
     setUser(userData);
     setToken(authToken);
+    setViewMode(userData.role || "patient");
     localStorage.setItem("pillsync_user", JSON.stringify(userData));
     localStorage.setItem("pillsync_token", authToken);
   };
@@ -49,7 +63,6 @@ export const AuthProvider = ({ children }) => {
       saveAuthSession(userData, data.token);
       return { success: true, user: userData };
     } catch (err) {
-      // Fallback for offline demo mode
       console.warn(
         "API connection failed, attempting fallback login",
         err.message,
@@ -73,30 +86,23 @@ export const AuthProvider = ({ children }) => {
     return { success: true, user: userData };
   };
 
-  const switchRole = (newRole) => {
-    const updated = {
-      ...user,
-      role: newRole,
-      name:
-        newRole === "caregiver"
-          ? "Dr. Sarah Jenkins"
-          : newRole === "admin"
-            ? "System Administrator"
-            : "Alex Morgan",
-      email:
-        newRole === "caregiver"
-          ? "sarah.caregiver@pillsync.com"
-          : newRole === "admin"
-            ? "admin@pillsync.com"
-            : "alex.patient@pillsync.com",
-    };
-    setUser(updated);
-    localStorage.setItem("pillsync_user", JSON.stringify(updated));
+  const switchRole = (newMode) => {
+    // Admins can switch anywhere, Caregivers can switch to patient or caregiver, Patients stay patient
+    if (user?.role === "admin") {
+      setViewMode(newMode);
+    } else if (user?.role === "caregiver") {
+      if (newMode === "patient" || newMode === "caregiver") {
+        setViewMode(newMode);
+      }
+    } else {
+      setViewMode("patient");
+    }
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
+    setViewMode("patient");
     localStorage.removeItem("pillsync_user");
     localStorage.removeItem("pillsync_token");
   };
@@ -106,6 +112,8 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         token,
+        viewMode,
+        setViewMode,
         login,
         loginWithApi,
         registerWithApi,

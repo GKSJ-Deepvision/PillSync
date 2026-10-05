@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import MedicineCard from "../components/medications/MedicineCard";
 import AddMedicineModal from "../components/medications/AddMedicineModal";
+import { useAuth } from "../context/AuthContext";
 import {
   fetchMedications,
   addMedication,
@@ -10,11 +11,19 @@ import {
 import { Plus, Search, Filter, RefreshCw } from "lucide-react";
 
 export default function MedicationsPage() {
+  const auth = useAuth() || {};
+  const user = auth.user;
+  const viewMode = auth.viewMode;
   const [medicines, setMedicines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedDisease, setSelectedDisease] = useState("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const activeRole =
+    user?.role === "admin"
+      ? viewMode || "admin"
+      : viewMode || user?.role || "patient";
 
   const loadMeds = async () => {
     setLoading(true);
@@ -47,7 +56,7 @@ export default function MedicationsPage() {
       setMedicines((prev) => prev.filter((m) => m.id !== id));
     } catch (err) {
       console.error("Failed to delete medicine", err);
-      alert("Failed to delete medicine from database.");
+      alert("Failed to delete medicine.");
     }
   };
 
@@ -57,7 +66,7 @@ export default function MedicationsPage() {
       setMedicines((prev) => [saved, ...prev]);
     } catch (err) {
       console.error("Failed to save medicine", err);
-      alert("Failed to save medicine to database.");
+      alert("Failed to save medicine.");
     }
   };
 
@@ -76,7 +85,7 @@ export default function MedicationsPage() {
       <div className="flex items-center justify-center min-h-[400px] text-slate-500 gap-2">
         <RefreshCw className="w-5 h-5 animate-spin text-brand-600" />
         <span className="font-semibold text-sm">
-          Loading medications inventory from DB...
+          Loading medications inventory...
         </span>
       </div>
     );
@@ -102,17 +111,19 @@ export default function MedicationsPage() {
             Medication Schedule & Inventory
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Manage your daily doses, disease categories, and database inventory.
+            Manage your daily doses, disease categories, and active inventory.
           </p>
         </div>
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 text-white font-bold text-xs shadow-md shadow-brand-500/20 flex items-center justify-center gap-2 hover:from-brand-500 hover:to-brand-400 transition-all active:scale-95"
-        >
-          <Plus className="w-4 h-4" />
-          Add New Medicine
-        </button>
+        {activeRole !== "patient" && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 text-white font-bold text-xs shadow-md shadow-brand-500/20 flex items-center justify-center gap-2 hover:from-brand-500 hover:to-brand-400 transition-all active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            Add New Medicine
+          </button>
+        )}
       </div>
 
       {/* Search & Filters */}

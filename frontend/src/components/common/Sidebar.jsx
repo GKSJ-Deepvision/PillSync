@@ -10,36 +10,74 @@ import {
   Users,
   BarChart3,
   ShieldCheck,
+  User,
   X,
 } from "lucide-react";
 
 export default function Sidebar({ mobileOpen, closeMobileSidebar }) {
-  const { user } = useAuth();
+  const { user, viewMode } = useAuth();
 
   const navItems = [
-    { name: "Dashboard", path: "/", icon: LayoutDashboard },
-    { name: "Medications", path: "/medications", icon: Pill },
+    {
+      name: "Dashboard",
+      path: "/",
+      icon: LayoutDashboard,
+      roles: ["patient", "caregiver", "admin"],
+    },
+    {
+      name: "Medications",
+      path: "/medications",
+      icon: Pill,
+      roles: ["patient", "admin"],
+    },
     {
       name: "OCR Prescription Scan",
       path: "/ocr-upload",
       icon: ScanLine,
       badge: "AI",
+      roles: ["caregiver", "admin"],
     },
-    { name: "Smart Reminders", path: "/reminders", icon: Clock },
+    {
+      name: "Smart Reminders",
+      path: "/reminders",
+      icon: Clock,
+      roles: ["patient", "caregiver"],
+    },
     {
       name: "AI Refill Engine",
       path: "/refills",
       icon: RefreshCw,
       badge: "Smart",
+      roles: ["caregiver", "admin"],
     },
     {
       name: "Caregiver Portal",
       path: "/caregiver",
       icon: Users,
-      roleLimit: ["caregiver", "admin", "patient"],
+      roles: ["caregiver", "admin"],
     },
-    { name: "Analytics & Reports", path: "/analytics", icon: BarChart3 },
+    {
+      name: "Analytics & Reports",
+      path: "/analytics",
+      icon: BarChart3,
+      roles: ["caregiver", "admin"],
+    },
+    {
+      name: "My Profile",
+      path: "/profile",
+      icon: User,
+      roles: ["patient", "caregiver", "admin"],
+    },
   ];
+
+  const activeMode =
+    user?.role === "admin"
+      ? viewMode || "admin"
+      : viewMode || user?.role || "patient";
+
+  const visibleNavItems = navItems.filter(
+    (item) => !item.roles || item.roles.includes(activeMode),
+  );
 
   return (
     <>
@@ -73,7 +111,7 @@ export default function Sidebar({ mobileOpen, closeMobileSidebar }) {
 
           {/* Navigation Links */}
           <nav className="space-y-1.5">
-            {navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const Icon = item.icon;
               return (
                 <NavLink
@@ -115,6 +153,9 @@ export default function Sidebar({ mobileOpen, closeMobileSidebar }) {
             Logged in as{" "}
             <span className="font-semibold capitalize text-brand-700 dark:text-brand-300">
               {user?.role}
+              {viewMode && viewMode !== user?.role
+                ? ` (${viewMode} view)`
+                : ""}
             </span>
           </p>
         </div>

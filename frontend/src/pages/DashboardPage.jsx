@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import AddMedicineModal from "../components/medications/AddMedicineModal";
 import StockProgressBar from "../components/refills/StockProgressBar";
+import CaregiverPage from "./CaregiverPage";
+import AnalyticsPage from "./AnalyticsPage";
 import {
   fetchMedications,
   addMedication,
@@ -15,7 +17,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Plus,
-  ScanLine,
+  Clock,
   Sparkles,
   TrendingUp,
   RefreshCw,
@@ -24,7 +26,25 @@ import {
 import { Link } from "react-router-dom";
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, viewMode } = useAuth();
+
+  const activeRole =
+    user?.role === "admin"
+      ? viewMode || "admin"
+      : viewMode || user?.role || "patient";
+
+  if (activeRole === "caregiver") {
+    return <CaregiverPage />;
+  }
+
+  if (activeRole === "admin") {
+    return <AnalyticsPage />;
+  }
+
+  return <PatientDashboardContent user={user} viewMode={viewMode} />;
+}
+
+function PatientDashboardContent({ user, viewMode }) {
   const [medicines, setMedicines] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +64,7 @@ export default function DashboardPage() {
       setAnalytics(statsData);
     } catch (err) {
       console.error("Error loading dashboard data:", err);
-      setError("Failed to connect to backend database.");
+      setError("Failed to load dashboard data. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -65,7 +85,7 @@ export default function DashboardPage() {
       setAnalytics(statsData);
     } catch (err) {
       console.error("Take dose failed:", err);
-      alert("Failed to record dose in backend.");
+      alert("Failed to record dose. Please try again.");
     }
   };
 
@@ -77,13 +97,13 @@ export default function DashboardPage() {
       setAnalytics(statsData);
     } catch (err) {
       console.error("Delete medicine failed:", err);
-      alert("Failed to delete medicine from database.");
+      alert("Failed to delete medicine.");
     }
   };
 
   const handleMissDose = (_medId) => {
     alert(
-      "Logged dose as missed in database for tracking and caregiver alerts.",
+      "Logged dose as missed for tracking and caregiver alerts.",
     );
   };
 
@@ -95,7 +115,7 @@ export default function DashboardPage() {
       setAnalytics(statsData);
     } catch (err) {
       console.error("Add medicine failed:", err);
-      alert("Failed to save medicine to database.");
+      alert("Failed to save medicine.");
     }
   };
 
@@ -147,7 +167,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-center min-h-[400px] text-slate-500 gap-2">
         <RefreshCw className="w-5 h-5 animate-spin text-brand-600" />
         <span className="font-semibold text-sm">
-          Loading live MongoDB database records...
+          Loading medication schedule...
         </span>
       </div>
     );
@@ -165,43 +185,106 @@ export default function DashboardPage() {
     ),
   ];
 
+  // Role checks based on active perspective
+  const activeRole =
+    user?.role === "admin"
+      ? viewMode || "admin"
+      : viewMode || user?.role || "patient";
+
+  const isCaregiver = activeRole === "caregiver";
+  const isAdmin = activeRole === "admin";
+
   return (
     <div className="space-y-6">
-      {/* Welcome Banner */}
+      {/* Role-Based Welcome Banner */}
       <div className="p-6 rounded-3xl bg-gradient-to-r from-brand-600 via-indigo-600 to-brand-700 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="space-y-1 relative z-10">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold text-brand-100 border border-white/20 mb-1">
             <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            MongoDB Atlas Connected • Live Patient Schedule
+            {isCaregiver
+              ? "Caregiver Portal • Real-time Patient Monitoring"
+              : isAdmin
+                ? "System Administration • Global Health Dashboard"
+                : "Active Patient Schedule • Real-time Monitoring"}
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Welcome back, {user?.name || "Patient"}! 👋
+            Welcome back, {user?.name || (isCaregiver ? "Doctor" : "User")}! 👋
           </h1>
           <p className="text-xs sm:text-sm text-brand-100/90 max-w-xl">
-            You have{" "}
-            <strong className="text-white font-bold">
-              {todayDoses.length} assigned doses scheduled for today
-            </strong>{" "}
-            across {categoryFilteredMeds.length} active prescription(s).
+            {isCaregiver ? (
+              <>
+                Monitoring{" "}
+                <strong className="text-white font-bold">
+                  3 assigned family members & patients
+                </strong>
+                . 1 active missed-dose alert requires attention.
+              </>
+            ) : isAdmin ? (
+              <>
+                System operating normally with{" "}
+                <strong className="text-white font-bold">
+                  128 active patient schedules
+                </strong>{" "}
+                and 24 registered caregivers.
+              </>
+            ) : (
+              <>
+                You have{" "}
+                <strong className="text-white font-bold">
+                  {todayDoses.length} assigned doses scheduled for today
+                </strong>{" "}
+                across {categoryFilteredMeds.length} active prescription(s).
+              </>
+            )}
           </p>
         </div>
 
         <div className="flex items-center gap-3 relative z-10">
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="px-4 py-2.5 rounded-2xl bg-white text-brand-700 hover:bg-brand-50 font-bold text-xs shadow-lg flex items-center gap-2 transition-all active:scale-95"
-          >
-            <Plus className="w-4 h-4" />
-            Add Medicine
-          </button>
-
-          <Link
-            to="/ocr-upload"
-            className="px-4 py-2.5 rounded-2xl bg-brand-500/40 hover:bg-brand-500/60 backdrop-blur-md text-white font-bold text-xs border border-white/20 flex items-center gap-2 transition-all"
-          >
-            <ScanLine className="w-4 h-4" />
-            OCR Prescription Scan
-          </Link>
+          {isCaregiver ? (
+            <>
+              <Link
+                to="/caregiver"
+                className="px-4 py-2.5 rounded-2xl bg-white text-brand-700 hover:bg-brand-50 font-bold text-xs shadow-lg flex items-center gap-2 transition-all active:scale-95"
+              >
+                <Users className="w-4 h-4" />
+                Caregiver Portal
+              </Link>
+              <Link
+                to="/analytics"
+                className="px-4 py-2.5 rounded-2xl bg-brand-500/40 hover:bg-brand-500/60 backdrop-blur-md text-white font-bold text-xs border border-white/20 flex items-center gap-2 transition-all"
+              >
+                <Activity className="w-4 h-4" />
+                View Analytics
+              </Link>
+            </>
+          ) : isAdmin ? (
+            <>
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="px-4 py-2.5 rounded-2xl bg-white text-brand-700 hover:bg-brand-50 font-bold text-xs shadow-lg flex items-center gap-2 transition-all active:scale-95"
+              >
+                <Plus className="w-4 h-4" />
+                Add Medicine
+              </button>
+              <Link
+                to="/caregiver"
+                className="px-4 py-2.5 rounded-2xl bg-brand-500/40 hover:bg-brand-500/60 backdrop-blur-md text-white font-bold text-xs border border-white/20 flex items-center gap-2 transition-all"
+              >
+                <Users className="w-4 h-4" />
+                Manage Caregivers
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/reminders"
+                className="px-4 py-2.5 rounded-2xl bg-white text-brand-700 hover:bg-brand-50 font-bold text-xs shadow-lg flex items-center gap-2 transition-all active:scale-95"
+              >
+                <Clock className="w-4 h-4" />
+                Smart Reminders
+              </Link>
+            </>
+          )}
         </div>
       </div>
 

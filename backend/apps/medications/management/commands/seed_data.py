@@ -11,16 +11,44 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write("Seeding database with real medication records...")
 
-        # Create demo user if not exists
-        if not User.objects.filter(email="patient@pillsync.com").exists():
-            User.objects.create_user(
-                username="patient@pillsync.com",
-                email="patient@pillsync.com",
-                password="password123",  # pragma: allowlist secret
-                first_name="Sarah",
-                last_name="Jenkins",
-            )
-            self.stdout.write(self.style.SUCCESS("Created demo patient user."))
+        # Create demo users for all 3 roles if not exist
+        demo_accounts = [
+            {
+                "email": "alex.patient@pillsync.com",
+                "first_name": "Alex",
+                "last_name": "Morgan",
+            },
+            {
+                "email": "sarah.caregiver@pillsync.com",
+                "first_name": "Dr. Sarah",
+                "last_name": "Jenkins",
+            },
+            {
+                "email": "admin@pillsync.com",
+                "first_name": "System",
+                "last_name": "Administrator",
+            },
+            {
+                "email": "patient@pillsync.com",
+                "first_name": "Sarah",
+                "last_name": "Jenkins",
+            },
+        ]
+
+        for acc in demo_accounts:
+            if not User.objects.filter(email=acc["email"]).exists():
+                u = User.objects.create_user(
+                    username=acc["email"],
+                    email=acc["email"],
+                    password="password123",  # pragma: allowlist secret
+                    first_name=acc["first_name"],
+                    last_name=acc["last_name"],
+                )
+                if acc["email"] == "admin@pillsync.com":
+                    u.is_staff = True
+                    u.is_superuser = True
+                    u.save()
+                self.stdout.write(self.style.SUCCESS(f"Created demo account: {acc['email']}"))
 
         # Initial Medications
         med_records = [
@@ -93,7 +121,9 @@ class Command(BaseCommand):
 
         created_meds = []
         for m_data in med_records:
-            med, created = Medication.objects.get_or_create(name=m_data["name"], defaults=m_data)
+            med = Medication.objects.filter(name=m_data["name"]).first()
+            if not med:
+                med = Medication.objects.create(**m_data)
             med.update_stock_days()
             med.save()
             created_meds.append(med)

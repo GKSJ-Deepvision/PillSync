@@ -13,6 +13,9 @@ import RemindersPage from "../pages/RemindersPage";
 import RefillsPage from "../pages/RefillsPage";
 import CaregiverPage from "../pages/CaregiverPage";
 import AnalyticsPage from "../pages/AnalyticsPage";
+import ProfilePage from "../pages/ProfilePage";
+
+import ProtectedRoleRoute from "../components/common/ProtectedRoleRoute";
 
 function ProtectedLayout() {
   const { isAuthenticated } = useAuth();
@@ -35,12 +38,55 @@ function ProtectedLayout() {
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
           <Routes>
             <Route path="/" element={<DashboardPage />} />
-            <Route path="/medications" element={<MedicationsPage />} />
-            <Route path="/ocr-upload" element={<OcrUploadPage />} />
-            <Route path="/reminders" element={<RemindersPage />} />
-            <Route path="/refills" element={<RefillsPage />} />
-            <Route path="/caregiver" element={<CaregiverPage />} />
-            <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route
+              path="/medications"
+              element={
+                <ProtectedRoleRoute allowedRoles={["patient", "admin"]}>
+                  <MedicationsPage />
+                </ProtectedRoleRoute>
+              }
+            />
+            <Route
+              path="/ocr-upload"
+              element={
+                <ProtectedRoleRoute allowedRoles={["caregiver", "admin"]}>
+                  <OcrUploadPage />
+                </ProtectedRoleRoute>
+              }
+            />
+            <Route
+              path="/reminders"
+              element={
+                <ProtectedRoleRoute allowedRoles={["patient", "caregiver"]}>
+                  <RemindersPage />
+                </ProtectedRoleRoute>
+              }
+            />
+            <Route
+              path="/refills"
+              element={
+                <ProtectedRoleRoute allowedRoles={["caregiver", "admin"]}>
+                  <RefillsPage />
+                </ProtectedRoleRoute>
+              }
+            />
+            <Route
+              path="/caregiver"
+              element={
+                <ProtectedRoleRoute allowedRoles={["caregiver", "admin"]}>
+                  <CaregiverPage />
+                </ProtectedRoleRoute>
+              }
+            />
+            <Route
+              path="/analytics"
+              element={
+                <ProtectedRoleRoute allowedRoles={["caregiver", "admin"]}>
+                  <AnalyticsPage />
+                </ProtectedRoleRoute>
+              }
+            />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

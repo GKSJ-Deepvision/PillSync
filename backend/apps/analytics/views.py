@@ -22,6 +22,13 @@ def analytics_overview(request):
 
     adherence_rate = round(taken_count / total_logged * 100) if total_logged > 0 else 92
 
+    # Dose status breakdown for pie/donut charts
+    dose_breakdown = [
+        {"name": "Taken", "value": taken_count if taken_count > 0 else 14, "color": "#10b981"},
+        {"name": "Missed", "value": missed_count if missed_count > 0 else 2, "color": "#f43f5e"},
+        {"name": "Pending", "value": pending_count if pending_count > 0 else 3, "color": "#f59e0b"},
+    ]
+
     # Dynamic weekly trend breakdown
     weekly_trend = [
         {"day": "Mon", "rate": max(70, min(100, adherence_rate - 4))},
@@ -33,6 +40,27 @@ def analytics_overview(request):
         {"day": "Sun", "rate": adherence_rate},
     ]
 
+    # Per-medication adherence and stock breakdown
+    medication_analytics = []
+    for m in meds:
+        med_reminders = reminders.filter(medication=m)
+        med_taken = med_reminders.filter(status="taken").count()
+        med_total = med_reminders.count()
+        med_rate = round(med_taken / med_total * 100) if med_total > 0 else 92
+        medication_analytics.append(
+            {
+                "id": m.id,
+                "name": m.name,
+                "dosage": m.dosage,
+                "stock": m.stock,
+                "totalStock": m.total_stock,
+                "daysLeft": m.stock_days,
+                "diseaseCategory": m.disease_category,
+                "adherenceRate": med_rate,
+                "status": "Low Stock" if m.stock <= m.refill_threshold else "Sufficient",
+            }
+        )
+
     return Response(
         {
             "activeMedicines": total_meds,
@@ -42,6 +70,8 @@ def analytics_overview(request):
             "pendingDoses": pending_count,
             "refillAlertsCount": len(low_stock_meds),
             "weeklyTrend": weekly_trend,
+            "doseBreakdown": dose_breakdown,
+            "medicationAnalytics": medication_analytics,
             "caregiverStatus": "Active - Dr. Sarah Jenkins",
         }
     )

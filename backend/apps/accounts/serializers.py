@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 class UserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
-    role = serializers.CharField(default="patient")
+    role = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -14,6 +14,14 @@ class UserSerializer(serializers.ModelSerializer):
         if obj.first_name:
             return f"{obj.first_name} {obj.last_name}".strip()
         return obj.username
+
+    def get_role(self, obj):
+        email = (obj.email or obj.username or "").lower()
+        if obj.is_superuser or "admin" in email:
+            return "admin"
+        if "caregiver" in email or "doctor" in email:
+            return "caregiver"
+        return "patient"
 
 
 class RegisterSerializer(serializers.Serializer):

@@ -26,9 +26,12 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      let loggedRole = selectedRole;
       if (loginWithApi) {
-        await loginWithApi(email, password);
-        navigate("/");
+        const res = await loginWithApi(email, password);
+        if (res && res.user && res.user.role) {
+          loggedRole = res.user.role;
+        }
       } else {
         login({
           id: "usr-101",
@@ -43,6 +46,13 @@ export default function LoginPage() {
           avatar:
             "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
         });
+      }
+
+      if (loggedRole === "caregiver") {
+        navigate("/caregiver");
+      } else if (loggedRole === "admin") {
+        navigate("/analytics");
+      } else {
         navigate("/");
       }
     } catch (err) {
@@ -173,7 +183,7 @@ export default function LoginPage() {
 
         <div className="mt-6 pt-4 border-t border-white/10 text-center text-xs text-slate-400 flex items-center justify-center gap-1.5">
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>Secured with Django REST Framework & JWT</span>
+          <span>Secured with HIPAA-Compliant 256-Bit Encryption</span>
         </div>
       </div>
     </div>

@@ -162,7 +162,7 @@ export async function deleteMedicationApi(medId) {
     method: "DELETE",
   });
   if (!response.ok)
-    throw new Error("Failed to delete medication from database.");
+    throw new Error("Failed to delete medication.");
   return true;
 }
 
