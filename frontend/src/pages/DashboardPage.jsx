@@ -103,9 +103,7 @@ function PatientDashboardContent({ user, viewMode }) {
   };
 
   const handleMissDose = (_medId) => {
-    alert(
-      "Logged dose as missed for tracking and caregiver alerts.",
-    );
+    alert("Logged dose as missed for tracking and caregiver alerts.");
   };
 
   const handleAddMedicine = async (newMed) => {

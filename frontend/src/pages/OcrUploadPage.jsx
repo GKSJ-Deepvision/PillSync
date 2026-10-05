@@ -139,9 +139,7 @@ export default function OcrUploadPage() {
         diseaseCategory: ocrResult.extractedDisease || "General",
         doctorName: ocrResult.doctorName,
       });
-      alert(
-        "Medicine successfully parsed & added to your active schedule!",
-      );
+      alert("Medicine successfully parsed & added to your active schedule!");
       navigate("/medications");
     } catch (err) {
       alert(`Error saving medicine: ${err.message}`);
@@ -160,8 +158,9 @@ export default function OcrUploadPage() {
           Prescription Image OCR Extraction
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          Upload a handwritten or printed doctor prescription. AI-powered smart recognition
-          will auto-extract and verify medicine names, dosage, and frequency.
+          Upload a handwritten or printed doctor prescription. AI-powered smart
+          recognition will auto-extract and verify medicine names, dosage, and
+          frequency.
         </p>
       </div>
 

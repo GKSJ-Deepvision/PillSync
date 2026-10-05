@@ -3,8 +3,6 @@ import { loginUser, registerUser } from "../services/api";
 
 const AuthContext = createContext();
 
-
-
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("pillsync_user");
@@ -58,7 +56,10 @@ export const AuthProvider = ({ children }) => {
           backendUser.avatar ||
           "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
       };
-      saveAuthSession(userData, data.access || data.token || "jwt-session-token");
+      saveAuthSession(
+        userData,
+        data.access || data.token || "jwt-session-token",
+      );
       return { success: true, user: userData };
     } catch (err) {
       console.warn("API login failed:", err.message);
@@ -71,7 +72,8 @@ export const AuthProvider = ({ children }) => {
     const backendUser = data.user || {};
     const userData = {
       id: backendUser.id || `usr-${Date.now()}`,
-      name: name || backendUser.name || backendUser.username || email.split("@")[0],
+      name:
+        name || backendUser.name || backendUser.username || email.split("@")[0],
       email: backendUser.email || email,
       role: role || backendUser.role || "patient",
       avatar:

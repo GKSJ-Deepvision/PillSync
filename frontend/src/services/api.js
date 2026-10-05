@@ -161,8 +161,7 @@ export async function deleteMedicationApi(medId) {
   const response = await fetch(`${API_BASE_URL}/medications/${medId}/`, {
     method: "DELETE",
   });
-  if (!response.ok)
-    throw new Error("Failed to delete medication.");
+  if (!response.ok) throw new Error("Failed to delete medication.");
   return true;
 }
 

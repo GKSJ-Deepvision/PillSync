@@ -153,9 +153,7 @@ export default function Sidebar({ mobileOpen, closeMobileSidebar }) {
             Logged in as{" "}
             <span className="font-semibold capitalize text-brand-700 dark:text-brand-300">
               {user?.role}
-              {viewMode && viewMode !== user?.role
-                ? ` (${viewMode} view)`
-                : ""}
+              {viewMode && viewMode !== user?.role ? ` (${viewMode} view)` : ""}
             </span>
           </p>
         </div>

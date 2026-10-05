@@ -39,7 +39,7 @@ export default function AddMedicineModal({
     activeIngredient: "",
     manufacturer: "",
     fdaNdc: "",
-    assignedPatientId: defaultPatientId || (patientsList[0]?.id || ""),
+    assignedPatientId: defaultPatientId || patientsList[0]?.id || "",
   });
 
   const [fdaResults, setFdaResults] = useState([]);
@@ -141,7 +141,7 @@ export default function AddMedicineModal({
       activeIngredient: "",
       manufacturer: "",
       fdaNdc: "",
-      assignedPatientId: defaultPatientId || (patientsList[0]?.id || ""),
+      assignedPatientId: defaultPatientId || patientsList[0]?.id || "",
     });
     onClose();
   };
@@ -233,7 +233,8 @@ export default function AddMedicineModal({
               Medicine Name
             </label>
             <span className="text-[11px] font-semibold text-brand-600 dark:text-brand-400 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-amber-400" /> Verified Auto-complete
+              <Sparkles className="w-3 h-3 text-amber-400" /> Verified
+              Auto-complete
             </span>
           </div>
 

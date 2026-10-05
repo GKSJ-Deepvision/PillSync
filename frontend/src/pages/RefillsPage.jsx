@@ -81,8 +81,8 @@ export default function RefillsPage() {
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
           Calculates real-time daily dosage consumption rate, accounts for
-          missed doses, and predicts exact exhaustion dates from active inventory
-          levels.
+          missed doses, and predicts exact exhaustion dates from active
+          inventory levels.
         </p>
       </div>
 

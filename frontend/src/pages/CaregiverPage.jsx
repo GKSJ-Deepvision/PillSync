@@ -267,7 +267,9 @@ export default function CaregiverPage() {
     e.preventDefault();
     if (!caregiverFormData.name || !caregiverFormData.email) return;
 
-    setReportMsg(`Caregiver ${caregiverFormData.name} registered successfully!`);
+    setReportMsg(
+      `Caregiver ${caregiverFormData.name} registered successfully!`,
+    );
     setCaregiverFormData({
       name: "",
       email: "",
@@ -355,30 +357,34 @@ export default function CaregiverPage() {
     const dateStr = new Date().toISOString().split("T")[0];
 
     if (reportType === "Weekly Adherence" || reportType === "Monthly Summary") {
-      csvHeader = "Patient ID,Patient Name,Relation,Age,Gender,Adherence Rate,Status,Missed Doses,Emergency Contact\n";
+      csvHeader =
+        "Patient ID,Patient Name,Relation,Age,Gender,Adherence Rate,Status,Missed Doses,Emergency Contact\n";
       csvRows = patientsList.map(
         (p) =>
-          `"${p.id}","${p.name}","${p.relation}",${p.age},"${p.gender}","${p.adherence}","${p.status}",${p.missedDoses},"${p.emergencyContact}"`
+          `"${p.id}","${p.name}","${p.relation}",${p.age},"${p.gender}","${p.adherence}","${p.status}",${p.missedDoses},"${p.emergencyContact}"`,
       );
     } else if (reportType === "Missed Dosage Analysis") {
-      csvHeader = "Patient Name,Relation,Missed Doses Count,Last Taken,Status,Emergency Contact\n";
+      csvHeader =
+        "Patient Name,Relation,Missed Doses Count,Last Taken,Status,Emergency Contact\n";
       csvRows = patientsList
         .filter((p) => p.missedDoses > 0 || p.status !== "Healthy")
         .map(
           (p) =>
-            `"${p.name}","${p.relation}",${p.missedDoses},"${p.lastTaken}","${p.status}","${p.emergencyContact}"`
+            `"${p.name}","${p.relation}",${p.missedDoses},"${p.lastTaken}","${p.status}","${p.emergencyContact}"`,
         );
       if (csvRows.length === 0) {
         csvRows = patientsList.map(
           (p) =>
-            `"${p.name}","${p.relation}",${p.missedDoses},"${p.lastTaken}","${p.status}","${p.emergencyContact}"`
+            `"${p.name}","${p.relation}",${p.missedDoses},"${p.lastTaken}","${p.status}","${p.emergencyContact}"`,
         );
       }
     } else if (reportType === "Prescription Refill Forecast") {
-      csvHeader = "Medication Name,Dosage,Frequency,Current Stock,Refill Status\n";
+      csvHeader =
+        "Medication Name,Dosage,Frequency,Current Stock,Refill Status\n";
       csvRows = medicines.map((m) => {
         const threshold = m.refillThreshold || 10;
-        const status = m.stock <= threshold ? "REFILL REQUIRED" : "ADEQUATE STOCK";
+        const status =
+          m.stock <= threshold ? "REFILL REQUIRED" : "ADEQUATE STOCK";
         return `"${m.name}","${m.dosage}","${m.frequency}",${m.stock},"${status}"`;
       });
       if (csvRows.length === 0) {
@@ -399,7 +405,10 @@ export default function CaregiverPage() {
     const link = document.createElement("a");
     link.href = url;
     const sanitizedFileName = reportType.toLowerCase().replace(/\s+/g, "_");
-    link.setAttribute("download", `PillSync_${sanitizedFileName}_${dateStr}.csv`);
+    link.setAttribute(
+      "download",
+      `PillSync_${sanitizedFileName}_${dateStr}.csv`,
+    );
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -427,9 +436,8 @@ export default function CaregiverPage() {
     (acc, p) => acc + p.missedDoses,
     0,
   );
-  const lowStockCount = medicines.filter(
-    (m) => m.stock <= (m.refillThreshold || 10),
-  ).length || 2;
+  const lowStockCount =
+    medicines.filter((m) => m.stock <= (m.refillThreshold || 10)).length || 2;
 
   if (loading) {
     return (
@@ -455,7 +463,8 @@ export default function CaregiverPage() {
             Caregiver Dashboard & Patient Roster
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Monitor patient adherence, manage assigned medications, and receive live missed-dose alerts.
+            Monitor patient adherence, manage assigned medications, and receive
+            live missed-dose alerts.
           </p>
         </div>
 
@@ -610,11 +619,13 @@ export default function CaregiverPage() {
                         {patient.name}
                       </h4>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        Age {patient.age} &bull; {patient.conditions.join(" • ")}
+                        Age {patient.age} &bull;{" "}
+                        {patient.conditions.join(" • ")}
                       </p>
                     </div>
 
-                    {patient.status === "Attention Needed" || patient.missedDoses > 0 ? (
+                    {patient.status === "Attention Needed" ||
+                    patient.missedDoses > 0 ? (
                       <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-300 flex items-center gap-1">
                         🟠 Attention
                       </span>
@@ -666,8 +677,7 @@ export default function CaregiverPage() {
                     }}
                     className="py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 hover:text-emerald-700 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors border border-slate-200 dark:border-slate-700"
                   >
-                    <Plus className="w-3.5 h-3.5 text-emerald-600" />
-                    + Medicine
+                    <Plus className="w-3.5 h-3.5 text-emerald-600" />+ Medicine
                   </button>
                 </div>
               </div>
@@ -714,7 +724,8 @@ export default function CaregiverPage() {
               Caregiver Analytics & Reports
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Download weekly/monthly adherence reports, missed dosage breakdowns, and patient comparative analysis.
+              Download weekly/monthly adherence reports, missed dosage
+              breakdowns, and patient comparative analysis.
             </p>
           </div>
 
@@ -742,7 +753,9 @@ export default function CaregiverPage() {
               Missed Dose Report
             </button>
             <button
-              onClick={() => handleDownloadReport("Prescription Refill Forecast")}
+              onClick={() =>
+                handleDownloadReport("Prescription Refill Forecast")
+              }
               className="px-3.5 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 text-amber-700 dark:text-amber-300 text-xs font-bold flex items-center gap-1.5 transition-colors border border-amber-200 dark:border-amber-900"
             >
               <Pill className="w-3.5 h-3.5 text-amber-500" />
@@ -815,7 +828,8 @@ export default function CaregiverPage() {
               Medication Schedule & Inventory
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Manage daily doses, disease categories, and active inventory for assigned patients.
+              Manage daily doses, disease categories, and active inventory for
+              assigned patients.
             </p>
           </div>
           <button
@@ -872,7 +886,8 @@ export default function CaregiverPage() {
         {/* Medication Card Grid */}
         {filteredMeds.length === 0 ? (
           <div className="p-8 rounded-3xl glass-card text-center text-slate-500 text-xs">
-            No active medications found matching "{search || selectedDisease}". Click "+ Add Medicine" to create a schedule.
+            No active medications found matching "{search || selectedDisease}".
+            Click "+ Add Medicine" to create a schedule.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -895,37 +910,52 @@ export default function CaregiverPage() {
       <Modal
         isOpen={!!selectedPatientDetail}
         onClose={() => setSelectedPatientDetail(null)}
-        title={selectedPatientDetail ? `Patient Detail — ${selectedPatientDetail.name}` : "Patient Detail"}
+        title={
+          selectedPatientDetail
+            ? `Patient Detail — ${selectedPatientDetail.name}`
+            : "Patient Detail"
+        }
       >
         {selectedPatientDetail && (
           <div className="space-y-5">
             {/* Header info */}
             <div className="p-4 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 text-white flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-extrabold">{selectedPatientDetail.name}</h3>
+                <h3 className="text-lg font-extrabold">
+                  {selectedPatientDetail.name}
+                </h3>
                 <p className="text-xs text-brand-100 mt-0.5">
-                  Age {selectedPatientDetail.age} &bull; Gender: {selectedPatientDetail.gender}
+                  Age {selectedPatientDetail.age} &bull; Gender:{" "}
+                  {selectedPatientDetail.gender}
                 </p>
               </div>
               <div className="text-right">
                 <span className="text-[10px] font-bold uppercase tracking-wider block text-brand-200">
                   Adherence
                 </span>
-                <span className="text-xl font-extrabold">{selectedPatientDetail.adherence}</span>
+                <span className="text-xl font-extrabold">
+                  {selectedPatientDetail.adherence}
+                </span>
               </div>
             </div>
 
             {/* Conditions & Missed */}
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-slate-400 block font-semibold text-[10px]">Conditions</span>
+                <span className="text-slate-400 block font-semibold text-[10px]">
+                  Conditions
+                </span>
                 <span className="font-bold text-slate-800 dark:text-slate-200">
                   {selectedPatientDetail.conditions?.join(" • ") || "General"}
                 </span>
               </div>
               <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300">
-                <span className="text-rose-400 block font-semibold text-[10px]">Missed Doses</span>
-                <span className="font-bold text-base">{selectedPatientDetail.missedDoses} missed</span>
+                <span className="text-rose-400 block font-semibold text-[10px]">
+                  Missed Doses
+                </span>
+                <span className="font-bold text-base">
+                  {selectedPatientDetail.missedDoses} missed
+                </span>
               </div>
             </div>
 
@@ -936,15 +966,20 @@ export default function CaregiverPage() {
                 Today's Schedule
               </h4>
               <div className="space-y-2">
-                {selectedPatientDetail.todaySchedule && selectedPatientDetail.todaySchedule.length > 0 ? (
+                {selectedPatientDetail.todaySchedule &&
+                selectedPatientDetail.todaySchedule.length > 0 ? (
                   selectedPatientDetail.todaySchedule.map((s, idx) => (
                     <div
                       key={idx}
                       className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-slate-500 w-16">{s.time}</span>
-                        <span className="font-bold text-slate-900 dark:text-white">{s.med}</span>
+                        <span className="font-extrabold text-slate-500 w-16">
+                          {s.time}
+                        </span>
+                        <span className="font-bold text-slate-900 dark:text-white">
+                          {s.med}
+                        </span>
                       </div>
                       {s.status === "taken" ? (
                         <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
@@ -968,7 +1003,12 @@ export default function CaregiverPage() {
             {/* Action Buttons */}
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800 grid grid-cols-3 gap-2">
               <button
-                onClick={() => handleSendReminder(selectedPatientDetail.name, "today's medication")}
+                onClick={() =>
+                  handleSendReminder(
+                    selectedPatientDetail.name,
+                    "today's medication",
+                  )
+                }
                 className="py-2 px-2 rounded-xl bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-300 font-bold text-xs flex items-center justify-center gap-1 border border-brand-200 dark:border-brand-800"
               >
                 <Bell className="w-3.5 h-3.5 text-brand-500" />
@@ -1030,7 +1070,10 @@ export default function CaregiverPage() {
                 placeholder="84"
                 value={patientFormData.age}
                 onChange={(e) =>
-                  setPatientFormData({ ...patientFormData, age: e.target.value })
+                  setPatientFormData({
+                    ...patientFormData,
+                    age: e.target.value,
+                  })
                 }
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                 required
@@ -1044,7 +1087,10 @@ export default function CaregiverPage() {
               <select
                 value={patientFormData.gender}
                 onChange={(e) =>
-                  setPatientFormData({ ...patientFormData, gender: e.target.value })
+                  setPatientFormData({
+                    ...patientFormData,
+                    gender: e.target.value,
+                  })
                 }
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
               >
@@ -1064,7 +1110,10 @@ export default function CaregiverPage() {
               placeholder="e.g. Thyroid, Heart, Blood Pressure"
               value={patientFormData.conditions}
               onChange={(e) =>
-                setPatientFormData({ ...patientFormData, conditions: e.target.value })
+                setPatientFormData({
+                  ...patientFormData,
+                  conditions: e.target.value,
+                })
               }
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             />
@@ -1079,7 +1128,10 @@ export default function CaregiverPage() {
               placeholder="e.g. Sulfa Drugs, Penicillin, None"
               value={patientFormData.allergies}
               onChange={(e) =>
-                setPatientFormData({ ...patientFormData, allergies: e.target.value })
+                setPatientFormData({
+                  ...patientFormData,
+                  allergies: e.target.value,
+                })
               }
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             />
@@ -1094,7 +1146,10 @@ export default function CaregiverPage() {
               placeholder="+1 (555) 876-5432"
               value={patientFormData.emergencyContact}
               onChange={(e) =>
-                setPatientFormData({ ...patientFormData, emergencyContact: e.target.value })
+                setPatientFormData({
+                  ...patientFormData,
+                  emergencyContact: e.target.value,
+                })
               }
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             />
@@ -1134,7 +1189,10 @@ export default function CaregiverPage() {
               placeholder="e.g. Dr. Michael Chen"
               value={caregiverFormData.name}
               onChange={(e) =>
-                setCaregiverFormData({ ...caregiverFormData, name: e.target.value })
+                setCaregiverFormData({
+                  ...caregiverFormData,
+                  name: e.target.value,
+                })
               }
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               required
@@ -1151,7 +1209,10 @@ export default function CaregiverPage() {
                 placeholder="doctor@pillsync.com"
                 value={caregiverFormData.email}
                 onChange={(e) =>
-                  setCaregiverFormData({ ...caregiverFormData, email: e.target.value })
+                  setCaregiverFormData({
+                    ...caregiverFormData,
+                    email: e.target.value,
+                  })
                 }
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 required
@@ -1167,7 +1228,10 @@ export default function CaregiverPage() {
                 placeholder="+1 (555) 000-1122"
                 value={caregiverFormData.phone}
                 onChange={(e) =>
-                  setCaregiverFormData({ ...caregiverFormData, phone: e.target.value })
+                  setCaregiverFormData({
+                    ...caregiverFormData,
+                    phone: e.target.value,
+                  })
                 }
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
@@ -1184,7 +1248,10 @@ export default function CaregiverPage() {
                   type="button"
                   key={rel}
                   onClick={() =>
-                    setCaregiverFormData({ ...caregiverFormData, relationship: rel })
+                    setCaregiverFormData({
+                      ...caregiverFormData,
+                      relationship: rel,
+                    })
                   }
                   className={`py-2 px-3 rounded-xl border text-center transition-all ${
                     caregiverFormData.relationship === rel

@@ -46,7 +46,10 @@ def login_view(request):
     if not user:
         # Case-insensitive fallback query by email or username
         try:
-            u = User.objects.filter(email__iexact=email).first() or User.objects.filter(username__iexact=email).first()
+            u = (
+                User.objects.filter(email__iexact=email).first()
+                or User.objects.filter(username__iexact=email).first()
+            )
             if u and u.check_password(password):
                 user = u
         except Exception:

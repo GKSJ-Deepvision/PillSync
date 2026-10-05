@@ -116,7 +116,10 @@ export default function ProfilePage() {
       )}
 
       {/* 2. Main Profile Content */}
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+      >
         {/* Left Column: Personal & Medical Details (2 cols) */}
         <div className="lg:col-span-2 space-y-6">
           {/* Basic & Contact Information */}
