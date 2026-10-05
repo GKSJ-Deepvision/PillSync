@@ -4,7 +4,6 @@ import {
   User,
   Mail,
   Phone,
-  Calendar,
   Shield,
   Heart,
   AlertTriangle,
@@ -15,7 +14,6 @@ import {
   X,
   Bell,
   Activity,
-  FileText,
   Sparkles,
 } from "lucide-react";
 

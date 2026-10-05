@@ -34,8 +34,8 @@ docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/pillsync-frontend:lates
 1. Create a service in AWS App Runner selecting the ECR container repository `pillsync-backend`.
 2. Configure environment variables in AWS App Runner console:
    - `SECRET_KEY`: `<your-production-django-secret>`
-   - `DATABASE_URL`: `postgres://user:password@rds-instance.us-east-1.rds.amazonaws.com:5432/pillsync`
-   - `MONGO_URI`: `mongodb://username:password@docdb-instance.us-east-1.docdb.amazonaws.com:27017/pillsync`
+   - `DATABASE_URL`: `postgres://<user>:<password>@rds-instance.us-east-1.rds.amazonaws.com:5432/pillsync`
+   - `MONGO_URI`: `mongodb://<username>:<password>@docdb-instance.us-east-1.docdb.amazonaws.com:27017/pillsync`
    - `REDIS_URL`: `redis://elasticache-instance.us-east-1.cache.amazonaws.com:6379/0`
 3. Expose port 8000.
 

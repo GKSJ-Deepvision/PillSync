@@ -22,6 +22,7 @@ import {
   TrendingUp,
   RefreshCw,
   Trash2,
+  Users,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 

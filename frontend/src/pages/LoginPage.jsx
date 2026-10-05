@@ -14,9 +14,9 @@ import {
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login, loginWithApi } = useAuth();
-  const [email, setEmail] = useState("alex.patient@pillsync.com");
-  const [password, setPassword] = useState("password123");
-  const [selectedRole, setSelectedRole] = useState("patient");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("patient");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -26,23 +26,18 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      let loggedRole = selectedRole;
+      let loggedRole = role;
       if (loginWithApi) {
-        const res = await loginWithApi(email, password);
+        const res = await loginWithApi(email, password, role);
         if (res && res.user && res.user.role) {
           loggedRole = res.user.role;
         }
       } else {
         login({
-          id: "usr-101",
-          name:
-            selectedRole === "caregiver"
-              ? "Dr. Sarah Jenkins"
-              : selectedRole === "admin"
-                ? "System Administrator"
-                : "Alex Morgan",
+          id: `usr-${Date.now()}`,
+          name: email.split("@")[0] || "User",
           email: email,
-          role: selectedRole,
+          role: role,
           avatar:
             "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
         });
@@ -56,9 +51,10 @@ export default function LoginPage() {
         navigate("/");
       }
     } catch (err) {
-      console.warn("API error, executing demo login fallback:", err.message);
-      // If API fails or backend error, display error message to user
-      setErrorMsg(err.message || "Authentication failed");
+      console.warn("Login failed:", err.message);
+      setErrorMsg(
+        err.message || "Authentication failed. Please check your credentials.",
+      );
     } finally {
       setLoading(false);
     }
@@ -92,38 +88,6 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Role Quick Selector */}
-        <div className="mb-6">
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 text-center">
-            Select Role Demo Accounts
-          </label>
-          <div className="grid grid-cols-3 gap-2 p-1 bg-slate-900/80 rounded-2xl border border-white/10 text-xs">
-            {[
-              { role: "patient", email: "alex.patient@pillsync.com" },
-              { role: "caregiver", email: "sarah.caregiver@pillsync.com" },
-              { role: "admin", email: "admin@pillsync.com" },
-            ].map((item) => (
-              <button
-                key={item.role}
-                type="button"
-                onClick={() => {
-                  setSelectedRole(item.role);
-                  setEmail(item.email);
-                  setPassword("password123");
-                  setErrorMsg("");
-                }}
-                className={`py-2 rounded-xl capitalize font-semibold transition-all ${
-                  selectedRole === item.role
-                    ? "bg-brand-600 text-white shadow-md"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                {item.role}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -134,6 +98,7 @@ export default function LoginPage() {
               <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
               <input
                 type="email"
+                placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/60 border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
@@ -150,12 +115,34 @@ export default function LoginPage() {
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
               <input
                 type="password"
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/60 border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                 required
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">
+              Account Role
+            </label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-900/60 border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            >
+              <option value="patient" className="bg-slate-900">
+                Patient Profile
+              </option>
+              <option value="caregiver" className="bg-slate-900">
+                Caregiver Profile
+              </option>
+              <option value="admin" className="bg-slate-900">
+                Administrator Profile
+              </option>
+            </select>
           </div>
 
           <button
@@ -167,7 +154,7 @@ export default function LoginPage() {
               <Loader2 className="w-4 h-4 animate-spin text-white" />
             ) : (
               <>
-                <span>Sign In as {selectedRole}</span>
+                <span className="capitalize">Sign In as {role}</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}

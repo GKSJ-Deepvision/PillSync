@@ -3,24 +3,21 @@ import { loginUser, registerUser } from "../services/api";
 
 const AuthContext = createContext();
 
-const MOCK_PATIENT = {
-  id: "usr-101",
-  name: "Alex Morgan",
-  email: "alex.patient@pillsync.com",
-  role: "patient",
-  avatar:
-    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-  caregiver: "Dr. Sarah Jenkins",
-};
+
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("pillsync_user");
-    return savedUser ? JSON.parse(savedUser) : MOCK_PATIENT;
+    if (!savedUser) return null;
+    try {
+      return JSON.parse(savedUser);
+    } catch {
+      return null;
+    }
   });
 
   const [token, setToken] = useState(
-    () => localStorage.getItem("pillsync_token") || "dummy-jwt-token-xyz",
+    () => localStorage.getItem("pillsync_token") || null,
   );
 
   const [viewMode, setViewMode] = useState(() => {
@@ -48,41 +45,40 @@ export const AuthProvider = ({ children }) => {
     saveAuthSession(userData, authToken);
   };
 
-  const loginWithApi = async (email, password) => {
+  const loginWithApi = async (email, password, role) => {
     try {
-      const data = await loginUser({ email, password });
+      const data = await loginUser({ email, password, role });
+      const backendUser = data.user || {};
       const userData = {
-        id: data.user.id,
-        name: data.user.name || data.user.username,
-        email: data.user.email,
-        role: data.user.role,
+        id: backendUser.id || `usr-${Date.now()}`,
+        name: backendUser.name || backendUser.username || email.split("@")[0],
+        email: backendUser.email || email,
+        role: backendUser.role || role || "patient",
         avatar:
-          data.user.avatar ||
+          backendUser.avatar ||
           "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
       };
-      saveAuthSession(userData, data.token);
+      saveAuthSession(userData, data.access || data.token || "jwt-session-token");
       return { success: true, user: userData };
     } catch (err) {
-      console.warn(
-        "API connection failed, attempting fallback login",
-        err.message,
-      );
+      console.warn("API login failed:", err.message);
       throw err;
     }
   };
 
   const registerWithApi = async (name, email, password, role) => {
     const data = await registerUser({ name, email, password, role });
+    const backendUser = data.user || {};
     const userData = {
-      id: data.user.id,
-      name: data.user.name || data.user.username,
-      email: data.user.email,
-      role: data.user.role,
+      id: backendUser.id || `usr-${Date.now()}`,
+      name: name || backendUser.name || backendUser.username || email.split("@")[0],
+      email: backendUser.email || email,
+      role: role || backendUser.role || "patient",
       avatar:
-        data.user.avatar ||
+        backendUser.avatar ||
         "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
     };
-    saveAuthSession(userData, data.token);
+    saveAuthSession(userData, data.access || data.token || "jwt-session-token");
     return { success: true, user: userData };
   };
 

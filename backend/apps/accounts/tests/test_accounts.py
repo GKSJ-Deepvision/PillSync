@@ -11,7 +11,7 @@ class TestAccountsAPI:
         self.user = User.objects.create_user(
             username="testuser@example.com",
             email="testuser@example.com",
-            password="Password123!",
+            password="dummy-test-password-123!",
             first_name="Test",
             last_name="User",
         )
@@ -19,7 +19,7 @@ class TestAccountsAPI:
     def test_user_registration(self):
         payload = {
             "email": "newuser@example.com",
-            "password": "Password123!",
+            "password": "dummy-test-password-123!",
             "name": "New User",
             "role": "patient",
         }
@@ -32,7 +32,7 @@ class TestAccountsAPI:
     def test_user_registration_duplicate_email(self):
         payload = {
             "email": "testuser@example.com",
-            "password": "Password123!",
+            "password": "dummy-test-password-123!",
             "name": "Test User",
             "role": "patient",
         }
@@ -42,7 +42,7 @@ class TestAccountsAPI:
     def test_user_login_success(self):
         payload = {
             "email": "testuser@example.com",
-            "password": "Password123!",
+            "password": "dummy-test-password-123!",
         }
         response = self.client.post("/api/accounts/login/", payload, format="json")
         assert response.status_code == status.HTTP_200_OK

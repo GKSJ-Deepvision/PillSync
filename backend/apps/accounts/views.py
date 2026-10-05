@@ -33,8 +33,9 @@ def register_view(request):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def login_view(request):
-    email = request.data.get("email")
+    email = (request.data.get("email") or "").strip()
     password = request.data.get("password")
+    requested_role = request.data.get("role")
 
     if not email or not password:
         return Response(
@@ -43,16 +44,19 @@ def login_view(request):
 
     user = authenticate(username=email, password=password)
     if not user:
-        # Fallback query if username != email
+        # Case-insensitive fallback query by email or username
         try:
-            u = User.objects.get(email=email)
-            if u.check_password(password):
+            u = User.objects.filter(email__iexact=email).first() or User.objects.filter(username__iexact=email).first()
+            if u and u.check_password(password):
                 user = u
-        except User.DoesNotExist:
+        except Exception:
             pass
 
     if not user:
         return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
+
+    if requested_role:
+        user._role = requested_role.lower()
 
     refresh = RefreshToken.for_user(user)
     user_data = UserSerializer(user).data

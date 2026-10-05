@@ -7,7 +7,6 @@ import {
   takeDoseApi,
   deleteMedicationApi,
 } from "../services/api";
-import { useAuth } from "../context/AuthContext";
 import Modal from "../components/common/Modal";
 import MedicineCard from "../components/medications/MedicineCard";
 import AddMedicineModal from "../components/medications/AddMedicineModal";
@@ -15,34 +14,22 @@ import {
   Users,
   AlertTriangle,
   CheckCircle2,
-  PhoneCall,
   RefreshCw,
   UserPlus,
-  Mail,
-  Phone,
-  HeartHandshake,
-  ShieldCheck,
   Plus,
   Pill,
   Clock,
-  FileText,
   Search,
   Filter,
   TrendingUp,
   BarChart3,
   Download,
   Bell,
-  Send,
-  Calendar,
-  Award,
-  Sparkles,
   ScanLine,
 } from "lucide-react";
 
 export default function CaregiverPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Modals state
@@ -88,28 +75,6 @@ export default function CaregiverPage() {
       title: "Robert completed all scheduled doses for today",
       time: "Today",
       icon: "🟢",
-    },
-  ]);
-
-  // Caregivers list
-  const [caregivers, setCaregivers] = useState([
-    {
-      id: "c1",
-      name: "Dr. Sarah Jenkins",
-      role: "Primary Physician",
-      email: "dr.jenkins@pillsync.com",
-      phone: "+1 (555) 234-5678",
-      focus: "Diabetes & Blood Pressure Specialist",
-      status: "Active - Receiving Alerts",
-    },
-    {
-      id: "c2",
-      name: "Mark Jenkins",
-      role: "Family Caregiver (Son)",
-      email: "mark.j@pillsync.com",
-      phone: "+1 (555) 876-5432",
-      focus: "Daily Medication & Emergency Contact",
-      status: "Active - Instant SMS",
     },
   ]);
 
@@ -246,11 +211,10 @@ export default function CaregiverPage() {
     async function load() {
       setLoading(true);
       try {
-        const [statsData, medsData] = await Promise.all([
+        const [, medsData] = await Promise.all([
           fetchAnalyticsOverview(),
           fetchMedications(),
         ]);
-        setAnalytics(statsData);
         setMedicines(medsData);
       } catch (err) {
         console.error("Failed to load caregiver patient stats", err);
@@ -303,17 +267,7 @@ export default function CaregiverPage() {
     e.preventDefault();
     if (!caregiverFormData.name || !caregiverFormData.email) return;
 
-    const newCaregiver = {
-      id: `c-${Date.now()}`,
-      name: caregiverFormData.name,
-      role: `${caregiverFormData.relationship} Caregiver`,
-      email: caregiverFormData.email,
-      phone: caregiverFormData.phone || "+1 (555) 000-1122",
-      focus: "Patient Monitoring & Emergency Contact",
-      status: "Active - Instant Alerts",
-    };
-
-    setCaregivers((prev) => [newCaregiver, ...prev]);
+    setReportMsg(`Caregiver ${caregiverFormData.name} registered successfully!`);
     setCaregiverFormData({
       name: "",
       email: "",

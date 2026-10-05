@@ -13,12 +13,14 @@ class UserSerializer(serializers.ModelSerializer):
     def get_name(self, obj):
         if obj.first_name:
             return f"{obj.first_name} {obj.last_name}".strip()
-        return obj.username
+        return obj.username.split("@")[0] if "@" in obj.username else obj.username
 
     def get_role(self, obj):
-        email = (obj.email or obj.username or "").lower()
-        if obj.is_superuser or "admin" in email:
+        if getattr(obj, "_role", None):
+            return obj._role
+        if obj.is_superuser or obj.is_staff:
             return "admin"
+        email = (obj.email or obj.username or "").lower()
         if "caregiver" in email or "doctor" in email:
             return "caregiver"
         return "patient"
@@ -27,13 +29,14 @@ class UserSerializer(serializers.ModelSerializer):
 class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
-    name = serializers.CharField(required=False, default="")
+    name = serializers.CharField(required=False, default="", allow_blank=True)
     role = serializers.CharField(required=False, default="patient")
 
     def create(self, validated_data):
-        email = validated_data["email"]
+        email = validated_data["email"].strip().lower()
         password = validated_data["password"]
-        name = validated_data.get("name", "")
+        name = validated_data.get("name", "").strip()
+        role = validated_data.get("role", "patient").lower()
 
         name_parts = name.split(" ", 1)
         first_name = name_parts[0] if name_parts else ""
@@ -46,4 +49,11 @@ class RegisterSerializer(serializers.Serializer):
             first_name=first_name,
             last_name=last_name,
         )
+
+        if role == "admin":
+            user.is_staff = True
+            user.is_superuser = True
+            user.save()
+
+        user._role = role
         return user
