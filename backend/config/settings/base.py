@@ -112,5 +112,3 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://pillsync-frontend-cltn.onrender.com",
 ]
-
-
