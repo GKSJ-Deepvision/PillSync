@@ -25,9 +25,9 @@ COPY . .
 RUN adduser --disabled-password --gecos "" appuser && chown -R appuser:appuser /app
 USER appuser
 
-EXPOSE 8000
+EXPOSE 10000
 
 # Django:
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["sh", "-c", "gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-10000}"]
 # FastAPI alternative:
 # CMD ["uvicorn", "config.main:app", "--host", "0.0.0.0", "--port", "8000"]
