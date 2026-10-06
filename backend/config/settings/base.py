@@ -110,4 +110,7 @@ TESSERACT_CMD = os.environ.get("TESSERACT_CMD", "tesseract")
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "https://pillsync-frontend-cltn.onrender.com",
 ]
+
+
