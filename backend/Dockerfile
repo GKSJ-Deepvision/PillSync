@@ -28,6 +28,6 @@ USER appuser
 EXPOSE 8000
 
 # Django:
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
 # FastAPI alternative:
 # CMD ["uvicorn", "config.main:app", "--host", "0.0.0.0", "--port", "8000"]

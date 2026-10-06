@@ -28,6 +28,7 @@ import http.client
 import json
 import os
 import re
+import time
 import urllib.error
 import urllib.request
 from collections.abc import Callable
@@ -121,22 +122,28 @@ def _post(
         },
     )
 
-    try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
-            return json.loads(response.read())
-
-    except urllib.error.HTTPError as exc:
+    for attempt in range(3):
         try:
-            error_body = exc.read().decode("utf-8", errors="replace")
-        except (OSError, http.client.HTTPException):
-            error_body = ""
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                return json.loads(response.read())
 
-        raise VisionError(
-            f"vision request failed: HTTP {exc.code} {exc.reason}; " f"response: {error_body}"
-        ) from exc
+        except urllib.error.HTTPError as exc:
+            try:
+                error_body = exc.read().decode("utf-8", errors="replace")
+            except (OSError, http.client.HTTPException):
+                error_body = ""
 
-    except Exception as exc:
-        raise VisionError(f"vision request failed: {exc}") from exc
+            if exc.code == 503 and attempt < 2:
+                time.sleep(2 * (attempt + 1))
+                continue
+
+            raise VisionError(
+                f"vision request failed: HTTP {exc.code} {exc.reason}; "
+                f"response: {error_body}"
+            ) from exc
+
+        except Exception as exc:
+            raise VisionError(f"vision request failed: {exc}") from exc
 
 
 # ---------------------------------------------------------------------------
