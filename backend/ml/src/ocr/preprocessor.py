@@ -33,10 +33,13 @@ def preprocess_image(image_bytes: bytes) -> Any:
     # Sharpen image details
     sharpened_img = contrast_img.filter(ImageFilter.SHARPEN)
 
-    # Resize if too small
+    # Resize if too small or too large to fit optimal OCR resolution and conserve Render CPU/RAM
     w, h = sharpened_img.size
-    if w < 1000:
-        scale = 1000 / float(w)
-        sharpened_img = sharpened_img.resize((1000, int(h * scale)), Image.Resampling.LANCZOS)
+    if w > 1200:
+        scale = 1200 / float(w)
+        sharpened_img = sharpened_img.resize((1200, int(h * scale)), Image.Resampling.BILINEAR)
+    elif w < 600:
+        scale = 600 / float(w)
+        sharpened_img = sharpened_img.resize((600, int(h * scale)), Image.Resampling.BILINEAR)
 
     return sharpened_img

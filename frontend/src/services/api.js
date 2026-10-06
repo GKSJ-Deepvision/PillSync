@@ -229,28 +229,40 @@ export async function fetchAnalyticsOverview() {
 /* OCR Medicine Recognition API */
 export async function scanPrescriptionOcrApi(formDataOrText) {
   let options = {};
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+
   if (typeof formDataOrText === "string") {
     options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ raw_text: formDataOrText }),
+      signal: controller.signal,
     };
   } else if (formDataOrText instanceof FormData) {
     options = {
       method: "POST",
       body: formDataOrText,
+      signal: controller.signal,
     };
   } else {
     options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formDataOrText),
+      signal: controller.signal,
     };
   }
 
-  const response = await fetch(`${API_BASE_URL}/ocr/scan/`, options);
-  if (!response.ok) throw new Error("OCR Scanning failed.");
-  return await response.json();
+  try {
+    const response = await fetch(`${API_BASE_URL}/ocr/scan/`, options);
+    clearTimeout(timeoutId);
+    if (!response.ok) throw new Error("OCR Scanning failed.");
+    return await response.json();
+  } catch (err) {
+    clearTimeout(timeoutId);
+    throw err;
+  }
 }
 
 export async function confirmOcrMedicationApi(confirmData) {

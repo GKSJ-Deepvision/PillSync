@@ -18,11 +18,16 @@ except ImportError:
 # ``False`` and fall back to a deterministic text example.  This keeps the
 # rest of the extractor functional for unit‑tests that do not require real
 # OCR.
+import shutil
+
 try:
     import pytesseract  # type: ignore
     HAS_TESSERACT = True
 except Exception:  # broad catch to include binary‑compatibility errors
     HAS_TESSERACT = False
+
+# Check if tesseract binary is installed and executable in system PATH
+HAS_TESSERACT_CMD = HAS_TESSERACT and (shutil.which("tesseract") is not None or shutil.which("tesseract.exe") is not None)
 
 
 COMMON_MEDICATIONS = [
@@ -51,8 +56,8 @@ class PrescriptionOcrExtractor:
         extracted_text = ""
         ocr_confidence = 85.0
 
-# Perform OCR only when the library is available.
-        if HAS_TESSERACT:
+        # Perform OCR only when system tesseract executable is present
+        if HAS_TESSERACT_CMD:
             try:
                 extracted_text = pytesseract.image_to_string(image)  # type: ignore
                 data = pytesseract.image_to_data(image, output_type=pytesseract.Output.DICT)  # type: ignore
