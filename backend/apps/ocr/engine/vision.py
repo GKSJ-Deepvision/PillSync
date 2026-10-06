@@ -138,8 +138,7 @@ def _post(
                 continue
 
             raise VisionError(
-                f"vision request failed: HTTP {exc.code} {exc.reason}; "
-                f"response: {error_body}"
+                f"vision request failed: HTTP {exc.code} {exc.reason}; " f"response: {error_body}"
             ) from exc
 
         except Exception as exc:
