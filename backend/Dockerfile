@@ -28,6 +28,6 @@ USER appuser
 EXPOSE 10000
 
 # Django:
-CMD ["sh", "-c", "gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-10000}"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-10000}"]
 # FastAPI alternative:
 # CMD ["uvicorn", "config.main:app", "--host", "0.0.0.0", "--port", "8000"]
