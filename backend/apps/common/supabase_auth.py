@@ -61,18 +61,31 @@ def decode_token(token: str) -> dict:
             return jwt.decode(
                 token, secret, algorithms=["HS256"], audience=AUDIENCE, options=options
             )
+
         if alg in ("RS256", "ES256"):
             base_url = os.environ.get("SUPABASE_URL", "")
             if not base_url:
                 raise AuthenticationFailed(
                     "Server auth is not configured: set SUPABASE_URL in backend/.env."
                 )
-            key = _jwks_client(base_url).get_signing_key_from_jwt(token).key
-            return jwt.decode(
-                token, key, algorithms=["RS256", "ES256"], audience=AUDIENCE, options=options
-            )
+
+            try:
+                key = _jwks_client(base_url).get_signing_key_from_jwt(token).key
+                return jwt.decode(
+                    token,
+                    key,
+                    algorithms=["RS256", "ES256"],
+                    audience=AUDIENCE,
+                    options=options,
+                )
+            except Exception as exc:
+                raise AuthenticationFailed(
+                    f"Unable to verify Supabase token: {type(exc).__name__}."
+                ) from exc
+
     except jwt.PyJWTError as exc:
         raise AuthenticationFailed("Invalid or expired token.") from exc
+
     raise AuthenticationFailed("Unsupported token algorithm.")
 
 
@@ -83,11 +96,14 @@ class SupabaseJWTAuthentication(BaseAuthentication):
             return None
         if len(parts) != 2:
             raise AuthenticationFailed("Malformed Authorization header.")
+
         claims = decode_token(parts[1].decode())
+
         try:
             user_id = str(uuid.UUID(str(claims["sub"])))
         except ValueError as exc:
             raise AuthenticationFailed("Invalid token subject.") from exc
+
         return SupabaseUser(user_id, claims.get("email", "")), claims
 
     def authenticate_header(self, request):

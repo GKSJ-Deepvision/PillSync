@@ -140,8 +140,16 @@ export default function AdminOCRMonitoringPage() {
         });
 
         if (!response.ok) {
+          const errorBody = await response.text();
+
+          console.error(
+            "OCR monitoring response:",
+            response.status,
+            errorBody
+          );
+
           throw new Error(
-            `Failed to load OCR monitoring data (${response.status})`
+            `Failed to load OCR monitoring data (${response.status}): ${errorBody}`
           );
         }
 
@@ -299,3 +307,5 @@ export default function AdminOCRMonitoringPage() {
     </div>
   );
 }
+
+
