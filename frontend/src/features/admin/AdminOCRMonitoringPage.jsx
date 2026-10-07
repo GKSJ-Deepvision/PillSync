@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 
-const API_URL = "https://pillsync-backend-9cz1.onrender.com/api/ocr/admin-monitoring/";
+const API_URL = `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}/api/ocr/admin-monitoring/`;
 
 function isSuccessfulOCR(scan) {
   const medicine = String(scan.medicine_name ?? "").trim().toLowerCase();
