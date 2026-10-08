@@ -17,12 +17,10 @@ class DashboardAnalyticsTests(TestCase):
         self.user = User.objects.create_user(
             username="analytics-user",
             email="analytics@example.com",
-            password="test-password-123",
         )
         self.other_user = User.objects.create_user(
             username="other-user",
             email="other@example.com",
-            password="test-password-123",
         )
         self.client.force_authenticate(self.user)
         self.medicine = Medicine.objects.create(
