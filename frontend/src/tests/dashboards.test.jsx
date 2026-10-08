@@ -5,12 +5,19 @@ import PatientDashboard from '../pages/patient/PatientDashboard';
 import BackendUnavailable from '../components/BackendUnavailable';
 import Unauthorized from '../pages/auth/Unauthorized';
 import { medicationService } from '../services/medicationService';
+import { analyticsService } from '../services/analyticsService';
 
 vi.mock('../services/medicationService', () => ({
   medicationService: {
     listMedicines: vi.fn(),
     listReminders: vi.fn(),
     getAdherence: vi.fn(),
+  },
+}));
+
+vi.mock('../services/analyticsService', () => ({
+  analyticsService: {
+    getDashboard: vi.fn(),
   },
 }));
 
@@ -23,6 +30,15 @@ describe('Dashboard Pages', () => {
       adherence_percentage: 0,
       taken: 0,
       total_scheduled: 0,
+    });
+    analyticsService.getDashboard.mockResolvedValue({
+      active_medicines: [],
+      upcoming_reminders: [],
+      adherence: {
+        adherence_percentage: 0,
+        taken: 0,
+        total_scheduled: 0,
+      },
     });
   });
 

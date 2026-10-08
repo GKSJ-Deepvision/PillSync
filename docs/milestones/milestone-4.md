@@ -1,53 +1,37 @@
-# Milestone 4 — Analytics, Testing & Deployment (Week 7–8)
+# Milestone 4 — Analytics, Testing & Deployment
 
-- **Intern:** <your full name>
-- **Branch:** <intern/NN-your-name>
-- **Submitted on:** <YYYY-MM-DD>
+## Current status
 
-## Evaluation criteria
-
-| Criterion | Status | Evidence (file, path or link) |
+| Criterion | Status | Evidence |
 |---|---|---|
-| Fully deployed frontend and backend | ☐ Not started / ☐ In progress / ☐ Done | |
-| Analytics dashboards operational | ☐ | |
-| Refill and adherence visualisations | ☐ | |
-| Testing and validation completed | ☐ | |
-| End-to-end medication workflow demonstrated | ☐ | |
-| Documentation complete | ☐ | |
+| Analytics dashboard API | Done | `GET /api/analytics/dashboard/` |
+| Refill and adherence data | Done | Existing adherence service and refill records are aggregated |
+| Frontend dashboard integration | Done | Patient dashboard uses the analytics endpoint with a compatibility fallback |
+| Caregiver monitoring | Not started | No caregiver-patient relationship exists in the current data model |
+| Admin dashboard | Not started | No safe admin API/UI has been added yet |
+| Deployment | Not claimed | No deployment was performed in this work session |
 
-## Deployment
+## Implemented analytics
 
-- **Live URL:**
-- **Platform:** <Render / AWS / Azure / Vercel>
-- **Deployment steps:** <link to deployment/ notes>
-- **Container images built:** ☐ backend ☐ frontend
+The dashboard endpoint enforces ownership through `request.user`, validates date
+filters, uses aggregate history counts, selects refill predictions with
+`select_related`, and limits upcoming reminders to ten records in the next seven
+days. Adherence is calculated by the existing
+`apps.adherence.services.calculate_adherence` service.
 
-## Performance metrics
+## Validation
 
-| Metric | Measured value | How it was measured |
-|---|---|---|
-| Medication adherence accuracy | | |
-| Reminder delivery success rate | | |
-| Missed-dose detection accuracy | | |
-| Refill prediction accuracy | | |
-| Low-stock alert accuracy | | |
-| Dashboard response time | | |
-| Report generation time | | |
-| API response time | | |
-| Concurrent users handled | | |
+Focused backend analytics tests cover authentication, ownership isolation,
+aggregation, low-stock flags, refill prediction data, empty data behavior, and
+invalid dates. Frontend dashboard tests cover rendering against the analytics
+service response.
 
-## Testing summary
+Full test counts, coverage, response-time measurements, deployment URLs, and
+container status remain unreported until those commands and deployment steps are
+actually run.
 
-- Backend tests: <count>, coverage: <%>
-- Frontend tests: <count>
-- End-to-end scenarios covered:
-- Known failing or skipped tests:
+## Known limitations
 
-## Demo
-
-- Recording / screenshots: <link into docs/demo/>
-- Walkthrough script: <link>
-
-## Retrospective
-
-<What worked, what you would do differently, what is still incomplete.>
+The repository does not currently define a caregiver-to-patient relationship, so
+caregiver patient monitoring has not been fabricated. Admin endpoints and a
+production deployment still require separate implementation and validation.

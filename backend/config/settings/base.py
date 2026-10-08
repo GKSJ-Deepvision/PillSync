@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "apps.reminders",
     "apps.notifications",
     "apps.refills",
+    "apps.analytics",
 ]
 
 MIDDLEWARE = [

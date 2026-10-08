@@ -6,6 +6,7 @@ import { Calendar, Pill, Activity, Bell, Award, ArrowRight, Clock, User, Trendin
 import { Link } from 'react-router-dom';
 import { getApiErrorMessage } from '../../services/api';
 import { medicationService } from '../../services/medicationService';
+import { analyticsService } from '../../services/analyticsService';
 
 const asList = (value) => {
   if (Array.isArray(value)) return value;
@@ -22,20 +23,27 @@ const PatientDashboard = () => {
 
   useEffect(() => {
     const load = async () => {
-      const results = await Promise.allSettled([
-        medicationService.listMedicines(),
-        medicationService.listReminders(),
-        medicationService.getAdherence(),
-      ]);
-      const [medicineResult, reminderResult, adherenceResult] = results;
-
-      if (medicineResult.status === 'fulfilled') setMedicines(asList(medicineResult.value));
-      if (reminderResult.status === 'fulfilled') setReminders(asList(reminderResult.value));
-      if (adherenceResult.status === 'fulfilled') setAdherence(adherenceResult.value);
-
-      const failedResult = results.find((result) => result.status === 'rejected');
-      if (failedResult) {
-        setError(getApiErrorMessage(failedResult.reason, 'Unable to load some dashboard data.'));
+      try {
+        const dashboard = await analyticsService.getDashboard();
+        setMedicines(asList(dashboard.active_medicines));
+        setReminders(asList(dashboard.upcoming_reminders));
+        setAdherence(dashboard.adherence);
+      } catch (dashboardError) {
+        // Keep the dashboard usable while an older API is being upgraded.
+        const results = await Promise.allSettled([
+          medicationService.listMedicines(),
+          medicationService.listReminders(),
+          medicationService.getAdherence(),
+        ]);
+        const [medicineResult, reminderResult, adherenceResult] = results;
+        if (medicineResult.status === 'fulfilled') setMedicines(asList(medicineResult.value));
+        if (reminderResult.status === 'fulfilled') setReminders(asList(reminderResult.value));
+        if (adherenceResult.status === 'fulfilled') setAdherence(adherenceResult.value);
+        const failedResult = results.find((result) => result.status === 'rejected');
+        setError(getApiErrorMessage(
+          failedResult?.reason || dashboardError,
+          'Unable to load some dashboard data.',
+        ));
       }
       setLoading(false);
     };
