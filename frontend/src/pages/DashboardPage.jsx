@@ -75,18 +75,79 @@ function PatientDashboardContent({ user, viewMode }) {
     loadData();
   }, []);
 
-  const handleTakeDose = async (medId) => {
+  const todayKey = new Date().toISOString().split("T")[0];
+  const [takenDoseState, setTakenDoseState] = useState(() => {
     try {
-      const updatedMed = await takeDoseApi(medId);
-      setMedicines((prev) =>
-        prev.map((m) => (m.id === medId ? updatedMed : m)),
-      );
-      // Reload analytics stats
+      const saved = localStorage.getItem(`pillsync_taken_doses_${todayKey}`);
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
+  const [toastMsg, setToastMsg] = useState("");
+
+  const handleTakeDose = (doseId, medName, dosage) => {
+    const timeNow = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    setTakenDoseState((prev) => {
+      const isAlreadyTaken = prev[doseId]?.status === "taken";
+      const updated = {
+        ...prev,
+        [doseId]: isAlreadyTaken
+          ? { status: "pending", time: null }
+          : { status: "taken", time: timeNow },
+      };
+      try {
+        localStorage.setItem(
+          `pillsync_taken_doses_${todayKey}`,
+          JSON.stringify(updated),
+        );
+      } catch (e) {
+        console.error("Failed to persist taken dose state:", e);
+      }
+      return updated;
+    });
+
+    if (takenDoseState[doseId]?.status === "taken") {
+      setToastMsg(`Status reset to pending for ${medName}.`);
+    } else {
+      setToastMsg(`✓ ${medName} (${dosage}) recorded as TAKEN at ${timeNow}!`);
+    }
+    setTimeout(() => setToastMsg(""), 4000);
+  };
+
+  const handleMissDose = (doseId, medName) => {
+    setTakenDoseState((prev) => {
+      const updated = {
+        ...prev,
+        [doseId]: { status: "missed", time: null },
+      };
+      try {
+        localStorage.setItem(
+          `pillsync_taken_doses_${todayKey}`,
+          JSON.stringify(updated),
+        );
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
+    setToastMsg(`Logged dose for ${medName} as missed for tracking.`);
+    setTimeout(() => setToastMsg(""), 4000);
+  };
+
+  const handleAddMedicine = async (newMed) => {
+    try {
+      const savedMed = await addMedication(newMed);
+      setMedicines((prev) => [savedMed, ...prev]);
       const statsData = await fetchAnalyticsOverview();
       setAnalytics(statsData);
     } catch (err) {
-      console.error("Take dose failed:", err);
-      alert("Failed to record dose. Please try again.");
+      console.error("Add medicine failed:", err);
+      alert("Failed to save medicine.");
     }
   };
 
@@ -99,22 +160,6 @@ function PatientDashboardContent({ user, viewMode }) {
     } catch (err) {
       console.error("Delete medicine failed:", err);
       alert("Failed to delete medicine.");
-    }
-  };
-
-  const handleMissDose = (_medId) => {
-    alert("Logged dose as missed for tracking and caregiver alerts.");
-  };
-
-  const handleAddMedicine = async (newMed) => {
-    try {
-      const savedMed = await addMedication(newMed);
-      setMedicines((prev) => [savedMed, ...prev]);
-      const statsData = await fetchAnalyticsOverview();
-      setAnalytics(statsData);
-    } catch (err) {
-      console.error("Add medicine failed:", err);
-      alert("Failed to save medicine.");
     }
   };
 
@@ -145,8 +190,11 @@ function PatientDashboardContent({ user, viewMode }) {
           timeStr = "09:00 PM";
       }
 
+      const doseId = `${med.id}-${timePeriod}`;
+      const savedState = takenDoseState[doseId];
+
       todayDoses.push({
-        id: `${med.id}-${timePeriod}`,
+        id: doseId,
         medId: med.id,
         name: med.name,
         dosage: med.dosage,
@@ -156,10 +204,13 @@ function PatientDashboardContent({ user, viewMode }) {
         diseaseCategory: med.diseaseCategory || "General",
         stock: med.stock,
         timesOfDay: med.timesOfDay,
-        status: "pending",
+        status: savedState?.status || "pending",
+        takenTime: savedState?.time || null,
       });
     });
   });
+
+  const takenCount = todayDoses.filter((d) => d.status === "taken").length;
 
   if (loading) {
     return (
@@ -412,6 +463,21 @@ function PatientDashboardContent({ user, viewMode }) {
             </span>
           </div>
 
+          {toastMsg && (
+            <div className="p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center justify-between shadow-sm animate-fadeIn">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span>{toastMsg}</span>
+              </div>
+              <button
+                onClick={() => setToastMsg("")}
+                className="text-xs opacity-70 hover:opacity-100 font-extrabold"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           {todayDoses.length === 0 ? (
             <div className="p-8 rounded-3xl glass-card text-center text-slate-500 text-xs">
               No assigned doses found for category "{activeTab}". Select another
@@ -419,65 +485,104 @@ function PatientDashboardContent({ user, viewMode }) {
             </div>
           ) : (
             <div className="space-y-3">
-              {todayDoses.map((dose) => (
-                <div
-                  key={dose.id}
-                  className="p-4 rounded-2xl glass-card border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:border-brand-300 transition-all"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold text-xs shrink-0">
-                      {dose.period[0]}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                          {dose.name} ({dose.dosage})
-                        </h4>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300">
-                          {dose.diseaseCategory}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        Scheduled:{" "}
-                        <strong className="text-slate-800 dark:text-slate-200 font-bold">
-                          {dose.time} ({dose.period})
-                        </strong>{" "}
-                        &bull; Current Stock: {dose.stock} pills remaining
-                      </p>
-                    </div>
-                  </div>
+              {todayDoses.map((dose) => {
+                const isTaken = dose.status === "taken";
+                const isMissed = dose.status === "missed";
 
-                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                    <button
-                      onClick={() => handleTakeDose(dose.medId)}
-                      className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all active:scale-95"
-                    >
-                      Take Dose
-                    </button>
-                    <button
-                      onClick={() => handleMissDose(dose.medId)}
-                      className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-100 hover:text-rose-700 text-slate-600 dark:text-slate-400 font-semibold text-xs transition-colors"
-                    >
-                      Missed
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            `Are you sure you want to remove ${dose.name}?`,
-                          )
-                        ) {
-                          handleDeleteMedication(dose.medId);
+                return (
+                  <div
+                    key={dose.id}
+                    className={`p-4 rounded-2xl glass-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all ${
+                      isTaken
+                        ? "border-2 border-emerald-500/60 bg-emerald-50/50 dark:bg-emerald-950/30"
+                        : isMissed
+                          ? "border border-rose-500/40 bg-rose-50/30 dark:bg-rose-950/20"
+                          : "border border-slate-200/80 dark:border-slate-800 hover:border-brand-300"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                          isTaken
+                            ? "bg-emerald-600 text-white"
+                            : "bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400"
+                        }`}
+                      >
+                        {isTaken ? (
+                          <CheckCircle2 className="w-5 h-5" />
+                        ) : (
+                          dose.period[0]
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                            {dose.name} ({dose.dosage})
+                          </h4>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300">
+                            {dose.diseaseCategory}
+                          </span>
+                          {isTaken && (
+                            <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/80 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                              Taken {dose.takenTime ? `at ${dose.takenTime}` : "✓"}
+                            </span>
+                          )}
+                          {isMissed && (
+                            <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/80 text-rose-800 dark:text-rose-200 border border-rose-300 dark:border-rose-700">
+                              Missed ✗
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                          Scheduled:{" "}
+                          <strong className="text-slate-800 dark:text-slate-200 font-bold">
+                            {dose.time} ({dose.period})
+                          </strong>{" "}
+                          &bull; Stock Inventory: {dose.stock} pills remaining
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                      <button
+                        onClick={() =>
+                          handleTakeDose(dose.id, dose.name, dose.dosage)
                         }
-                      }}
-                      title="Remove Medicine"
-                      className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 text-rose-600 dark:text-rose-400 font-bold text-xs border border-rose-200 dark:border-rose-900 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                        className={`px-3.5 py-2 rounded-xl font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 ${
+                          isTaken
+                            ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                            : "bg-emerald-600 hover:bg-emerald-500 text-white"
+                        }`}
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                        {isTaken ? "Dose Taken ✓" : "Take Dose"}
+                      </button>
+                      <button
+                        onClick={() => handleMissDose(dose.id, dose.name)}
+                        className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-100 hover:text-rose-700 text-slate-600 dark:text-slate-400 font-semibold text-xs transition-colors cursor-pointer"
+                      >
+                        Missed
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              `Are you sure you want to remove ${dose.name}?`,
+                            )
+                          ) {
+                            handleDeleteMedication(dose.medId);
+                          }
+                        }}
+                        title="Remove Medicine"
+                        className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 text-rose-600 dark:text-rose-400 font-bold text-xs border border-rose-200 dark:border-rose-900 transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

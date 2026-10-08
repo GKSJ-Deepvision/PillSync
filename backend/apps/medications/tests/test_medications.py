@@ -61,7 +61,8 @@ class TestMedicationsAPI:
         response = self.client.post(f"/api/medications/{self.medication.id}/take-dose/")
         assert response.status_code == status.HTTP_200_OK
         self.medication.refresh_from_db()
-        assert self.medication.stock == 19
+        assert self.medication.stock == 20
+        assert response.json()["status"] == "taken"
 
     def test_medication_detail_delete(self):
         response = self.client.delete(f"/api/medications/{self.medication.id}/")

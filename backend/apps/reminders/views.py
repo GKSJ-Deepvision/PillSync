@@ -37,12 +37,9 @@ def update_reminder_status(request, pk):
         reminder.status = new_status
         reminder.save()
 
-        # If marked taken from pending, decrement medication stock
-        if new_status == "taken" and prev_status != "taken" and reminder.medication:
-            med = reminder.medication
-            med.stock = max(0, med.stock - 1)
-            med.update_stock_days()
-            med.save()
+        # Update reminder status without reducing medication stock
+        if new_status == "taken" and prev_status != "taken":
+            pass
 
         return Response(ReminderSerializer(reminder).data)
 

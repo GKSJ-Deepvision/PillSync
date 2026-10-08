@@ -95,10 +95,8 @@ def take_dose(request, pk):
     except Medication.DoesNotExist:
         return Response({"detail": "Medication not found."}, status=status.HTTP_404_NOT_FOUND)
 
-    med.stock = max(0, med.stock - 1)
-    med.update_stock_days()
-    med.save()
     med_data = MedicationSerializer(med).data
+    med_data["status"] = "taken"
     return Response(med_data)
 
 
