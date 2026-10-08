@@ -675,4 +675,3 @@ function PatientDashboardContent({ user, viewMode }) {
     </div>
   );
 }
-}
