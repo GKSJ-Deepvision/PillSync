@@ -16,15 +16,18 @@ import {
 export default function RefillsPage() {
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [orderStatus, setOrderStatus] = useState({});
 
   const loadData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const data = await fetchRefillPredictionsApi();
       setPredictions(data);
     } catch (err) {
       console.error("Failed to fetch refill predictions:", err);
+      setError("Unable to calculate refill predictions. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -36,7 +39,7 @@ export default function RefillsPage() {
 
   const handleOrderRefill = async (medId) => {
     try {
-      await requestRefillApi(medId, 60, "Refill requested via AI Dashboard");
+      await requestRefillApi(medId, 60, "Refill requested via Caregiver Dashboard");
       setOrderStatus((prev) => ({ ...prev, [medId]: "Refill Order Placed!" }));
       setTimeout(() => {
         setOrderStatus((prev) => ({ ...prev, [medId]: null }));
@@ -74,107 +77,125 @@ export default function RefillsPage() {
       <div>
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-100 dark:bg-brand-950 text-xs font-bold text-brand-700 dark:text-brand-300 mb-2 border border-brand-200 dark:border-brand-800">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          AI Refill Prediction Engine • Smart Inventory Tracking
+          Caregiver Refill Engine • Inventory Management
         </div>
         <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">
-          Automated Stock Depletion & Refill Predictions
+          Automated Stock Depletion & Refill Management
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          Calculates real-time daily dosage consumption rate, accounts for
-          missed doses, and predicts exact exhaustion dates from active
-          inventory levels.
+          Calculates real-time daily dosage consumption rate and predicts exact exhaustion dates from active inventory levels.
         </p>
       </div>
 
+      {error && (
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center justify-between">
+          <span>{error}</span>
+          <button onClick={loadData} className="underline font-bold cursor-pointer">
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* Grid of Refill Prediction Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {predictions.map((item) => (
-          <div
-            key={item.medicationId}
-            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <span className="text-xs font-semibold text-brand-600 dark:text-brand-400">
-                  {item.diseaseCategory}
+      {predictions.length === 0 ? (
+        <div className="p-8 rounded-3xl glass-card text-center space-y-2">
+          <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
+          <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+            No active refills needed
+          </h4>
+          <p className="text-xs text-slate-500">
+            All active patient prescription stock levels are healthy and above threshold.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {predictions.map((item) => (
+            <div
+              key={item.medicationId}
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="text-xs font-semibold text-brand-600 dark:text-brand-400">
+                    {item.diseaseCategory}
+                  </span>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                    {item.medicationName} ({item.dosage})
+                  </h3>
+                </div>
+                <span
+                  className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                    item.status === "CRITICAL" || item.status === "LOW_STOCK"
+                      ? "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
+                      : item.status === "WARNING"
+                        ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+                        : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                  }`}
+                >
+                  {item.status}
                 </span>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                  {item.medicationName} ({item.dosage})
-                </h3>
               </div>
-              <span
-                className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                  item.status === "CRITICAL" || item.status === "LOW_STOCK"
-                    ? "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
-                    : item.status === "WARNING"
-                      ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
-                      : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
-                }`}
-              >
-                {item.status}
-              </span>
-            </div>
 
-            <StockProgressBar
-              medicineName=""
-              currentStock={item.initialQuantity}
-              totalStock={item.totalStock}
-              refillDate={`Exhausts in ${item.effectiveStockDays} Days (${item.depletionDate})`}
-            />
+              <StockProgressBar
+                medicineName=""
+                currentStock={item.initialQuantity}
+                totalStock={item.totalStock}
+                refillDate={`Exhausts in ${item.effectiveStockDays} Days (${item.depletionDate})`}
+              />
 
-            <div className="grid grid-cols-2 gap-3 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl space-y-1">
-                <div className="text-slate-400 font-medium flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-brand-500" /> Depletion
-                  Date
+              <div className="grid grid-cols-2 gap-3 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl space-y-1">
+                  <div className="text-slate-400 font-medium flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-brand-500" /> Depletion Date
+                  </div>
+                  <div className="font-bold text-slate-800 dark:text-slate-200">
+                    {item.depletionDate}
+                  </div>
                 </div>
-                <div className="font-bold text-slate-800 dark:text-slate-200">
-                  {item.depletionDate}
+
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl space-y-1">
+                  <div className="text-slate-400 font-medium flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Reorder By
+                  </div>
+                  <div className="font-bold text-brand-600 dark:text-brand-400">
+                    {item.recommendedRefillDate}
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl space-y-1">
-                <div className="text-slate-400 font-medium flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Reorder By
-                </div>
-                <div className="font-bold text-brand-600 dark:text-brand-400">
-                  {item.recommendedRefillDate}
-                </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() =>
+                    handleOrderRefill(item.medicationId, item.medicationName)
+                  }
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-slate-900 dark:bg-white hover:bg-brand-600 dark:hover:bg-brand-400 text-white dark:text-slate-900 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
+                >
+                  {orderStatus[item.medicationId] ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 dark:text-emerald-600" />
+                      {orderStatus[item.medicationId]}
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="w-4 h-4" />
+                      Request Refill Order
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() =>
+                    handleStockAdjust(item.medicationId, item.initialQuantity)
+                  }
+                  className="py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-all cursor-pointer"
+                  title="Update manual stock"
+                >
+                  Update Stock
+                </button>
               </div>
             </div>
-
-            <div className="flex gap-2 pt-2">
-              <button
-                onClick={() =>
-                  handleOrderRefill(item.medicationId, item.medicationName)
-                }
-                className="flex-1 py-2.5 px-4 rounded-xl bg-slate-900 dark:bg-white hover:bg-brand-600 dark:hover:bg-brand-400 text-white dark:text-slate-900 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
-              >
-                {orderStatus[item.medicationId] ? (
-                  <>
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 dark:text-emerald-600" />
-                    {orderStatus[item.medicationId]}
-                  </>
-                ) : (
-                  <>
-                    <ShoppingCart className="w-4 h-4" />
-                    Request Refill Order
-                  </>
-                )}
-              </button>
-              <button
-                onClick={() =>
-                  handleStockAdjust(item.medicationId, item.initialQuantity)
-                }
-                className="py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-all"
-                title="Update manual stock"
-              >
-                Update Stock
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

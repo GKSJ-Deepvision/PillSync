@@ -16,6 +16,7 @@ export default function MedicationsPage() {
   const viewMode = auth.viewMode;
   const [medicines, setMedicines] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [selectedDisease, setSelectedDisease] = useState("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,13 +26,17 @@ export default function MedicationsPage() {
       ? viewMode || "admin"
       : viewMode || user?.role || "patient";
 
+  const isPatient = activeRole === "patient";
+
   const loadMeds = async () => {
     setLoading(true);
+    setError(null);
     try {
       const data = await fetchMedications();
       setMedicines(data);
     } catch (err) {
       console.error("Failed to load medications", err);
+      setError("Unable to load assigned medications. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -51,6 +56,7 @@ export default function MedicationsPage() {
   };
 
   const handleDeleteMedicine = async (id) => {
+    if (isPatient) return;
     try {
       await deleteMedicationApi(id);
       setMedicines((prev) => prev.filter((m) => m.id !== id));
@@ -108,23 +114,34 @@ export default function MedicationsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">
-            Medication Schedule & Inventory
+            Assigned Medications & Schedule
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Manage your daily doses, disease categories, and active inventory.
+            {isPatient
+              ? "View your assigned prescriptions, dosages, timing, and active inventory."
+              : "Manage patient prescription schedules, disease categories, and inventory."}
           </p>
         </div>
 
-        {activeRole !== "patient" && (
+        {!isPatient && (
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 text-white font-bold text-xs shadow-md shadow-brand-500/20 flex items-center justify-center gap-2 hover:from-brand-500 hover:to-brand-400 transition-all active:scale-95"
+            className="px-5 py-2.5 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-600/20 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Add New Medicine
           </button>
         )}
       </div>
+
+      {error && (
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center justify-between">
+          <span>{error}</span>
+          <button onClick={loadMeds} className="underline font-bold cursor-pointer">
+            Try again
+          </button>
+        </div>
+      )}
 
       {/* Search & Filters */}
       <div className="p-4 rounded-3xl glass-card border border-slate-200/80 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -145,7 +162,7 @@ export default function MedicationsPage() {
             <button
               key={cat}
               onClick={() => setSelectedDisease(cat)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 selectedDisease.toLowerCase() === cat.toLowerCase()
                   ? "bg-brand-600 text-white shadow-sm"
                   : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
@@ -158,23 +175,41 @@ export default function MedicationsPage() {
       </div>
 
       {/* Medicine Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.map((med) => (
-          <MedicineCard
-            key={med.id}
-            medicine={med}
-            onTake={handleTakeDose}
-            onMiss={() => alert("Missed dose logged.")}
-            onDelete={handleDeleteMedicine}
-          />
-        ))}
-      </div>
+      {filtered.length === 0 ? (
+        <div className="p-10 rounded-3xl glass-card text-center space-y-3">
+          <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center mx-auto">
+            <Search className="w-6 h-6" />
+          </div>
+          <h4 className="text-base font-bold text-slate-900 dark:text-white">
+            No medicines assigned yet
+          </h4>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            {isPatient
+              ? "No prescriptions match your selected filter. Please contact your assigned caregiver to add medicines."
+              : "No medications found. Click '+ Add New Medicine' or upload a doctor prescription."}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((med) => (
+            <MedicineCard
+              key={med.id}
+              medicine={med}
+              onTake={handleTakeDose}
+              onMiss={() => alert("Missed dose logged.")}
+              onDelete={isPatient ? null : handleDeleteMedicine}
+            />
+          ))}
+        </div>
+      )}
 
-      <AddMedicineModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onAddMedicine={handleAddMedicine}
-      />
+      {!isPatient && (
+        <AddMedicineModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onAddMedicine={handleAddMedicine}
+        />
+      )}
     </div>
   );
 }

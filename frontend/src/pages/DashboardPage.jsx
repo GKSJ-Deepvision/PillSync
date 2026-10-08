@@ -86,19 +86,29 @@ function PatientDashboardContent({ user, viewMode }) {
   });
   const [toastMsg, setToastMsg] = useState("");
 
-  const handleTakeDose = (doseId, medName, dosage) => {
+  const handleTakeDose = async (doseId, medId, medName, dosage) => {
     const timeNow = new Date().toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
 
+    if (medId) {
+      try {
+        await takeDoseApi(medId);
+        setMedicines((prev) =>
+          prev.map((m) =>
+            m.id === medId ? { ...m, stock: Math.max(0, m.stock - 1) } : m,
+          ),
+        );
+      } catch (e) {
+        console.warn("Background stock reduction API error:", e);
+      }
+    }
+
     setTakenDoseState((prev) => {
-      const isAlreadyTaken = prev[doseId]?.status === "taken";
       const updated = {
         ...prev,
-        [doseId]: isAlreadyTaken
-          ? { status: "pending", time: null }
-          : { status: "taken", time: timeNow },
+        [doseId]: { status: "taken", time: timeNow },
       };
       try {
         localStorage.setItem(
@@ -106,16 +116,12 @@ function PatientDashboardContent({ user, viewMode }) {
           JSON.stringify(updated),
         );
       } catch (e) {
-        console.error("Failed to persist taken dose state:", e);
+        console.error("Failed to persist dose state:", e);
       }
       return updated;
     });
 
-    if (takenDoseState[doseId]?.status === "taken") {
-      setToastMsg(`Status reset to pending for ${medName}.`);
-    } else {
-      setToastMsg(`✓ ${medName} (${dosage}) recorded as TAKEN at ${timeNow}!`);
-    }
+    setToastMsg(`Medicine marked as taken.`);
     setTimeout(() => setToastMsg(""), 4000);
   };
 
@@ -135,7 +141,7 @@ function PatientDashboardContent({ user, viewMode }) {
       }
       return updated;
     });
-    setToastMsg(`Logged dose for ${medName} as missed for tracking.`);
+    setToastMsg(`Logged dose for ${medName} as missed.`);
     setTimeout(() => setToastMsg(""), 4000);
   };
 
@@ -211,6 +217,10 @@ function PatientDashboardContent({ user, viewMode }) {
   });
 
   const takenCount = todayDoses.filter((d) => d.status === "taken").length;
+  const todayAdherence =
+    todayDoses.length > 0
+      ? Math.round((takenCount / todayDoses.length) * 100)
+      : 100;
 
   if (loading) {
     return (
@@ -243,6 +253,7 @@ function PatientDashboardContent({ user, viewMode }) {
 
   const isCaregiver = activeRole === "caregiver";
   const isAdmin = activeRole === "admin";
+  const isPatient = activeRole === "patient";
 
   return (
     <div className="space-y-6">
@@ -299,19 +310,19 @@ function PatientDashboardContent({ user, viewMode }) {
                 <Users className="w-4 h-4" />
                 Caregiver Portal
               </Link>
-              <Link
-                to="/analytics"
-                className="px-4 py-2.5 rounded-2xl bg-brand-500/40 hover:bg-brand-500/60 backdrop-blur-md text-white font-bold text-xs border border-white/20 flex items-center gap-2 transition-all"
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="px-4 py-2.5 rounded-2xl bg-brand-500/40 hover:bg-brand-500/60 backdrop-blur-md text-white font-bold text-xs border border-white/20 flex items-center gap-2 transition-all cursor-pointer"
               >
-                <Activity className="w-4 h-4" />
-                View Analytics
-              </Link>
+                <Plus className="w-4 h-4" />
+                Add Medicine
+              </button>
             </>
           ) : isAdmin ? (
             <>
               <button
                 onClick={() => setIsAddModalOpen(true)}
-                className="px-4 py-2.5 rounded-2xl bg-white text-brand-700 hover:bg-brand-50 font-bold text-xs shadow-lg flex items-center gap-2 transition-all active:scale-95"
+                className="px-4 py-2.5 rounded-2xl bg-white text-brand-700 hover:bg-brand-50 font-bold text-xs shadow-lg flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 Add Medicine
@@ -340,7 +351,7 @@ function PatientDashboardContent({ user, viewMode }) {
 
       {error && (
         <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center justify-between">
-          <span>{error}</span>
+          <span>Failed to load schedule. Please try again.</span>
           <button onClick={loadData} className="underline font-bold">
             Retry
           </button>
@@ -352,13 +363,13 @@ function PatientDashboardContent({ user, viewMode }) {
         <div className="p-5 rounded-3xl glass-card border border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              Today's Assigned Doses
+              Today's Scheduled Doses
             </p>
             <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
               {todayDoses.length}
             </h3>
             <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5 mt-1">
-              <TrendingUp className="w-3 h-3" /> Scheduled for Today
+              <TrendingUp className="w-3 h-3" /> {takenCount} of {todayDoses.length} Taken
             </span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950/80 text-brand-600 dark:text-brand-400 flex items-center justify-center">
@@ -369,13 +380,13 @@ function PatientDashboardContent({ user, viewMode }) {
         <div className="p-5 rounded-3xl glass-card border border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              Weekly Adherence Rate
+              Today's Adherence Rate
             </p>
             <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
-              {analytics?.adherenceRate || 94}%
+              {todayAdherence}%
             </h3>
             <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5 mt-1">
-              <CheckCircle2 className="w-3 h-3" /> Patient Tracking Active
+              <CheckCircle2 className="w-3 h-3" /> Live Tracking
             </span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
@@ -422,8 +433,7 @@ function PatientDashboardContent({ user, viewMode }) {
       <div>
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Filter Schedule by Condition Category (
-            {dynamicCategories.length - 1} categories):
+            Filter Schedule by Condition Category:
           </span>
         </div>
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
@@ -445,13 +455,12 @@ function PatientDashboardContent({ user, viewMode }) {
 
       {/* Main Content: Today's Assigned Dosage Schedule */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Scheduled Today Doses */}
+        {/* Scheduled Today Doses Table */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
               <Pill className="w-5 h-5 text-brand-600" />
-              Patient's Assigned Dosages Schedule for Today ({todayDoses.length}
-              )
+              Today's Medication Schedule ({todayDoses.length})
             </h3>
             <span className="text-xs text-brand-600 dark:text-brand-400 font-semibold">
               Today:{" "}
@@ -479,122 +488,167 @@ function PatientDashboardContent({ user, viewMode }) {
           )}
 
           {todayDoses.length === 0 ? (
-            <div className="p-8 rounded-3xl glass-card text-center text-slate-500 text-xs">
-              No assigned doses found for category "{activeTab}". Select another
-              category or click "+ Add Medicine".
+            <div className="p-8 rounded-3xl glass-card text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center mx-auto">
+                <Pill className="w-6 h-6" />
+              </div>
+              <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                No medicines assigned yet
+              </h4>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                There are no active medicines scheduled for category "{activeTab}". Select another category or view your full prescription list.
+              </p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {todayDoses.map((dose) => {
-                const isTaken = dose.status === "taken";
-                const isMissed = dose.status === "missed";
+            <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 glass-card">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-slate-100/70 dark:bg-slate-800/70 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider">
+                    <th className="p-3.5">Medicine</th>
+                    <th className="p-3.5">Schedule</th>
+                    <th className="p-3.5">Status</th>
+                    <th className="p-3.5 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                  {todayDoses.map((dose) => {
+                    const isTaken = dose.status === "taken";
+                    const isMissed = dose.status === "missed";
 
-                return (
-                  <div
-                    key={dose.id}
-                    className={`p-4 rounded-2xl glass-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all ${
-                      isTaken
-                        ? "border-2 border-emerald-500/60 bg-emerald-50/50 dark:bg-emerald-950/30"
-                        : isMissed
-                          ? "border border-rose-500/40 bg-rose-50/30 dark:bg-rose-950/20"
-                          : "border border-slate-200/80 dark:border-slate-800 hover:border-brand-300"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                    return (
+                      <tr
+                        key={dose.id}
+                        className={`transition-colors ${
                           isTaken
-                            ? "bg-emerald-600 text-white"
-                            : "bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400"
+                            ? "bg-emerald-50/40 dark:bg-emerald-950/20"
+                            : isMissed
+                              ? "bg-rose-50/30 dark:bg-rose-950/10"
+                              : "hover:bg-slate-50 dark:hover:bg-slate-800/40"
                         }`}
                       >
-                        {isTaken ? (
-                          <CheckCircle2 className="w-5 h-5" />
-                        ) : (
-                          dose.period[0]
-                        )}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                        <td className="p-3.5">
+                          <div className="font-bold text-slate-900 dark:text-white text-sm">
                             {dose.name} ({dose.dosage})
-                          </h4>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300">
+                          </div>
+                          <span className="inline-block mt-0.5 text-[10px] font-bold px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300">
                             {dose.diseaseCategory}
                           </span>
-                          {isTaken && (
-                            <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/80 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                              Taken {dose.takenTime ? `at ${dose.takenTime}` : "✓"}
+                        </td>
+
+                        <td className="p-3.5">
+                          <div className="font-bold text-slate-800 dark:text-slate-200">
+                            {dose.time}
+                          </div>
+                          <div className="text-[11px] text-slate-500 capitalize">
+                            {dose.period} &bull; {dose.foodTiming.replace("_", " ")}
+                          </div>
+                        </td>
+
+                        <td className="p-3.5">
+                          {isTaken ? (
+                            <span className="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950 px-2.5 py-1 rounded-full text-[11px] border border-emerald-300 dark:border-emerald-800">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              ✓ Taken {dose.takenTime ? `at ${dose.takenTime}` : ""}
                             </span>
-                          )}
-                          {isMissed && (
-                            <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/80 text-rose-800 dark:text-rose-200 border border-rose-300 dark:border-rose-700">
+                          ) : isMissed ? (
+                            <span className="inline-flex items-center gap-1 font-bold text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-950 px-2.5 py-1 rounded-full text-[11px] border border-rose-300 dark:border-rose-800">
                               Missed ✗
                             </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-950 px-2.5 py-1 rounded-full text-[11px] border border-amber-300 dark:border-amber-800">
+                              <Clock className="w-3.5 h-3.5" />
+                              Take Now
+                            </span>
                           )}
-                        </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                          Scheduled:{" "}
-                          <strong className="text-slate-800 dark:text-slate-200 font-bold">
-                            {dose.time} ({dose.period})
-                          </strong>{" "}
-                          &bull; Stock Inventory: {dose.stock} pills remaining
-                        </p>
-                      </div>
-                    </div>
+                        </td>
 
-                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                      <button
-                        onClick={() =>
-                          handleTakeDose(dose.id, dose.name, dose.dosage)
-                        }
-                        className={`px-3.5 py-2 rounded-xl font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 ${
-                          isTaken
-                            ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                            : "bg-emerald-600 hover:bg-emerald-500 text-white"
-                        }`}
-                      >
-                        <CheckCircle2 className="w-4 h-4" />
-                        {isTaken ? "Dose Taken ✓" : "Take Dose"}
-                      </button>
-                      <button
-                        onClick={() => handleMissDose(dose.id, dose.name)}
-                        className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-100 hover:text-rose-700 text-slate-600 dark:text-slate-400 font-semibold text-xs transition-colors cursor-pointer"
-                      >
-                        Missed
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (
-                            window.confirm(
-                              `Are you sure you want to remove ${dose.name}?`,
-                            )
-                          ) {
-                            handleDeleteMedication(dose.medId);
-                          }
-                        }}
-                        title="Remove Medicine"
-                        className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 text-rose-600 dark:text-rose-400 font-bold text-xs border border-rose-200 dark:border-rose-900 transition-colors cursor-pointer"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+                        <td className="p-3.5 text-right">
+                          {isTaken ? (
+                            <button
+                              disabled
+                              className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 cursor-not-allowed opacity-90 inline-flex items-center gap-1"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              ✓ Taken
+                            </button>
+                          ) : (
+                            <div className="inline-flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() =>
+                                  handleTakeDose(
+                                    dose.id,
+                                    dose.medId,
+                                    dose.name,
+                                    dose.dosage,
+                                  )
+                                }
+                                className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all active:scale-95 cursor-pointer inline-flex items-center gap-1"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                Take Medicine
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleMissDose(dose.id, dose.name)
+                                }
+                                className="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-100 hover:text-rose-700 text-slate-600 dark:text-slate-400 font-semibold text-[11px] transition-colors cursor-pointer"
+                              >
+                                Missed
+                              </button>
+                              {!isPatient && (
+                                <button
+                                  onClick={() =>
+                                    handleDeleteMedication(dose.medId)
+                                  }
+                                  title="Remove Medicine"
+                                  className="p-1.5 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-950 text-rose-600 dark:text-rose-400 transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
 
-        {/* Right Column: AI Stock & Refill Tracker */}
+        {/* Right Column: Refill & Stock Alerts */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-amber-400" />
-              Prescription Refill Tracker
+              Stock & Refills
             </h3>
           </div>
+
+          {/* Simple Human-Friendly Low Stock Alerts (Point 5) */}
+          {lowStockMeds.length > 0 && (
+            <div className="space-y-2">
+              {lowStockMeds.map((med) => (
+                <div
+                  key={med.id}
+                  className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs space-y-1"
+                >
+                  <div className="flex items-center gap-1.5 font-bold text-rose-700 dark:text-rose-300">
+                    <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
+                    <span>🔔 Low Stock</span>
+                  </div>
+                  <p className="text-slate-800 dark:text-slate-200 font-medium">
+                    <strong>{med.name}</strong> — approximately {med.stock} doses remaining.
+                  </p>
+                  <span className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 block">
+                    Refill recommended.
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="space-y-3">
             {categoryFilteredMeds.map((med) => (
@@ -610,12 +664,15 @@ function PatientDashboardContent({ user, viewMode }) {
         </div>
       </div>
 
-      {/* Add Medicine Modal */}
-      <AddMedicineModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onAddMedicine={handleAddMedicine}
-      />
+      {/* Add Medicine Modal (Caregiver/Admin only) */}
+      {!isPatient && (
+        <AddMedicineModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onAddMedicine={handleAddMedicine}
+        />
+      )}
     </div>
   );
+}
 }

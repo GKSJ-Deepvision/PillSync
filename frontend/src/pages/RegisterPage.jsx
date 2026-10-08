@@ -54,35 +54,22 @@ export default function RegisterPage() {
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center p-4 relative overflow-hidden transition-colors duration-300 ${
+      className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${
         isDarkMode
-          ? "bg-slate-950 text-white"
-          : "bg-gradient-to-br from-slate-100 via-brand-50/50 to-indigo-50/50 text-slate-900"
+          ? "bg-slate-950 text-slate-100"
+          : "bg-slate-50 text-slate-900"
       }`}
     >
-      {/* Background ambient lighting */}
-      {isDarkMode ? (
-        <>
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-600/20 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
-        </>
-      ) : (
-        <>
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-200/40 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-200/40 rounded-full blur-3xl pointer-events-none"></div>
-        </>
-      )}
-
       {/* Theme Switcher Toggle */}
       <div className="absolute top-5 right-5 z-20">
         <button
           type="button"
           onClick={() => setIsDarkMode(!isDarkMode)}
           title={`Switch to ${isDarkMode ? "Light" : "Dark"} Mode`}
-          className={`p-2.5 rounded-2xl border transition-all flex items-center gap-2 text-xs font-bold shadow-md cursor-pointer ${
+          className={`p-2.5 rounded-2xl border transition-all flex items-center gap-2 text-xs font-bold shadow-sm cursor-pointer ${
             isDarkMode
               ? "bg-slate-900 border-slate-700 text-amber-300 hover:bg-slate-800"
-              : "bg-white border-slate-300 text-slate-800 hover:bg-slate-50"
+              : "bg-white border-slate-300 text-slate-800 hover:bg-slate-100"
           }`}
         >
           {isDarkMode ? (
@@ -98,14 +85,14 @@ export default function RegisterPage() {
       </div>
 
       <div
-        className={`w-full max-w-md rounded-3xl p-8 shadow-2xl relative z-10 border transition-all ${
+        className={`w-full max-w-md rounded-3xl p-8 shadow-xl relative z-10 border transition-all ${
           isDarkMode
-            ? "bg-slate-900/95 border-slate-700/80 text-white"
-            : "bg-white/95 border-slate-200 text-slate-900"
+            ? "bg-slate-900 border-slate-800 text-slate-100"
+            : "bg-white border-slate-200 text-slate-900"
         }`}
       >
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-brand-500/30 mb-2">
+          <div className="w-12 h-12 rounded-2xl bg-brand-600 flex items-center justify-center shadow-md shadow-brand-600/20 mb-2">
             <HeartPulse className="w-7 h-7 text-white" />
           </div>
           <h2
@@ -160,7 +147,7 @@ export default function RegisterPage() {
                 onChange={(e) => setName(e.target.value)}
                 className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm font-medium border focus:outline-none focus:ring-2 transition-all ${
                   isDarkMode
-                    ? "bg-slate-800/90 border-slate-700 text-white placeholder:text-slate-400 focus:border-brand-400 focus:ring-brand-500/30"
+                    ? "bg-slate-800 border-slate-700 text-white placeholder:text-slate-400 focus:border-brand-400 focus:ring-brand-500/30"
                     : "bg-slate-50 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-brand-600 focus:ring-brand-500/20"
                 }`}
                 required
@@ -190,7 +177,7 @@ export default function RegisterPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm font-medium border focus:outline-none focus:ring-2 transition-all ${
                   isDarkMode
-                    ? "bg-slate-800/90 border-slate-700 text-white placeholder:text-slate-400 focus:border-brand-400 focus:ring-brand-500/30"
+                    ? "bg-slate-800 border-slate-700 text-white placeholder:text-slate-400 focus:border-brand-400 focus:ring-brand-500/30"
                     : "bg-slate-50 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-brand-600 focus:ring-brand-500/20"
                 }`}
                 required
@@ -220,7 +207,7 @@ export default function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm font-medium border focus:outline-none focus:ring-2 transition-all ${
                   isDarkMode
-                    ? "bg-slate-800/90 border-slate-700 text-white placeholder:text-slate-400 focus:border-brand-400 focus:ring-brand-500/30"
+                    ? "bg-slate-800 border-slate-700 text-white placeholder:text-slate-400 focus:border-brand-400 focus:ring-brand-500/30"
                     : "bg-slate-50 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-brand-600 focus:ring-brand-500/20"
                 }`}
                 required
@@ -241,7 +228,7 @@ export default function RegisterPage() {
               onChange={(e) => setRole(e.target.value)}
               className={`w-full px-4 py-3 rounded-xl text-sm font-medium border focus:outline-none focus:ring-2 transition-all ${
                 isDarkMode
-                  ? "bg-slate-800/90 border-slate-700 text-white focus:border-brand-400 focus:ring-brand-500/30"
+                  ? "bg-slate-800 border-slate-700 text-white focus:border-brand-400 focus:ring-brand-500/30"
                   : "bg-slate-50 border-slate-300 text-slate-900 focus:border-brand-600 focus:ring-brand-500/20"
               }`}
             >
@@ -269,7 +256,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-600 via-indigo-600 to-brand-500 hover:from-brand-500 hover:to-indigo-500 font-bold text-sm text-white shadow-lg shadow-brand-500/30 flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer mt-5 disabled:opacity-50"
+            className="w-full py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 font-bold text-sm text-white shadow-md shadow-brand-600/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer mt-5 disabled:opacity-50"
           >
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin text-white" />

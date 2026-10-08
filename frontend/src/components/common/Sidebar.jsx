@@ -28,7 +28,7 @@ export default function Sidebar({ mobileOpen, closeMobileSidebar }) {
       name: "Medications",
       path: "/medications",
       icon: Pill,
-      roles: ["patient", "admin"],
+      roles: ["patient", "caregiver", "admin"],
     },
     {
       name: "OCR Prescription Scan",
