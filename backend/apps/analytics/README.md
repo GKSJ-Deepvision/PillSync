@@ -18,3 +18,14 @@ The endpoint delegates adherence calculations to
 logic. Querysets use ownership filters, aggregation, `select_related`, and bounded
 reminder results to avoid exposing cross-user data or loading unbounded dashboard
 lists.
+
+## Caregiver monitoring
+
+`GET /api/analytics/caregiver/patients/<patient_id>/dashboard/` returns the same
+dashboard contract for a patient who has an active
+`CaregiverPatientRelationship` with the authenticated caregiver. The endpoint
+requires the caregiver role and scopes medicines, medication history, adherence,
+reminders, and refill predictions to the related patient. Unassigned patients,
+non-caregivers, and nonexistent patient IDs all receive the same 404 response to
+avoid disclosing private patient existence. The `start_date` and `end_date`
+filters retain the dashboard's `YYYY-MM-DD` validation.

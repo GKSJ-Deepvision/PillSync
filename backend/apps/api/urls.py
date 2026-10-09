@@ -1,6 +1,10 @@
 from django.urls import include, path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+from apps.accounts.views import (
+    CaregiverPatientRelationshipDetailView,
+    CaregiverPatientRelationshipListCreateView,
+)
 from apps.medications.views import DosageListCreateView, MedicationScheduleListCreateView
 
 from .views import (
@@ -31,6 +35,16 @@ urlpatterns = [
     path("auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("auth/me/", MeView.as_view(), name="me"),
     path("profile/", ProfileView.as_view(), name="profile"),
+    path(
+        "relationships/caregiver-patients/",
+        CaregiverPatientRelationshipListCreateView.as_view(),
+        name="caregiver-patient-relationships",
+    ),
+    path(
+        "relationships/caregiver-patients/<int:relationship_id>/",
+        CaregiverPatientRelationshipDetailView.as_view(),
+        name="caregiver-patient-relationship-detail",
+    ),
     path("adherence/", AdherenceView.as_view(), name="adherence"),
     path(
         "adherence/medicines/<int:medicine_id>/",

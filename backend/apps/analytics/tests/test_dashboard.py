@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.utils import timezone
 from rest_framework.test import APIClient
 
+from apps.accounts.models import CaregiverPatientRelationship
 from apps.medicines.models import MedicationHistory, Medicine, MedicineSchedule
 from apps.refills.models import RefillPrediction
 
@@ -91,5 +92,84 @@ class DashboardAnalyticsTests(TestCase):
         self.client.force_authenticate(self.user)
         response = self.client.get(
             "/api/analytics/dashboard/?start_date=2026-99-01",
+        )
+        self.assertEqual(response.status_code, 400)
+
+
+class CaregiverDashboardAnalyticsTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.caregiver = User.objects.create_user(
+            username="caregiver",
+            email="caregiver@example.com",
+            role=User.Role.CAREGIVER,
+        )
+        self.patient = User.objects.create_user(
+            username="patient",
+            email="patient@example.com",
+        )
+        self.other_patient = User.objects.create_user(
+            username="other-patient",
+            email="other-patient@example.com",
+        )
+        self.medicine = Medicine.objects.create(
+            user=self.patient,
+            name="Patient medicine",
+            quantity=1,
+        )
+        self.schedule = MedicineSchedule.objects.create(
+            medicine=self.medicine,
+            dose="1 tablet",
+            time="08:00:00",
+            start_date=timezone.localdate(),
+        )
+        CaregiverPatientRelationship.objects.create(
+            caregiver=self.caregiver,
+            patient=self.patient,
+        )
+
+    def test_authorized_caregiver_gets_only_target_patient_dashboard(self):
+        MedicationHistory.objects.create(
+            schedule=self.schedule,
+            medicine=self.medicine,
+            dose="1 tablet",
+            scheduled_at=timezone.now(),
+            status=MedicationHistory.Status.TAKEN,
+        )
+        self.client.force_authenticate(self.caregiver)
+
+        response = self.client.get(
+            f"/api/analytics/caregiver/patients/{self.patient.id}/dashboard/"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.data["active_medicines"][0]["name"],
+            "Patient medicine",
+        )
+        self.assertEqual(response.data["history"]["total"], 1)
+
+    def test_unassigned_patient_and_non_caregiver_are_not_disclosed(self):
+        self.client.force_authenticate(self.caregiver)
+        self.assertEqual(
+            self.client.get(
+                f"/api/analytics/caregiver/patients/{self.other_patient.id}/dashboard/"
+            ).status_code,
+            404,
+        )
+
+        self.client.force_authenticate(self.patient)
+        self.assertEqual(
+            self.client.get(
+                f"/api/analytics/caregiver/patients/{self.patient.id}/dashboard/"
+            ).status_code,
+            404,
+        )
+
+    def test_invalid_date_validation_is_preserved(self):
+        self.client.force_authenticate(self.caregiver)
+        response = self.client.get(
+            f"/api/analytics/caregiver/patients/{self.patient.id}/dashboard/"
+            "?start_date=2026-99-01"
         )
         self.assertEqual(response.status_code, 400)
