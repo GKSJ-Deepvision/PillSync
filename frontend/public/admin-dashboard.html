@@ -5,24 +5,31 @@
     <title>PillSync - Admin Dashboard</title>
     <link rel="stylesheet" href="dashboard.css" />
     <link rel="stylesheet" href="admin-dashboard.css" />
-    <link rel="stylesheet" href="debug-logger.css" />
   </head>
   <body>
     <div class="app">
+      <!-- SIDEBAR -->
       <aside class="sidebar">
         <div class="brand">💊 PillSync</div>
-        <div class="profile-card">
-          <div class="profile-avatar" id="sidebarAvatar">A</div>
-          <div class="profile-name" id="sidebarName">Loading…</div>
-          <div class="profile-email" id="sidebarEmail"></div>
-          <span class="role-badge">Admin</span>
+        <div class="mini-card" style="cursor: default">
+          <div
+            class="mini-avatar"
+            id="sidebarAvatar"
+            style="background: linear-gradient(135deg, #7c6af5, #00c2a8)"
+          >
+            A
+          </div>
+          <div class="mini-text">
+            <div class="mini-name" id="sidebarName">System Admin</div>
+            <div class="mini-sub" id="sidebarSub">Admin · Full access</div>
+          </div>
         </div>
         <nav class="nav">
-          <a href="#" class="nav-item active">Overview</a>
-          <a href="#" class="nav-item">Users</a>
-          <a href="#" class="nav-item">Activity Log</a>
+          <a href="admin-dashboard.html" class="nav-item active">🛡️ Overview</a>
         </nav>
-        <a href="login.html" class="logout">Log out</a>
+        <a href="login.html" class="logout" onclick="localStorage.removeItem('access_token')"
+          >Log out</a
+        >
       </aside>
 
       <main class="main">
@@ -35,6 +42,14 @@
 
         <!-- STAT CARDS -->
         <section class="stat-grid" id="statGrid"></section>
+        <!-- ROLE DISTRIBUTION -->
+        <section class="role-chart-section">
+          <h2 class="section-title">User distribution</h2>
+          <div class="role-chart-card">
+            <div class="donut-chart" id="donutChart"></div>
+            <div class="donut-legend" id="donutLegend"></div>
+          </div>
+        </section>
 
         <!-- USER MANAGEMENT -->
         <section class="users-section">
@@ -73,7 +88,7 @@
       </main>
     </div>
 
+    <script src="user-session.js?v=4"></script>
     <script src="admin-dashboard.js"></script>
-    <script src="debug-logger.js"></script>
   </body>
 </html>

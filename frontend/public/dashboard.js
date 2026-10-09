@@ -277,9 +277,9 @@ function renderDoseChip(dose, container) {
     ${
       !resolved
         ? `
-    <div class="actions">
-      <button class="btn-taken" id="btn-taken-${dose.id}" onclick="markDose('${dose.id}', 'taken')" ${snoozed ? '' : ''}>Taken</button>
-      <button class="btn-missed" id="btn-missed-${dose.id}" onclick="markDose('${dose.id}', 'missed')">Missed</button>
+    <div class="dose-actions">
+      <button class="take-btn" id="btn-taken-${dose.id}" onclick="markDose('${dose.id}', 'taken')">Taken</button>
+      <button class="miss-btn" id="btn-missed-${dose.id}" onclick="markDose('${dose.id}', 'missed')">Missed</button>
     </div>`
         : ''
     }
@@ -440,6 +440,20 @@ function renderMedicineList() {
     `;
     list.appendChild(row);
   });
+}
+
+// ── Simulate reminder demo helper ──────────────────────────────────────────
+function simulateReminder() {
+  const allDoses = Object.values(todayData.slots || {}).flat();
+  const pendingDose =
+    allDoses.find((d) => d.status === 'PENDING' || d.status === 'SCHEDULED') || allDoses[0];
+  if (pendingDose) {
+    showToast(
+      `🔔 Time for your medicine: ${pendingDose.medicine_name || pendingDose.name || 'Medicine'} (${pendingDose.scheduled_time || 'Now'})`
+    );
+  } else {
+    showToast('✅ All caught up! No pending doses right now.');
+  }
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────

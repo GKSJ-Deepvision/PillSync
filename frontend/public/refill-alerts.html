@@ -2,9 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>PillSync - My Medicines</title>
+    <title>PillSync - Refill Alerts</title>
     <link rel="stylesheet" href="dashboard.css" />
-    <link rel="stylesheet" href="my-medicines.css" />
+    <link rel="stylesheet" href="refill-alerts.css" />
   </head>
   <body>
     <div class="app">
@@ -34,11 +34,11 @@
 
         <nav class="nav">
           <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
-          <a href="my-medicines.html" class="nav-item active">💊 My Medicines</a>
+          <a href="my-medicines.html" class="nav-item">💊 My Medicines</a>
           <a href="add-medicine.html" class="nav-item">➕ Add Medicine</a>
           <a href="ocr.html" class="nav-item">📷 Scan Prescription</a>
           <a href="history.html" class="nav-item">📊 History</a>
-          <a href="refill-alerts.html" class="nav-item">🔔 Refill Alerts</a>
+          <a href="refill-alerts.html" class="nav-item active">🔔 Refill Alerts</a>
           <a href="dosage-analysis.html" class="nav-item">📈 Dosage Analysis</a>
           <a href="adherence-analytics.html" class="nav-item">📊 Adherence Analytics</a>
         </nav>
@@ -51,23 +51,29 @@
       <main class="main">
         <header class="topbar">
           <div>
-            <div class="greeting">My medicines</div>
-            <div class="subgreeting">All the medicines you're currently tracking</div>
+            <div class="greeting">Refill Alerts</div>
+            <div class="subgreeting">
+              Medicines organized by category, with refill status at a glance
+            </div>
           </div>
-          <button class="add-btn" onclick="window.location.href = 'add-medicine.html'">
-            + Add medicine
-          </button>
         </header>
 
-        <input type="text" class="search-bar" id="searchBar" placeholder="Search medicines..." />
+        <section class="summary-strip" id="summaryStrip"></section>
+
+        <div class="controls-row">
+          <input type="text" class="search-bar" id="searchBar" placeholder="Search medicines..." />
+          <button class="alert-check-btn" onclick="checkForAlerts()">🔔 Check for alerts</button>
+        </div>
 
         <div class="filter-chips" id="filterChips"></div>
 
-        <div class="full-medicine-list" id="fullMedicineList"></div>
+        <div id="categorySections"></div>
+
+        <div class="refill-toast" id="refillToast"></div>
       </main>
     </div>
 
-    <script src="user-session.js?v=4"></script>
-    <script src="my-medicines.js"></script>
+    <script src="user-session.js?v=3"></script>
+    <script src="refill-alerts.js"></script>
   </body>
 </html>

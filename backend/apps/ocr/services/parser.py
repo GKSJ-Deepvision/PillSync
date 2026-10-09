@@ -1,5 +1,41 @@
+import difflib
 import re
 from typing import Any
+
+COMMON_MEDICATIONS = [
+    "Lisinopril",
+    "Metformin",
+    "Amlodipine",
+    "Atorvastatin",
+    "Levothyroxine",
+    "Amoxicillin",
+    "Losartan",
+    "Omeprazole",
+    "Simvastatin",
+    "Gabapentin",
+    "Hydrochlorothiazide",
+    "Sertraline",
+    "Montelukast",
+    "Pantoprazole",
+    "Metoprolol",
+    "Glipizide",
+    "Azithromycin",
+    "Ciprofloxacin",
+    "Insulin",
+    "Aspirin",
+    "Ibuprofen",
+    "Paracetamol",
+]
+
+
+def match_known_medication(candidate: str) -> str:
+    """Fuzzy match OCR candidate against known medications."""
+    if not candidate:
+        return candidate
+    matches = difflib.get_close_matches(candidate.strip(), COMMON_MEDICATIONS, n=1, cutoff=0.55)
+    if matches:
+        return matches[0]
+    return candidate.strip()
 
 
 def parse_ocr_text(text: str) -> dict[str, Any]:
@@ -48,7 +84,7 @@ def parse_ocr_text(text: str) -> dict[str, Any]:
             "TWICE_DAILY",
         ),
         (
-            r"\b(?:once\s+daily|once\s+a\s+day|od|o\.d|0-0-1|1-0-0|0-1-0|daily|every\s+morning|every\s+night|q\.d|qd)\b",
+            r"\b(?:once\s+daily|once\s+a\s+day|od|o\.d|0-0-1|1-0-0|0-1-0|daily|every\s+morning|every\s+night|q\.d|qd|duty)\b",
             "DAILY",
         ),
     ]
@@ -76,7 +112,7 @@ def parse_ocr_text(text: str) -> dict[str, Any]:
                 ).strip()
                 name_part = re.sub(r"^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$", "", name_part).strip()
                 if len(name_part) >= 2:
-                    medicine_name = name_part
+                    medicine_name = match_known_medication(name_part)
                     break
 
     # Second attempt: If no dosage match, check for explicit Rx / Tab / Cap prefix line
@@ -89,7 +125,7 @@ def parse_ocr_text(text: str) -> dict[str, Any]:
                 candidate = rx_match.group(2).strip()
                 cleaned = re.sub(r"^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$", "", candidate).strip()
                 if len(cleaned) >= 3:
-                    medicine_name = cleaned
+                    medicine_name = match_known_medication(cleaned)
                     break
 
     return {

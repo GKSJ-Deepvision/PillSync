@@ -50,13 +50,17 @@ async function loadUserProfileHeader() {
     const firstName = user.full_name ? user.full_name.split(' ')[0] : 'User';
     const timeGreeting = getGreetingPrefix();
 
-    // 1. Sidebar Profile Updates
+    // 1. Sidebar Profile Updates (both full profile card and mini card)
     const sidebarAvatar =
-      document.getElementById('sidebarAvatar') || document.querySelector('.profile-avatar');
+      document.getElementById('sidebarAvatar') ||
+      document.querySelector('.profile-avatar') ||
+      document.querySelector('.mini-avatar:not(.mini-avatar-alt)');
     if (sidebarAvatar) sidebarAvatar.textContent = initial;
 
     const sidebarName =
-      document.getElementById('sidebarName') || document.querySelector('.profile-name');
+      document.getElementById('sidebarName') ||
+      document.querySelector('.profile-name') ||
+      document.querySelector('.mini-name');
     if (sidebarName) sidebarName.textContent = user.full_name;
 
     const sidebarEmail =
@@ -67,12 +71,18 @@ async function loadUserProfileHeader() {
       document.getElementById('sidebarRole') || document.querySelector('.role-badge');
     if (sidebarRole) sidebarRole.textContent = roleCapitalized;
 
+    const miniSub = document.querySelector('.mini-sub');
+    if (miniSub) miniSub.textContent = `${roleCapitalized} · View profile`;
+
     // 2. Topbar Greeting Updates
     const topGreeting =
       document.getElementById('topGreeting') || document.querySelector('.greeting');
     if (topGreeting) {
-      // Check if page header is a dashboard greeting or static page title
-      if (topGreeting.textContent.includes('Good') || topGreeting.id === 'topGreeting') {
+      if (
+        topGreeting.textContent.includes('Good') ||
+        topGreeting.id === 'topGreeting' ||
+        topGreeting.textContent.includes('Isha')
+      ) {
         topGreeting.textContent = `${timeGreeting}, ${firstName}`;
       }
     }
@@ -89,6 +99,42 @@ async function loadUserProfileHeader() {
 
     const modalRole = document.getElementById('modalRole');
     if (modalRole) modalRole.textContent = roleCapitalized;
+
+    const modalPhone = document.getElementById('modalPhone');
+    if (modalPhone) modalPhone.textContent = user.phone_number || '+91 98765 43210';
+
+    // Set dynamic user name for chat
+    window.CHAT_ME = user.full_name;
+
+    // Fetch patient profile details for modal & caregiver
+    try {
+      const pRes = await fetch('/api/v1/profiles/patients/me/', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (pRes.ok) {
+        const p = await pRes.json();
+        const el = (id) => document.getElementById(id);
+        if (p.blood_group && el('modalBlood')) el('modalBlood').textContent = p.blood_group;
+        if (p.date_of_birth && el('modalAge')) {
+          const age = new Date().getFullYear() - new Date(p.date_of_birth).getFullYear();
+          el('modalAge').textContent = age;
+        }
+        if (p.patient_conditions && p.patient_conditions.length > 0 && el('modalConditions')) {
+          el('modalConditions').innerHTML = p.patient_conditions
+            .map((c) => `<span class="condition-tag">${c.condition_name || c.condition}</span>`)
+            .join(' ');
+        }
+        if (p.emergency_contacts && p.emergency_contacts.length > 0) {
+          const ec = p.emergency_contacts[0];
+          if (el('modalEmName')) el('modalEmName').textContent = ec.name;
+          if (el('modalEmRel')) el('modalEmRel').textContent = ec.relationship_display || ec.relationship;
+          if (el('modalEmPhone')) el('modalEmPhone').textContent = ec.phone_number;
+          if (el('caregiverName')) el('caregiverName').textContent = ec.name;
+        }
+      }
+    } catch (_pErr) {
+      // Ignore if no patient profile
+    }
 
     return user;
   } catch (err) {

@@ -2,9 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>PillSync - My Medicines</title>
+    <title>PillSync - Dosage Analysis</title>
     <link rel="stylesheet" href="dashboard.css" />
-    <link rel="stylesheet" href="my-medicines.css" />
+    <link rel="stylesheet" href="dosage-analysis.css" />
   </head>
   <body>
     <div class="app">
@@ -34,12 +34,12 @@
 
         <nav class="nav">
           <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
-          <a href="my-medicines.html" class="nav-item active">💊 My Medicines</a>
+          <a href="my-medicines.html" class="nav-item">💊 My Medicines</a>
           <a href="add-medicine.html" class="nav-item">➕ Add Medicine</a>
           <a href="ocr.html" class="nav-item">📷 Scan Prescription</a>
           <a href="history.html" class="nav-item">📊 History</a>
           <a href="refill-alerts.html" class="nav-item">🔔 Refill Alerts</a>
-          <a href="dosage-analysis.html" class="nav-item">📈 Dosage Analysis</a>
+          <a href="dosage-analysis.html" class="nav-item active">📈 Dosage Analysis</a>
           <a href="adherence-analytics.html" class="nav-item">📊 Adherence Analytics</a>
         </nav>
 
@@ -51,23 +51,44 @@
       <main class="main">
         <header class="topbar">
           <div>
-            <div class="greeting">My medicines</div>
-            <div class="subgreeting">All the medicines you're currently tracking</div>
+            <div class="greeting">Dosage Analysis</div>
+            <div class="subgreeting">A visual breakdown of your daily medicine schedule</div>
           </div>
-          <button class="add-btn" onclick="window.location.href = 'add-medicine.html'">
-            + Add medicine
-          </button>
         </header>
 
-        <input type="text" class="search-bar" id="searchBar" placeholder="Search medicines..." />
+        <section class="top-grid">
+          <div class="clock-card">
+            <h2 class="section-title">Your 24-hour dose clock</h2>
+            <div class="clock-wrap" id="clockWrap"></div>
+            <div class="clock-legend" id="clockLegend"></div>
+            <div class="dose-detail-panel" id="doseDetailPanel">
+              Click any dot on the clock to see details
+            </div>
+          </div>
 
-        <div class="filter-chips" id="filterChips"></div>
+          <div class="side-col">
+            <div class="countdown-card">
+              <h2 class="section-title">Next dose</h2>
+              <div class="countdown-display" id="countdownDisplay"></div>
+            </div>
 
-        <div class="full-medicine-list" id="fullMedicineList"></div>
+            <div class="suggestions-card">
+              <h2 class="section-title">💡 Smart suggestions</h2>
+              <div id="suggestionsList"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="conflicts-section" id="conflictsSection"></section>
+
+        <section class="schedule-section">
+          <h2 class="section-title">Full daily schedule</h2>
+          <div class="schedule-list" id="scheduleList"></div>
+        </section>
       </main>
     </div>
 
     <script src="user-session.js?v=4"></script>
-    <script src="my-medicines.js"></script>
+    <script src="dosage-analysis.js"></script>
   </body>
 </html>

@@ -13,7 +13,8 @@ body {
   margin: 0;
 }
 .login-box {
-  background: white;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
   padding: 40px 30px;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
@@ -23,7 +24,7 @@ body {
 .logo {
   font-size: 28px;
   font-weight: bold;
-  color: #3d5a4c;
+  color: #24382e;
   margin-bottom: 5px;
 }
 .subtitle {
@@ -41,14 +42,14 @@ body {
   flex: 1;
   padding: 8px 5px;
   font-size: 12px;
-  border: 1px solid #3d5a4c;
+  border: 1px solid #24382e;
   background: white;
-  color: #3d5a4c;
+  color: #24382e;
   border-radius: 6px;
   cursor: pointer;
 }
 .role-tab.active {
-  background: #3d5a4c;
+  background: #24382e;
   color: white;
 }
 input {
@@ -61,7 +62,7 @@ input {
 }
 input:focus {
   outline: none;
-  border-color: #3d5a4c;
+  border-color: #24382e;
 }
 .options-row {
   display: flex;
@@ -71,13 +72,13 @@ input:focus {
   margin: 10px 0;
 }
 .options-row a {
-  color: #3d5a4c;
+  color: #24382e;
   text-decoration: none;
 }
 button {
   width: 100%;
   padding: 12px;
-  background-color: #3d5a4c;
+  background-color: #24382e;
   color: white;
   border: none;
   border-radius: 6px;
@@ -86,7 +87,7 @@ button {
   margin-top: 10px;
 }
 button:hover {
-  background-color: #3d5a4c;
+  background-color: #16241d;
 }
 #errorMsg {
   color: #e63946;
@@ -99,7 +100,7 @@ button:hover {
   color: #555;
 }
 .signup-link a {
-  color: #3d5a4c;
+  color: #24382e;
   font-weight: bold;
   text-decoration: none;
 }

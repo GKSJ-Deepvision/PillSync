@@ -32,12 +32,24 @@ async function loadPatientProfile() {
     return;
   }
   try {
+    // 1. Try patient's own self profile
+    const meRes = await fetch(`${BASE_URL}/profiles/patients/me/`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (meRes.ok) {
+      const meData = await meRes.json();
+      if (meData.id) {
+        patientProfileId = meData.id;
+        return;
+      }
+    }
+
+    // 2. Fallback to list
     const res = await fetch(`${BASE_URL}/profiles/patients/`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (res.ok) {
       const data = await res.json();
-      // The logged-in user's own profile is the first result
       if (data.results && data.results.length > 0) {
         patientProfileId = data.results[0].id;
       } else if (Array.isArray(data) && data.length > 0) {
@@ -49,13 +61,19 @@ async function loadPatientProfile() {
   }
 }
 
+// Initialize default date to today
+const startDateInput = document.getElementById('medStartDate');
+if (startDateInput && !startDateInput.value) {
+  startDateInput.value = new Date().toISOString().split('T')[0];
+}
+
 // Update how many time inputs show based on chosen frequency
 document.getElementById('medFrequency').addEventListener('change', function () {
   const count = parseInt(this.value);
   const container = document.getElementById('timeInputs');
   container.innerHTML = '';
 
-  const defaultTimes = ['08:00', '13:00', '21:00'];
+  const defaultTimes = ['08:00', '13:00', '20:00'];
   for (let i = 0; i < count; i++) {
     const input = document.createElement('input');
     input.type = 'time';
@@ -71,11 +89,12 @@ document.getElementById('medForm').addEventListener('submit', async function (e)
   const name = document.getElementById('medName').value.trim();
   const category = document.getElementById('medCategory').value;
   const stock = document.getElementById('medStock').value;
-  const startDate = document.getElementById('medStartDate').value;
+  const startDate = document.getElementById('medStartDate').value || new Date().toISOString().split('T')[0];
   const errorMsg = document.getElementById('formError');
+  errorMsg.textContent = '';
 
-  if (!name || !stock || !startDate) {
-    errorMsg.textContent = 'Please fill in all required fields.';
+  if (!name || !stock) {
+    errorMsg.textContent = 'Please fill in the medicine name and stock.';
     return;
   }
 
@@ -87,25 +106,42 @@ document.getElementById('medForm').addEventListener('submit', async function (e)
   }
 
   if (!patientProfileId) {
-    errorMsg.textContent = 'Could not find your patient profile. Please try refreshing the page.';
+    await loadPatientProfile();
+  }
+
+  if (!patientProfileId) {
+    errorMsg.textContent = 'Could not find your patient profile. Please make sure you are logged in as a patient.';
     return;
   }
 
-  // Build schedules from the time inputs
+  // Build schedules from the time inputs with distinct slots
   const times = Array.from(document.querySelectorAll('.dose-time')).map((input) => input.value);
-  const schedules = times.map((time) => ({
-    slot: getSlot(time),
-    time_of_day: time + ':00', // backend expects HH:MM:SS
-    quantity_per_dose: 1,
-    frequency: 'DAILY',
-    start_date: startDate,
-  }));
+  const slotPool = ['MORNING', 'AFTERNOON', 'EVENING', 'NIGHT'];
+  const usedSlots = new Set();
+
+  const schedules = times.map((time, idx) => {
+    let slot = getSlot(time);
+    if (usedSlots.has(slot)) {
+      // Find another available slot
+      const alt = slotPool.find((s) => !usedSlots.has(s));
+      if (alt) slot = alt;
+    }
+    usedSlots.add(slot);
+
+    return {
+      slot: slot,
+      time_of_day: time.length === 5 ? time + ':00' : time, // backend expects HH:MM:SS
+      quantity_per_dose: 1,
+      frequency: 'DAILY',
+      start_date: startDate,
+    };
+  });
 
   const payload = {
     patient: patientProfileId,
     name: name,
     category: category,
-    quantity_remaining: parseInt(stock),
+    quantity_remaining: parseInt(stock, 10),
     start_date: startDate,
     schedules: schedules,
   };
@@ -122,11 +158,11 @@ document.getElementById('medForm').addEventListener('submit', async function (e)
 
     if (!response.ok) {
       const errorData = await response.json();
-      // Backend returns { error: { message, details } } for validation errors
-      const details = errorData?.error?.details;
-      if (details) {
-        const firstError = Object.values(details)[0];
-        errorMsg.textContent = Array.isArray(firstError) ? firstError[0] : firstError;
+      const details = errorData?.error?.details || errorData;
+      if (details && typeof details === 'object') {
+        const firstKey = Object.keys(details)[0];
+        const firstVal = details[firstKey];
+        errorMsg.textContent = Array.isArray(firstVal) ? `${firstKey}: ${firstVal[0]}` : String(firstVal);
       } else {
         errorMsg.textContent =
           errorData.detail || errorData?.error?.message || 'Failed to add medicine.';
@@ -134,7 +170,7 @@ document.getElementById('medForm').addEventListener('submit', async function (e)
       return;
     }
 
-    window.location.href = 'dashboard.html';
+    window.location.href = 'my-medicines.html';
   } catch (error) {
     console.error('Error adding medicine:', error);
     errorMsg.textContent = 'An error occurred while connecting to the server.';
@@ -143,3 +179,4 @@ document.getElementById('medForm').addEventListener('submit', async function (e)
 
 // Load patient profile when page opens
 loadPatientProfile();
+

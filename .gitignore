@@ -74,6 +74,10 @@ ml/models/*
 .vscode/
 !.vscode/extensions.json
 .idea/
+.claude/
+.kilo/
+.gemini/
+.cursor/
 *.swp
 *~
 .DS_Store

@@ -35,6 +35,8 @@ function getSlot(timeStr) {
   return 'NIGHT';
 }
 
+const slotPool = ['MORNING', 'AFTERNOON', 'EVENING', 'NIGHT'];
+
 async function loadPatientProfile() {
   const token = localStorage.getItem('access_token');
   if (!token) {
@@ -42,6 +44,19 @@ async function loadPatientProfile() {
     return;
   }
   try {
+    // 1. Try patient self endpoint first
+    const meRes = await fetch(`${BASE_URL}/profiles/patients/me/`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (meRes.ok) {
+      const meData = await meRes.json();
+      if (meData.id) {
+        patientProfileId = meData.id;
+        return;
+      }
+    }
+
+    // 2. Fallback to patient list endpoint
     const res = await fetch(`${BASE_URL}/profiles/patients/`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -299,13 +314,23 @@ reviewForm.addEventListener('submit', async (e) => {
 
   const token = localStorage.getItem('access_token');
   const times = Array.from(document.querySelectorAll('.dose-time')).map((input) => input.value);
-  const schedules = times.map((time) => ({
-    slot: getSlot(time),
-    time_of_day: time + ':00',
-    quantity_per_dose: 1,
-    frequency: 'DAILY',
-    start_date: startDate,
-  }));
+  const usedSlots = new Set();
+  const schedules = times.map((time) => {
+    let slot = getSlot(time);
+    if (usedSlots.has(slot)) {
+      const alt = slotPool.find((s) => !usedSlots.has(s));
+      if (alt) slot = alt;
+    }
+    usedSlots.add(slot);
+
+    return {
+      slot: slot,
+      time_of_day: time.length === 5 ? time + ':00' : time,
+      quantity_per_dose: 1,
+      frequency: 'DAILY',
+      start_date: startDate,
+    };
+  });
 
   const fullName = dosage ? `${name} ${dosage}` : name;
   const payload = {
@@ -328,8 +353,16 @@ reviewForm.addEventListener('submit', async (e) => {
     });
 
     if (!res.ok) {
-      const err = await res.json();
-      formError.textContent = err?.detail || 'Failed to save medicine.';
+      const errorData = await res.json();
+      const details = errorData?.error?.details || errorData;
+      if (details && typeof details === 'object') {
+        const firstKey = Object.keys(details)[0];
+        const firstVal = details[firstKey];
+        formError.textContent = Array.isArray(firstVal) ? `${firstKey}: ${firstVal[0]}` : String(firstVal);
+      } else {
+        formError.textContent =
+          errorData.detail || errorData?.error?.message || 'Failed to save medicine.';
+      }
       return;
     }
 

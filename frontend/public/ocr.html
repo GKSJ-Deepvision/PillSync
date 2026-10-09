@@ -6,7 +6,6 @@
     <title>PillSync - Scan Prescription (OCR)</title>
     <link rel="stylesheet" href="dashboard.css" />
     <link rel="stylesheet" href="ocr.css" />
-    <link rel="stylesheet" href="debug-logger.css" />
   </head>
   <body>
     <div class="app">
@@ -14,19 +13,24 @@
       <aside class="sidebar">
         <div class="brand">💊 PillSync</div>
 
-        <!-- PROFILE CARD -->
-        <div class="profile-card">
-          <div class="profile-avatar" id="sidebarAvatar">U</div>
-          <div class="profile-name" id="sidebarName">Loading...</div>
-          <div class="profile-email" id="sidebarEmail">...</div>
-          <span class="role-badge" id="sidebarRole">Patient</span>
+        <!-- PROFILE MINI (click to view full profile) -->
+        <div class="mini-card" onclick="window.location.href = 'profile.html'">
+          <div class="mini-avatar" id="sidebarAvatar">U</div>
+          <div class="mini-text">
+            <div class="mini-name" id="sidebarName">Patient</div>
+            <div class="mini-sub" id="sidebarSub">Patient · View profile</div>
+          </div>
+          <span class="mini-chevron">›</span>
         </div>
 
-        <!-- CAREGIVER CARD -->
-        <div class="caregiver-card">
-          <div class="caregiver-label">Your caregiver</div>
-          <div class="caregiver-name" id="caregiverName">None linked</div>
-          <div class="caregiver-email" id="caregiverEmail">No email</div>
+        <!-- CAREGIVER MINI (click to view caregiver info) -->
+        <div class="mini-card" onclick="window.location.href = 'caregiver-info.html'">
+          <div class="mini-avatar mini-avatar-alt">🤝</div>
+          <div class="mini-text">
+            <div class="mini-name" id="caregiverName">Caregiver</div>
+            <div class="mini-sub" id="caregiverSub">Caregiver · View info</div>
+          </div>
+          <span class="mini-chevron">›</span>
         </div>
 
         <!-- NAVIGATION -->
@@ -36,6 +40,9 @@
           <a href="add-medicine.html" class="nav-item">➕ Add Medicine</a>
           <a href="ocr.html" class="nav-item active">📷 Scan Prescription</a>
           <a href="history.html" class="nav-item">📊 History</a>
+          <a href="refill-alerts.html" class="nav-item">🔔 Refill Alerts</a>
+          <a href="dosage-analysis.html" class="nav-item">📈 Dosage Analysis</a>
+          <a href="adherence-analytics.html" class="nav-item">📊 Adherence Analytics</a>
         </nav>
 
         <a href="login.html" class="logout" onclick="localStorage.removeItem('access_token')"
@@ -211,7 +218,6 @@
     <div class="notification-toast" id="toast"></div>
 
     <script src="user-session.js?v=3"></script>
-    <script src="ocr.js?v=2"></script>
-    <script src="debug-logger.js"></script>
+    <script src="ocr.js?v=3"></script>
   </body>
 </html>

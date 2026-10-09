@@ -5,29 +5,32 @@
     <title>PillSync - Caregiver Dashboard</title>
     <link rel="stylesheet" href="dashboard.css" />
     <link rel="stylesheet" href="caregiver-dashboard.css" />
-    <link rel="stylesheet" href="debug-logger.css" />
   </head>
   <body>
     <div class="app">
+      <!-- SIDEBAR -->
       <aside class="sidebar">
         <div class="brand">💊 PillSync</div>
-        <div class="profile-card">
-          <div class="profile-avatar" id="sidebarAvatar">C</div>
-          <div class="profile-name" id="sidebarName">Loading…</div>
-          <div class="profile-email" id="sidebarEmail"></div>
-          <span class="role-badge">Caregiver</span>
+        <div class="mini-card" onclick="window.location.href = 'caregiver-profile.html'">
+          <div class="mini-avatar mini-avatar-alt" id="sidebarAvatar">P</div>
+          <div class="mini-text">
+            <div class="mini-name" id="sidebarName">Pari Verma</div>
+            <div class="mini-sub" id="sidebarSub">Caregiver · View profile</div>
+          </div>
+          <span class="mini-chevron">›</span>
         </div>
         <nav class="nav">
-          <a href="#" class="nav-item active">My Patients</a>
-          <a href="#" class="nav-item">Alerts</a>
+          <a href="caregiver-dashboard.html" class="nav-item active">👥 My Patients</a>
         </nav>
-        <a href="login.html" class="logout">Log out</a>
+        <a href="login.html" class="logout" onclick="localStorage.removeItem('access_token')"
+          >Log out</a
+        >
       </aside>
 
       <main class="main">
         <header class="topbar">
           <div>
-            <div class="greeting" id="topGreeting">Good morning, Caregiver</div>
+            <div class="greeting">Good morning, Pari</div>
             <div class="subgreeting">Here's how your patients are doing today</div>
           </div>
         </header>
@@ -43,7 +46,30 @@
       </main>
     </div>
 
+    <!-- CHAT MODAL -->
+    <div class="chat-overlay" id="chatModal" style="display: none">
+      <div class="chat-box">
+        <div class="chat-header">
+          <span id="chatWithName">Chat</span>
+          <button class="chat-close" onclick="closeChat()">✕</button>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-row">
+          <input
+            type="text"
+            id="chatInput"
+            placeholder="Type a message..."
+            onkeypress="if (event.key === 'Enter') sendMessage();"
+          />
+          <button onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+    <script src="user-session.js?v=4"></script>
+    <script>
+      window.CHAT_ME = 'Pari Verma';
+    </script>
+    <script src="chat.js"></script>
     <script src="caregiver-dashboard.js"></script>
-    <script src="debug-logger.js"></script>
   </body>
 </html>

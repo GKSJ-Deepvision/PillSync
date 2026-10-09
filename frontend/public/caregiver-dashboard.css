@@ -22,16 +22,21 @@
 }
 
 .patient-card {
-  background: white;
-  border: 1px solid var(--line);
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 14px;
   padding: 20px;
   cursor: pointer;
-  transition: box-shadow 0.15s ease;
+  box-shadow: 0 8px 24px rgba(27, 31, 59, 0.06);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .patient-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 32px rgba(27, 31, 59, 0.12);
+  transform: translateY(-2px);
 }
 
 .patient-card-top {
@@ -91,22 +96,10 @@
 }
 
 .badge-good {
-  background: #f1f7f3;
-  color: var(--sage-deep);
+  background: rgba(0, 194, 168, 0.12);
+  color: #00a38c;
 }
 .badge-warning {
-  background: #fdf1ec;
-  color: var(--terracotta);
-}
-.badge-neutral {
-  background: #f5f3ef;
-  color: #8a8578;
-}
-
-.patient-pending {
-  font-size: 11px;
-  color: #b5830a;
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px solid var(--line);
+  background: rgba(255, 107, 107, 0.12);
+  color: #e05252;
 }

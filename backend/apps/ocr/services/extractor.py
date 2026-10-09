@@ -1,4 +1,4 @@
-"""OCR Extraction Service."""
+"""OCR Extraction Service with Multi-pass Deblurring and Enhancement."""
 
 from __future__ import annotations
 
@@ -20,55 +20,110 @@ if not shutil.which("tesseract"):
         pytesseract.pytesseract.tesseract_cmd = windows_default
 
 
-def preprocess_image(img_bgr: np.ndarray) -> np.ndarray:
-    """Apply basic preprocessing (grayscale + OTSU thresholding) to improve OCR clarity."""
-    gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-    _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+def get_ocr_data(image: np.ndarray) -> tuple[str, float]:
+    """Run tesseract on an image and calculate average confidence."""
+    try:
+        raw_text = pytesseract.image_to_string(image)
+        data = pytesseract.image_to_data(image, output_type=Output.DICT)
+        confidences = [
+            int(conf)
+            for conf, word in zip(data["conf"], data["text"], strict=True)
+            if word.strip() and int(conf) != -1
+        ]
+        avg_conf = sum(confidences) / len(confidences) if confidences else 0.0
+        return raw_text.strip(), avg_conf
+    except Exception:
+        return "", 0.0
+
+
+def enhance_deblur_sharpen(img_bgr: np.ndarray) -> np.ndarray:
+    """Deblur and sharpen using CLAHE, unsharp masking, and bicubic upscaling."""
+    gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY) if len(img_bgr.shape) == 3 else img_bgr
+    
+    # 1. Contrast Limited Adaptive Histogram Equalization
+    clahe = cv2.createCLAHE(clipLimit=2.5, tileGridSize=(8, 8))
+    enhanced = clahe.apply(gray)
+    
+    # 2. Unsharp Masking to recover soft/blurry edges
+    gaussian = cv2.GaussianBlur(enhanced, (0, 0), 2.0)
+    unsharp = cv2.addWeighted(enhanced, 2.0, gaussian, -1.0, 0)
+    
+    # 3. 2x Bicubic Upsampling for small or low-res text
+    h, w = unsharp.shape[:2]
+    if max(h, w) < 1800:
+        unsharp = cv2.resize(unsharp, (w * 2, h * 2), interpolation=cv2.INTER_CUBIC)
+        
+    _, thresh = cv2.threshold(unsharp, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return thresh
 
 
+def enhance_adaptive_thresh(img_bgr: np.ndarray) -> np.ndarray:
+    """Enhance uneven lighting and soft blur with adaptive Gaussian thresholding."""
+    gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY) if len(img_bgr.shape) == 3 else img_bgr
+    denoised = cv2.bilateralFilter(gray, 9, 75, 75)
+    return cv2.adaptiveThreshold(
+        denoised, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 5
+    )
+
+
 def extract_from_image_bytes(image_bytes: bytes) -> dict[str, Any]:
-    """Process raw image bytes and return extracted structured data with confidence."""
+    """Process raw image bytes and return extracted structured data with highest confidence."""
     nparr = np.frombuffer(image_bytes, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
     if img is None:
         raise ValueError("Could not decode image.")
 
-    # 1. OCR on original
-    raw_text = pytesseract.image_to_string(img)
-    data = pytesseract.image_to_data(img, output_type=Output.DICT)
-    confidences = [
-        int(conf)
-        for conf, word in zip(data["conf"], data["text"], strict=True)
-        if word.strip() and int(conf) != -1
-    ]
+    candidates: list[tuple[str, float, dict[str, Any]]] = []
 
-    # If low text or low confidence, try OTSU preprocessed
-    avg_conf = sum(confidences) / len(confidences) if confidences else 0.0
-    if len(raw_text.strip()) < 5 or avg_conf < 40:
-        preprocessed = preprocess_image(img)
-        p_text = pytesseract.image_to_string(preprocessed)
-        p_data = pytesseract.image_to_data(preprocessed, output_type=Output.DICT)
-        p_confidences = [
-            int(conf)
-            for conf, word in zip(p_data["conf"], p_data["text"], strict=True)
-            if word.strip() and int(conf) != -1
-        ]
-        p_avg_conf = sum(p_confidences) / len(p_confidences) if p_confidences else 0.0
-        if len(p_text.strip()) > len(raw_text.strip()) or p_avg_conf > avg_conf:
-            raw_text = p_text
-            avg_conf = p_avg_conf
+    # Pass 1: Raw Original
+    raw_text_1, conf_1 = get_ocr_data(img)
+    parsed_1 = parse_ocr_text(raw_text_1)
+    candidates.append((raw_text_1, conf_1, parsed_1))
 
-    # 2. Parse text with structured parser
-    parsed = parse_ocr_text(raw_text)
+    # Pass 2: Grayscale + Otsu
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    _, otsu = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    raw_text_2, conf_2 = get_ocr_data(otsu)
+    parsed_2 = parse_ocr_text(raw_text_2)
+    candidates.append((raw_text_2, conf_2, parsed_2))
+
+    # Pass 3: Deblur & Sharpen (Unsharp Mask + CLAHE + 2x Upscale)
+    deblurred = enhance_deblur_sharpen(img)
+    raw_text_3, conf_3 = get_ocr_data(deblurred)
+    parsed_3 = parse_ocr_text(raw_text_3)
+    candidates.append((raw_text_3, conf_3, parsed_3))
+
+    # Pass 4: Adaptive Thresholding
+    adaptive = enhance_adaptive_thresh(img)
+    raw_text_4, conf_4 = get_ocr_data(adaptive)
+    parsed_4 = parse_ocr_text(raw_text_4)
+    candidates.append((raw_text_4, conf_4, parsed_4))
+
+    # Score candidates: prioritize finding medicine_name, dosage, quantity, and higher confidence
+    def score_candidate(cand: tuple[str, float, dict[str, Any]]) -> float:
+        text, conf, parsed = cand
+        score = conf
+        if parsed.get("medicine_name"):
+            score += 40
+        if parsed.get("dosage"):
+            score += 30
+        if parsed.get("quantity"):
+            score += 15
+        if parsed.get("frequency"):
+            score += 15
+        if len(text) > 20:
+            score += 10
+        return score
+
+    best_text, best_conf, best_parsed = max(candidates, key=score_candidate)
 
     return {
-        "raw_text": raw_text.strip(),
-        "confidence": round(avg_conf, 2),
-        "medicine_name": parsed.get("medicine_name"),
-        "dosage": parsed.get("dosage"),
-        "quantity": parsed.get("quantity"),
-        "frequency": parsed.get("frequency"),
-        "prescription_details": parsed.get("prescription_details"),
+        "raw_text": best_text.strip(),
+        "confidence": round(best_conf, 2),
+        "medicine_name": best_parsed.get("medicine_name"),
+        "dosage": best_parsed.get("dosage"),
+        "quantity": best_parsed.get("quantity"),
+        "frequency": best_parsed.get("frequency"),
+        "prescription_details": best_parsed.get("prescription_details"),
     }
