@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>PillSync - Add Medicine</title>
+    <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="add-medicine.css" />
+  </head>
+  <body>
+    <div class="app">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="brand">💊 PillSync</div>
+
+        <!-- PROFILE MINI (click to view full profile) -->
+        <div class="mini-card" onclick="window.location.href = 'profile.html'">
+          <div class="mini-avatar" id="sidebarAvatar">U</div>
+          <div class="mini-text">
+            <div class="mini-name" id="sidebarName">Patient</div>
+            <div class="mini-sub" id="sidebarSub">Patient · View profile</div>
+          </div>
+          <span class="mini-chevron">›</span>
+        </div>
+
+        <!-- CAREGIVER MINI (click to view caregiver info) -->
+        <div class="mini-card" onclick="window.location.href = 'caregiver-info.html'">
+          <div class="mini-avatar mini-avatar-alt">🤝</div>
+          <div class="mini-text">
+            <div class="mini-name" id="caregiverName">Caregiver</div>
+            <div class="mini-sub" id="caregiverSub">Caregiver · View info</div>
+          </div>
+          <span class="mini-chevron">›</span>
+        </div>
+
+        <nav class="nav">
+          <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+          <a href="my-medicines.html" class="nav-item">💊 My Medicines</a>
+          <a href="add-medicine.html" class="nav-item active">➕ Add Medicine</a>
+          <a href="ocr.html" class="nav-item">📷 Scan Prescription</a>
+          <a href="history.html" class="nav-item">📊 History</a>
+          <a href="refill-alerts.html" class="nav-item">🔔 Refill Alerts</a>
+          <a href="dosage-analysis.html" class="nav-item">📈 Dosage Analysis</a>
+          <a href="adherence-analytics.html" class="nav-item">📊 Adherence Analytics</a>
+        </nav>
+
+        <a href="login.html" class="logout" onclick="localStorage.removeItem('access_token')"
+          >Log out</a
+        >
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <div class="greeting">Add a medicine</div>
+            <div class="subgreeting">Fill in the details below to start tracking it</div>
+          </div>
+        </header>
+
+        <form class="med-form" id="medForm">
+          <label>Medicine name</label>
+          <input
+            type="text"
+            id="medName"
+            list="medSuggestions"
+            placeholder="e.g. Metformin 500mg"
+            autocomplete="off"
+          />
+          <datalist id="medSuggestions">
+            <option value="Metformin 500mg"></option>
+            <option value="Amlodipine 5mg"></option>
+            <option value="Amoxycillin 500mg"></option>
+            <option value="Atorvastatin 10mg"></option>
+            <option value="Levothyroxine 50mcg"></option>
+            <option value="Paracetamol 650mg"></option>
+            <option value="Azithromycin 500mg"></option>
+            <option value="Losartan 50mg"></option>
+          </datalist>
+
+          <label>Category</label>
+          <select id="medCategory">
+            <option value="BLOOD_PRESSURE">Blood Pressure</option>
+            <option value="DIABETES">Diabetes</option>
+            <option value="THYROID">Thyroid</option>
+            <option value="ANTIBIOTICS">Antibiotics</option>
+            <option value="VITAMINS">Vitamins</option>
+            <option value="HEART">Heart Medications</option>
+            <option value="OTHER">Other</option>
+          </select>
+
+          <div class="form-row">
+            <div>
+              <label>Frequency</label>
+              <select id="medFrequency">
+                <option value="1">Once a day</option>
+                <option value="2">Twice a day</option>
+                <option value="3">3 times a day</option>
+              </select>
+            </div>
+            <div>
+              <label>Current stock (tablets)</label>
+              <input type="number" id="medStock" placeholder="e.g. 30" min="1" />
+            </div>
+          </div>
+
+          <label>Reminder times</label>
+          <div class="time-inputs" id="timeInputs">
+            <input type="time" class="dose-time" value="08:00" />
+          </div>
+
+          <label>Start date</label>
+          <input type="date" id="medStartDate" />
+
+          <p class="form-error" id="formError"></p>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="window.location.href = 'dashboard.html'"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn-primary">Save medicine</button>
+          </div>
+        </form>
+      </main>
+    </div>
+
+    <script src="user-session.js?v=4"></script>
+    <script src="add-medicine.js"></script>
+  </body>
+</html>

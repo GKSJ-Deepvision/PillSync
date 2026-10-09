@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>PillSync - My Profile</title>
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body>
+    <div class="app">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="brand">💊 PillSync</div>
+
+        <!-- PROFILE MINI (click to view full profile) -->
+        <div
+          class="mini-card"
+          onclick="window.location.href = 'profile.html'"
+          style="border-color: rgba(0, 194, 168, 0.4); background: rgba(255, 255, 255, 0.12)"
+        >
+          <div class="mini-avatar" id="sidebarAvatar">U</div>
+          <div class="mini-text">
+            <div class="mini-name" id="sidebarName">Patient</div>
+            <div class="mini-sub" id="sidebarSub">Patient · View profile</div>
+          </div>
+          <span class="mini-chevron">›</span>
+        </div>
+
+        <!-- CAREGIVER MINI (click to view caregiver info) -->
+        <div class="mini-card" onclick="window.location.href = 'caregiver-info.html'">
+          <div class="mini-avatar mini-avatar-alt">🤝</div>
+          <div class="mini-text">
+            <div class="mini-name" id="caregiverName">Caregiver</div>
+            <div class="mini-sub" id="caregiverSub">Caregiver · View info</div>
+          </div>
+          <span class="mini-chevron">›</span>
+        </div>
+
+        <nav class="nav">
+          <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+          <a href="my-medicines.html" class="nav-item">💊 My Medicines</a>
+          <a href="add-medicine.html" class="nav-item">➕ Add Medicine</a>
+          <a href="ocr.html" class="nav-item">📷 Scan Prescription</a>
+          <a href="history.html" class="nav-item">📊 History</a>
+          <a href="refill-alerts.html" class="nav-item">🔔 Refill Alerts</a>
+          <a href="dosage-analysis.html" class="nav-item">📈 Dosage Analysis</a>
+          <a href="adherence-analytics.html" class="nav-item">📊 Adherence Analytics</a>
+        </nav>
+
+        <a href="login.html" class="logout" onclick="localStorage.removeItem('access_token')"
+          >Log out</a
+        >
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <div class="greeting">My Profile</div>
+            <div class="subgreeting">View and manage your personal information</div>
+          </div>
+        </header>
+
+        <div class="profile-page-header">
+          <div class="profile-page-avatar" id="pAvatar">U</div>
+          <div>
+            <div class="profile-page-name" id="pName">Patient</div>
+            <div class="profile-page-email" id="pEmail">—</div>
+          </div>
+        </div>
+
+        <div class="profile-card-section">
+          <div class="section-header">
+            <h2 class="section-title" style="margin-bottom: 0">Personal Details</h2>
+            <button class="edit-toggle-btn" id="editBtn" onclick="toggleEdit()">Edit</button>
+          </div>
+
+          <div class="profile-field-row">
+            <span class="profile-field-label">Phone</span>
+            <span class="profile-field-value" id="fPhone-view">—</span>
+            <span class="profile-field-value" id="fPhone-edit" style="display: none"
+              ><input type="text" id="fPhone-input" placeholder="+91 98765 43210"
+            /></span>
+          </div>
+          <div class="profile-field-row">
+            <span class="profile-field-label">Age</span>
+            <span class="profile-field-value" id="fAge-view">—</span>
+          </div>
+          <div class="profile-field-row">
+            <span class="profile-field-label">Gender</span>
+            <span class="profile-field-value" id="fGender-view">—</span>
+          </div>
+          <div class="profile-field-row">
+            <span class="profile-field-label">Date of Birth</span>
+            <span class="profile-field-value" id="fDob-view">—</span>
+          </div>
+          <div class="profile-field-row">
+            <span class="profile-field-label">Blood Group</span>
+            <span class="profile-field-value" id="fBlood-view">—</span>
+            <span class="profile-field-value" id="fBlood-edit" style="display: none"
+              ><input type="text" id="fBlood-input" placeholder="e.g. O+, B+, A-"
+            /></span>
+          </div>
+          <div class="profile-field-row">
+            <span class="profile-field-label">Medical Conditions</span>
+            <span class="profile-field-value" id="fConditions-view">None reported</span>
+          </div>
+
+          <div class="profile-page-actions" id="editActions" style="display: none">
+            <button class="edit-toggle-btn" onclick="saveProfile()">Save</button>
+            <button class="btn-cancel" onclick="cancelEdit()">Cancel</button>
+          </div>
+        </div>
+
+        <div class="profile-card-section" id="emergencyDetails">
+          <h2 class="section-title">Emergency Contact</h2>
+          <div class="profile-field-row">
+            <span class="profile-field-label">Name</span>
+            <span class="profile-field-value" id="fEmName">—</span>
+          </div>
+          <div class="profile-field-row">
+            <span class="profile-field-label">Relation</span>
+            <span class="profile-field-value" id="fEmRel">—</span>
+          </div>
+          <div class="profile-field-row">
+            <span class="profile-field-label">Phone</span>
+            <span class="profile-field-value" id="fEmPhone">—</span>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="user-session.js?v=4"></script>
+    <script src="profile.js"></script>
+  </body>
+</html>

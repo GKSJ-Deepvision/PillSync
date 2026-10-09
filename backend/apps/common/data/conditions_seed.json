@@ -1,0 +1,154 @@
+{
+  "categories": [
+    {
+      "code": "BLOOD_PRESSURE",
+      "label": "Blood Pressure"
+    },
+    {
+      "code": "DIABETES",
+      "label": "Diabetes"
+    },
+    {
+      "code": "THYROID",
+      "label": "Thyroid"
+    },
+    {
+      "code": "ANTIBIOTICS",
+      "label": "Antibiotics"
+    },
+    {
+      "code": "VITAMINS",
+      "label": "Vitamins"
+    },
+    {
+      "code": "HEART",
+      "label": "Heart Medications"
+    },
+    {
+      "code": "OTHER",
+      "label": "Other"
+    }
+  ],
+  "conditions": [
+    {
+      "code": "HYPERTENSION",
+      "name": "Hypertension (High Blood Pressure)",
+      "category": "BLOOD_PRESSURE",
+      "chronic": true
+    },
+    {
+      "code": "TYPE_1_DIABETES",
+      "name": "Type 1 Diabetes",
+      "category": "DIABETES",
+      "chronic": true
+    },
+    {
+      "code": "TYPE_2_DIABETES",
+      "name": "Type 2 Diabetes",
+      "category": "DIABETES",
+      "chronic": true
+    },
+    {
+      "code": "HYPOTHYROIDISM",
+      "name": "Hypothyroidism",
+      "category": "THYROID",
+      "chronic": true
+    },
+    {
+      "code": "HYPERTHYROIDISM",
+      "name": "Hyperthyroidism",
+      "category": "THYROID",
+      "chronic": true
+    },
+    {
+      "code": "CORONARY_ARTERY_DISEASE",
+      "name": "Coronary Artery Disease",
+      "category": "HEART",
+      "chronic": true
+    },
+    {
+      "code": "HEART_FAILURE",
+      "name": "Heart Failure",
+      "category": "HEART",
+      "chronic": true
+    },
+    {
+      "code": "ARRHYTHMIA",
+      "name": "Cardiac Arrhythmia",
+      "category": "HEART",
+      "chronic": true
+    },
+    {
+      "code": "HYPERLIPIDEMIA",
+      "name": "High Cholesterol (Hyperlipidemia)",
+      "category": "HEART",
+      "chronic": true
+    },
+    {
+      "code": "ASTHMA",
+      "name": "Asthma",
+      "category": "OTHER",
+      "chronic": true
+    },
+    {
+      "code": "COPD",
+      "name": "Chronic Obstructive Pulmonary Disease",
+      "category": "OTHER",
+      "chronic": true
+    },
+    {
+      "code": "CKD",
+      "name": "Chronic Kidney Disease",
+      "category": "OTHER",
+      "chronic": true
+    },
+    {
+      "code": "OSTEOPOROSIS",
+      "name": "Osteoporosis",
+      "category": "VITAMINS",
+      "chronic": true
+    },
+    {
+      "code": "ANEMIA",
+      "name": "Anemia",
+      "category": "VITAMINS",
+      "chronic": true
+    },
+    {
+      "code": "VITAMIN_D_DEFICIENCY",
+      "name": "Vitamin D Deficiency",
+      "category": "VITAMINS",
+      "chronic": false
+    },
+    {
+      "code": "INFECTION",
+      "name": "Acute Infection",
+      "category": "ANTIBIOTICS",
+      "chronic": false
+    },
+    {
+      "code": "ARTHRITIS",
+      "name": "Arthritis",
+      "category": "OTHER",
+      "chronic": true
+    },
+    {
+      "code": "EPILEPSY",
+      "name": "Epilepsy",
+      "category": "OTHER",
+      "chronic": true
+    },
+    {
+      "code": "DEPRESSION",
+      "name": "Depression",
+      "category": "OTHER",
+      "chronic": true
+    },
+    {
+      "code": "OTHER",
+      "name": "Other",
+      "category": "OTHER",
+      "chronic": false
+    }
+  ]
+}

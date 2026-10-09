@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>PillSync - Admin Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="admin-dashboard.css" />
+  </head>
+  <body>
+    <div class="app">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="brand">💊 PillSync</div>
+        <div class="mini-card" style="cursor: default">
+          <div
+            class="mini-avatar"
+            id="sidebarAvatar"
+            style="background: linear-gradient(135deg, #7c6af5, #00c2a8)"
+          >
+            A
+          </div>
+          <div class="mini-text">
+            <div class="mini-name" id="sidebarName">System Admin</div>
+            <div class="mini-sub" id="sidebarSub">Admin · Full access</div>
+          </div>
+        </div>
+        <nav class="nav">
+          <a href="admin-dashboard.html" class="nav-item active">🛡️ Overview</a>
+        </nav>
+        <a href="login.html" class="logout" onclick="localStorage.removeItem('access_token')"
+          >Log out</a
+        >
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <div class="greeting">Admin overview</div>
+            <div class="subgreeting">Platform-wide stats and user management</div>
+          </div>
+        </header>
+
+        <!-- STAT CARDS -->
+        <section class="stat-grid" id="statGrid"></section>
+        <!-- ROLE DISTRIBUTION -->
+        <section class="role-chart-section">
+          <h2 class="section-title">User distribution</h2>
+          <div class="role-chart-card">
+            <div class="donut-chart" id="donutChart"></div>
+            <div class="donut-legend" id="donutLegend"></div>
+          </div>
+        </section>
+
+        <!-- USER MANAGEMENT -->
+        <section class="users-section">
+          <div class="section-header">
+            <h2 class="section-title">All users</h2>
+            <input
+              type="text"
+              class="search-bar-small"
+              id="userSearch"
+              placeholder="Search users..."
+            />
+          </div>
+
+          <div class="filter-chips" id="roleFilterChips"></div>
+
+          <table class="user-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Joined</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody"></tbody>
+          </table>
+        </section>
+
+        <!-- ACTIVITY LOG -->
+        <section class="activity-section">
+          <h2 class="section-title">Recent activity</h2>
+          <div class="activity-list" id="activityList"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="user-session.js?v=4"></script>
+    <script src="admin-dashboard.js"></script>
+  </body>
+</html>

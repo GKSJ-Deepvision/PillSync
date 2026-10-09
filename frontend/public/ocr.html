@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PillSync - Scan Prescription (OCR)</title>
+    <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="ocr.css" />
+  </head>
+  <body>
+    <div class="app">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="brand">💊 PillSync</div>
+
+        <!-- PROFILE MINI (click to view full profile) -->
+        <div class="mini-card" onclick="window.location.href = 'profile.html'">
+          <div class="mini-avatar" id="sidebarAvatar">U</div>
+          <div class="mini-text">
+            <div class="mini-name" id="sidebarName">Patient</div>
+            <div class="mini-sub" id="sidebarSub">Patient · View profile</div>
+          </div>
+          <span class="mini-chevron">›</span>
+        </div>
+
+        <!-- CAREGIVER MINI (click to view caregiver info) -->
+        <div class="mini-card" onclick="window.location.href = 'caregiver-info.html'">
+          <div class="mini-avatar mini-avatar-alt">🤝</div>
+          <div class="mini-text">
+            <div class="mini-name" id="caregiverName">Caregiver</div>
+            <div class="mini-sub" id="caregiverSub">Caregiver · View info</div>
+          </div>
+          <span class="mini-chevron">›</span>
+        </div>
+
+        <!-- NAVIGATION -->
+        <nav class="nav">
+          <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+          <a href="my-medicines.html" class="nav-item">💊 My Medicines</a>
+          <a href="add-medicine.html" class="nav-item">➕ Add Medicine</a>
+          <a href="ocr.html" class="nav-item active">📷 Scan Prescription</a>
+          <a href="history.html" class="nav-item">📊 History</a>
+          <a href="refill-alerts.html" class="nav-item">🔔 Refill Alerts</a>
+          <a href="dosage-analysis.html" class="nav-item">📈 Dosage Analysis</a>
+          <a href="adherence-analytics.html" class="nav-item">📊 Adherence Analytics</a>
+        </nav>
+
+        <a href="login.html" class="logout" onclick="localStorage.removeItem('access_token')"
+          >Log out</a
+        >
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <div class="greeting">Prescription OCR Scanner</div>
+            <div class="subgreeting">
+              Upload your doctor's prescription or medicine label to auto-extract details and save
+              directly to your medicines list
+            </div>
+          </div>
+        </header>
+
+        <!-- STEP FLOW BANNER -->
+        <div class="steps-banner">
+          <div class="step-item">
+            <span class="step-num">1</span> Upload Real Prescription / Photo
+          </div>
+          <div class="step-arrow">➔</div>
+          <div class="step-item"><span class="step-num">2</span> OCR Extraction & Confidence</div>
+          <div class="step-arrow">➔</div>
+          <div class="step-item"><span class="step-num">3</span> Review & Edit Fields</div>
+          <div class="step-arrow">➔</div>
+          <div class="step-item"><span class="step-num">4</span> Saves to My Medicines</div>
+        </div>
+
+        <div class="ocr-container">
+          <!-- UPLOAD CARD -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">1. Upload Any Prescription or Medicine Image</span>
+            </div>
+
+            <div class="dropzone" id="dropzone">
+              <span class="dropzone-icon">📄</span>
+              <div class="dropzone-title">Upload Real Doctor's Prescription or Medicine Box</div>
+              <div class="dropzone-sub">Drag & drop your image file here, or click browse</div>
+              <button type="button" class="btn-browse" id="btnBrowse">
+                📁 Browse / Choose Photo from Device
+              </button>
+              <div class="dropzone-formats">Accepts: PNG, JPG, JPEG, WEBP (Up to 10MB)</div>
+              <input type="file" id="fileInput" class="hidden-input" accept="image/*" />
+            </div>
+
+            <!-- Preview Section -->
+            <div class="preview-card" id="previewCard">
+              <div class="preview-bar">
+                <span id="previewFileName">prescription.png</span>
+                <button type="button" class="btn-icon-clear" id="btnClearImg">✕ Remove</button>
+              </div>
+              <img id="previewImg" class="preview-img" alt="Prescription preview" />
+            </div>
+
+            <button type="button" class="btn-scan" id="btnScan" disabled>
+              <span class="spinner" id="scanBtnSpinner" style="display: none"></span>
+              <span id="scanBtnText">⚡ Run OCR Scan & Extract</span>
+            </button>
+
+            <div
+              class="quick-actions"
+              style="margin-top: 20px; border-top: 1px solid var(--line); padding-top: 14px"
+            >
+              <span style="font-size: 13px; color: #7a776f"
+                >Don't have a prescription file right now?</span
+              >
+              <button type="button" class="btn-sample" id="btnSample">
+                📄 Load Quick Test Sample
+              </button>
+            </div>
+          </div>
+
+          <!-- RESULTS & VERIFICATION CARD -->
+          <div class="card" id="reviewCard" style="display: none">
+            <div class="card-header">
+              <span class="card-title">2. Review, Edit & Confirm</span>
+            </div>
+
+            <div class="confidence-box" id="confidenceBox">
+              <div>
+                <div class="confidence-label">Recognition Confidence</div>
+                <div class="confidence-score" id="confidenceVal">--%</div>
+              </div>
+              <span class="badge-pill badge-high" id="confidenceBadge">Verified</span>
+            </div>
+
+            <form class="review-form" id="reviewForm">
+              <label for="medName">Medicine Name</label>
+              <input
+                type="text"
+                id="medName"
+                placeholder="e.g. Lisinopril"
+                required
+                autocomplete="off"
+              />
+
+              <div class="form-grid">
+                <div>
+                  <label for="medDosage">Dosage / Strength</label>
+                  <input type="text" id="medDosage" placeholder="e.g. 10mg" />
+                </div>
+                <div>
+                  <label for="medStock">Total Quantity / Stock (Tablets)</label>
+                  <input type="number" id="medStock" placeholder="30" min="1" required />
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div>
+                  <label for="medCategory">Category</label>
+                  <select id="medCategory">
+                    <option value="BLOOD_PRESSURE">Blood Pressure</option>
+                    <option value="DIABETES">Diabetes</option>
+                    <option value="THYROID">Thyroid</option>
+                    <option value="ANTIBIOTICS">Antibiotics</option>
+                    <option value="VITAMINS">Vitamins</option>
+                    <option value="HEART">Heart Medications</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="medFrequency">Frequency</label>
+                  <select id="medFrequency">
+                    <option value="1">Once a day (Daily)</option>
+                    <option value="2">Twice a day (1-0-1 / BD)</option>
+                    <option value="3">3 times a day (1-1-1 / TID)</option>
+                  </select>
+                </div>
+              </div>
+
+              <label>Scheduled Dose Times</label>
+              <div class="time-inputs" id="timeInputs">
+                <input type="time" class="dose-time" value="08:00" />
+              </div>
+
+              <label for="medStartDate">Course Start Date</label>
+              <input type="date" id="medStartDate" required />
+
+              <!-- RAW TEXT INSPECTOR -->
+              <div class="raw-ocr-section">
+                <button type="button" class="raw-toggle" id="rawToggleBtn">
+                  ▶ View Raw OCR Extracted Text
+                </button>
+                <div class="raw-text-view" id="rawTextView"></div>
+              </div>
+
+              <p class="form-error" id="formError"></p>
+
+              <div class="form-actions" style="margin-top: 18px">
+                <button
+                  type="button"
+                  class="btn-secondary"
+                  onclick="window.location.href = 'my-medicines.html'"
+                >
+                  Cancel
+                </button>
+                <button type="submit" class="btn-primary" id="btnSaveMedicine">
+                  💾 Save Directly to My Medicines
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- NOTIFICATION TOAST -->
+    <div class="notification-toast" id="toast"></div>
+
+    <script src="user-session.js?v=3"></script>
+    <script src="ocr.js?v=3"></script>
+  </body>
+</html>

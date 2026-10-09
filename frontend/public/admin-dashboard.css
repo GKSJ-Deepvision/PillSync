@@ -1,0 +1,236 @@
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 36px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 8px 24px rgba(27, 31, 59, 0.06);
+}
+
+.stat-card .stat-icon {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.stat-card .stat-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--sage-deep);
+}
+
+.stat-card .stat-label {
+  font-size: 12px;
+  color: #8a8578;
+  margin-top: 2px;
+}
+
+.users-section {
+  margin-bottom: 36px;
+}
+
+.search-bar-small {
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 13px;
+  width: 220px;
+  font-family: inherit;
+}
+
+.search-bar-small:focus {
+  outline: none;
+  border-color: var(--sage-soft);
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.user-table th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #8a8578;
+  padding: 12px 16px;
+  background: #faf9f5;
+  border-bottom: 1px solid var(--line);
+}
+
+.user-table td {
+  padding: 13px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--line);
+}
+
+.user-table tr:last-child td {
+  border-bottom: none;
+}
+
+.role-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.role-patient {
+  background: rgba(0, 194, 168, 0.12);
+  color: #00a38c;
+}
+.role-caregiver {
+  background: rgba(255, 107, 107, 0.12);
+  color: #e05252;
+}
+.role-admin {
+  background: rgba(124, 106, 245, 0.12);
+  color: #6a54e8;
+}
+
+.status-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-dot::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--sage-soft);
+}
+
+.status-dot.inactive::before {
+  background: #c9c4b8;
+}
+
+.table-action {
+  background: none;
+  border: none;
+  color: var(--terracotta);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.activity-item {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.activity-time {
+  color: #8a8578;
+  font-size: 12px;
+}
+.role-chart-section {
+  margin-bottom: 36px;
+}
+
+.role-chart-card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+
+.donut-chart {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.donut-chart::after {
+  content: '';
+  position: absolute;
+  width: 76px;
+  height: 76px;
+  background: white;
+  border-radius: 50%;
+}
+
+.donut-center-text {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.donut-center-text .donut-total {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--sage-deep);
+  display: block;
+}
+
+.donut-center-text .donut-label {
+  font-size: 10px;
+  color: #8a8578;
+}
+
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.legend-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  color: #6b6a63;
+  min-width: 80px;
+}
+
+.legend-count {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.legend-percent {
+  color: #8a8578;
+  font-size: 12px;
+}

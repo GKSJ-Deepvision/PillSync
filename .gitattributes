@@ -1,0 +1,27 @@
+* text=auto eol=lf
+
+*.py    text diff=python
+*.js    text
+*.jsx   text
+*.ts    text
+*.tsx   text
+*.json  text
+*.md    text
+*.yml   text
+*.yaml  text
+*.html  text
+*.css   text
+*.sh    text eol=lf
+*.bat   text eol=crlf
+*.ps1   text eol=crlf
+
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.pdf   binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary
+*.xlsx  binary
+*.ipynb text

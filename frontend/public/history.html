@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>PillSync - History</title>
+    <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="history.css" />
+  </head>
+  <body>
+    <div class="app">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="brand">💊 PillSync</div>
+
+        <!-- PROFILE MINI (click to view full profile) -->
+        <div class="mini-card" onclick="window.location.href = 'profile.html'">
+          <div class="mini-avatar" id="sidebarAvatar">U</div>
+          <div class="mini-text">
+            <div class="mini-name" id="sidebarName">Patient</div>
+            <div class="mini-sub" id="sidebarSub">Patient · View profile</div>
+          </div>
+          <span class="mini-chevron">›</span>
+        </div>
+
+        <!-- CAREGIVER MINI (click to view caregiver info) -->
+        <div class="mini-card" onclick="window.location.href = 'caregiver-info.html'">
+          <div class="mini-avatar mini-avatar-alt">🤝</div>
+          <div class="mini-text">
+            <div class="mini-name" id="caregiverName">Caregiver</div>
+            <div class="mini-sub" id="caregiverSub">Caregiver · View info</div>
+          </div>
+          <span class="mini-chevron">›</span>
+        </div>
+
+        <nav class="nav">
+          <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+          <a href="my-medicines.html" class="nav-item">💊 My Medicines</a>
+          <a href="add-medicine.html" class="nav-item">➕ Add Medicine</a>
+          <a href="ocr.html" class="nav-item">📷 Scan Prescription</a>
+          <a href="history.html" class="nav-item active">📊 History</a>
+          <a href="refill-alerts.html" class="nav-item">🔔 Refill Alerts</a>
+          <a href="dosage-analysis.html" class="nav-item">📈 Dosage Analysis</a>
+          <a href="adherence-analytics.html" class="nav-item">📊 Adherence Analytics</a>
+        </nav>
+
+        <a href="login.html" class="logout" onclick="localStorage.removeItem('access_token')"
+          >Log out</a
+        >
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <div class="greeting">Medication history</div>
+            <div class="subgreeting">Your adherence over the past days</div>
+          </div>
+        </header>
+
+        <!-- SUMMARY STATS -->
+        <section class="summary-row" id="summaryRow"></section>
+
+        <!-- HISTORY LOG -->
+        <section class="history-section">
+          <h2 class="section-title">Daily log</h2>
+          <div class="history-list" id="historyList"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="user-session.js?v=4"></script>
+    <script src="history.js"></script>
+  </body>
+</html>

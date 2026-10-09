@@ -1,0 +1,60 @@
+name: I am blocked
+description: Ask for help when something is stopping your progress
+title: "[Blocked] "
+labels: ["blocked"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before opening this: re-read the failing CI job's log, and try the fix it
+        suggests. If you are still stuck after that, this is the right place.
+
+  - type: input
+    id: branch
+    attributes:
+      label: Your branch
+      placeholder: intern/07-muthukumaran-k
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part
+      options:
+        - Backend (Django / FastAPI)
+        - Frontend (React)
+        - OCR / AI
+        - Refill prediction
+        - Notifications (FCM / Twilio / SendGrid)
+        - Database
+        - Docker / deployment
+        - CI pipeline
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What are you trying to do?
+      description: One or two sentences.
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you already tried?
+      description: List the things you tried and what happened each time.
+    validations:
+      required: true
+
+  - type: textarea
+    id: error
+    attributes:
+      label: Exact error message or failing CI job
+      description: Paste the error, or link the failing Actions run. Do not paste API keys.
+      render: shell
+    validations:
+      required: true

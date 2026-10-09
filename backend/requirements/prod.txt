@@ -1,0 +1,4 @@
+-r base.txt
+
+# Production-only additions.
+# sentry-sdk==2.20.0

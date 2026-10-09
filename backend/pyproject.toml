@@ -1,0 +1,46 @@
+# Shared tooling configuration for the PillSync backend.
+#
+# pytest is configured in pytest.ini, not here - see the note at the top of that file.
+# CI runs ruff, black, isort and pytest against these settings — keep them as-is
+# so every intern's branch is checked identically.
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+extend-exclude = '/(migrations|\.venv|node_modules)/'
+
+[tool.isort]
+profile = "black"
+line_length = 100
+skip_glob = ["*/migrations/*", "*/.venv/*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+exclude = ["migrations", ".venv", "node_modules", "build", "dist"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "UP", "C4"]
+ignore = [
+    "E501",  # line length is enforced by black
+    "B008",  # function call in default argument (common in FastAPI Depends)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["B011"]
+
+[tool.coverage.run]
+branch = true
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "*/.venv/*",
+    "manage.py",
+    "config/asgi.py",
+    "config/wsgi.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
