@@ -41,7 +41,7 @@ const CaregiverProfile = () => {
             <Phone className="h-5 w-5 text-slate-400 shrink-0" />
             <div>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Phone Number</span>
-              <span className="font-semibold text-slate-700 mt-0.5 block">{user?.phone || '+1 (555) 987-6543'}</span>
+              <span className="font-semibold text-slate-700 mt-0.5 block">{user?.phone || 'Not provided'}</span>
             </div>
           </div>
 
@@ -49,7 +49,7 @@ const CaregiverProfile = () => {
             <Calendar className="h-5 w-5 text-slate-400 shrink-0" />
             <div>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Registration Date</span>
-              <span className="font-semibold text-slate-700 mt-0.5 block">January 14, 2026</span>
+              <span className="font-semibold text-slate-700 mt-0.5 block">Not available</span>
             </div>
           </div>
 
@@ -57,7 +57,7 @@ const CaregiverProfile = () => {
             <Heart className="h-5 w-5 text-slate-400 shrink-0" />
             <div>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Affiliated Hospital</span>
-              <span className="font-semibold text-slate-700 mt-0.5 block leading-normal">Mercy General Clinic</span>
+              <span className="font-semibold text-slate-700 mt-0.5 block leading-normal">Not provided</span>
             </div>
           </div>
         </div>

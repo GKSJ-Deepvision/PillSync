@@ -31,6 +31,9 @@ import ClinicalTools from '../pages/patient/ClinicalTools';
 
 // Caregiver Pages
 import CaregiverProfile from '../pages/caregiver/CaregiverProfile';
+import CaregiverDashboard from '../pages/caregiver/CaregiverDashboard';
+import MyPatients from '../pages/caregiver/MyPatients';
+import PatientDetails from '../pages/caregiver/PatientDetails';
 
 // Admin Pages
 
@@ -40,7 +43,7 @@ const DashboardRedirect = () => {
   const role = user?.role ? user.role.toLowerCase() : '';
   
   if (role === 'patient') return <PatientDashboard />;
-  if (role === 'caregiver') return <BackendUnavailable title="Caregiver dashboard unavailable" description="The current Django API does not expose caregiver assignments, patient monitoring, or caregiver alerts." />;
+  if (role === 'caregiver') return <CaregiverDashboard />;
   if (role === 'admin') return <BackendUnavailable title="Admin dashboard unavailable" description="The current Django API does not expose administrative user management, activity logs, or platform analytics." />;
   return <Navigate to="/login" replace />;
 };
@@ -87,8 +90,8 @@ const AppRoutes = () => {
 
           {/* Caregiver Role-Protected Operations */}
           <Route element={<RoleRoute allowedRoles={['caregiver']} />}>
-            <Route path="/patients" element={<BackendUnavailable title="Patient assignments unavailable" description="No caregiver patient-assignment endpoint is registered in the current Django API." />} />
-            <Route path="/patients/:id" element={<BackendUnavailable title="Patient details unavailable" description="No caregiver patient-detail endpoint is registered in the current Django API." />} />
+            <Route path="/patients" element={<MyPatients />} />
+            <Route path="/patients/:id" element={<PatientDetails />} />
             <Route path="/alerts" element={<BackendUnavailable title="Caregiver alerts unavailable" description="No caregiver alert endpoint is registered in the current Django API." />} />
           </Route>
 

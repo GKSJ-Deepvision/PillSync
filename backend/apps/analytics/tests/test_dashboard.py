@@ -173,3 +173,17 @@ class CaregiverDashboardAnalyticsTests(TestCase):
             "?start_date=2026-99-01"
         )
         self.assertEqual(response.status_code, 400)
+
+    def test_revoked_assignment_blocks_dashboard_access(self):
+        relationship = CaregiverPatientRelationship.objects.get(
+            caregiver=self.caregiver,
+            patient=self.patient,
+        )
+        relationship.delete()
+        self.client.force_authenticate(self.caregiver)
+
+        response = self.client.get(
+            f"/api/analytics/caregiver/patients/{self.patient.id}/dashboard/"
+        )
+
+        self.assertEqual(response.status_code, 404)

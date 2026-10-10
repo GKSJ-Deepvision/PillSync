@@ -38,12 +38,12 @@ const Navbar = ({ onToggleSidebar }) => {
       <div className="flex items-center gap-4">
         {/* Notifications indicator shortcut */}
         <Link
-          to={user?.role === 'patient' ? '/notifications' : user?.role === 'caregiver' ? '/alerts' : '#'}
-          className={`p-2 rounded-lg text-slate-400 hover:text-slate-650 hover:bg-slate-50 transition-colors relative ${user?.role === 'admin' ? 'pointer-events-none opacity-40' : ''}`}
+          to={user?.role === 'patient' ? '/notifications' : '#'}
+          className={`p-2 rounded-lg text-slate-400 hover:text-slate-650 hover:bg-slate-50 transition-colors relative ${user?.role !== 'patient' ? 'pointer-events-none opacity-40' : ''}`}
           aria-label="Notifications"
         >
           <Bell className="h-5 w-5" />
-          {user?.role !== 'admin' && (
+          {user?.role === 'patient' && (
             <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-red-500 border-2 border-white rounded-full animate-pulse" />
           )}
         </Link>

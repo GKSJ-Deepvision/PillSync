@@ -10,7 +10,6 @@ import {
   Settings,
   Users,
   History,
-  AlertTriangle,
   FileHeart,
   X
 } from 'lucide-react';
@@ -36,7 +35,6 @@ const Sidebar = ({ isOpen, onClose }) => {
       { name: 'Dashboard', path: '/dashboard', icon: Home },
       { name: 'Profile', path: '/profile', icon: User },
       { name: 'My Patients', path: '/patients', icon: Users },
-      { name: 'Alerts', path: '/alerts', icon: AlertTriangle },
       { name: 'Settings', path: '/settings', icon: Settings }
     ],
     admin: [
