@@ -2,7 +2,8 @@ import os
 
 import dj_database_url
 
-from .base import BASE_DIR, MIDDLEWARE  # noqa: F403
+from .base import *  # noqa: F403
+from .base import BASE_DIR, MIDDLEWARE # noqa: F403
 
 DEBUG = False
 
