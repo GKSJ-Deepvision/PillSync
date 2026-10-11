@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   /* Crimson / Coral / Pink Palette from reference UI */
   --primary-crimson: #ED4264;

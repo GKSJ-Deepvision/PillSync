@@ -18,6 +18,13 @@ class PatientProfile(models.Model):
         null=True,
         blank=True,
     )
+    caregiver = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="cared_profiles",
+        null=True,
+        blank=True,
+    )
     name = models.CharField(max_length=100)
     relationship = models.CharField(
         max_length=50,
@@ -39,3 +46,36 @@ class PatientProfile(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.relationship})"
+
+
+class MedicalCondition(models.Model):
+    patient_profile = models.ForeignKey(
+        PatientProfile,
+        on_delete=models.CASCADE,
+        related_name="conditions",
+    )
+    name = models.CharField(max_length=150)
+    diagnosed_date = models.DateField(null=True, blank=True)
+    severity = models.CharField(max_length=50, blank=True, default="Moderate")
+    notes = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.patient_profile.name})"
+
+
+class EmergencyContact(models.Model):
+    patient_profile = models.ForeignKey(
+        PatientProfile,
+        on_delete=models.CASCADE,
+        related_name="emergency_contacts",
+    )
+    name = models.CharField(max_length=100)
+    relationship = models.CharField(max_length=50, default="Family")
+    phone = models.CharField(max_length=20)
+    email = models.EmailField(blank=True, null=True)
+    is_primary = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.patient_profile.name})"

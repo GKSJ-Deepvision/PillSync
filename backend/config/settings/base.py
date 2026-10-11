@@ -1,5 +1,7 @@
 import os
 import sys
+import urllib.parse
+from datetime import timedelta
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -24,11 +26,15 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Third party apps
     "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     # PillSync local apps
+    "apps.common",
     "apps.accounts",
     "apps.profiles",
     "apps.medications",
+    "apps.prescriptions",
     "apps.reminders",
     "apps.adherence",
     "apps.refills",
@@ -68,12 +74,55 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# Database configuration: DATABASE_URL -> POSTGRES_* -> SQLite fallback
+DATABASE_URL = os.getenv("DATABASE_URL")
+POSTGRES_DB = os.getenv("POSTGRES_DB")
+
+pg_available = False
+if DATABASE_URL or POSTGRES_DB:
+    try:
+        import psycopg  # noqa: F401
+
+        pg_available = True
+    except ImportError:
+        try:
+            import psycopg2  # noqa: F401
+
+            pg_available = True
+        except ImportError:
+            pg_available = False
+
+if pg_available and DATABASE_URL:
+    parsed_db = urllib.parse.urlparse(DATABASE_URL)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": parsed_db.path.lstrip("/"),
+            "USER": parsed_db.username or "",
+            "PASSWORD": parsed_db.password or "",
+            "HOST": parsed_db.hostname or "localhost",
+            "PORT": parsed_db.port or 5432,
+        }
     }
-}
+elif pg_available and POSTGRES_DB:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": POSTGRES_DB,
+            "USER": os.getenv("POSTGRES_USER", "postgres"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
+            "HOST": os.getenv("POSTGRES_HOST", "localhost"),
+            "PORT": os.getenv("POSTGRES_PORT", "5432"),
+        }
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -107,10 +156,20 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.BasicAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=2),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
