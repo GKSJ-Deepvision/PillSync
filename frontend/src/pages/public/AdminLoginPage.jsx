@@ -223,23 +223,6 @@ export default function AdminLoginPage({ onLoginSuccess }) {
           >
             {loading ? 'Authenticating Admin...' : 'Authenticate Admin Session'}
           </button>
-
-          <button
-            type="button"
-            onClick={handleQuickDemoLogin}
-            style={{
-              padding: '8px',
-              fontSize: '0.8rem',
-              backgroundColor: '#f8fafc',
-              color: '#334155',
-              border: '1px dashed #cbd5e1',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: 700,
-            }}
-          >
-            ⚡ Quick Demo Fill & Sign In
-          </button>
         </form>
 
         <div style={{ marginTop: '16px', textAlign: 'center', fontSize: '0.85rem', color: '#64748b' }}>

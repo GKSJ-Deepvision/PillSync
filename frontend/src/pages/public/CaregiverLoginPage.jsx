@@ -236,23 +236,6 @@ export default function CaregiverLoginPage({ onLoginSuccess }) {
           >
             {loading ? 'Signing In...' : 'Sign In as Caregiver'}
           </button>
-
-          <button
-            type="button"
-            onClick={handleQuickDemoLogin}
-            style={{
-              padding: '8px',
-              fontSize: '0.8rem',
-              backgroundColor: '#fffbeb',
-              color: '#d97706',
-              border: '1px dashed #fde68a',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: 700,
-            }}
-          >
-            ⚡ Quick Demo Fill & Sign In
-          </button>
         </form>
 
         <div style={{ marginTop: '16px', textAlign: 'center', fontSize: '0.85rem', color: '#64748b' }}>

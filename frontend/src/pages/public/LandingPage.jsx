@@ -13,7 +13,6 @@ import {
   AlertCircle,
   KeyRound,
   X,
-  Sparkles,
 } from 'lucide-react';
 import { authService } from '../../features/auth/authService';
 import { setCredentials } from '../../features/auth/authSlice';
@@ -47,15 +46,14 @@ export default function LandingPage({ onLoginSuccess }) {
     setSuccessMsg(null);
     setIsModalOpen(true);
 
-    // Pre-populate role-appropriate sample email if empty
-    if (!usernameOrEmail) {
-      if (role === 'patient') setUsernameOrEmail('patient@pillsync.org');
-      else if (role === 'caregiver') setUsernameOrEmail('caregiver@pillsync.org');
-      else if (role === 'admin') setUsernameOrEmail('admin@pillsync.org');
-    }
-    if (!password) {
-      setPassword('DemoPass123!');
-    }
+    // Reset form inputs for fresh user login or registration
+    setUsernameOrEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setName('');
+    setEmail('');
+    setPhone('');
+    setAdminKey('');
   };
 
   const handleLoginSubmit = async (e) => {
@@ -207,23 +205,6 @@ export default function LandingPage({ onLoginSuccess }) {
     }
   };
 
-  const handleInstantDemo = (role) => {
-    const demoMap = {
-      patient: { id: 1, name: 'John Doe', email: 'patient@pillsync.org', role: 'patient' },
-      caregiver: { id: 2, name: 'Eleanor Vance', email: 'caregiver@pillsync.org', role: 'caregiver' },
-      admin: { id: 3, name: 'Sarah Connor', email: 'admin@pillsync.org', role: 'admin' },
-    };
-    const user = demoMap[role];
-    dispatch(
-      setCredentials({
-        user,
-        token: `demo-${role}-jwt-token`,
-      })
-    );
-    if (onLoginSuccess) onLoginSuccess(user);
-    navigate(`/${role}`);
-  };
-
   const roleColors = {
     patient: { primary: '#DC143C', bg: '#fff1f2', border: '#fecdd3', text: 'Patient' },
     caregiver: { primary: '#d97706', bg: '#fffbeb', border: '#fde68a', text: 'Caregiver' },
@@ -241,60 +222,9 @@ export default function LandingPage({ onLoginSuccess }) {
         <h1 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#2B181D', margin: '0 0 10px', letterSpacing: '-0.02em' }}>
           Choose Your Role: Sign In or Register
         </h1>
-        <p style={{ fontSize: '1.05rem', color: '#7E646A', margin: '0 0 18px', maxWidth: '680px', marginInline: 'auto' }}>
-          Full-stack authentication for all 3 roles: <strong>Patient</strong>, <strong>Caregiver</strong>, and <strong>Administrator</strong>. Log in with existing credentials, register a new account, or use 1-click demo access.
+        <p style={{ fontSize: '1.05rem', color: '#7E646A', margin: '0 0 24px', maxWidth: '680px', marginInline: 'auto' }}>
+          Full-stack authentication for all 3 roles: <strong>Patient</strong>, <strong>Caregiver</strong>, and <strong>Administrator</strong>. Access your dedicated portal or register a new verified account below.
         </p>
-
-        {/* Quick Launchpad Buttons */}
-        <div style={{ display: 'inline-flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px', backgroundColor: 'white', padding: '10px 18px', borderRadius: '30px', boxShadow: '0 4px 16px rgba(0,0,0,0.05)', border: '1px solid #fee2e2' }}>
-          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748b', alignSelf: 'center', marginRight: '4px' }}>Quick Sign In / Register:</span>
-          
-          {/* Patient Pills */}
-          <button
-            onClick={() => openAuth('patient', 'login')}
-            style={{ background: '#fff1f2', border: '1px solid #fecdd3', color: '#DC143C', padding: '5px 12px', borderRadius: '16px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
-          >
-            Patient Login
-          </button>
-          <button
-            onClick={() => openAuth('patient', 'register')}
-            style={{ background: '#fff1f2', border: '1px solid #fecdd3', color: '#DC143C', padding: '5px 12px', borderRadius: '16px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
-          >
-            Patient Register
-          </button>
-
-          <span style={{ color: '#e2e8f0', alignSelf: 'center' }}>|</span>
-
-          {/* Caregiver Pills */}
-          <button
-            onClick={() => openAuth('caregiver', 'login')}
-            style={{ background: '#fffbeb', border: '1px solid #fde68a', color: '#d97706', padding: '5px 12px', borderRadius: '16px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
-          >
-            Caregiver Login
-          </button>
-          <button
-            onClick={() => openAuth('caregiver', 'register')}
-            style={{ background: '#fffbeb', border: '1px solid #fde68a', color: '#d97706', padding: '5px 12px', borderRadius: '16px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
-          >
-            Caregiver Register
-          </button>
-
-          <span style={{ color: '#e2e8f0', alignSelf: 'center' }}>|</span>
-
-          {/* Admin Pills */}
-          <button
-            onClick={() => openAuth('admin', 'login')}
-            style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', color: '#334155', padding: '5px 12px', borderRadius: '16px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
-          >
-            Admin Login
-          </button>
-          <button
-            onClick={() => openAuth('admin', 'register')}
-            style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', color: '#334155', padding: '5px 12px', borderRadius: '16px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
-          >
-            Admin Register
-          </button>
-        </div>
       </div>
 
       {/* 3 Categories Cards */}
@@ -314,13 +244,13 @@ export default function LandingPage({ onLoginSuccess }) {
             </p>
             <div className="role-card-badge">Patient Scope</div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', marginTop: '6px' }}>
               <button 
                 onClick={() => openAuth('patient', 'login')} 
                 className="btn-coral-pay"
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '11px', fontSize: '0.88rem' }}
               >
-                <LogIn size={16} /> LOGIN / SIGN IN
+                <LogIn size={18} /> LOGIN / SIGN IN
               </button>
               
               <button 
@@ -329,25 +259,18 @@ export default function LandingPage({ onLoginSuccess }) {
                   background: 'white', 
                   border: '2px solid #DC143C', 
                   color: '#DC143C', 
-                  padding: '9px', 
+                  padding: '10px', 
                   borderRadius: '12px', 
-                  fontSize: '0.82rem', 
+                  fontSize: '0.85rem', 
                   fontWeight: 800, 
                   cursor: 'pointer',
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'center', 
-                  gap: '6px' 
+                  gap: '8px' 
                 }}
               >
-                <UserPlus size={16} /> SIGN UP / REGISTER
-              </button>
-
-              <button 
-                onClick={() => handleInstantDemo('patient')} 
-                style={{ background: '#FFF0F3', border: '1px solid #FFD6DC', color: '#DC143C', padding: '7px', borderRadius: '12px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
-              >
-                <Sparkles size={13} /> 1-Click Demo Patient (/patient)
+                <UserPlus size={18} /> SIGN UP / REGISTER
               </button>
             </div>
           </div>
@@ -369,13 +292,13 @@ export default function LandingPage({ onLoginSuccess }) {
               Multi-Patient Scope
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', marginTop: '6px' }}>
               <button 
                 onClick={() => openAuth('caregiver', 'login')} 
                 className="btn-coral-pay"
-                style={{ background: 'linear-gradient(135deg, #FF6B81 0%, #ED4264 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                style={{ background: 'linear-gradient(135deg, #FF6B81 0%, #ED4264 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '11px', fontSize: '0.88rem' }}
               >
-                <LogIn size={16} /> LOGIN / SIGN IN
+                <LogIn size={18} /> LOGIN / SIGN IN
               </button>
               
               <button 
@@ -384,25 +307,18 @@ export default function LandingPage({ onLoginSuccess }) {
                   background: 'white', 
                   border: '2px solid #ED4264', 
                   color: '#ED4264', 
-                  padding: '9px', 
+                  padding: '10px', 
                   borderRadius: '12px', 
-                  fontSize: '0.82rem', 
+                  fontSize: '0.85rem', 
                   fontWeight: 800, 
                   cursor: 'pointer',
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'center', 
-                  gap: '6px' 
+                  gap: '8px' 
                 }}
               >
-                <UserPlus size={16} /> SIGN UP / REGISTER
-              </button>
-
-              <button 
-                onClick={() => handleInstantDemo('caregiver')} 
-                style={{ background: '#FFF0F3', border: '1px solid #FFD6DC', color: '#ED4264', padding: '7px', borderRadius: '12px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
-              >
-                <Sparkles size={13} /> 1-Click Demo Caregiver (/caregiver)
+                <UserPlus size={18} /> SIGN UP / REGISTER
               </button>
             </div>
           </div>
@@ -424,13 +340,13 @@ export default function LandingPage({ onLoginSuccess }) {
               System Admin Scope
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', marginTop: '6px' }}>
               <button 
                 onClick={() => openAuth('admin', 'login')} 
                 className="btn-coral-pay"
-                style={{ background: 'linear-gradient(135deg, #2B181D 0%, #4A2830 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                style={{ background: 'linear-gradient(135deg, #2B181D 0%, #4A2830 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '11px', fontSize: '0.88rem' }}
               >
-                <LogIn size={16} /> LOGIN / SIGN IN
+                <LogIn size={18} /> LOGIN / SIGN IN
               </button>
               
               <button 
@@ -439,25 +355,18 @@ export default function LandingPage({ onLoginSuccess }) {
                   background: 'white', 
                   border: '2px solid #334155', 
                   color: '#334155', 
-                  padding: '9px', 
+                  padding: '10px', 
                   borderRadius: '12px', 
-                  fontSize: '0.82rem', 
+                  fontSize: '0.85rem', 
                   fontWeight: 800, 
                   cursor: 'pointer',
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'center', 
-                  gap: '6px' 
+                  gap: '8px' 
                 }}
               >
-                <UserPlus size={16} /> SIGN UP / REGISTER
-              </button>
-
-              <button 
-                onClick={() => handleInstantDemo('admin')} 
-                style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', color: '#2B181D', padding: '7px', borderRadius: '12px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
-              >
-                <Sparkles size={13} /> 1-Click Demo Admin (/admin)
+                <UserPlus size={18} /> SIGN UP / REGISTER
               </button>
             </div>
           </div>
@@ -701,35 +610,6 @@ export default function LandingPage({ onLoginSuccess }) {
                     }}
                   >
                     {loading ? 'Authenticating...' : `Sign In as ${roleColors[authRole].text}`}
-                  </button>
-
-                  {/* 1-Click Fill Demo Button */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (authRole === 'patient') {
-                        setUsernameOrEmail('patient@pillsync.org');
-                        setPassword('DemoPass123!');
-                      } else if (authRole === 'caregiver') {
-                        setUsernameOrEmail('caregiver@pillsync.org');
-                        setPassword('DemoPass123!');
-                      } else {
-                        setUsernameOrEmail('admin@pillsync.org');
-                        setPassword('DemoPass123!');
-                      }
-                    }}
-                    style={{
-                      padding: '8px',
-                      fontSize: '0.8rem',
-                      backgroundColor: roleColors[authRole].bg,
-                      color: roleColors[authRole].primary,
-                      border: `1px dashed ${roleColors[authRole].border}`,
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontWeight: 700,
-                    }}
-                  >
-                    ⚡ Auto-Fill Demo Credentials
                   </button>
                 </form>
               )}

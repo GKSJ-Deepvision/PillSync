@@ -4,6 +4,7 @@ import {
   Home, Pill, Calendar, FileText, BarChart3, RefreshCw, History, Bell, 
   User, Settings, LogOut, Users, UserCheck, Link, ShieldAlert
 } from 'lucide-react';
+import PillSyncLogo from '../common/PillSyncLogo';
 
 export default function Sidebar({ currentRole }) {
   const navigate = useNavigate();
@@ -68,6 +69,9 @@ export default function Sidebar({ currentRole }) {
       overflowY: 'auto'
     }}>
       <div>
+        <div style={{ padding: '4px 12px 14px' }}>
+          <PillSyncLogo size="sm" />
+        </div>
         <div style={{ padding: '0 12px 10px', fontSize: '0.75rem', fontWeight: 700, color: '#DC143C', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
           {activeRole === 'admin' ? 'PillSync Admin' : activeRole === 'caregiver' ? 'Caregiver Portal' : 'Patient Navigation'}
         </div>

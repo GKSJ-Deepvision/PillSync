@@ -261,23 +261,6 @@ export default function PatientLoginPage({ onLoginSuccess }) {
           >
             {loading ? 'Signing In...' : 'Sign In as Patient'}
           </button>
-
-          <button
-            type="button"
-            onClick={handleQuickDemoLogin}
-            style={{
-              padding: '8px',
-              fontSize: '0.8rem',
-              backgroundColor: '#fff1f2',
-              color: '#DC143C',
-              border: '1px dashed #fecdd3',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: 700,
-            }}
-          >
-            ⚡ Quick Demo Fill & Sign In
-          </button>
         </form>
 
         <div style={{ margin: '16px 0', textAlign: 'center', position: 'relative' }}>
