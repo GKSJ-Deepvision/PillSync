@@ -4,8 +4,54 @@ import { Pill, Plus, Search, Edit2, Trash2 } from 'lucide-react';
 export default function MyMedicinesPage({ setActiveTab }) {
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Start with empty medicines array - NO PRE-POPULATED DATA
-  const [medicines, setMedicines] = useState([]);
+  // Realistic Indian medications with real-world stock and schedules
+  const [medicines, setMedicines] = useState([
+    {
+      id: 1,
+      name: 'Glycomet-SR (Metformin)',
+      dosage: '500 mg (1 Tablet)',
+      frequency: '2 / day (Morning & Night)',
+      category: 'Diabetes',
+      stock: 46,
+      status: 'Active'
+    },
+    {
+      id: 2,
+      name: 'Telma (Telmisartan)',
+      dosage: '40 mg (1 Tablet)',
+      frequency: '1 / day (Morning 08:00 AM)',
+      category: 'Blood Pressure',
+      stock: 22,
+      status: 'Active'
+    },
+    {
+      id: 3,
+      name: 'Pan-40 (Pantoprazole)',
+      dosage: '40 mg (1 Tablet)',
+      frequency: '1 / day (Empty stomach)',
+      category: 'Gastroenterology',
+      stock: 6,
+      status: 'Low Stock'
+    },
+    {
+      id: 4,
+      name: 'Shelcal-500 (Calcium + D3)',
+      dosage: '500 mg (1 Tablet)',
+      frequency: '1 / day (Night after dinner)',
+      category: 'Vitamins & Supplements',
+      stock: 28,
+      status: 'Active'
+    },
+    {
+      id: 5,
+      name: 'Augmentin (Amoxicillin/Clavulanate)',
+      dosage: '625 mg (1 Tablet)',
+      frequency: '2 / day (Post meals)',
+      category: 'Antibiotics',
+      stock: 12,
+      status: 'Active'
+    }
+  ]);
 
   const handleDelete = (id) => {
     setMedicines(medicines.filter(m => m.id !== id));

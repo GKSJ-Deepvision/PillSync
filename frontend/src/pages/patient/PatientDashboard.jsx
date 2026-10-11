@@ -5,8 +5,49 @@ import { Clock, CheckCircle2, RefreshCw, AlertTriangle, Pill, Plus, Calendar, Fi
 export default function PatientDashboard({ currentUser }) {
   const navigate = useNavigate();
 
-  // Start with empty schedule & doses state - NO PRE-POPULATED DATA
-  const [doses, setDoses] = useState([]);
+  // Active scheduled doses for Indian prescriptions with responsive status toggles
+  const [doses, setDoses] = useState([
+    {
+      id: 1,
+      medicine: 'Pan-40 (Pantoprazole 40mg)',
+      time: '07:30 AM',
+      dosage: '1 Tablet (Before Breakfast)',
+      status: 'TAKEN',
+      loggedAt: '07:35 AM'
+    },
+    {
+      id: 2,
+      medicine: 'Telma-40 (Telmisartan 40mg)',
+      time: '08:30 AM',
+      dosage: '1 Tablet (Post Breakfast)',
+      status: 'TAKEN',
+      loggedAt: '08:40 AM'
+    },
+    {
+      id: 3,
+      medicine: 'Glycomet-SR (Metformin 500mg)',
+      time: '01:30 PM',
+      dosage: '1 Tablet (After Lunch)',
+      status: 'PENDING',
+      loggedAt: null
+    },
+    {
+      id: 4,
+      medicine: 'Augmentin 625 (Amoxicillin+Clavulanate)',
+      time: '08:00 PM',
+      dosage: '1 Tablet (After Dinner)',
+      status: 'PENDING',
+      loggedAt: null
+    },
+    {
+      id: 5,
+      medicine: 'Shelcal-500 (Calcium + Vit D3)',
+      time: '09:30 PM',
+      dosage: '1 Tablet (Before Sleep)',
+      status: 'PENDING',
+      loggedAt: null
+    }
+  ]);
 
   const handleStatusChange = (id, newStatus) => {
     setDoses(doses.map(d => d.id === id ? {

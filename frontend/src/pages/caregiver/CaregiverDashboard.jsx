@@ -5,8 +5,39 @@ import { Users, ShieldAlert, BellRing, PhoneCall, Plus, Trash2, Eye, RefreshCw, 
 export default function CaregiverDashboard() {
   const navigate = useNavigate();
 
-  // Start with empty patients roster - NO PRE-POPULATED DATA
-  const [patients, setPatients] = useState([]);
+  // Realistic Indian family profiles under caregiver supervision
+  const [patients, setPatients] = useState([
+    {
+      id: 1,
+      name: 'Venkat Rao Nallamilli (Father)',
+      age: 68,
+      condition: 'Hypertension & Type 2 Diabetes',
+      phone: '+91 98480 12345',
+      status: 'Morning Doses Taken',
+      adherence: 94,
+      statusColor: 'badge-taken'
+    },
+    {
+      id: 2,
+      name: 'Lakshmi Nallamilli (Mother)',
+      age: 63,
+      condition: 'Osteoarthritis & Thyroid',
+      phone: '+91 98480 67890',
+      status: 'Afternoon Dose Pending',
+      adherence: 88,
+      statusColor: 'badge-snoozed'
+    },
+    {
+      id: 3,
+      name: 'Rajesh Kumar (Spouse)',
+      age: 42,
+      condition: 'Hyperlipidemia',
+      phone: '+91 94401 54321',
+      status: 'All Doses on Track',
+      adherence: 100,
+      statusColor: 'badge-taken'
+    }
+  ]);
   
   // Form State to Add Patient Manually
   const [showAddForm, setShowAddForm] = useState(false);
@@ -14,9 +45,26 @@ export default function CaregiverDashboard() {
     name: '', age: '', condition: 'Hypertension', phone: ''
   });
 
-  // Missed-Dose Alerts Stream & Refill Notifications - STARTS EMPTY
-  const [alerts, setAlerts] = useState([]);
-  const [refillAlerts, setRefillAlerts] = useState([]);
+  // Missed-Dose Alerts Stream & Refill Notifications
+  const [alerts, setAlerts] = useState([
+    {
+      id: 101,
+      type: 'missed',
+      time: '01:45 PM',
+      title: '⚠️ Missed Dose Alert — Lakshmi Nallamilli',
+      desc: 'Afternoon dose of Shelcal-500 was missed by 45 minutes. Auto SMS nudge dispatched.'
+    }
+  ]);
+  const [refillAlerts, setRefillAlerts] = useState([
+    {
+      id: 201,
+      patient: 'Venkat Rao Nallamilli',
+      medicine: 'Pan-40 (Pantoprazole)',
+      stockLeft: '6 Tablets (3 Days Left)',
+      urgency: 'CRITICAL',
+      status: 'PENDING_ORDER'
+    }
+  ]);
 
   const handleAddPatientSubmit = (e) => {
     e.preventDefault();
