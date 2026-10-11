@@ -20,7 +20,7 @@
 - **Live URL:** https://pillsync-frontend-cltn.onrender.com
 - **Platform:** Render (backend: Docker web service on the free plan; frontend: Render service). Database and authentication: Supabase. Vision OCR: Gemini API.
 - **Steps and environment variables:** `deployment/README.md`
-- **Release readiness:** run the **CD (release readiness)** workflow from the Actions tab to build both container images and record the result here.
+- **Release readiness:** CI run #347 (commit `11025fe`) passed: the backend and frontend Docker images both build, the secret scan found no credentials, and the file hygiene and structure checks passed.
 
 ### Problems found and fixed during deployment
 
@@ -45,7 +45,7 @@
 
 ## Testing summary
 
-- **Backend:** 57 tests passed. Coverage 90% overall (1006 statements, 101 missed); about 86% when the test files themselves are left out. Weakest areas: `ocr/engine/vision.py` 56% (the Gemini calls), `ocr/views.py` 76%, `ocr/services.py` 82%.
+- **Backend:** 57 tests passed. Line coverage 88.5% in CI run #347 (a local run that includes the test files themselves measured 90%). Weakest areas: `ocr/engine/vision.py` 56% (the Gemini calls), `ocr/views.py` 76%, `ocr/services.py` 82%.
 - **Frontend:** 57 tests passed in 6 files: `DoseRing`, `greeting`, `scheduling` (13 from earlier milestones) plus `refill`, `adherence` and `ocrMapping` (44 added in this milestone).
 - **CI:** `.github/workflows/ci.yml` runs linting and both test suites on every push.
 - **Failing or skipped tests:** none.
