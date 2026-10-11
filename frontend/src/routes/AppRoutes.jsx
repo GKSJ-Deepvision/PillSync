@@ -8,6 +8,7 @@ import CaregiverLoginPage from '../pages/public/CaregiverLoginPage';
 import AdminLoginPage from '../pages/public/AdminLoginPage';
 import PatientRegisterPage from '../pages/public/PatientRegisterPage';
 import CaregiverRegisterPage from '../pages/public/CaregiverRegisterPage';
+import AdminRegisterPage from '../pages/public/AdminRegisterPage';
 import ForgotPasswordPage from '../pages/public/ForgotPasswordPage';
 
 // Patient Portal Pages
@@ -41,7 +42,7 @@ export default function AppRoutes({ currentUser, setCurrentUser, setCurrentRole 
   return (
     <Routes>
       {/* 1. Public & Role Selection Landing */}
-      <Route path="/" element={<LandingPage />} />
+      <Route path="/" element={<LandingPage onLoginSuccess={handleLoginSuccess} />} />
       <Route path="/login" element={<PatientLoginPage onLoginSuccess={handleLoginSuccess} />} />
       <Route path="/login/patient" element={<PatientLoginPage onLoginSuccess={handleLoginSuccess} />} />
       <Route path="/login/caregiver" element={<CaregiverLoginPage onLoginSuccess={handleLoginSuccess} />} />
@@ -50,6 +51,7 @@ export default function AppRoutes({ currentUser, setCurrentUser, setCurrentRole 
       <Route path="/register" element={<PatientRegisterPage onLoginSuccess={handleLoginSuccess} />} />
       <Route path="/register/patient" element={<PatientRegisterPage onLoginSuccess={handleLoginSuccess} />} />
       <Route path="/register/caregiver" element={<CaregiverRegisterPage onLoginSuccess={handleLoginSuccess} />} />
+      <Route path="/register/admin" element={<AdminRegisterPage onLoginSuccess={handleLoginSuccess} />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
       {/* 2. Patient Portal Routes (Direct URL Access) */}
