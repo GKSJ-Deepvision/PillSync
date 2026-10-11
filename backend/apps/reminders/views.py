@@ -19,21 +19,32 @@ class ReminderViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"])
     def take(self, request, pk=None):
+        from .services.actions import record_dose_action
+
         reminder = self.get_object()
-        reminder.status = Reminder.Status.TAKEN
-        reminder.save()
-        return Response(ReminderSerializer(reminder).data)
+        result = record_dose_action(reminder, "Taken", notes=request.data.get("notes", ""))
+        return Response(result)
 
     @action(detail=True, methods=["post"])
     def miss(self, request, pk=None):
+        from .services.actions import record_dose_action
+
         reminder = self.get_object()
-        reminder.status = Reminder.Status.MISSED
-        reminder.save()
-        return Response(ReminderSerializer(reminder).data)
+        result = record_dose_action(reminder, "Missed", notes=request.data.get("notes", ""))
+        return Response(result)
 
     @action(detail=True, methods=["post"])
     def snooze(self, request, pk=None):
+        from .services.actions import record_dose_action
+
         reminder = self.get_object()
-        reminder.status = Reminder.Status.SNOOZED
-        reminder.save()
-        return Response(ReminderSerializer(reminder).data)
+        result = record_dose_action(reminder, "Snoozed", notes=request.data.get("notes", ""))
+        return Response(result)
+
+    @action(detail=True, methods=["post"])
+    def skip(self, request, pk=None):
+        from .services.actions import record_dose_action
+
+        reminder = self.get_object()
+        result = record_dose_action(reminder, "Skipped", notes=request.data.get("notes", ""))
+        return Response(result)

@@ -20,11 +20,20 @@ class RefillPredictionViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["post"])
     def calculate(self, request):
+        from .engine import RefillEngine
+
         stock = int(request.data.get("stock", 60))
         daily_freq = float(request.data.get("daily_frequency", 2.0))
         qty_per_dose = float(request.data.get("qty_per_dose", 1.0))
         missed = int(request.data.get("missed_doses", 0))
         med_name = request.data.get("medicine_name", "Medication")
+
+        forecast = RefillEngine.calculate_refill_forecast(
+            stock_remaining=stock,
+            daily_dosage_frequency=daily_freq,
+            quantity_per_dose=qty_per_dose,
+            missed_doses=missed,
+        )
 
         res = RefillPredictionEngine.predict_depletion(
             initial_stock=stock,
@@ -33,6 +42,7 @@ class RefillPredictionViewSet(viewsets.ModelViewSet):
             missed_doses=missed,
             medicine_name=med_name,
         )
+        res["forecast"] = forecast
         return Response(res, status=status.HTTP_200_OK)
 
 

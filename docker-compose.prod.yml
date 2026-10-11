@@ -1,0 +1,88 @@
+# Production stack for PillSync
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pillsync_prod}
+      POSTGRES_USER: ${POSTGRES_USER:-pillsync_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pillsync_prod_password}
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pillsync_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+      DATABASE_URL: postgres://${POSTGRES_USER:-pillsync_user}:${POSTGRES_PASSWORD:-pillsync_prod_password}@db:5432/${POSTGRES_DB:-pillsync_prod}
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-prod-secret-key-pillsync-verified-2026}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    command: celery -A config worker -l info
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+      DATABASE_URL: postgres://${POSTGRES_USER:-pillsync_user}:${POSTGRES_PASSWORD:-pillsync_prod_password}@db:5432/${POSTGRES_DB:-pillsync_prod}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-prod-secret-key-pillsync-verified-2026}
+    depends_on:
+      - backend
+      - redis
+
+  beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    command: celery -A config beat -l info
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+      DATABASE_URL: postgres://${POSTGRES_USER:-pillsync_user}:${POSTGRES_PASSWORD:-pillsync_prod_password}@db:5432/${POSTGRES_DB:-pillsync_prod}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-prod-secret-key-pillsync-verified-2026}
+    depends_on:
+      - backend
+      - redis
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata_prod:

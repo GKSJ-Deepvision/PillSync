@@ -13,6 +13,10 @@ class OCRExtractionViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["post"])
     def extract(self, request):
+        from .services.parser import PrescriptionParser
+
         raw_text = request.data.get("raw_text", "Rx: Metformin 500mg 60 pills take twice daily")
+        parsed = PrescriptionParser.parse_prescription(raw_text)
         res = OCRRecognizer.extract_prescription_text(raw_text)
+        res["parsed_prescription"] = parsed
         return Response(res, status=status.HTTP_200_OK)

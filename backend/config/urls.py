@@ -29,6 +29,7 @@ def api_root(request):
 urlpatterns = [
     path("", api_root, name="api-root"),
     path("api/", api_root, name="api-root-prefix"),
+    path("api/v1/", api_root, name="api-v1-root"),
     path("admin/", admin.site.urls),
     path("api/accounts/", include("apps.accounts.urls")),
     path("api/profiles/", include("apps.profiles.urls")),
@@ -40,4 +41,17 @@ urlpatterns = [
     path("api/analytics/", include("apps.analytics.urls")),
     path("api/ocr/", include("apps.ocr.urls")),
     path("api/notifications/", include("apps.notifications.urls")),
+    # v1 API namespace aliases
+    path("api/v1/accounts/", include("apps.accounts.urls")),
+    path("api/v1/profiles/", include("apps.profiles.urls")),
+    path("api/v1/medicines/", include("apps.medications.urls")),
+    path("api/v1/medications/", include("apps.medications.urls")),
+    path("api/v1/prescriptions/", include("apps.prescriptions.urls")),
+    path("api/v1/reminders/", include("apps.reminders.urls")),
+    path("api/v1/doses/", include("apps.adherence.urls")),
+    path("api/v1/adherence/", include("apps.adherence.urls")),
+    path("api/v1/refills/", include("apps.refills.urls")),
+    path("api/v1/analytics/", include("apps.analytics.urls")),
+    path("api/v1/ocr/", include("apps.ocr.urls")),
+    path("api/v1/notifications/", include("apps.notifications.urls")),
 ]
