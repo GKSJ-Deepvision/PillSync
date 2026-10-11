@@ -20,6 +20,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             "role",
         ]
 
+    def validate_role(self, value):
+        if value == User.Role.ADMIN:
+            raise serializers.ValidationError(
+                "Administrator accounts must be created by an existing administrator."
+            )
+        return value
+
     def create(self, validated_data):
         password = validated_data.pop("password")
 

@@ -15,7 +15,12 @@ export const getApiErrorMessage = (error, fallback = 'Something went wrong. Plea
       : fallback;
   }
   if (typeof data.detail === 'string') return data.detail;
-  if (typeof data === 'string') return data;
+  if (typeof data === 'string') {
+    if (data.trim().toLowerCase().startsWith('<!doctype html') || data.trim().startsWith('<html')) {
+      return fallback;
+    }
+    return data;
+  }
   if (typeof data === 'object') {
     return Object.entries(data)
       .flatMap(([field, messages]) => {

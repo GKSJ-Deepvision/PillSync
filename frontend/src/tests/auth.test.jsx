@@ -45,7 +45,7 @@ describe('Authentication Pages', () => {
     expect(screen.getByRole('heading', { name: 'Create Account' })).toBeInTheDocument();
     expect(screen.getByTestId('role-btn-patient')).toBeInTheDocument();
     expect(screen.getByTestId('role-btn-caregiver')).toBeInTheDocument();
-    expect(screen.getByTestId('role-btn-admin')).toBeInTheDocument();
+    expect(screen.queryByTestId('role-btn-admin')).not.toBeInTheDocument();
   });
 
   it('renders ForgotPassword page with email field', () => {

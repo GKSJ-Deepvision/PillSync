@@ -1,6 +1,9 @@
 # Create your tests here.
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import DatabaseError
 from django.test import TestCase
 
 # from rest_framework.test import APITestCase
@@ -45,6 +48,48 @@ class APITests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["status"], "ok")
 
+    def test_readiness_endpoint_is_public_and_reports_ready(self):
+        response = self.client.get("/health/ready/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, {"status": "ready"})
+
+    @patch("apps.api.views.connection.ensure_connection")
+    def test_readiness_endpoint_returns_service_unavailable_when_database_fails(
+        self,
+        ensure_connection,
+    ):
+        ensure_connection.side_effect = DatabaseError("database unavailable")
+
+        response = self.client.get("/health/ready/")
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.data, {"status": "unavailable"})
+
+    @patch("apps.api.views.connection.cursor")
+    def test_readiness_endpoint_returns_service_unavailable_when_query_fails(
+        self,
+        cursor,
+    ):
+        cursor.return_value.__enter__.return_value.execute.side_effect = DatabaseError(
+            "query failed"
+        )
+
+        response = self.client.get("/health/ready/")
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.data, {"status": "unavailable"})
+
+    @patch("apps.api.views.connection.ensure_connection")
+    def test_readiness_endpoint_does_not_hide_unrelated_errors(
+        self,
+        ensure_connection,
+    ):
+        ensure_connection.side_effect = RuntimeError("unexpected programming error")
+
+        with self.assertRaises(RuntimeError):
+            self.client.get("/health/ready/")
+
     def test_user_registration(self):
         response = self.client.post(
             "/api/auth/register/",
@@ -61,6 +106,39 @@ class APITests(APITestCase):
         self.assertTrue(
             User.objects.filter(username="newpatient").exists(),
         )
+
+    def test_caregiver_registration_persists_caregiver_role(self):
+        response = self.client.post(
+            "/api/auth/register/",
+            {
+                "username": "newcaregiver",
+                "email": "newcaregiver@example.com",
+                "password": TEST_PASSWORD,
+                "role": "caregiver",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(
+            User.objects.get(username="newcaregiver").role,
+            User.Role.CAREGIVER,
+        )
+
+    def test_public_registration_cannot_create_admin(self):
+        response = self.client.post(
+            "/api/auth/register/",
+            {
+                "username": "newadmin",
+                "email": "newadmin@example.com",
+                "password": TEST_PASSWORD,
+                "role": "admin",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(User.objects.filter(username="newadmin").exists())
 
     def test_jwt_login(self):
         response = self.client.post(

@@ -4,8 +4,10 @@
 
 # from .serializers import UserRegistrationSerializer
 
+import logging
 from datetime import timedelta
 
+from django.db import DatabaseError, connection
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework import status
@@ -36,6 +38,8 @@ from .serializers import (
     UserRegistrationSerializer,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class HealthCheckView(APIView):
     authentication_classes = []
@@ -48,6 +52,26 @@ class HealthCheckView(APIView):
                 "service": "PillSync API",
             }
         )
+
+
+class ReadinessCheckView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request):
+        try:
+            connection.ensure_connection()
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+                cursor.fetchone()
+        except DatabaseError:
+            logger.exception("Readiness database check failed.")
+            return Response(
+                {"status": "unavailable"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        return Response({"status": "ready"})
 
 
 class RegisterView(APIView):

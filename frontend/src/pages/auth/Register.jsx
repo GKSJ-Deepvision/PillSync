@@ -4,7 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import ErrorMessage from '../../components/ErrorMessage';
-import { Heart, Shield, Users } from 'lucide-react';
+import { getApiErrorMessage } from '../../services/api';
+import { Heart, Users } from 'lucide-react';
 
 const Register = () => {
   const { register } = useAuth();
@@ -34,14 +35,6 @@ const Register = () => {
       activeColor: 'border-violet-500 bg-violet-50/50 text-violet-700 ring-2 ring-violet-500/20',
       inactiveColor: 'border-slate-200 hover:border-slate-350 bg-white text-slate-500 hover:bg-slate-50/30'
     },
-    {
-      id: 'admin',
-      title: 'Admin',
-      desc: 'Oversee system registry records and logs audit history.',
-      icon: Shield,
-      activeColor: 'border-rose-500 bg-rose-50/50 text-rose-700 ring-2 ring-rose-500/20',
-      inactiveColor: 'border-slate-200 hover:border-slate-350 bg-white text-slate-500 hover:bg-slate-50/30'
-    }
   ];
 
   const validateForm = () => {
@@ -62,8 +55,8 @@ const Register = () => {
       setError('Password is required.');
       return false;
     }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long.');
       return false;
     }
     if (password !== confirmPassword) {
@@ -84,7 +77,7 @@ const Register = () => {
       await register({ email, role, password });
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message || 'Registration failed. The email may already be in use.');
+      setError(getApiErrorMessage(err, 'Registration failed. The email may already be in use.'));
     } finally {
       setLoading(false);
     }

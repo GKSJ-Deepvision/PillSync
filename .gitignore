@@ -85,3 +85,12 @@ temp/
 # The intern roster spreadsheet carries 26 people's personal email addresses.
 # Branch assignments live in .github/interns.yml instead, without the emails.
 *.xlsx
+
+# ---- Local OCR and prescription upload data ----
+/backend/ocr/*
+!/backend/ocr/71bGBkmTj8L._SL1200_.jpg
+!/backend/ocr/Atorvastatin.jpg
+!/backend/ocr/sample_medicine.png
+!/backend/ocr/test-madicine.png
+/backend/prescriptions/*
+!/backend/prescriptions/ChatGPT_Image_Sep_27_2026_05_45_23_PM.png

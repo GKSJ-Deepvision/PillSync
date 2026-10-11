@@ -1,6 +1,7 @@
 -r base.txt
 
 # Production-only additions
-# gunicorn==23.0.0
-# whitenoise==6.8.2
+dj-database-url==2.*
+gunicorn==23.*
+whitenoise==6.*
 # sentry-sdk==2.19.2

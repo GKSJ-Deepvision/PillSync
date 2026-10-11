@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import ErrorMessage from '../../components/ErrorMessage';
+import { getApiErrorMessage } from '../../services/api';
 
 const Login = () => {
   const { login } = useAuth();
@@ -31,8 +32,8 @@ const Login = () => {
       setError('Password is required.');
       return false;
     }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long.');
       return false;
     }
     return true;
@@ -49,7 +50,7 @@ const Login = () => {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.message || 'Authentication failed. Please verify credentials.');
+      setError(getApiErrorMessage(err, 'Authentication failed. Please verify credentials.'));
     } finally {
       setLoading(false);
     }
