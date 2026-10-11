@@ -12,7 +12,7 @@ function MainLayout() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
 
-  const isPublicAuthPage = ['/', '/login', '/login/patient', '/login/caregiver', '/login/admin', '/register', '/register/patient', '/register/caregiver', '/forgot-password'].includes(location.pathname);
+  const isPublicAuthPage = ['/', '/login', '/login/patient', '/login/caregiver', '/login/admin', '/register', '/register/patient', '/register/caregiver', '/register/admin', '/forgot-password'].includes(location.pathname);
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#fcf8f9', display: 'flex', flexDirection: 'column' }}>
