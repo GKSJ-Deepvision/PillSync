@@ -17,7 +17,10 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("time", models.TimeField()),
@@ -29,7 +32,10 @@ class Migration(migrations.Migration):
                         max_length=20,
                     ),
                 ),
-                ("day_of_week", models.PositiveSmallIntegerField(blank=True, null=True)),
+                (
+                    "day_of_week",
+                    models.PositiveSmallIntegerField(blank=True, null=True),
+                ),
                 ("start_date", models.DateField()),
                 ("end_date", models.DateField(blank=True, null=True)),
                 ("is_active", models.BooleanField(default=True)),

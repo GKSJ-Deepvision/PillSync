@@ -24,7 +24,7 @@ class RefillPredictionView(APIView):
             prediction = RefillPredictionService().predict(medicine)
         except ValidationError as exc:
             return Response(
-                {"detail": exc.message_dict if hasattr(exc, "message_dict") else exc.messages},
+                {"detail": (exc.message_dict if hasattr(exc, "message_dict") else exc.messages)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

@@ -17,7 +17,10 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("dose", models.CharField(max_length=100)),
@@ -25,7 +28,11 @@ class Migration(migrations.Migration):
                 (
                     "status",
                     models.CharField(
-                        choices=[("taken", "Taken"), ("missed", "Missed"), ("skipped", "Skipped")],
+                        choices=[
+                            ("taken", "Taken"),
+                            ("missed", "Missed"),
+                            ("skipped", "Skipped"),
+                        ],
                         max_length=20,
                     ),
                 ),

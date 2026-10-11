@@ -8,28 +8,56 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0001_initial'),
+        ("accounts", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CaregiverPatientRelationship',
+            name="CaregiverPatientRelationship",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('caregiver', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='patient_relationships', to=settings.AUTH_USER_MODEL)),
-                ('patient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='caregiver_relationships', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "caregiver",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="patient_relationships",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "patient",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="caregiver_relationships",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at', '-id'],
+                "ordering": ["-created_at", "-id"],
             },
         ),
         migrations.AddConstraint(
-            model_name='caregiverpatientrelationship',
-            constraint=models.UniqueConstraint(fields=('caregiver', 'patient'), name='unique_caregiver_patient_relationship'),
+            model_name="caregiverpatientrelationship",
+            constraint=models.UniqueConstraint(
+                fields=("caregiver", "patient"),
+                name="unique_caregiver_patient_relationship",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='caregiverpatientrelationship',
-            constraint=models.CheckConstraint(check=models.Q(('caregiver', models.F('patient')), _negated=True), name='caregiver_patient_not_self'),
+            model_name="caregiverpatientrelationship",
+            constraint=models.CheckConstraint(
+                check=models.Q(("caregiver", models.F("patient")), _negated=True),
+                name="caregiver_patient_not_self",
+            ),
         ),
     ]
