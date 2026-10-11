@@ -1,11 +1,13 @@
+from datetime import UTC, datetime
+
 import pytest
 from rest_framework.test import APIClient
+
 from apps.accounts.models import User
-from apps.profiles.models import PatientProfile
-from apps.medications.models import Medicine, MedicationSchedule
-from apps.reminders.models import Reminder
 from apps.adherence.models import AdherenceLog
-from datetime import datetime, UTC
+from apps.medications.models import MedicationSchedule, Medicine
+from apps.profiles.models import PatientProfile
+from apps.reminders.models import Reminder
 
 
 @pytest.mark.django_db

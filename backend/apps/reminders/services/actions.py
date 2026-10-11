@@ -1,6 +1,7 @@
-from datetime import datetime, UTC
-from apps.reminders.models import Reminder
+from datetime import UTC, datetime
+
 from apps.adherence.models import AdherenceLog
+from apps.reminders.models import Reminder
 
 
 def record_dose_action(reminder_id_or_instance, action_type, notes=""):

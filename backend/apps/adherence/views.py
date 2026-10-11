@@ -55,6 +55,7 @@ class AdherenceLogViewSet(viewsets.ModelViewSet):
         export_format = request.query_params.get("format", "").lower()
         if export_format == "csv":
             import csv
+
             from django.http import HttpResponse
 
             response = HttpResponse(content_type="text/csv")
