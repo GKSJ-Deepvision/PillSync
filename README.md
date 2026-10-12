@@ -27,6 +27,18 @@ The 26 branch names are listed in [`.github/interns.yml`](.github/interns.yml).
 
 ---
 
+## Deployed app (branch `intern/01-advala-indhu`)
+
+Live app: https://pillsync-frontend-cltn.onrender.com (hosted on Render's free plan, so the first load can take up to a minute).
+
+| Item | Where |
+|---|---|
+| Milestone reports | `docs/milestones/` |
+| Deployment steps | `deployment/README.md` |
+| Demo flow and screenshots | `docs/demo/README.md` |
+| API, architecture and database notes | `docs/api/`, `docs/architecture/`, `docs/database/` |
+
+---
 ## Repository layout
 
 ```

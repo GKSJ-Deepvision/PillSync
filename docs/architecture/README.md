@@ -22,7 +22,7 @@ PillSync is a healthcare medication-management application with a React/Vite fro
 
 ## Django applications
 
-The backend contains the following Django applications:
+The backend is organised into the following Django applications. Implemented so far are `common` (Supabase authentication), `ocr` and `refills`. The others are reserved folders for later work; their features (medications, reminders, notifications, adherence and profiles) are currently handled in the frontend through Supabase:
 
 - accounts
 - adherence
@@ -81,4 +81,13 @@ In addition to Tesseract-based extraction, the pipeline can call a hosted vision
 
 The project provides Dockerfiles for both backend and frontend and a Docker Compose configuration for local/container-based execution.
 
-Live deployment details are recorded separately after an actual hosting deployment is completed.
+## Live deployment
+
+The application is deployed on Render, with Supabase for the database and login.
+
+- **Frontend:** https://pillsync-frontend-cltn.onrender.com
+- **Backend:** a Docker web service built from `backend/Dockerfile`. On every start it runs `python manage.py migrate --noinput` and then gunicorn.
+- **Database and authentication:** Supabase PostgreSQL through the connection pooler.
+- **Vision OCR:** Gemini API, with Tesseract as the fallback.
+
+The frontend reads the backend address from `VITE_API_BASE_URL` at build time, and the backend allows the deployed frontend through `CORS_ALLOWED_ORIGINS`. Steps, environment variable names and troubleshooting are in `deployment/README.md`.
