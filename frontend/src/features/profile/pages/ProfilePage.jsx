@@ -36,21 +36,21 @@ export function ProfilePage() {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    phone: user?.phone || '+1 (555) 234-5678',
-    dateOfBirth: user?.dateOfBirth || '1988-06-14',
-    gender: user?.gender || 'Male',
-    bloodGroup: user?.bloodGroup || 'O+',
-    address: user?.address || '742 Evergreen Terrace, Springfield, OR',
+    phone: user?.phone || '',
+    dateOfBirth: user?.dateOfBirth || '',
+    gender: user?.gender || 'Not specified',
+    bloodGroup: user?.bloodGroup || 'Not specified',
+    address: user?.address || '',
     // Clinical / Medical
-    allergies: user?.allergies || 'Penicillin, Sulfa drugs',
-    chronicConditions: user?.chronicConditions || 'Hypertension, Type 2 Diabetes',
-    primaryPhysician: user?.primaryPhysician || 'Dr. Robert Chen, MD',
-    hospitalAffiliation: user?.hospitalAffiliation || 'Springfield General Hospital',
-    emergencyContactName: user?.emergencyContactName || 'Elena Vance (Spouse)',
-    emergencyContactPhone: user?.emergencyContactPhone || '+1 (555) 987-6543',
-    licenseNumber: user?.licenseNumber || 'MD-LIC-882941',
-    specialty: user?.specialty || 'Internal Medicine & Chronic Disease Care',
-    department: user?.department || 'Clinical Pharmacotherapy Unit',
+    allergies: user?.allergies || '',
+    chronicConditions: user?.chronicConditions || '',
+    primaryPhysician: user?.primaryPhysician || '',
+    hospitalAffiliation: user?.hospitalAffiliation || '',
+    emergencyContactName: user?.emergencyContactName || '',
+    emergencyContactPhone: user?.emergencyContactPhone || '',
+    licenseNumber: user?.licenseNumber || '',
+    specialty: user?.specialty || '',
+    department: user?.department || '',
     // Preferences
     pushDose: user?.pushDose !== false,
     smsCritical: user?.smsCritical !== false,
@@ -192,14 +192,9 @@ export function ProfilePage() {
           <div className="profile-header-content">
             <div className="profile-avatar-section">
               <div className="profile-avatar-wrapper">
-                <img
-                  src={
-                    user?.avatar ||
-                    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-                  }
-                  alt="Profile Avatar"
-                  className="profile-avatar-img"
-                />
+                <div className="profile-avatar-img flex items-center justify-center font-black text-2xl bg-slate-900 text-teal-400 border-2 border-teal-500 shadow-md">
+                  {user?.name ? user.name.slice(0, 2).toUpperCase() : 'PS'}
+                </div>
                 <div className="profile-avatar-badge" title="Active Clinical Session" />
               </div>
 

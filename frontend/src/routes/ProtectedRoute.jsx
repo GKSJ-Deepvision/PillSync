@@ -29,7 +29,7 @@ export function ProtectedRoute({ children }) {
 }
 
 export function RoleBasedRoute({ children, allowedRoles = [] }) {
-  const { user, loading, isAuthenticated, switchRole } = useAuth();
+  const { user, loading, isAuthenticated } = useAuth();
 
   if (loading) {
     return (
@@ -48,7 +48,26 @@ export function RoleBasedRoute({ children, allowedRoles = [] }) {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
+  const currentRole = (user?.role || '').toLowerCase();
+  const currentEmail = (user?.email || '').trim().toLowerCase();
+
+  let isAllowed =
+    allowedRoles.length === 0 || allowedRoles.some((r) => r.toLowerCase() === currentRole);
+
+  // Strict Admin Isolation: Only designated admin email can access admin-only routes
+  const isOnlyAdminAllowed =
+    allowedRoles.length > 0 && allowedRoles.every((r) => r.toLowerCase() === 'admin');
+
+  if (isOnlyAdminAllowed && currentEmail !== 'syedmuhammedsr@gmail.com') {
+    isAllowed = false;
+  }
+
+  // Also prevent any non-admin email from masquerading as admin
+  if (currentRole === 'admin' && currentEmail !== 'syedmuhammedsr@gmail.com') {
+    isAllowed = false;
+  }
+
+  if (!isAllowed) {
     return (
       <div className="access-denied-wrapper">
         <div className="access-denied-card">
@@ -59,8 +78,7 @@ export function RoleBasedRoute({ children, allowedRoles = [] }) {
           <span className="access-denied-code">Error 403 · Access Restricted</span>
           <h2 className="access-denied-title">Clinical Role Authorization Required</h2>
           <p className="access-denied-message">
-            This portal view is strictly restricted to clinical roles with designated HIPAA
-            privileges.
+            This portal view is strictly restricted to designated administrative personnel.
           </p>
 
           <div className="access-denied-roles-box">
@@ -78,27 +96,7 @@ export function RoleBasedRoute({ children, allowedRoles = [] }) {
             </div>
           </div>
 
-          {/* Quick Demo Switcher if user wants to test allowed role */}
-          {allowedRoles.length > 0 && (
-            <div className="mt-4 border-t border-slate-100 pt-3">
-              <p className="text-[11px] text-slate-400 mb-2">
-                Want to test as an authorized persona?
-              </p>
-              <div className="flex justify-center gap-2">
-                {allowedRoles.map((role) => (
-                  <button
-                    key={role}
-                    onClick={() => switchRole?.(role)}
-                    className="rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 text-xs font-bold capitalize transition cursor-pointer border border-indigo-200"
-                  >
-                    Switch to {role}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="mt-6 flex items-center justify-center gap-3">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link
               to="/dashboard"
               className="inline-flex items-center gap-2 rounded-xl bg-slate-900 text-white px-5 py-2.5 text-xs font-bold hover:bg-slate-800 transition"
@@ -116,7 +114,7 @@ export function RoleBasedRoute({ children, allowedRoles = [] }) {
 }
 
 export function PublicRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { loading } = useAuth();
 
   if (loading) {
     return (
@@ -129,10 +127,6 @@ export function PublicRoute({ children }) {
         </div>
       </div>
     );
-  }
-
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
   }
 
   return children;

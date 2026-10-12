@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { Layout } from '../../../components/layout';
-import { Bell, ShieldCheck, Smartphone, SlidersHorizontal, Save } from 'lucide-react';
+import { Bell, ShieldCheck, Smartphone, SlidersHorizontal, Save, CheckCircle2 } from 'lucide-react';
 import './SettingsPage.css';
 
-const PREFS = [
+const DEFAULT_PREFS = [
   { label: 'Push dose reminders', enabled: true },
   { label: 'Critical SMS alerts', enabled: true },
   { label: 'Weekly clinical summary', enabled: true },
@@ -11,6 +12,33 @@ const PREFS = [
 ];
 
 export function SettingsPage() {
+  const [prefs, setPrefs] = useState(() => {
+    try {
+      const saved = localStorage.getItem('pillsync_user_settings');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return DEFAULT_PREFS;
+  });
+  const [highContrast, setHighContrast] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
+
+  const togglePref = (idx) => {
+    setPrefs((prev) =>
+      prev.map((item, i) => (i === idx ? { ...item, enabled: !item.enabled } : item))
+    );
+  };
+
+  const handleSave = () => {
+    localStorage.setItem('pillsync_user_settings', JSON.stringify(prefs));
+    setSavedSuccess(true);
+    setTimeout(() => setSavedSuccess(false), 3000);
+  };
+
   return (
     <Layout>
       <div className="settings-page">
@@ -33,13 +61,17 @@ export function SettingsPage() {
             </div>
 
             <div className="settings-list">
-              {PREFS.map((item) => (
-                <label key={item.label} className="switch-row">
+              {prefs.map((item, idx) => (
+                <div
+                  key={item.label}
+                  onClick={() => togglePref(idx)}
+                  className="switch-row cursor-pointer select-none"
+                >
                   <span>{item.label}</span>
                   <span className={`switch ${item.enabled ? 'on' : ''}`}>
                     <span className="switch-knob" />
                   </span>
-                </label>
+                </div>
               ))}
             </div>
           </div>
@@ -85,13 +117,27 @@ export function SettingsPage() {
                 <h3>High contrast mode</h3>
                 <p>Improves readability for low-vision clinical workflows.</p>
               </div>
-              <span className="device-badge muted">Off</span>
+              <button
+                type="button"
+                onClick={() => setHighContrast(!highContrast)}
+                className={`device-badge cursor-pointer border-0 ${highContrast ? 'bg-emerald-100 text-emerald-800' : 'muted'}`}
+              >
+                {highContrast ? 'Active' : 'Off'}
+              </button>
             </div>
 
-            <button type="button" className="save-btn">
-              <Save className="h-4 w-4" />
-              Save changes
-            </button>
+            <div className="flex items-center gap-3 mt-4">
+              <button type="button" onClick={handleSave} className="save-btn cursor-pointer">
+                <Save className="h-4 w-4" />
+                Save changes
+              </button>
+              {savedSuccess && (
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Preferences saved successfully!
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>

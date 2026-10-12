@@ -218,7 +218,9 @@ export function MedicationDetailPage() {
                 </div>
                 <div className="flex justify-between border-b border-slate-100 pb-2.5">
                   <span className="text-slate-500">Prescribing Clinician</span>
-                  <span className="font-bold text-indigo-600">Dr. Oliver Mitchell</span>
+                  <span className="font-bold text-indigo-600">
+                    {medication.prescriber || 'Assigned Clinician'}
+                  </span>
                 </div>
                 <div className="flex justify-between pb-1">
                   <span className="text-slate-500">Refill Verification</span>

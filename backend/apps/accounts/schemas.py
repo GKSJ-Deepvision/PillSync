@@ -6,7 +6,7 @@ from apps.accounts.models import User, UserRole
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True,
-        min_length=8,
+        min_length=6,
         max_length=128,
     )
 
@@ -39,7 +39,15 @@ class UserResponseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("id", "email", "full_name", "role")
+        fields = (
+            "id",
+            "email",
+            "full_name",
+            "role",
+            "assigned_caregiver",
+            "is_active",
+            "date_joined",
+        )
 
 
 class RoleAccessResponseSerializer(serializers.Serializer):

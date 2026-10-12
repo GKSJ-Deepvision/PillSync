@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../context/useAuth';
-import { Alert } from '../../../components/common';
-import { Mail, Pill, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Alert, PillSyncIcon } from '../../../components/common';
+import { Mail, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { isValidEmail } from '../../../utils/validation';
 import './ForgotPasswordPage.css';
 
@@ -67,7 +67,7 @@ export function ForgotPasswordPage() {
       <div className="forgot-card-container">
         <div className="forgot-header">
           <div className="forgot-logo-box">
-            <Pill className="h-6 w-6" />
+            <PillSyncIcon className="h-6 w-6 text-white" />
           </div>
           <h1 className="forgot-title">Reset your password</h1>
           <p className="forgot-subtitle">

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../../context/useAuth';
 import { Layout } from '../../../components/layout';
 import { Badge } from '../../../components/common/Badge';
@@ -18,143 +19,19 @@ import {
 } from 'lucide-react';
 import './NotificationsPage.css';
 
-const INITIAL_NOTIFICATIONS = [
-  {
-    id: 1,
-    type: 'patient_message',
-    title: 'Patient Inquiry · Sarah Connor',
-    patient: 'Sarah Connor',
-    patientAge: 48,
-    patientAvatar:
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
-    message:
-      'Good morning Dr. Oliver. I felt slight dizziness after taking my morning Lisinopril 20mg dose. Should I take it with food or reduce to 10mg?',
-    time: '12 minutes ago',
-    unread: true,
-    priority: 'high',
-    replies: [],
-  },
-  {
-    id: 2,
-    type: 'alert',
-    title: 'Critical Missed Dose · Sarah Connor',
-    patient: 'Sarah Connor',
-    patientAge: 48,
-    patientAvatar:
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
-    message:
-      'Lisinopril 20mg morning dose (08:00 AM) was not logged. Overdue by 3 hours. Automated SMS reminder sent.',
-    time: '45 minutes ago',
-    unread: true,
-    priority: 'high',
-    replies: [],
-  },
-  {
-    id: 3,
-    type: 'patient_message',
-    title: 'Vitals Update · Ibrahim Kadri',
-    patient: 'Ibrahim Kadri',
-    patientAge: 54,
-    patientAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    message:
-      'Dr. Oliver, my fasting blood glucose this morning was 114 mg/dL and BP was 122/78 mmHg. Both morning doses taken with oatmeal.',
-    time: '2 hours ago',
-    unread: true,
-    priority: 'normal',
-    replies: [],
-  },
-  {
-    id: 4,
-    type: 'refill',
-    title: 'Refill Authorization Needed · Michael Chang',
-    patient: 'Michael Chang',
-    patientAge: 62,
-    patientAvatar:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    message:
-      'Levothyroxine 50mcg is down to 4 days supply remaining. Michael Chang requested a 30-day prescription renewal.',
-    time: '3 hours ago',
-    unread: false,
-    priority: 'medium',
-    replies: [],
-  },
-  {
-    id: 5,
-    type: 'patient_message',
-    title: 'Care Question · Michael Chang',
-    patient: 'Michael Chang',
-    patientAge: 62,
-    patientAvatar:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    message:
-      'Can I take my Levothyroxine 30 minutes before breakfast or does it strictly need a full 60 minutes gap?',
-    time: 'Yesterday',
-    unread: false,
-    priority: 'normal',
-    replies: [
-      {
-        id: 'r1',
-        sender: 'Dr. Oliver Mitchell',
-        text: 'Hello Michael! A 30 to 45-minute window with a full glass of water is completely fine.',
-        time: 'Yesterday',
-      },
-    ],
-  },
-  {
-    id: 6,
-    type: 'alert',
-    title: 'Adherence Milestone Reached',
-    patient: 'Ibrahim Kadri',
-    patientAge: 54,
-    patientAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    message:
-      'Ibrahim Kadri achieved a 7-day 96% adherence score across all 4 prescribed medications.',
-    time: '2 days ago',
-    unread: false,
-    priority: 'normal',
-    replies: [],
-  },
-];
-
-const PATIENT_VIEW_NOTIFICATIONS = [
-  {
-    id: 101,
-    type: 'doctor_message',
-    title: 'Message from Dr. Oliver Mitchell',
-    doctor: 'Dr. Oliver Mitchell',
-    doctorAvatar:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
-    message:
-      'Good morning Ibrahim! Your fasting glucose reading of 114 mg/dL looks great. Continue your current Metformin 500mg dose after breakfast.',
-    time: '15 minutes ago',
-    unread: true,
-    priority: 'high',
-    replies: [],
-  },
-  {
-    id: 102,
-    type: 'refill',
-    title: 'Prescription Refill Reminder',
-    message:
-      'Metformin 500mg has 4 days remaining. Your pharmacy at City Health has prepared your 30-day refill pack.',
-    time: '2 hours ago',
-    unread: true,
-    priority: 'medium',
-    replies: [],
-  },
-  {
-    id: 103,
-    type: 'alert',
-    title: 'Dose Schedule Reminder',
-    message: 'Your Vitamin D3 2000 IU dose is scheduled for 01:00 PM with lunch today.',
-    time: '4 hours ago',
-    unread: false,
-    priority: 'normal',
-    replies: [],
-  },
-];
+// Persistent notifications getter defaulting to empty array (Zero dummy data)
+function getStoredNotifications() {
+  try {
+    const raw = localStorage.getItem('pillsync_notifications');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (err) {
+    console.error(err);
+  }
+  return []; // Clean empty default
+}
 
 export function NotificationsPage() {
   const { user } = useAuth();
@@ -162,9 +39,7 @@ export function NotificationsPage() {
   const isCaregiver = userRole === 'caregiver' || userRole === 'admin';
 
   const [filter, setFilter] = useState('all');
-  const [items, setItems] = useState(
-    isCaregiver ? INITIAL_NOTIFICATIONS : PATIENT_VIEW_NOTIFICATIONS
-  );
+  const [items, setItems] = useState(() => getStoredNotifications());
   const [replyingId, setReplyingId] = useState(null);
   const [replyText, setReplyText] = useState('');
 
@@ -186,20 +61,26 @@ export function NotificationsPage() {
   ).length;
 
   const markAsRead = (id) => {
-    setItems((current) =>
-      current.map((item) => (item.id === id ? { ...item, unread: false } : item))
-    );
+    setItems((current) => {
+      const updated = current.map((item) => (item.id === id ? { ...item, unread: false } : item));
+      try {
+        localStorage.setItem('pillsync_notifications', JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
   };
 
   const handleSendReply = (id) => {
     if (!replyText.trim()) return;
 
-    setItems((current) =>
-      current.map((item) => {
+    setItems((current) => {
+      const updated = current.map((item) => {
         if (item.id === id) {
           const newReply = {
             id: Date.now(),
-            sender: isCaregiver ? 'Dr. Oliver Mitchell' : user?.name || 'Patient',
+            sender: isCaregiver ? 'Clinical Care Team' : user?.name || 'Patient',
             text: replyText,
             time: 'Just now',
           };
@@ -210,11 +91,41 @@ export function NotificationsPage() {
           };
         }
         return item;
-      })
-    );
+      });
+      try {
+        localStorage.setItem('pillsync_notifications', JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
 
     setReplyText('');
     setReplyingId(null);
+  };
+
+  const handleAddTestNotification = () => {
+    const testItem = {
+      id: String(Date.now()),
+      type: 'alert',
+      priority: 'high',
+      title: 'Scheduled Intake Alert: Lisinopril 10mg',
+      message:
+        'Reminder: It is time for your morning hypertension regimen. Please take with water.',
+      time: 'Just now',
+      unread: true,
+      patient: isCaregiver ? 'Monitored Patient' : undefined,
+      doctor: !isCaregiver ? 'Attending Physician' : undefined,
+    };
+    setItems((current) => {
+      const updated = [testItem, ...current];
+      try {
+        localStorage.setItem('pillsync_notifications', JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
   };
 
   return (
@@ -235,21 +146,35 @@ export function NotificationsPage() {
             </p>
           </div>
 
-          <div className="notifications-summary">
-            <div>
-              <span className="label">Unread</span>
-              <strong className="text-indigo-600">{unreadCount}</strong>
-            </div>
-            <div>
-              <span className="label">Urgent</span>
-              <strong className="text-rose-600">{urgentCount}</strong>
-            </div>
+          <div className="flex flex-col sm:flex-row items-end gap-3">
             {isCaregiver && (
-              <div>
-                <span className="label">Messages</span>
-                <strong className="text-emerald-600">{messagesCount}</strong>
-              </div>
+              <button
+                type="button"
+                onClick={handleAddTestNotification}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 text-xs font-bold hover:bg-indigo-100 transition shadow-2xs cursor-pointer"
+                title="Dispatch a clinical test dose alert to monitored patients"
+              >
+                <Bell className="h-3.5 w-3.5" />
+                Dispatch Test Alert
+              </button>
             )}
+
+            <div className="notifications-summary">
+              <div>
+                <span className="label">Unread</span>
+                <strong className="text-indigo-600">{unreadCount}</strong>
+              </div>
+              <div>
+                <span className="label">Urgent</span>
+                <strong className="text-rose-600">{urgentCount}</strong>
+              </div>
+              {isCaregiver && (
+                <div>
+                  <span className="label">Messages</span>
+                  <strong className="text-emerald-600">{messagesCount}</strong>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -286,199 +211,230 @@ export function NotificationsPage() {
         {/* Notification Main Grid */}
         <div className="notifications-grid">
           <div className="notifications-list">
-            {filteredItems.map((notification) => (
-              <div
-                key={notification.id}
-                className={`notification-item ${notification.unread ? 'unread' : ''}`}
-              >
-                {/* Icon Column */}
-                <div className="notification-icon">
-                  {notification.type === 'alert' && (
-                    <AlertTriangle className="h-5 w-5 text-rose-600" />
-                  )}
-                  {(notification.type === 'patient_message' ||
-                    notification.type === 'doctor_message') && (
-                    <Mail className="h-5 w-5 text-indigo-600" />
-                  )}
-                  {notification.type === 'refill' && (
-                    <Sparkles className="h-5 w-5 text-amber-600" />
-                  )}
+            {filteredItems.length === 0 ? (
+              <div className="p-12 text-center bg-white rounded-2xl border border-slate-100 shadow-sm">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 mb-3">
+                  <Bell className="h-7 w-7" />
                 </div>
-
-                {/* Body Content */}
-                <div className="notification-body">
-                  {/* Patient Banner for Caregiver view */}
-                  {notification.patient && isCaregiver && (
-                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={notification.patientAvatar}
-                          alt={notification.patient}
-                          className="h-6 w-6 rounded-full object-cover border border-slate-200"
-                        />
-                        <span className="text-xs font-bold text-slate-900">
-                          {notification.patient}
-                        </span>
-                        <span className="text-[10px] text-slate-400">
-                          ({notification.patientAge}y)
-                        </span>
-                      </div>
-                      <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">
-                        Patient Message
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Doctor Banner for Patient view */}
-                  {notification.doctor && !isCaregiver && (
-                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={notification.doctorAvatar}
-                          alt={notification.doctor}
-                          className="h-6 w-6 rounded-full object-cover border border-slate-200"
-                        />
-                        <span className="text-xs font-bold text-slate-900">
-                          {notification.doctor}
-                        </span>
-                      </div>
-                      <Badge variant="success" size="xs">
-                        Attending Physician
-                      </Badge>
-                    </div>
-                  )}
-
-                  <div className="notification-header-row">
-                    <h3>{notification.title}</h3>
-                    {notification.unread && <span className="unread-dot">New Message</span>}
+                <h3 className="text-base font-bold text-slate-800">No notifications</h3>
+                <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                  {isCaregiver
+                    ? 'You are all caught up! Patient inquiries, missed dose flags, and refill requests will appear here.'
+                    : 'You are all caught up! Dose alerts, clinician instructions, and pharmacy refill notices from your care team will appear here.'}
+                </p>
+                {isCaregiver ? (
+                  <button
+                    type="button"
+                    onClick={handleAddTestNotification}
+                    className="mt-3.5 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition cursor-pointer shadow-sm"
+                  >
+                    <Bell className="h-3.5 w-3.5" />
+                    Dispatch Test Dose Alert
+                  </button>
+                ) : (
+                  <Link
+                    to="/dashboard"
+                    className="mt-3.5 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 text-indigo-700 text-xs font-bold hover:bg-indigo-100 transition shadow-2xs"
+                  >
+                    View Medication Schedule
+                  </Link>
+                )}
+              </div>
+            ) : (
+              filteredItems.map((notification) => (
+                <div
+                  key={notification.id}
+                  className={`notification-item ${notification.unread ? 'unread' : ''}`}
+                >
+                  {/* Icon Column */}
+                  <div className="notification-icon">
+                    {notification.type === 'alert' && (
+                      <AlertTriangle className="h-5 w-5 text-rose-600" />
+                    )}
+                    {(notification.type === 'patient_message' ||
+                      notification.type === 'doctor_message') && (
+                      <Mail className="h-5 w-5 text-indigo-600" />
+                    )}
+                    {notification.type === 'refill' && (
+                      <Sparkles className="h-5 w-5 text-amber-600" />
+                    )}
                   </div>
 
-                  <p className="notification-text">{notification.message}</p>
-
-                  {/* Thread Replies */}
-                  {notification.replies && notification.replies.length > 0 && (
-                    <div className="space-y-2 mt-3 pt-2 border-t border-slate-100">
-                      {notification.replies.map((reply) => (
-                        <div
-                          key={reply.id}
-                          className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs"
-                        >
-                          <div className="flex items-center justify-between font-bold text-slate-900 mb-1">
-                            <span className="flex items-center gap-1.5 text-indigo-700">
-                              <CheckCircle2 className="h-3.5 w-3.5" />
-                              {reply.sender} (Reply)
-                            </span>
-                            <span className="text-[10px] text-slate-400 font-normal">
-                              {reply.time}
-                            </span>
-                          </div>
-                          <p className="text-slate-700 m-0 text-xs leading-relaxed">{reply.text}</p>
+                  {/* Body Content */}
+                  <div className="notification-body">
+                    {/* Patient Banner for Caregiver view */}
+                    {notification.patient && isCaregiver && (
+                      <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                        <div className="flex items-center gap-2">
+                          {notification.patientAvatar ? (
+                            <img
+                              src={notification.patientAvatar}
+                              alt={notification.patient}
+                              className="h-6 w-6 rounded-full object-cover border border-slate-200"
+                            />
+                          ) : (
+                            <div className="h-6 w-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-bold">
+                              {notification.patient.slice(0, 2)}
+                            </div>
+                          )}
+                          <span className="text-xs font-bold text-slate-900">
+                            {notification.patient}
+                          </span>
                         </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Quick Reply Form */}
-                  {replyingId === notification.id ? (
-                    <div className="mt-3 p-3 rounded-xl border border-indigo-200 bg-indigo-50/40">
-                      <p className="text-[11px] font-bold text-indigo-900 mb-1.5 flex items-center gap-1">
-                        <MessageSquare className="h-3.5 w-3.5" />
-                        Reply to {notification.patient || 'Sender'}:
-                      </p>
-                      <textarea
-                        rows={2}
-                        value={replyText}
-                        onChange={(e) => setReplyText(e.target.value)}
-                        placeholder="Type clinical advice or response..."
-                        className="w-full rounded-lg border border-slate-200 bg-white p-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none"
-                      />
-                      <div className="flex items-center justify-end gap-2 mt-2">
-                        <button
-                          type="button"
-                          onClick={() => setReplyingId(null)}
-                          className="px-2.5 py-1 text-xs font-semibold text-slate-600 hover:text-slate-800"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleSendReply(notification.id)}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1 text-xs font-bold text-white hover:bg-indigo-700 transition shadow-2xs"
-                        >
-                          <Send className="h-3 w-3" />
-                          Send Reply
-                        </button>
+                        <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">
+                          Patient Message
+                        </span>
                       </div>
+                    )}
+
+                    {/* Doctor Banner for Patient view */}
+                    {notification.doctor && !isCaregiver && (
+                      <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-slate-900">
+                            {notification.doctor}
+                          </span>
+                        </div>
+                        <Badge variant="success" size="xs">
+                          Attending Physician
+                        </Badge>
+                      </div>
+                    )}
+
+                    <div className="notification-header-row">
+                      <h3>{notification.title}</h3>
+                      {notification.unread && <span className="unread-dot">New Message</span>}
                     </div>
-                  ) : null}
 
-                  {/* Metadata & Actions */}
-                  <div className="notification-meta mt-3">
-                    <span className="time">
-                      <Clock3 className="h-3.5 w-3.5" />
-                      {notification.time}
-                    </span>
-                    <span className={`priority priority-${notification.priority}`}>
-                      {notification.priority}
-                    </span>
+                    <p className="notification-text">{notification.message}</p>
 
-                    {/* Action buttons */}
-                    <div className="flex items-center gap-1.5 ml-auto">
-                      {(notification.type === 'patient_message' ||
-                        notification.type === 'doctor_message') &&
-                        replyingId !== notification.id && (
+                    {/* Thread Replies */}
+                    {notification.replies && notification.replies.length > 0 && (
+                      <div className="space-y-2 mt-3 pt-2 border-t border-slate-100">
+                        {notification.replies.map((reply) => (
+                          <div
+                            key={reply.id}
+                            className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs"
+                          >
+                            <div className="flex items-center justify-between font-bold text-slate-900 mb-1">
+                              <span className="flex items-center gap-1.5 text-indigo-700">
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                {reply.sender} (Reply)
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-normal">
+                                {reply.time}
+                              </span>
+                            </div>
+                            <p className="text-slate-700 m-0 text-xs leading-relaxed">
+                              {reply.text}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Quick Reply Form */}
+                    {replyingId === notification.id ? (
+                      <div className="mt-3 p-3 rounded-xl border border-indigo-200 bg-indigo-50/40">
+                        <p className="text-[11px] font-bold text-indigo-900 mb-1.5 flex items-center gap-1">
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          Reply to {notification.patient || 'Sender'}:
+                        </p>
+                        <textarea
+                          rows={2}
+                          value={replyText}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          placeholder="Type clinical advice or response..."
+                          className="w-full rounded-lg border border-slate-200 bg-white p-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none"
+                        />
+                        <div className="flex items-center justify-end gap-2 mt-2">
                           <button
                             type="button"
-                            onClick={() => {
-                              setReplyingId(notification.id);
-                              setReplyText('');
-                            }}
-                            className="inline-flex items-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition cursor-pointer"
+                            onClick={() => setReplyingId(null)}
+                            className="px-2.5 py-1 text-xs font-semibold text-slate-600 hover:text-slate-800"
                           >
-                            <MessageSquare className="h-3 w-3" />
-                            Reply
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleSendReply(notification.id)}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1 text-xs font-bold text-white hover:bg-indigo-700 transition shadow-2xs"
+                          >
+                            <Send className="h-3 w-3" />
+                            Send Reply
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {/* Metadata & Actions */}
+                    <div className="notification-meta mt-3">
+                      <span className="time">
+                        <Clock3 className="h-3.5 w-3.5" />
+                        {notification.time}
+                      </span>
+                      <span className={`priority priority-${notification.priority}`}>
+                        {notification.priority}
+                      </span>
+
+                      {/* Action buttons */}
+                      <div className="flex items-center gap-1.5 ml-auto">
+                        {(notification.type === 'patient_message' ||
+                          notification.type === 'doctor_message') &&
+                          replyingId !== notification.id && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setReplyingId(notification.id);
+                                setReplyText('');
+                              }}
+                              className="inline-flex items-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition cursor-pointer"
+                            >
+                              <MessageSquare className="h-3 w-3" />
+                              Reply
+                            </button>
+                          )}
+
+                        {notification.patient && (
+                          <button
+                            type="button"
+                            onClick={() => alert(`Connecting call to ${notification.patient}...`)}
+                            className="rounded-lg border border-slate-200 bg-white p-1 text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+                            title="Call"
+                          >
+                            <Phone className="h-3.5 w-3.5" />
                           </button>
                         )}
 
-                      {notification.patient && (
-                        <button
-                          type="button"
-                          onClick={() => alert(`Calling ${notification.patient}...`)}
-                          className="rounded-lg border border-slate-200 bg-white p-1 text-slate-600 hover:bg-slate-100 transition cursor-pointer"
-                          title="Call"
-                        >
-                          <Phone className="h-3.5 w-3.5" />
-                        </button>
-                      )}
+                        {notification.type === 'refill' && isCaregiver && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              alert(`30-day refill authorized for ${notification.patient}!`)
+                            }
+                            className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-bold text-white hover:bg-emerald-700 transition cursor-pointer shadow-2xs"
+                          >
+                            <Check className="h-3 w-3" />
+                            Authorize Refill
+                          </button>
+                        )}
 
-                      {notification.type === 'refill' && isCaregiver && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            alert(`30-day refill authorized for ${notification.patient}!`)
-                          }
-                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-bold text-white hover:bg-emerald-700 transition cursor-pointer shadow-2xs"
-                        >
-                          <Check className="h-3 w-3" />
-                          Authorize Refill
-                        </button>
-                      )}
-
-                      {notification.unread && (
-                        <button
-                          type="button"
-                          className="mark-read-btn cursor-pointer"
-                          onClick={() => markAsRead(notification.id)}
-                        >
-                          <CheckCircle2 className="h-3.5 w-3.5" />
-                          Mark read
-                        </button>
-                      )}
+                        {notification.unread && (
+                          <button
+                            type="button"
+                            className="mark-read-btn cursor-pointer"
+                            onClick={() => markAsRead(notification.id)}
+                          >
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            Mark read
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           {/* Side Panel Summary */}
@@ -489,8 +445,8 @@ export function NotificationsPage() {
                 <span>Cohort Communication Hub</span>
               </div>
               <p className="text-xs text-slate-600 mb-3 leading-relaxed">
-                Messages sent by patients via their mobile portal or web app are routed directly to
-                this caregiver inbox with instant push telemetry.
+                Messages sent by patients via their portal are routed directly to this inbox with
+                instant telemetry.
               </p>
               <ul>
                 <li>
@@ -502,8 +458,8 @@ export function NotificationsPage() {
                   <strong className="text-indigo-600">{unreadCount}</strong>
                 </li>
                 <li>
-                  <span>Active patients</span>
-                  <strong>3 Patients</strong>
+                  <span>Monitoring status</span>
+                  <strong className="text-emerald-600">Active</strong>
                 </li>
               </ul>
             </div>
@@ -514,8 +470,7 @@ export function NotificationsPage() {
                 Live Care Team Status
               </h4>
               <p className="text-xs text-slate-600 mt-1">
-                Lead Clinician Dr. Oliver Mitchell is currently online. Automated escalations are
-                active for doses delayed over 30 minutes.
+                Clinical care escalations are active for doses delayed over 30 minutes.
               </p>
             </div>
           </aside>

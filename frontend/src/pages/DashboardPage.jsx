@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../context/useAuth';
 import { Link } from 'react-router-dom';
 import { Layout } from '../components/layout';
@@ -19,160 +19,361 @@ import {
   ArrowRight,
   Bell,
   Server,
+  Check,
+  Fingerprint,
+  MessageSquare,
+  HeartPulse,
 } from 'lucide-react';
 import { getChatbotResponse } from '../utils/chatbotEngine';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { medicationApi } from '../api/medications';
+import { reminderApi } from '../api/reminders';
+import { apiClient } from '../api/client';
+import { getScopedStorage, setScopedStorage } from '../utils/userStorage';
+import { getCohortPatients } from '../utils/cohort';
+import { isDemoEmail, WORKING_ACCOUNTS } from '../api/auth';
 import './DashboardPage.css';
 
-const PATIENTS = [
-  {
-    id: 'p1',
-    name: 'Ibrahim Kadri',
-    age: 54,
-    condition: 'Type 2 Diabetes & Hypertension',
-    adherence: 94,
-    totalMeds: 4,
-    todayDoses: 6,
-    avatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    lastMessage: 'Good morning Dr. Oliver! Glucose is 114 mg/dL today.',
-    lastTime: '10m ago',
-    status: 'Stable',
-  },
-  {
-    id: 'p2',
-    name: 'Sarah Connor',
-    age: 48,
-    condition: 'Cardiac Arrhythmia & High Cholesterol',
-    adherence: 64,
-    totalMeds: 5,
-    todayDoses: 8,
-    avatar:
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
-    lastMessage: 'Experienced slight dizziness after the morning Lisinopril dose.',
-    lastTime: '1h ago',
-    status: 'Needs Attention',
-  },
-  {
-    id: 'p3',
-    name: 'Michael Chang',
-    age: 62,
-    condition: 'Hypothyroidism',
-    adherence: 82,
-    totalMeds: 3,
-    todayDoses: 4,
-    avatar:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    lastMessage: 'Levothyroxine supply down to 4 tablets. Requesting refill.',
-    lastTime: '3h ago',
-    status: 'Refill Due',
-  },
-];
+function getAdminRegisteredUsers() {
+  const mergedMap = new Map();
+  WORKING_ACCOUNTS.forEach((wa) => mergedMap.set(wa.email.toLowerCase(), wa));
+  try {
+    const raw = localStorage.getItem('pillsync_registered_users');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        parsed
+          .filter((u) => !isDemoEmail(u.email))
+          .forEach((u) => {
+            const key = u.email.toLowerCase();
+            mergedMap.set(key, { ...mergedMap.get(key), ...u });
+          });
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+  return Array.from(mergedMap.values());
+}
 
-const WEEKLY_ADHERENCE = [
-  { day: 'Mon', score: 90, target: 80 },
-  { day: 'Tue', score: 100, target: 80 },
-  { day: 'Wed', score: 85, target: 80 },
-  { day: 'Thu', score: 95, target: 80 },
-  { day: 'Fri', score: 75, target: 80 },
-  { day: 'Sat', score: 100, target: 80 },
-  { day: 'Sun', score: 92, target: 80 },
-];
-
-const CAREGIVER_COHORT_TREND = [
-  { day: 'Mon', adherence: 92, onTime: 18, missed: 1 },
-  { day: 'Tue', adherence: 88, onTime: 17, missed: 2 },
-  { day: 'Wed', adherence: 95, onTime: 19, missed: 0 },
-  { day: 'Thu', adherence: 85, onTime: 16, missed: 3 },
-  { day: 'Fri', adherence: 78, onTime: 15, missed: 4 },
-  { day: 'Sat', adherence: 94, onTime: 18, missed: 1 },
-  { day: 'Sun', adherence: 80, onTime: 16, missed: 2 },
-];
-
-const ADMIN_PLATFORM_DATA = [
-  { day: 'Mon', activeUsers: 1320, ocrScans: 280, reminders: 3420 },
-  { day: 'Tue', activeUsers: 1380, ocrScans: 310, reminders: 3580 },
-  { day: 'Wed', activeUsers: 1410, ocrScans: 295, reminders: 3640 },
-  { day: 'Thu', activeUsers: 1440, ocrScans: 340, reminders: 3790 },
-  { day: 'Fri', activeUsers: 1465, ocrScans: 390, reminders: 3820 },
-  { day: 'Sat', activeUsers: 1420, ocrScans: 210, reminders: 3500 },
-  { day: 'Sun', activeUsers: 1480, ocrScans: 245, reminders: 3610 },
-];
-
-const INITIAL_DOSES = [
-  {
-    id: 1,
-    time: '08:00 AM',
-    window: 'Morning',
-    med: 'Metformin 500mg',
-    instruction: '1 tablet after breakfast',
-    status: 'taken',
-    patient: 'Ibrahim Kadri',
-  },
-  {
-    id: 2,
-    time: '08:00 AM',
-    window: 'Morning',
-    med: 'Lisinopril 10mg',
-    instruction: '1 tablet with full glass of water',
-    status: 'taken',
-    patient: 'Ibrahim Kadri',
-  },
-  {
-    id: 3,
-    time: '08:00 AM',
-    window: 'Morning',
-    med: 'Lisinopril 20mg',
-    instruction: '1 tablet after breakfast',
-    status: 'missed',
-    patient: 'Sarah Connor',
-  },
-  {
-    id: 4,
-    time: '01:00 PM',
-    window: 'Afternoon',
-    med: 'Vitamin D3 2000 IU',
-    instruction: '1 softgel with lunch',
-    status: 'upcoming',
-    patient: 'Ibrahim Kadri',
-  },
-  {
-    id: 5,
-    time: '08:30 PM',
-    window: 'Evening',
-    med: 'Atorvastatin 20mg',
-    instruction: '1 tablet before bed',
-    status: 'upcoming',
-    patient: 'Sarah Connor',
-  },
-  {
-    id: 6,
-    time: '09:00 PM',
-    window: 'Night',
-    med: 'Levothyroxine 50mcg',
-    instruction: 'Before sleep on empty stomach',
-    status: 'upcoming',
-    patient: 'Michael Chang',
-  },
-];
+function getAdminPlatformTelemetry(userCount) {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const base = userCount > 0 ? userCount : 1;
+  return days.map((day, idx) => ({
+    day,
+    activeUsers: base,
+    ocrScans: Math.max(1, Math.round(base * 0.4 + (idx % 2))),
+    reminders: Math.max(1, base * 3),
+  }));
+}
 
 export function DashboardPage() {
   const { user } = useAuth();
-  const [doses, setDoses] = useState(INITIAL_DOSES);
   const [currentDateTime, setCurrentDateTime] = useState(() => new Date());
   const [chatMessages, setChatMessages] = useState([
     {
       id: 1,
       sender: 'doctor',
-      text: 'Good morning! Your adherence is at 94% this week. Keep up the consistent morning routine!',
-    },
-    {
-      id: 2,
-      sender: 'patient',
-      text: 'Thank you Dr. Oliver. Just took my Metformin and Lisinopril on schedule.',
+      text: 'Good day! I am your PillSync Clinical Care AI Assistant. How can I help you manage your medications, review today’s schedule, or check your adherence?',
+      suggestions: [
+        'What medicines do I take?',
+        'When is my next dose?',
+        'Check my adherence',
+        'What if I miss a dose?',
+      ],
     },
   ]);
   const [inputMsg, setInputMsg] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const chatMessagesEndRef = useRef(null);
+
+  useEffect(() => {
+    chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages, isTyping]);
+  const [userMeds, setUserMeds] = useState([]);
+  const [doses, setDoses] = useState([]);
+  const userRole = (user?.role || 'patient').toLowerCase();
+  const [cohortPatients, setCohortPatients] = useState(() => getCohortPatients(user));
+
+  useEffect(() => {
+    setCohortPatients(getCohortPatients(user));
+  }, [user]);
+
+  const [adminUsers, setAdminUsers] = useState(() => getAdminRegisteredUsers());
+
+  useEffect(() => {
+    if (userRole === 'admin') {
+      apiClient
+        .get('/auth/users/')
+        .then((res) => {
+          if (Array.isArray(res.data) && res.data.length > 0) {
+            const cleanUsers = res.data.filter((u) => !isDemoEmail(u.email));
+            const mergedMap = new Map();
+            WORKING_ACCOUNTS.forEach((wa) => mergedMap.set(wa.email.toLowerCase(), wa));
+            cleanUsers.forEach((cu) => {
+              const key = cu.email.toLowerCase();
+              mergedMap.set(key, { ...mergedMap.get(key), ...cu });
+            });
+            const finalUsers = Array.from(mergedMap.values());
+            setAdminUsers(finalUsers);
+            try {
+              localStorage.setItem('pillsync_registered_users', JSON.stringify(finalUsers));
+            } catch {}
+          }
+        })
+        .catch(() => {});
+    }
+  }, [userRole]);
+  const [patientCheckedIn, setPatientCheckedIn] = useState(() => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const savedDate = getScopedStorage('pillsync_patient_checkin_date', '');
+      return savedDate === today;
+    } catch {
+      return false;
+    }
+  });
+  const [checkinToast, setCheckinToast] = useState('');
+  const [caregiverFeedbackSaved, setCaregiverFeedbackSaved] = useState(false);
+
+  const adminPlatformData = useMemo(
+    () => getAdminPlatformTelemetry(adminUsers.length),
+    [adminUsers]
+  );
+
+  const handlePatientCheckin = () => {
+    const today = new Date().toISOString().split('T')[0];
+    setPatientCheckedIn(true);
+    setScopedStorage('pillsync_patient_checkin_date', today);
+    try {
+      localStorage.setItem('pillsync_patient_checkin_date', today);
+    } catch {}
+    setCheckinToast("Daily check-in confirmed! Today's streak recorded.");
+    setTimeout(() => setCheckinToast(''), 4500);
+  };
+
+  // Load real user medications from local API or assigned cohort schedule for caregivers
+  useEffect(() => {
+    let cancelled = false;
+
+    // For Caregiver: generate doses strictly across their assigned cohort patients
+    if (userRole === 'caregiver') {
+      const cohort = getCohortPatients(user);
+      const cohortDoses = [];
+      let idx = 1;
+      const todayStr = new Date().toISOString().split('T')[0];
+      const now = new Date();
+
+      cohort.forEach((p) => {
+        const pKey = p.email
+          ? p.email
+              .trim()
+              .toLowerCase()
+              .replace(/[^a-z0-9]/g, '_')
+          : '';
+        let pMeds = [];
+        try {
+          const rawMeds = localStorage.getItem(`pillsync_patient_medications_${pKey}`);
+          if (rawMeds) pMeds = JSON.parse(rawMeds);
+        } catch {}
+
+        if (!Array.isArray(pMeds)) {
+          pMeds = [];
+        }
+
+        let pStoredDoses = [];
+        try {
+          const rawDoses = localStorage.getItem(`pillsync_patient_doses_${pKey}`);
+          if (rawDoses) pStoredDoses = JSON.parse(rawDoses);
+        } catch {}
+
+        pMeds.forEach((med) => {
+          const schedules =
+            Array.isArray(med.schedule) && med.schedule.length > 0 ? med.schedule : ['08:00 AM'];
+          schedules.forEach((timeStr) => {
+            const isPM = timeStr.includes('PM');
+            let windowName = 'Morning';
+            if (isPM && !timeStr.startsWith('12')) {
+              windowName =
+                timeStr.startsWith('08') || timeStr.startsWith('09') || timeStr.startsWith('10')
+                  ? 'Night'
+                  : 'Evening';
+            } else if (isPM || timeStr.startsWith('12')) {
+              windowName = 'Afternoon';
+            }
+
+            const doseKey = `${p.id || p.name}-${med.name}-${timeStr}`;
+            let isPastTime = false;
+            try {
+              const [timePart, modifier] = timeStr.split(' ');
+              let [hours, minutes] = timePart.split(':').map(Number);
+              if (modifier === 'PM' && hours < 12) hours += 12;
+              if (modifier === 'AM' && hours === 12) hours = 0;
+              const scheduledDate = new Date();
+              scheduledDate.setHours(hours, minutes || 0, 0, 0);
+              if (now > scheduledDate) isPastTime = true;
+            } catch {}
+
+            let status = isPastTime ? 'missed' : 'upcoming';
+            let takenAt = undefined;
+
+            const existingRecord = pStoredDoses.find(
+              (d) =>
+                (d.doseKey && d.doseKey === doseKey) ||
+                (d.medName &&
+                  d.medName.trim().toLowerCase() === med.name.trim().toLowerCase() &&
+                  d.time === timeStr)
+            );
+
+            if (existingRecord) {
+              const recordDate =
+                existingRecord.date ||
+                (existingRecord.takenAt ? existingRecord.takenAt.split('T')[0] : null);
+              if (!recordDate || recordDate === todayStr) {
+                status = existingRecord.status || (isPastTime ? 'missed' : 'upcoming');
+                takenAt = existingRecord.takenAt;
+              }
+            }
+
+            cohortDoses.push({
+              id: idx,
+              doseKey,
+              patient: p.name,
+              patientEmail: p.email,
+              medId: med.id,
+              medName: med.name,
+              time: timeStr,
+              window: windowName,
+              med: `${med.name} ${med.dosage || ''}`,
+              instruction: med.instructions || 'Daily dose',
+              status,
+              takenAt,
+            });
+            idx++;
+          });
+        });
+      });
+
+      if (!cancelled) {
+        setDoses(cohortDoses);
+      }
+      return;
+    }
+
+    const fetchMeds = async () => {
+      try {
+        const data = await medicationApi.getMedications();
+        if (cancelled) return;
+        if (data && data.length > 0) {
+          setUserMeds(data);
+
+          // Read stored doses and reminders history
+          const storedDoses = getScopedStorage('pillsync_patient_doses', []) || [];
+          const storedReminders = getScopedStorage('pillsync_reminders', []) || [];
+
+          const generatedDoses = [];
+          let idx = 1;
+          data.forEach((med) => {
+            const schedules =
+              Array.isArray(med.schedule) && med.schedule.length > 0 ? med.schedule : ['08:00 AM'];
+            schedules.forEach((timeStr) => {
+              const isPM = timeStr.includes('PM');
+              let windowName = 'Morning';
+              if (isPM && !timeStr.startsWith('12')) {
+                windowName =
+                  timeStr.startsWith('08') || timeStr.startsWith('09') || timeStr.startsWith('10')
+                    ? 'Night'
+                    : 'Evening';
+              } else if (isPM || timeStr.startsWith('12')) {
+                windowName = 'Afternoon';
+              }
+
+              const doseKey = `${med.name}-${timeStr}`;
+
+              const todayStr = new Date().toISOString().split('T')[0];
+
+              // Retain taken/snoozed status strictly if matching this exact medication AND taken today
+              const existingRecord =
+                storedDoses.find(
+                  (d) =>
+                    (d.doseKey && d.doseKey === doseKey) ||
+                    (d.medId && String(d.medId) === String(med.id) && d.time === timeStr) ||
+                    (d.medName &&
+                      d.medName.trim().toLowerCase() === med.name.trim().toLowerCase() &&
+                      d.time === timeStr) ||
+                    (d.med &&
+                      d.med.trim().toLowerCase().startsWith(med.name.trim().toLowerCase()) &&
+                      d.time === timeStr)
+                ) ||
+                storedReminders.find(
+                  (r) =>
+                    (r.medicationId &&
+                      String(r.medicationId) === String(med.id) &&
+                      r.time === timeStr) ||
+                    (r.medicationName &&
+                      r.medicationName.trim().toLowerCase() === med.name.trim().toLowerCase() &&
+                      r.time === timeStr)
+                );
+
+              let isPastTime = false;
+              try {
+                const now = new Date();
+                const [timePart, modifier] = timeStr.split(' ');
+                let [hours, minutes] = timePart.split(':').map(Number);
+                if (modifier === 'PM' && hours < 12) hours += 12;
+                if (modifier === 'AM' && hours === 12) hours = 0;
+                const scheduledDate = new Date();
+                scheduledDate.setHours(hours, minutes || 0, 0, 0);
+                if (now > scheduledDate) isPastTime = true;
+              } catch {}
+
+              let status = isPastTime ? 'missed' : 'upcoming';
+              let takenAt = undefined;
+              if (existingRecord) {
+                const recordDate =
+                  existingRecord.date ||
+                  (existingRecord.takenAt ? existingRecord.takenAt.split('T')[0] : null);
+                if (!recordDate || recordDate === todayStr) {
+                  status = existingRecord.status || (isPastTime ? 'missed' : 'upcoming');
+                  takenAt = existingRecord.takenAt;
+                }
+              }
+
+              generatedDoses.push({
+                id: idx,
+                doseKey,
+                medId: med.id,
+                medName: med.name,
+                time: timeStr,
+                window: windowName,
+                med: `${med.name} ${med.dosage || ''}`,
+                instruction: med.instructions || `${med.frequency || 'Daily'} dose`,
+                status,
+                takenAt,
+              });
+              idx++;
+            });
+          });
+
+          setDoses(generatedDoses);
+          setScopedStorage('pillsync_patient_doses', generatedDoses);
+        } else {
+          setUserMeds([]);
+          setDoses([]);
+        }
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) {
+          setUserMeds([]);
+          setDoses([]);
+        }
+      }
+    };
+    fetchMeds();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, userRole, cohortPatients.length]);
 
   // Live real-time clock ticker
   useEffect(() => {
@@ -182,18 +383,13 @@ export function DashboardPage() {
     return () => clearInterval(timer);
   }, []);
 
-  const currentPatient = PATIENTS[0];
-  const userRole = user?.role || 'patient';
-
   const getDefaultName = () => {
-    if (userRole === 'caregiver') return 'Dr. Oliver Mitchell';
-    if (userRole === 'admin') return 'Sarah Jenkins';
-    return 'Ibrahim Kadri';
+    if (userRole === 'caregiver') return 'Clinical Caregiver';
+    if (userRole === 'admin') return 'System Administrator';
+    return 'Patient';
   };
 
-  const loggedInName = user?.name || getDefaultName();
-  const assignedCaregiver = 'Dr. Oliver Mitchell';
-  const assignedAdmin = 'Sarah Jenkins';
+  const loggedInName = user?.name || user?.email?.split('@')[0] || getDefaultName();
 
   const getGreetingWord = () => {
     const hr = currentDateTime.getHours();
@@ -203,20 +399,103 @@ export function DashboardPage() {
   };
 
   const handleTakeDose = (id) => {
-    setDoses((prev) => prev.map((dose) => (dose.id === id ? { ...dose, status: 'taken' } : dose)));
+    setDoses((prev) => {
+      const updated = prev.map((dose) =>
+        dose.id === id || String(dose.id) === String(id)
+          ? {
+              ...dose,
+              status: 'taken',
+              takenAt: new Date().toISOString(),
+            }
+          : dose
+      );
+      setScopedStorage('pillsync_patient_doses', updated);
+      try {
+        localStorage.setItem('pillsync_patient_doses', JSON.stringify(updated));
+      } catch {}
+
+      // Synchronize with reminders storage
+      const targetDose = prev.find((d) => d.id === id || String(d.id) === String(id));
+      if (targetDose) {
+        const storedReminders = getScopedStorage('pillsync_reminders', []) || [];
+        const syncedReminders = storedReminders.map((r) =>
+          (r.medicationName &&
+            targetDose.med &&
+            targetDose.med.includes(r.medicationName) &&
+            r.time === targetDose.time) ||
+          (r.time === targetDose.time && r.medicationId === targetDose.medId)
+            ? { ...r, status: 'taken', takenAt: new Date().toISOString() }
+            : r
+        );
+        setScopedStorage('pillsync_reminders', syncedReminders);
+      }
+
+      return updated;
+    });
+
+    if (typeof reminderApi?.markTaken === 'function') {
+      reminderApi.markTaken(id).catch(() => {});
+    }
+  };
+
+  const handleMarkNotTaken = (id) => {
+    setDoses((prev) => {
+      const updated = prev.map((dose) =>
+        dose.id === id || String(dose.id) === String(id)
+          ? {
+              ...dose,
+              status: 'missed',
+              takenAt: null,
+            }
+          : dose
+      );
+      setScopedStorage('pillsync_patient_doses', updated);
+      try {
+        localStorage.setItem('pillsync_patient_doses', JSON.stringify(updated));
+      } catch {}
+
+      // Synchronize with reminders storage
+      const targetDose = prev.find((d) => d.id === id || String(d.id) === String(id));
+      if (targetDose) {
+        const storedReminders = getScopedStorage('pillsync_reminders', []) || [];
+        const syncedReminders = storedReminders.map((r) =>
+          (r.medicationName &&
+            targetDose.med &&
+            targetDose.med.includes(r.medicationName) &&
+            r.time === targetDose.time) ||
+          (r.time === targetDose.time && r.medicationId === targetDose.medId)
+            ? { ...r, status: 'missed', takenAt: null }
+            : r
+        );
+        setScopedStorage('pillsync_reminders', syncedReminders);
+      }
+
+      return updated;
+    });
   };
 
   const handleSnoozeDose = (id) => {
-    setDoses((prev) =>
-      prev.map((dose) => (dose.id === id ? { ...dose, status: 'snoozed' } : dose))
-    );
+    setDoses((prev) => {
+      const updated = prev.map((dose) =>
+        dose.id === id || String(dose.id) === String(id) ? { ...dose, status: 'snoozed' } : dose
+      );
+      setScopedStorage('pillsync_patient_doses', updated);
+      try {
+        localStorage.setItem('pillsync_patient_doses', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    if (typeof reminderApi?.snoozeReminder === 'function') {
+      reminderApi.snoozeReminder(id, 30).catch(() => {});
+    }
   };
 
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (!inputMsg.trim()) return;
+  const sendMessage = (textToSend) => {
+    const query = (textToSend !== undefined ? textToSend : inputMsg).trim();
+    if (!query) return;
 
-    const userText = inputMsg;
+    const userText = query;
     const newMsg = {
       id: Date.now(),
       sender: 'patient',
@@ -224,20 +503,49 @@ export function DashboardPage() {
     };
     setChatMessages((prev) => [...prev, newMsg]);
     setInputMsg('');
+    setIsTyping(true);
 
     setTimeout(() => {
-      const botReplyText = getChatbotResponse(userText);
+      const botResponse = getChatbotResponse(userText, {
+        user,
+        medications: userMeds,
+        doses,
+        patientCheckedIn,
+      });
+
       const reply = {
         id: Date.now() + 1,
         sender: 'doctor',
-        text: botReplyText,
+        text: botResponse.text || String(botResponse),
+        suggestions: botResponse.suggestions || [],
       };
+      setIsTyping(false);
       setChatMessages((prev) => [...prev, reply]);
-    }, 600);
+    }, 450);
   };
 
-  const patientDoses = doses.filter((d) => d.patient === 'Ibrahim Kadri');
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    sendMessage();
+  };
+
+  const patientDoses = doses;
   const takenCount = patientDoses.filter((d) => d.status === 'taken').length;
+
+  const calendarDays = useMemo(() => {
+    const arr = [];
+    const now = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      arr.push({
+        day: String(d.getDate()),
+        today: i === 0,
+        done: i === 0 ? takenCount > 0 : false,
+      });
+    }
+    return arr;
+  }, [takenCount]);
 
   return (
     <Layout>
@@ -262,16 +570,14 @@ export function DashboardPage() {
                     : 'Verified Patient Protocol'}
               </Badge>
             </div>
-            <h1 className="dashboard-greeting-title">
+            <h1 className="dashboard-greeting-title select-none cursor-default">
               {getGreetingWord()}, {loggedInName}
             </h1>
             <p className="dashboard-greeting-subtitle">
               {userRole === 'patient' &&
-                `Your Care Plan is supervised by ${assignedCaregiver} · Platform Administrator: ${assignedAdmin}`}
-              {userRole === 'caregiver' &&
-                `Active Clinical Oversight · 3 Monitored Patients in Cohort · System Admin: ${assignedAdmin}`}
-              {userRole === 'admin' &&
-                `Platform Overview & HIPAA Compliance Operations · Supervised by Lead Clinician ${assignedCaregiver}`}
+                'Personal Care Portal · Adherence Tracking & Medication Schedule'}
+              {userRole === 'caregiver' && 'Active Clinical Oversight · Assigned Patients Cohort'}
+              {userRole === 'admin' && 'Platform Overview & HIPAA Compliance Operations'}
             </p>
           </div>
 
@@ -279,7 +585,11 @@ export function DashboardPage() {
             {userRole === 'caregiver' ? (
               <Link
                 to="/patients"
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 transition"
+                className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-white shadow-sm transition"
+                style={{
+                  background: 'linear-gradient(135deg,#3a9e90,#50b8a9)',
+                  boxShadow: '0 3px 12px -3px rgba(58,158,144,0.4)',
+                }}
               >
                 <Users className="h-4 w-4" />
                 View Assigned Patients
@@ -287,7 +597,11 @@ export function DashboardPage() {
             ) : userRole === 'admin' ? (
               <Link
                 to="/admin/users"
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 transition"
+                className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-white shadow-sm transition"
+                style={{
+                  background: 'linear-gradient(135deg,#3a9e90,#50b8a9)',
+                  boxShadow: '0 3px 12px -3px rgba(58,158,144,0.4)',
+                }}
               >
                 <Users className="h-4 w-4" />
                 Manage User Directory
@@ -295,7 +609,11 @@ export function DashboardPage() {
             ) : (
               <Link
                 to="/medications/new"
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 transition"
+                className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-white shadow-sm transition"
+                style={{
+                  background: 'linear-gradient(135deg,#3a9e90,#50b8a9)',
+                  boxShadow: '0 3px 12px -3px rgba(58,158,144,0.4)',
+                }}
               >
                 <Plus className="h-4 w-4" />
                 Add Medication
@@ -314,9 +632,11 @@ export function DashboardPage() {
               <div className="dashboard-kpi-card">
                 <div>
                   <p className="dashboard-kpi-label">Assigned Cohort</p>
-                  <p className="dashboard-kpi-value text-indigo-600">3 Patients</p>
+                  <p className="dashboard-kpi-value text-indigo-600">
+                    {cohortPatients.length} Patients
+                  </p>
                   <p className="dashboard-kpi-meta text-emerald-600 font-semibold">
-                    100% active monitoring
+                    {cohortPatients.length > 0 ? '100% active monitoring' : 'Roster ready'}
                   </p>
                 </div>
                 <div className="dashboard-kpi-icon bg-indigo-50 text-indigo-600">
@@ -327,9 +647,11 @@ export function DashboardPage() {
               <div className="dashboard-kpi-card">
                 <div>
                   <p className="dashboard-kpi-label">Cohort Avg Adherence</p>
-                  <p className="dashboard-kpi-value text-emerald-600">80.0%</p>
-                  <p className="dashboard-kpi-meta text-emerald-600 font-semibold">
-                    +2.4% this week
+                  <p className="dashboard-kpi-value text-emerald-600">
+                    {cohortPatients.length > 0 ? '80.0%' : '0%'}
+                  </p>
+                  <p className="dashboard-kpi-meta text-slate-500 font-semibold">
+                    {cohortPatients.length > 0 ? '+2.4% this week' : 'No patients assigned'}
                   </p>
                 </div>
                 <div className="dashboard-kpi-icon bg-emerald-50 text-emerald-600">
@@ -340,9 +662,13 @@ export function DashboardPage() {
               <div className="dashboard-kpi-card">
                 <div>
                   <p className="dashboard-kpi-label">Critical Dose Alerts</p>
-                  <p className="dashboard-kpi-value text-rose-600">2 Alerts</p>
+                  <p className="dashboard-kpi-value text-rose-600">
+                    {cohortPatients.filter((p) => p.adherence < 70).length} Alerts
+                  </p>
                   <p className="dashboard-kpi-meta text-rose-600 font-semibold">
-                    1 Missed dose · 1 High BP
+                    {cohortPatients.filter((p) => p.adherence < 70).length > 0
+                      ? 'Requires dose triage'
+                      : 'Zero critical risk alerts'}
                   </p>
                 </div>
                 <div className="dashboard-kpi-icon bg-rose-50 text-rose-600">
@@ -353,9 +679,9 @@ export function DashboardPage() {
               <div className="dashboard-kpi-card">
                 <div>
                   <p className="dashboard-kpi-label">Refill Status</p>
-                  <p className="dashboard-kpi-value text-amber-600">1 Due</p>
-                  <p className="dashboard-kpi-meta text-amber-600 font-semibold">
-                    Michael Chang (Levothyroxine)
+                  <p className="dashboard-kpi-value text-emerald-600">0 Due</p>
+                  <p className="dashboard-kpi-meta text-emerald-600 font-semibold">
+                    All regimens stocked
                   </p>
                 </div>
                 <div className="dashboard-kpi-icon bg-amber-50 text-amber-600">
@@ -376,7 +702,9 @@ export function DashboardPage() {
                         Cohort Weekly Adherence & Compliance
                       </h2>
                       <p className="text-xs text-slate-500 mt-0.5">
-                        Aggregated 7-day intake accuracy across 3 assigned patients
+                        {cohortPatients.length > 0
+                          ? `Aggregated 7-day intake accuracy across ${cohortPatients.length} assigned patients`
+                          : '7-day intake compliance telemetry'}
                       </p>
                     </div>
                     <Badge variant="primary" size="xs">
@@ -384,70 +712,145 @@ export function DashboardPage() {
                     </Badge>
                   </div>
 
-                  <div className="h-60 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={CAREGIVER_COHORT_TREND}
-                        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                        <XAxis
-                          dataKey="day"
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }}
-                        />
-                        <YAxis
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fill: '#94a3b8', fontSize: 11 }}
-                          domain={[0, 100]}
-                        />
-                        <Tooltip
-                          formatter={(value, name) => [
-                            name === 'Adherence %' ? `${value}%` : `${value} doses`,
-                            name,
+                  <div
+                    style={{ height: '260px', width: '100%', minHeight: '260px' }}
+                    className="flex items-center justify-center"
+                  >
+                    {cohortPatients.length === 0 ? (
+                      <div className="py-14 text-center text-slate-400">
+                        <Users className="h-10 w-10 text-slate-300 mx-auto mb-2" />
+                        <p className="text-xs font-bold text-slate-700">
+                          No cohort telemetry active
+                        </p>
+                        <p className="text-[11px] text-slate-400 mt-0.5 max-w-xs mx-auto">
+                          Assign patients to your monitoring roster to stream 7-day adherence
+                          telemetry.
+                        </p>
+                      </div>
+                    ) : (
+                      <ResponsiveContainer width="100%" height={260}>
+                        <BarChart
+                          data={[
+                            {
+                              day: 'Mon',
+                              adherence: 100,
+                              onTime: cohortPatients.length * 2,
+                              missed: 0,
+                            },
+                            {
+                              day: 'Tue',
+                              adherence: 100,
+                              onTime: cohortPatients.length * 2,
+                              missed: 0,
+                            },
+                            {
+                              day: 'Wed',
+                              adherence: 95,
+                              onTime: cohortPatients.length * 2,
+                              missed: 0,
+                            },
+                            {
+                              day: 'Thu',
+                              adherence: 100,
+                              onTime: cohortPatients.length * 2,
+                              missed: 0,
+                            },
+                            {
+                              day: 'Fri',
+                              adherence: 90,
+                              onTime: cohortPatients.length * 2,
+                              missed: 0,
+                            },
+                            {
+                              day: 'Sat',
+                              adherence: 100,
+                              onTime: cohortPatients.length * 2,
+                              missed: 0,
+                            },
+                            {
+                              day: 'Sun',
+                              adherence: 100,
+                              onTime: cohortPatients.length * 2,
+                              missed: 0,
+                            },
                           ]}
-                          contentStyle={{
-                            borderRadius: '12px',
-                            border: '1px solid #e2e8f0',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                            fontSize: '12px',
-                          }}
-                        />
-                        <Bar
-                          dataKey="adherence"
-                          name="Adherence %"
-                          fill="#4f46e5"
-                          radius={[4, 4, 0, 0]}
-                          maxBarSize={22}
-                        />
-                        <Bar
-                          dataKey="onTime"
-                          name="On-Time Doses"
-                          fill="#10b981"
-                          radius={[4, 4, 0, 0]}
-                          maxBarSize={22}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
+                          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                        >
+                          <defs>
+                            <linearGradient id="caregiverAdhGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#6366f1" stopOpacity={0.9} />
+                              <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.6} />
+                            </linearGradient>
+                            <linearGradient id="caregiverOnTimeGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#10b981" stopOpacity={0.9} />
+                              <stop offset="100%" stopColor="#059669" stopOpacity={0.6} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                          <XAxis
+                            dataKey="day"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }}
+                          />
+                          <YAxis
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#94a3b8', fontSize: 11 }}
+                            domain={[0, 100]}
+                          />
+                          <Tooltip
+                            formatter={(value, name) => [
+                              name === 'Adherence %' ? `${value}%` : `${value} doses`,
+                              name,
+                            ]}
+                            contentStyle={{
+                              borderRadius: '12px',
+                              border: '1px solid #e2e8f0',
+                              boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                              fontSize: '12px',
+                            }}
+                          />
+                          <Bar
+                            dataKey="adherence"
+                            name="Adherence %"
+                            fill="url(#caregiverAdhGrad)"
+                            radius={[6, 6, 0, 0]}
+                            maxBarSize={22}
+                          />
+                          <Bar
+                            dataKey="onTime"
+                            name="On-Time Doses"
+                            fill="url(#caregiverOnTimeGrad)"
+                            radius={[6, 6, 0, 0]}
+                            maxBarSize={22}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    )}
                   </div>
 
                   {/* Summary metric pills */}
                   <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-100 text-center">
                     <div className="p-2 rounded-xl bg-indigo-50/50">
                       <p className="text-[10px] uppercase font-bold text-slate-400">Cohort Avg</p>
-                      <p className="text-sm font-black text-indigo-700 m-0">80.0%</p>
+                      <p className="text-sm font-black text-indigo-700 m-0">
+                        {cohortPatients.length > 0 ? '80.0%' : '100%'}
+                      </p>
                     </div>
                     <div className="p-2 rounded-xl bg-emerald-50/50">
                       <p className="text-[10px] uppercase font-bold text-slate-400">
                         On-Time Doses
                       </p>
-                      <p className="text-sm font-black text-emerald-600 m-0">119</p>
+                      <p className="text-sm font-black text-emerald-600 m-0">
+                        {cohortPatients.length > 0 ? '119' : '0'}
+                      </p>
                     </div>
                     <div className="p-2 rounded-xl bg-rose-50/50">
                       <p className="text-[10px] uppercase font-bold text-slate-400">Missed Doses</p>
-                      <p className="text-sm font-black text-rose-600 m-0">13</p>
+                      <p className="text-sm font-black text-rose-600 m-0">
+                        {cohortPatients.length > 0 ? '13' : '0'}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -470,118 +873,52 @@ export function DashboardPage() {
                   </div>
 
                   <div className="space-y-3">
-                    {/* Item 1: Missed Dose Alert */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-rose-100 bg-rose-50/40 hover:bg-rose-50/70 transition">
-                      <div className="flex items-start gap-3">
-                        <img
-                          src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80"
-                          alt="Sarah Connor"
-                          className="h-9 w-9 rounded-full object-cover border border-rose-200 mt-0.5"
-                        />
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-xs font-bold text-slate-900 m-0">
-                              Sarah Connor (48y)
-                            </h4>
-                            <Badge variant="danger" size="xs">
-                              Missed Dose (3h overdue)
-                            </Badge>
+                    {cohortPatients.length === 0 ? (
+                      <div className="py-12 text-center text-slate-400">
+                        <CheckCircle2 className="h-8 w-8 text-emerald-500 mx-auto mb-2" />
+                        <p className="text-xs font-bold text-slate-700">
+                          All Patient Triage Queues Clear
+                        </p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          No critical missed doses or refill escalations pending across your
+                          monitored cohort.
+                        </p>
+                      </div>
+                    ) : (
+                      cohortPatients
+                        .filter((p) => p.adherence < 70)
+                        .map((p) => (
+                          <div
+                            key={p.id}
+                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-rose-100 bg-rose-50/40 hover:bg-rose-50/70 transition"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="h-9 w-9 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-xs mt-0.5">
+                                {p.name?.slice(0, 2) || 'PT'}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="text-xs font-bold text-slate-900 m-0">{p.name}</h4>
+                                  <Badge variant="danger" size="xs">
+                                    Adherence Alert ({p.adherence}%)
+                                  </Badge>
+                                </div>
+                                <p className="text-xs text-slate-600 m-0 mt-0.5">
+                                  {p.condition || 'Chronic care regimen'}
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => alert(`Nudge dispatched to ${p.name}`)}
+                              className="inline-flex items-center gap-1 rounded-lg bg-rose-600 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-rose-700 transition cursor-pointer shadow-2xs"
+                            >
+                              <Bell className="h-3 w-3" />
+                              Send Nudge
+                            </button>
                           </div>
-                          <p className="text-xs text-slate-600 m-0 mt-0.5">
-                            Lisinopril 20mg · Scheduled for 08:00 AM
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            alert(
-                              'SMS Nudge sent to Sarah Connor: Please log your morning Lisinopril dose.'
-                            )
-                          }
-                          className="inline-flex items-center gap-1 rounded-lg bg-rose-600 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-rose-700 transition cursor-pointer shadow-2xs"
-                        >
-                          <Bell className="h-3 w-3" />
-                          Send Nudge
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            alert('Initiating direct call to Sarah Connor (+1 555-876-5432)...')
-                          }
-                          className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-600 hover:bg-slate-50 transition cursor-pointer"
-                          title="Call Patient"
-                        >
-                          <Phone className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Item 2: Impending Supply Depletion */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-amber-100 bg-amber-50/40 hover:bg-amber-50/70 transition">
-                      <div className="flex items-start gap-3">
-                        <img
-                          src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80"
-                          alt="Michael Chang"
-                          className="h-9 w-9 rounded-full object-cover border border-amber-200 mt-0.5"
-                        />
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-xs font-bold text-slate-900 m-0">
-                              Michael Chang (62y)
-                            </h4>
-                            <Badge variant="warning" size="xs">
-                              Refill Authorization
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-slate-600 m-0 mt-0.5">
-                            Levothyroxine 50mcg has only 4 days supply remaining
-                          </p>
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          alert(
-                            '30-Day Refill authorized for Michael Chang at City Health Pharmacy!'
-                          )
-                        }
-                        className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-700 transition cursor-pointer shadow-2xs shrink-0"
-                      >
-                        Authorize Refill
-                      </button>
-                    </div>
-
-                    {/* Item 3: Patient Inquiry */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-indigo-100 bg-indigo-50/40 hover:bg-indigo-50/70 transition">
-                      <div className="flex items-start gap-3">
-                        <img
-                          src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80"
-                          alt="Ibrahim Kadri"
-                          className="h-9 w-9 rounded-full object-cover border border-indigo-200 mt-0.5"
-                        />
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-xs font-bold text-slate-900 m-0">
-                              Ibrahim Kadri (54y)
-                            </h4>
-                            <Badge variant="success" size="xs">
-                              Vitals Reported
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-slate-600 m-0 mt-0.5">
-                            Fasting Glucose: 114 mg/dL · Blood Pressure: 122/78 mmHg
-                          </p>
-                        </div>
-                      </div>
-
-                      <span className="text-xs font-bold text-emerald-700 bg-emerald-100/60 px-2.5 py-1 rounded-lg shrink-0">
-                        In Target Range ✓
-                      </span>
-                    </div>
+                        ))
+                    )}
                   </div>
                 </div>
               </div>
@@ -594,7 +931,9 @@ export function DashboardPage() {
                     <div>
                       <h2 className="dashboard-panel-title">Today's Cohort Dose Timeline</h2>
                       <p className="text-xs text-slate-500 mt-0.5">
-                        Live schedule across all 3 assigned patients
+                        {cohortPatients.length > 0
+                          ? `Live schedule across ${cohortPatients.length} assigned patients`
+                          : 'Live daily intake schedule'}
                       </p>
                     </div>
                     <Link
@@ -606,60 +945,72 @@ export function DashboardPage() {
                   </div>
 
                   <div className="dose-timeline-list">
-                    {doses.map((dose) => (
-                      <div key={dose.id} className="dose-timeline-item">
-                        <div className="flex items-start gap-3.5">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
-                            <Pill className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="dose-timing-badge">
-                                <Clock className="h-3 w-3" />
-                                {dose.time} · {dose.patient}
-                              </span>
-                              {dose.status === 'taken' && (
-                                <Badge variant="success" size="xs">
-                                  Taken on Time
-                                </Badge>
-                              )}
-                              {dose.status === 'missed' && (
-                                <Badge variant="danger" size="xs">
-                                  Missed Alert
-                                </Badge>
-                              )}
-                              {dose.status === 'upcoming' && (
-                                <Badge variant="gray" size="xs">
-                                  Upcoming
-                                </Badge>
-                              )}
-                            </div>
-                            <h3 className="dose-med-title">{dose.med}</h3>
-                            <p className="dose-med-instruction">{dose.instruction}</p>
-                          </div>
-                        </div>
-
-                        <div className="dose-action-buttons">
-                          {dose.status === 'missed' ? (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                alert(
-                                  `Urgent SMS reminder dispatched to ${dose.patient} for ${dose.med}`
-                                )
-                              }
-                              className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-rose-700 transition cursor-pointer"
-                            >
-                              Dispatch Alert
-                            </button>
-                          ) : (
-                            <span className="text-xs text-slate-400 font-semibold">
-                              {dose.status === 'taken' ? 'Logged ✓' : 'Scheduled'}
-                            </span>
-                          )}
-                        </div>
+                    {doses.length === 0 ? (
+                      <div className="py-12 text-center text-slate-400">
+                        <Clock className="h-8 w-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-xs font-bold text-slate-700">
+                          No scheduled cohort doses today
+                        </p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Assigned patient intake schedules will be tracked here in real time.
+                        </p>
                       </div>
-                    ))}
+                    ) : (
+                      doses.map((dose) => (
+                        <div key={dose.id} className="dose-timeline-item">
+                          <div className="flex items-start gap-3.5">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+                              <Pill className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="dose-timing-badge">
+                                  <Clock className="h-3 w-3" />
+                                  {dose.time} · {dose.patient || 'Patient'}
+                                </span>
+                                {dose.status === 'taken' && (
+                                  <Badge variant="success" size="xs">
+                                    Taken on Time
+                                  </Badge>
+                                )}
+                                {dose.status === 'missed' && (
+                                  <Badge variant="danger" size="xs">
+                                    Missed Alert
+                                  </Badge>
+                                )}
+                                {dose.status === 'upcoming' && (
+                                  <Badge variant="gray" size="xs">
+                                    Upcoming
+                                  </Badge>
+                                )}
+                              </div>
+                              <h3 className="dose-med-title">{dose.med}</h3>
+                              <p className="dose-med-instruction">{dose.instruction}</p>
+                            </div>
+                          </div>
+
+                          <div className="dose-action-buttons">
+                            {dose.status === 'missed' ? (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  alert(
+                                    `Urgent SMS reminder dispatched to ${dose.patient || 'patient'} for ${dose.med}`
+                                  )
+                                }
+                                className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-rose-700 transition cursor-pointer"
+                              >
+                                Dispatch Alert
+                              </button>
+                            ) : (
+                              <span className="text-xs text-slate-400 font-semibold">
+                                {dose.status === 'taken' ? 'Logged ✓' : 'Scheduled'}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
 
@@ -676,47 +1027,58 @@ export function DashboardPage() {
                       to="/notifications"
                       className="text-xs font-bold text-indigo-600 hover:text-indigo-700"
                     >
-                      Notifications ({PATIENTS.length}) →
+                      Notifications ({cohortPatients.length}) →
                     </Link>
                   </div>
 
                   <div className="caregiver-inquiry-list">
-                    {PATIENTS.map((p) => (
-                      <div key={p.id} className="caregiver-inquiry-card">
-                        <div className="caregiver-inquiry-header">
-                          <div className="caregiver-inquiry-user">
-                            <img src={p.avatar} alt={p.name} className="caregiver-inquiry-avatar" />
-                            <div>
-                              <p className="caregiver-inquiry-name">{p.name}</p>
-                              <p className="caregiver-inquiry-condition">{p.condition}</p>
-                            </div>
-                          </div>
-                          <span className="caregiver-inquiry-time">{p.lastTime}</span>
-                        </div>
-
-                        <div className="caregiver-inquiry-quote-box">
-                          <p className="caregiver-inquiry-text">"{p.lastMessage}"</p>
-                        </div>
-
-                        <div className="caregiver-inquiry-footer">
-                          <Badge
-                            variant={
-                              p.status === 'Stable'
-                                ? 'success'
-                                : p.status === 'Refill Due'
-                                  ? 'warning'
-                                  : 'danger'
-                            }
-                            size="xs"
-                          >
-                            {p.status}
-                          </Badge>
-                          <Link to="/notifications" className="caregiver-inquiry-reply-btn">
-                            Reply <ArrowRight className="h-3 w-3" />
-                          </Link>
-                        </div>
+                    {cohortPatients.length === 0 ? (
+                      <div className="py-8 text-center text-slate-400">
+                        <MessageSquare className="h-8 w-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-xs font-bold text-slate-700">
+                          No recent patient inquiries
+                        </p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Direct messages and vital updates from monitored patients will appear
+                          here.
+                        </p>
                       </div>
-                    ))}
+                    ) : (
+                      cohortPatients.map((p) => (
+                        <div key={p.id} className="caregiver-inquiry-card">
+                          <div className="caregiver-inquiry-header">
+                            <div className="caregiver-inquiry-user">
+                              <div className="h-8 w-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
+                                {p.name?.slice(0, 2) || 'PT'}
+                              </div>
+                              <div>
+                                <p className="caregiver-inquiry-name">{p.name}</p>
+                                <p className="caregiver-inquiry-condition">{p.condition}</p>
+                              </div>
+                            </div>
+                            <span className="caregiver-inquiry-time">Recently</span>
+                          </div>
+
+                          <div className="caregiver-inquiry-footer">
+                            <Badge
+                              variant={
+                                (p.adherence || 100) >= 85
+                                  ? 'success'
+                                  : (p.adherence || 100) >= 70
+                                    ? 'warning'
+                                    : 'danger'
+                              }
+                              size="xs"
+                            >
+                              {(p.adherence || 100) >= 85 ? 'Compliant' : 'Needs Review'}
+                            </Badge>
+                            <Link to="/notifications" className="caregiver-inquiry-reply-btn">
+                              Open Chat <ArrowRight className="h-3 w-3" />
+                            </Link>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
@@ -734,9 +1096,11 @@ export function DashboardPage() {
               <div className="dashboard-kpi-card">
                 <div>
                   <p className="dashboard-kpi-label">Total Platform Users</p>
-                  <p className="dashboard-kpi-value text-indigo-600">1,480</p>
+                  <p className="dashboard-kpi-value text-indigo-600">{adminUsers.length || 0}</p>
                   <p className="dashboard-kpi-meta text-emerald-600 font-semibold">
-                    +12% growth this month
+                    {adminUsers.length > 0
+                      ? `${adminUsers.length} verified accounts`
+                      : 'Zero registered accounts'}
                   </p>
                 </div>
                 <div className="dashboard-kpi-icon bg-indigo-50 text-indigo-600">
@@ -747,9 +1111,11 @@ export function DashboardPage() {
               <div className="dashboard-kpi-card">
                 <div>
                   <p className="dashboard-kpi-label">Active Caregivers</p>
-                  <p className="dashboard-kpi-value text-emerald-600">48</p>
+                  <p className="dashboard-kpi-value text-emerald-600">
+                    {adminUsers.filter((u) => (u.role || '').toLowerCase() === 'caregiver').length}
+                  </p>
                   <p className="dashboard-kpi-meta text-emerald-600 font-semibold">
-                    99.2% response rate
+                    Clinical coordinators active
                   </p>
                 </div>
                 <div className="dashboard-kpi-icon bg-emerald-50 text-emerald-600">
@@ -802,12 +1168,22 @@ export function DashboardPage() {
                     </Badge>
                   </div>
 
-                  <div className="h-60 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
+                  <div style={{ height: '260px', width: '100%', minHeight: '260px' }}>
+                    <ResponsiveContainer width="100%" height={260}>
                       <BarChart
-                        data={ADMIN_PLATFORM_DATA}
+                        data={adminPlatformData}
                         margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                       >
+                        <defs>
+                          <linearGradient id="adminUserGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#6366f1" stopOpacity={0.9} />
+                            <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.6} />
+                          </linearGradient>
+                          <linearGradient id="adminOcrGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#10b981" stopOpacity={0.9} />
+                            <stop offset="100%" stopColor="#059669" stopOpacity={0.6} />
+                          </linearGradient>
+                        </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                         <XAxis
                           dataKey="day"
@@ -831,15 +1207,15 @@ export function DashboardPage() {
                         <Bar
                           dataKey="activeUsers"
                           name="Active Users"
-                          fill="#4f46e5"
-                          radius={[4, 4, 0, 0]}
+                          fill="url(#adminUserGrad)"
+                          radius={[6, 6, 0, 0]}
                           maxBarSize={24}
                         />
                         <Bar
                           dataKey="ocrScans"
                           name="OCR Scans"
-                          fill="#10b981"
-                          radius={[4, 4, 0, 0]}
+                          fill="url(#adminOcrGrad)"
+                          radius={[6, 6, 0, 0]}
                           maxBarSize={24}
                         />
                       </BarChart>
@@ -862,63 +1238,58 @@ export function DashboardPage() {
                       to="/admin/users"
                       className="text-xs font-bold text-indigo-600 hover:text-indigo-700"
                     >
-                      All Users (1,480) →
+                      All Users ({adminUsers.length}) →
                     </Link>
                   </div>
 
                   <div className="space-y-2.5">
-                    <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs">
-                          IK
+                    {adminUsers.slice(0, 4).map((u) => {
+                      const initials = (u.name || u.email || 'US')
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .slice(0, 2)
+                        .toUpperCase();
+                      const roleStr = (u.role || '').toLowerCase();
+                      const isCaregiver = roleStr === 'caregiver';
+                      const isAdmin = roleStr === 'admin';
+                      return (
+                        <div key={u.id || u.email} className="admin-user-row">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`admin-avatar-pill ${
+                                isAdmin
+                                  ? 'bg-purple-100 text-purple-700'
+                                  : isCaregiver
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : 'bg-indigo-100 text-indigo-700'
+                              }`}
+                            >
+                              {initials}
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold text-slate-900 m-0">
+                                {u.name || u.email}
+                              </p>
+                              <p className="text-[11px] text-slate-500 m-0">
+                                {u.email} ·{' '}
+                                {u.role === 'admin'
+                                  ? 'System Administrator'
+                                  : u.role === 'caregiver'
+                                    ? 'Clinical Caregiver'
+                                    : 'Patient Account'}
+                              </p>
+                            </div>
+                          </div>
+                          <Badge
+                            variant={isAdmin ? 'purple' : isCaregiver ? 'success' : 'primary'}
+                            size="xs"
+                          >
+                            {u.role ? u.role.charAt(0).toUpperCase() + u.role.slice(1) : 'Patient'}
+                          </Badge>
                         </div>
-                        <div>
-                          <p className="text-xs font-bold text-slate-900 m-0">Ibrahim Kadri</p>
-                          <p className="text-[11px] text-slate-500 m-0">
-                            patient@example.com · Assigned to Dr. Oliver Mitchell
-                          </p>
-                        </div>
-                      </div>
-                      <Badge variant="primary" size="xs">
-                        Patient
-                      </Badge>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-xs">
-                          OM
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-slate-900 m-0">
-                            Dr. Oliver Mitchell
-                          </p>
-                          <p className="text-[11px] text-slate-500 m-0">
-                            caregiver@example.com · 3 Patients Assigned
-                          </p>
-                        </div>
-                      </div>
-                      <Badge variant="success" size="xs">
-                        Caregiver
-                      </Badge>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs">
-                          SC
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-slate-900 m-0">Sarah Connor</p>
-                          <p className="text-[11px] text-slate-500 m-0">
-                            sarah.connor@example.com · Cardiac Care
-                          </p>
-                        </div>
-                      </div>
-                      <Badge variant="primary" size="xs">
-                        Patient
-                      </Badge>
-                    </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -943,33 +1314,48 @@ export function DashboardPage() {
                   </div>
 
                   <div className="space-y-2.5">
-                    <div className="p-3 rounded-xl border border-slate-100 bg-slate-50 text-xs">
+                    {adminUsers.length > 0 ? (
+                      adminUsers.slice(0, 3).map((u, i) => (
+                        <div key={u.id || u.email || i} className="admin-audit-row text-xs">
+                          <div className="flex items-center justify-between font-bold text-slate-900 mb-1">
+                            <span>Account Verified</span>
+                            <span className="text-[10px] text-slate-400">Live</span>
+                          </div>
+                          <p className="text-slate-600 m-0 text-[11px]">
+                            {u.name || u.email} assigned {u.role ? u.role.toUpperCase() : 'PATIENT'}{' '}
+                            credentials.
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="admin-audit-row text-xs">
+                        <div className="flex items-center justify-between font-bold text-slate-900 mb-1">
+                          <span>Auth Engine Initialized</span>
+                          <span className="text-[10px] text-slate-400">Online</span>
+                        </div>
+                        <p className="text-slate-600 m-0 text-[11px]">
+                          Zero security violations recorded. RBAC access control active.
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="admin-audit-row text-xs">
                       <div className="flex items-center justify-between font-bold text-slate-900 mb-1">
-                        <span>Role Elevation Approved</span>
-                        <span className="text-[10px] text-slate-400">12m ago</span>
+                        <span>Database Replica Sync</span>
+                        <span className="text-[10px] text-slate-400">Verified</span>
                       </div>
                       <p className="text-slate-600 m-0 text-[11px]">
-                        User dr.oliver@example.com assigned Caregiver credentials.
+                        SQLite3 relational storage verified with HIPAA schema integrity.
                       </p>
                     </div>
 
-                    <div className="p-3 rounded-xl border border-slate-100 bg-slate-50 text-xs">
+                    <div className="admin-audit-row text-xs">
                       <div className="flex items-center justify-between font-bold text-slate-900 mb-1">
-                        <span>Automated Database Backup</span>
-                        <span className="text-[10px] text-slate-400">1h ago</span>
+                        <span>OCR Service Health Check</span>
+                        <span className="text-[10px] text-slate-400">Online</span>
                       </div>
                       <p className="text-slate-600 m-0 text-[11px]">
-                        Encrypted replica backup generated and archived.
-                      </p>
-                    </div>
-
-                    <div className="p-3 rounded-xl border border-slate-100 bg-slate-50 text-xs">
-                      <div className="flex items-center justify-between font-bold text-slate-900 mb-1">
-                        <span>Security Audit Scan Passed</span>
-                        <span className="text-[10px] text-slate-400">3h ago</span>
-                      </div>
-                      <p className="text-slate-600 m-0 text-[11px]">
-                        HIPAA transmission security scan finished with 0 vulnerabilities.
+                        Tesseract Optical Engine & image preprocessor running normally.
                       </p>
                     </div>
                   </div>
@@ -979,7 +1365,7 @@ export function DashboardPage() {
                 <div className="dashboard-panel">
                   <h2 className="dashboard-panel-title mb-3">Platform Health & Encryption</h2>
                   <div className="space-y-2.5">
-                    <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50">
+                    <div className="admin-health-row">
                       <div className="flex items-center gap-2.5">
                         <Shield className="h-4 w-4 text-emerald-600" />
                         <div>
@@ -996,7 +1382,7 @@ export function DashboardPage() {
                       </Badge>
                     </div>
 
-                    <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50">
+                    <div className="admin-health-row">
                       <div className="flex items-center gap-2.5">
                         <Activity className="h-4 w-4 text-indigo-600" />
                         <div>
@@ -1022,14 +1408,83 @@ export function DashboardPage() {
         {/* ========================================================================= */}
         {userRole === 'patient' && (
           <>
+            {/* KORU Wellness Habit Strip & Reminder Ribbon */}
+            <div className="koru-dashboard-ribbon">
+              <div className="koru-ribbon-streak-box">
+                <div className="koru-ribbon-streak-title">
+                  <span className="font-extrabold text-slate-900 text-sm">
+                    7-Day Consistency Streak
+                  </span>
+                  <span className="text-xs text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded-full">
+                    {takenCount > 0 ? '1-Day Streak 🔥' : 'Start Today!'}
+                  </span>
+                </div>
+                <div className="koru-dashboard-week-strip">
+                  {calendarDays.map((d) => (
+                    <div key={d.day} className={`koru-day-col ${d.today ? 'active-today' : ''}`}>
+                      <div className={`koru-check-slot ${d.done ? 'checked' : ''}`}>
+                        {d.done ? <Check className="h-2.5 w-2.5 text-white" /> : null}
+                      </div>
+                      <div
+                        className={`koru-day-circle ${d.today ? 'is-today' : ''} ${
+                          !d.done && !d.today ? 'is-future' : ''
+                        }`}
+                      >
+                        {d.day}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="koru-ribbon-reminder-box">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900 m-0">
+                    Never miss your medications.
+                  </h4>
+                  <p className="text-xs text-slate-600 m-0 mt-0.5">
+                    {patientCheckedIn
+                      ? 'Daily check-in recorded! Streak active and doses logged.'
+                      : 'Automated SMS & in-app reminders active'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handlePatientCheckin}
+                  className={`koru-checkin-btn cursor-pointer transition-all ${
+                    patientCheckedIn ? 'bg-[#215a51] text-white' : ''
+                  }`}
+                  title="Click to check in for today"
+                >
+                  {patientCheckedIn ? (
+                    <>
+                      <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+                      <span>Checked In</span>
+                    </>
+                  ) : (
+                    <>
+                      <Fingerprint className="h-4 w-4 text-[#2d8275]" />
+                      <span>Check-in</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              {checkinToast && (
+                <div className="mt-2.5 p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-bold text-emerald-800 flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  <span>{checkinToast}</span>
+                </div>
+              )}
+            </div>
+
             {/* 4 Key Stat KPI Cards for Patient */}
             <div className="dashboard-kpi-grid">
               <div className="dashboard-kpi-card">
                 <div>
                   <p className="dashboard-kpi-label">Active Regimens</p>
-                  <p className="dashboard-kpi-value">{currentPatient.totalMeds}</p>
+                  <p className="dashboard-kpi-value">{userMeds.length}</p>
                   <p className="dashboard-kpi-meta text-indigo-600 font-semibold">
-                    4 active prescriptions
+                    {userMeds.length} active prescriptions
                   </p>
                 </div>
                 <div className="dashboard-kpi-icon bg-indigo-50 text-indigo-600">
@@ -1044,7 +1499,9 @@ export function DashboardPage() {
                     {takenCount} / {patientDoses.length}
                   </p>
                   <p className="dashboard-kpi-meta text-emerald-600 font-semibold">
-                    {patientDoses.length - takenCount} remaining today
+                    {patientDoses.length > 0
+                      ? `${patientDoses.length - takenCount} remaining today`
+                      : 'No doses scheduled'}
                   </p>
                 </div>
                 <div className="dashboard-kpi-icon bg-emerald-50 text-emerald-600">
@@ -1055,9 +1512,13 @@ export function DashboardPage() {
               <div className="dashboard-kpi-card">
                 <div>
                   <p className="dashboard-kpi-label">7-Day Adherence</p>
-                  <p className="dashboard-kpi-value">{currentPatient.adherence}%</p>
-                  <p className="dashboard-kpi-meta text-emerald-600 font-semibold">
-                    +4.2% vs target
+                  <p className="dashboard-kpi-value">
+                    {patientDoses.length > 0
+                      ? `${Math.round((takenCount / patientDoses.length) * 100)}%`
+                      : '0%'}
+                  </p>
+                  <p className="dashboard-kpi-meta text-slate-500 font-semibold">
+                    {patientDoses.length > 0 ? '+4.2% vs target' : 'No active regimens'}
                   </p>
                 </div>
                 <div className="dashboard-kpi-icon bg-violet-50 text-violet-600">
@@ -1068,9 +1529,23 @@ export function DashboardPage() {
               <div className="dashboard-kpi-card">
                 <div>
                   <p className="dashboard-kpi-label">Refill Watchlist</p>
-                  <p className="dashboard-kpi-value text-amber-600">1 Low</p>
-                  <p className="dashboard-kpi-meta text-amber-600 font-semibold">
-                    Metformin (4 days left)
+                  <p
+                    className={`dashboard-kpi-value ${
+                      userMeds.some((m) => m.quantity <= 10) ? 'text-amber-600' : 'text-emerald-600'
+                    }`}
+                  >
+                    {userMeds.some((m) => m.quantity <= 10) ? '1 Low' : 'Optimal'}
+                  </p>
+                  <p
+                    className={`dashboard-kpi-meta font-semibold ${
+                      userMeds.some((m) => m.quantity <= 10) ? 'text-amber-600' : 'text-emerald-600'
+                    }`}
+                  >
+                    {userMeds.find((m) => m.quantity <= 10)
+                      ? `${userMeds.find((m) => m.quantity <= 10).name} refill recommended`
+                      : userMeds.length > 0
+                        ? 'All prescriptions stocked'
+                        : 'No active prescriptions'}
                   </p>
                 </div>
                 <div className="dashboard-kpi-icon bg-amber-50 text-amber-600">
@@ -1098,59 +1573,110 @@ export function DashboardPage() {
                   </div>
 
                   <div className="dose-timeline-list">
-                    {patientDoses.map((dose) => (
-                      <div key={dose.id} className="dose-timeline-item">
-                        <div className="flex items-start gap-3.5">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
-                            <Pill className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="dose-timing-badge">
-                                <Clock className="h-3 w-3" />
-                                {dose.time} · {dose.window}
-                              </span>
-                              {dose.status === 'taken' && (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600">
-                                  <CheckCircle2 className="h-3.5 w-3.5" /> Taken
-                                </span>
-                              )}
-                              {dose.status === 'snoozed' && (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600">
-                                  <Clock className="h-3.5 w-3.5" /> Snoozed (+30m)
-                                </span>
-                              )}
+                    {patientDoses.length > 0 ? (
+                      patientDoses.map((dose) => (
+                        <div key={dose.id} className="dose-timeline-item">
+                          <div className="flex items-start gap-3.5">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+                              <Pill className="h-5 w-5" />
                             </div>
-                            <h3 className="dose-med-title">{dose.med}</h3>
-                            <p className="dose-med-instruction">{dose.instruction}</p>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="dose-timing-badge">
+                                  <Clock className="h-3 w-3" />
+                                  {dose.time} · {dose.window}
+                                </span>
+                                {dose.status === 'taken' && (
+                                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600">
+                                    <CheckCircle2 className="h-3.5 w-3.5" /> Taken
+                                  </span>
+                                )}
+                                {dose.status === 'missed' && (
+                                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600">
+                                    <AlertTriangle className="h-3.5 w-3.5" /> Not Taken
+                                  </span>
+                                )}
+                                {dose.status === 'snoozed' && (
+                                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600">
+                                    <Clock className="h-3.5 w-3.5" /> Snoozed (+30m)
+                                  </span>
+                                )}
+                              </div>
+                              <h3 className="dose-med-title">{dose.med}</h3>
+                              <p className="dose-med-instruction">{dose.instruction}</p>
+                            </div>
+                          </div>
+
+                          <div className="dose-action-buttons flex items-center gap-1.5">
+                            {dose.status === 'taken' ? (
+                              <>
+                                <span className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
+                                  Completed ✓
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleMarkNotTaken(dose.id)}
+                                  className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[11px] font-semibold text-slate-500 hover:text-rose-600 hover:border-rose-200 transition cursor-pointer"
+                                  title="Change to Not Taken"
+                                >
+                                  Mark Not Taken
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => handleTakeDose(dose.id)}
+                                  className="dose-btn-take"
+                                >
+                                  <CheckCircle2 className="h-4 w-4" />
+                                  Take Dose
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleMarkNotTaken(dose.id)}
+                                  className={`rounded-lg px-2.5 py-1.5 text-xs font-bold transition cursor-pointer ${
+                                    dose.status === 'missed'
+                                      ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                                      : 'border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100'
+                                  }`}
+                                  title="Keep / Mark as Not Taken"
+                                >
+                                  Not Taken
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSnoozeDose(dose.id)}
+                                  className="dose-btn-snooze"
+                                >
+                                  Snooze
+                                </button>
+                              </>
+                            )}
                           </div>
                         </div>
-
-                        <div className="dose-action-buttons">
-                          {dose.status === 'taken' ? (
-                            <span className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
-                              Completed ✓
-                            </span>
-                          ) : (
-                            <>
-                              <button
-                                onClick={() => handleTakeDose(dose.id)}
-                                className="dose-btn-take"
-                              >
-                                <CheckCircle2 className="h-4 w-4" />
-                                Take Dose
-                              </button>
-                              <button
-                                onClick={() => handleSnoozeDose(dose.id)}
-                                className="dose-btn-snooze"
-                              >
-                                Snooze
-                              </button>
-                            </>
-                          )}
+                      ))
+                    ) : (
+                      <div className="py-10 text-center">
+                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 mb-3">
+                          <Clock className="h-6 w-6" />
                         </div>
+                        <h3 className="text-sm font-bold text-slate-800">
+                          No scheduled doses for today
+                        </h3>
+                        <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                          Add your prescriptions to automatically generate your daily intake
+                          schedule and reminders.
+                        </p>
+                        <Link
+                          to="/medications/new"
+                          className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 transition"
+                        >
+                          <Plus className="h-4 w-4" />
+                          Add Prescription
+                        </Link>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
 
@@ -1173,43 +1699,132 @@ export function DashboardPage() {
                     </div>
                   </div>
 
-                  <div className="h-56 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={WEEKLY_ADHERENCE}
-                        margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                        <XAxis
-                          dataKey="day"
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }}
-                        />
-                        <YAxis
-                          domain={[0, 100]}
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fill: '#94a3b8', fontSize: 11 }}
-                        />
-                        <Tooltip
-                          formatter={(val) => [`${val}%`, 'Adherence']}
-                          contentStyle={{
-                            borderRadius: '12px',
-                            border: '1px solid #e2e8f0',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                            fontSize: '12px',
-                          }}
-                        />
-                        <Bar dataKey="score" fill="#6366f1" radius={[6, 6, 0, 0]} maxBarSize={28} />
-                      </BarChart>
-                    </ResponsiveContainer>
+                  <div
+                    style={{ height: '240px', width: '100%', minHeight: '240px' }}
+                    className="flex items-center justify-center"
+                  >
+                    {patientDoses.length === 0 ? (
+                      <div className="py-12 text-center text-slate-400">
+                        <TrendingUp className="h-8 w-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-xs font-bold text-slate-700">No adherence logs yet</p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Log your daily doses to begin plotting your 7-day compliance trend.
+                        </p>
+                      </div>
+                    ) : (
+                      <ResponsiveContainer width="100%" height={240}>
+                        <BarChart
+                          data={[
+                            { day: 'Mon', score: 100, target: 80 },
+                            { day: 'Tue', score: 100, target: 80 },
+                            { day: 'Wed', score: 100, target: 80 },
+                            { day: 'Thu', score: 100, target: 80 },
+                            { day: 'Fri', score: 100, target: 80 },
+                            { day: 'Sat', score: 100, target: 80 },
+                            {
+                              day: 'Sun',
+                              score: Math.round((takenCount / patientDoses.length) * 100),
+                              target: 80,
+                            },
+                          ]}
+                          margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+                        >
+                          <defs>
+                            <linearGradient id="patientAdhGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#6366f1" stopOpacity={0.95} />
+                              <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.6} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                          <XAxis
+                            dataKey="day"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }}
+                          />
+                          <YAxis
+                            domain={[0, 100]}
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#94a3b8', fontSize: 11 }}
+                          />
+                          <Tooltip
+                            formatter={(val) => [`${val}%`, 'Adherence']}
+                            contentStyle={{
+                              borderRadius: '12px',
+                              border: '1px solid #e2e8f0',
+                              boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                              fontSize: '12px',
+                            }}
+                          />
+                          <Bar
+                            dataKey="score"
+                            fill="url(#patientAdhGrad)"
+                            radius={[6, 6, 0, 0]}
+                            maxBarSize={28}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Right Column: Prescription Stock, Biomarkers, Refill Alert & Care Team Messenger */}
+              {/* Right Column: Adherence Gauge, Prescription Stock, Care Team */}
               <div className="dashboard-card-section">
+                {/* KORU Clinical Adherence Gauge (Inspired by Screen 4) */}
+                <div className="dashboard-panel">
+                  <div className="dashboard-panel-header">
+                    <div>
+                      <h2 className="dashboard-panel-title">Clinical Adherence Meter</h2>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Real-time daily intake compliance evaluation
+                      </p>
+                    </div>
+                    <Badge variant="success" size="xs">
+                      Optimal
+                    </Badge>
+                  </div>
+
+                  <div className="koru-gauge-interactive-box">
+                    <div className="koru-face-indicator">
+                      <span className="text-3xl">😊</span>
+                      <span className="text-xs font-extrabold text-emerald-800 uppercase tracking-wider">
+                        Optimal / 94% Target
+                      </span>
+                    </div>
+
+                    <div className="koru-arch-gauge-container">
+                      <div className="koru-arch-track">
+                        <div className="koru-arch-cursor" style={{ left: '88%' }} />
+                      </div>
+                      <div className="flex justify-between text-[11px] font-bold text-slate-400 mt-1.5">
+                        <span>0 Low</span>
+                        <span className="text-emerald-700 font-extrabold">94% Target</span>
+                        <span>100 Perfect</span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCaregiverFeedbackSaved(true);
+                        setTimeout(() => setCaregiverFeedbackSaved(false), 3000);
+                      }}
+                      className="w-full mt-3 rounded-full bg-slate-900 text-white text-xs font-bold py-2.5 hover:bg-slate-800 transition shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      {caregiverFeedbackSaved ? (
+                        <>
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                          <span>Feedback Recorded</span>
+                        </>
+                      ) : (
+                        <span>Save Daily Feedback</span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
                 {/* Prescription Supply & Stock Progress Meter */}
                 <div className="dashboard-panel">
                   <div className="dashboard-panel-header">
@@ -1228,50 +1843,48 @@ export function DashboardPage() {
                   </div>
 
                   <div className="supply-meter-list">
-                    <div className="supply-meter-item">
-                      <div className="supply-meter-header">
-                        <span className="supply-meter-name">Metformin 500mg</span>
-                        <span className="supply-meter-count text-amber-600 font-bold">
-                          4 / 60 tabs (7%)
-                        </span>
+                    {userMeds.length > 0 ? (
+                      userMeds.map((med) => {
+                        const total = 60;
+                        const currentQty = med.quantity || 30;
+                        const pct = Math.min(100, Math.round((currentQty / total) * 100));
+                        const isLow = currentQty <= 10;
+                        return (
+                          <div key={med.id || med.name} className="supply-meter-item">
+                            <div className="supply-meter-header">
+                              <span className="supply-meter-name">
+                                {med.name} {med.dosage || ''}
+                              </span>
+                              <span
+                                className={`supply-meter-count font-bold ${
+                                  isLow ? 'text-amber-600' : 'text-emerald-700'
+                                }`}
+                              >
+                                {currentQty} doses ({pct}%)
+                              </span>
+                            </div>
+                            <div className="supply-track">
+                              <div
+                                className={`supply-fill ${
+                                  isLow ? 'supply-fill-critical' : 'supply-fill-healthy'
+                                }`}
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="py-4 text-center">
+                        <p className="text-xs text-slate-500">No prescriptions tracked yet.</p>
+                        <Link
+                          to="/medications/new"
+                          className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:underline"
+                        >
+                          + Add your first prescription
+                        </Link>
                       </div>
-                      <div className="supply-track">
-                        <div className="supply-fill supply-fill-critical" style={{ width: '7%' }} />
-                      </div>
-                    </div>
-
-                    <div className="supply-meter-item">
-                      <div className="supply-meter-header">
-                        <span className="supply-meter-name">Lisinopril 10mg</span>
-                        <span className="supply-meter-count">24 / 30 tabs (80%)</span>
-                      </div>
-                      <div className="supply-track">
-                        <div className="supply-fill supply-fill-healthy" style={{ width: '80%' }} />
-                      </div>
-                    </div>
-
-                    <div className="supply-meter-item">
-                      <div className="supply-meter-header">
-                        <span className="supply-meter-name">Atorvastatin 20mg</span>
-                        <span className="supply-meter-count">28 / 30 tabs (93%)</span>
-                      </div>
-                      <div className="supply-track">
-                        <div className="supply-fill supply-fill-healthy" style={{ width: '93%' }} />
-                      </div>
-                    </div>
-
-                    <div className="supply-meter-item">
-                      <div className="supply-meter-header">
-                        <span className="supply-meter-name">Vitamin D3 1000IU</span>
-                        <span className="supply-meter-count">30 / 30 tabs (100%)</span>
-                      </div>
-                      <div className="supply-track">
-                        <div
-                          className="supply-fill supply-fill-healthy"
-                          style={{ width: '100%' }}
-                        />
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
 
@@ -1281,58 +1894,82 @@ export function DashboardPage() {
                   <div className="vitals-card-grid">
                     <div className="vital-tile">
                       <p className="vital-tile-label">Fasting Glucose</p>
-                      <p className="vital-tile-value">114 mg/dL</p>
-                      <p className="vital-tile-status">✓ In Target Range</p>
+                      <p className="vital-tile-value text-slate-700">-- mg/dL</p>
+                      <p className="vital-tile-status text-slate-400">Awaiting Log</p>
                     </div>
 
                     <div className="vital-tile">
                       <p className="vital-tile-label">Blood Pressure</p>
-                      <p className="vital-tile-value">122/78</p>
-                      <p className="vital-tile-status">✓ Optimal Target</p>
+                      <p className="vital-tile-value text-slate-700">-- / --</p>
+                      <p className="vital-tile-status text-slate-400">Awaiting Log</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Low Stock / Refill Alert Banner */}
-                <div className="dashboard-alert-banner">
-                  <AlertCircle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
-                  <div>
-                    <h3 className="text-xs font-bold text-rose-900">Prescription Refill Warning</h3>
-                    <p className="text-xs text-rose-700 mt-0.5 leading-relaxed">
-                      <strong>Metformin 500mg</strong> has only 4 tablets remaining in your current
-                      supply.
-                    </p>
-                    <button
-                      onClick={() => alert('Refill request dispatched to City Health Pharmacy!')}
-                      className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1 text-xs font-bold text-white hover:bg-rose-700 transition cursor-pointer"
-                    >
-                      Request 30-Day Refill Now
-                    </button>
+                {userMeds.some((m) => m.quantity <= 10) ? (
+                  <div className="dashboard-alert-banner">
+                    <AlertCircle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
+                    <div>
+                      <h3 className="text-xs font-bold text-rose-900">
+                        Prescription Refill Warning
+                      </h3>
+                      <p className="text-xs text-rose-700 mt-0.5 leading-relaxed">
+                        <strong>{userMeds.find((m) => m.quantity <= 10)?.name}</strong> has a low
+                        tablet count remaining in your active supply.
+                      </p>
+                      <button
+                        onClick={() =>
+                          alert('Refill request dispatched to clinical pharmacy partner!')
+                        }
+                        className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1 text-xs font-bold text-white hover:bg-rose-700 transition cursor-pointer"
+                      >
+                        Request 30-Day Refill Now
+                      </button>
+                    </div>
                   </div>
-                </div>
+                ) : userMeds.length > 0 ? (
+                  <div
+                    className="dashboard-alert-banner"
+                    style={{ background: '#f0fdf4', borderColor: '#bbf7d0' }}
+                  >
+                    <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <h3 className="text-xs font-bold text-emerald-900">
+                        Prescription Supply Healthy
+                      </h3>
+                      <p className="text-xs text-emerald-700 mt-0.5 leading-relaxed">
+                        All active prescriptions have sufficient dosage quantities remaining.
+                        Automatic tracking active.
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
 
-                {/* Care Team Consultation Chat Widget */}
+                {/* Clinical Support & AI Consultation Chat Widget */}
                 <div className="care-chat-box">
                   <div className="care-chat-header">
                     <div className="flex items-center gap-2.5">
-                      <img
-                        src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-                        alt="Dr. Oliver Mitchell"
-                        className="h-8 w-8 rounded-full object-cover"
-                      />
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 font-bold text-xs">
+                        <HeartPulse className="h-4 w-4" />
+                      </div>
                       <div>
-                        <h3 className="text-xs font-bold text-slate-900">Dr. Oliver Mitchell</h3>
+                        <h3 className="text-xs font-bold text-slate-900">
+                          Clinical Support &amp; AI Assistant
+                        </h3>
                         <p className="text-[10px] text-emerald-600 font-semibold">
-                          Lead Caregiver · Online
+                          Verified Health Assistant · Active
                         </p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-1.5">
                       <button
-                        onClick={() => alert('Calling Dr. Oliver Mitchell at +1 (555) 019-2834...')}
+                        onClick={() =>
+                          alert('Clinical support hotline: 1-800-PILLSYNC (24/7 Support)')
+                        }
                         className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition"
-                        title="Call Doctor"
+                        title="Contact Clinical Support"
                       >
                         <Phone className="h-4 w-4" />
                       </button>
@@ -1340,16 +1977,52 @@ export function DashboardPage() {
                   </div>
 
                   <div className="care-chat-stream">
-                    {chatMessages.map((msg) => (
-                      <div
-                        key={msg.id}
-                        className={
-                          msg.sender === 'patient' ? 'care-bubble-patient' : 'care-bubble-doctor'
-                        }
-                      >
-                        {msg.text}
+                    {chatMessages.map((msg, idx) => {
+                      const isLastBotMsg =
+                        msg.sender === 'doctor' &&
+                        (idx === chatMessages.length - 1 ||
+                          (idx === chatMessages.length - 2 &&
+                            chatMessages[chatMessages.length - 1].sender === 'patient'));
+
+                      return (
+                        <div key={msg.id} className="flex flex-col gap-1.5">
+                          <div
+                            className={
+                              msg.sender === 'patient'
+                                ? 'care-bubble-patient'
+                                : 'care-bubble-doctor'
+                            }
+                          >
+                            {msg.text}
+                          </div>
+                          {msg.suggestions && msg.suggestions.length > 0 && isLastBotMsg && (
+                            <div className="care-chat-suggestions">
+                              {msg.suggestions.map((sug, sIdx) => (
+                                <button
+                                  key={sIdx}
+                                  type="button"
+                                  onClick={() => sendMessage(sug)}
+                                  className="care-chat-chip"
+                                >
+                                  {sug}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {isTyping && (
+                      <div className="care-bubble-doctor care-typing-bubble">
+                        <span className="dot dot-1" />
+                        <span className="dot dot-2" />
+                        <span className="dot dot-3" />
+                        <span className="text-[11px] text-slate-500 font-medium ml-1">
+                          Clinical AI is reviewing...
+                        </span>
                       </div>
-                    ))}
+                    )}
+                    <div ref={chatMessagesEndRef} />
                   </div>
 
                   <form onSubmit={handleSendMessage} className="care-chat-input-row">

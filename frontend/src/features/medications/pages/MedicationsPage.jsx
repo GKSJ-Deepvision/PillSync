@@ -18,106 +18,7 @@ const DISEASE_CATEGORIES = [
   'Heart Medications',
 ];
 
-const COHORT_PATIENT_FILTERS = ['All Patients', 'Ibrahim Kadri', 'Sarah Connor', 'Michael Chang'];
-
-const COHORT_MEDICATIONS = [
-  {
-    id: 'cm1',
-    name: 'Metformin',
-    dosage: '500mg',
-    disease: 'Diabetes',
-    frequency: 'Twice daily',
-    schedule: ['08:00 AM', '08:00 PM'],
-    quantity: 14,
-    status: 'active',
-    patient: 'Ibrahim Kadri',
-    patientAge: 54,
-    patientAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    adherence: 96,
-    prescribedBy: 'Dr. Oliver Mitchell',
-  },
-  {
-    id: 'cm2',
-    name: 'Lisinopril',
-    dosage: '10mg',
-    disease: 'Blood Pressure',
-    frequency: 'Once daily',
-    schedule: ['08:00 AM'],
-    quantity: 22,
-    status: 'active',
-    patient: 'Ibrahim Kadri',
-    patientAge: 54,
-    patientAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    adherence: 94,
-    prescribedBy: 'Dr. Oliver Mitchell',
-  },
-  {
-    id: 'cm3',
-    name: 'Lisinopril',
-    dosage: '20mg',
-    disease: 'Blood Pressure',
-    frequency: 'Once daily',
-    schedule: ['08:00 AM'],
-    quantity: 8,
-    status: 'active',
-    patient: 'Sarah Connor',
-    patientAge: 48,
-    patientAvatar:
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
-    adherence: 64,
-    prescribedBy: 'Dr. Oliver Mitchell',
-  },
-  {
-    id: 'cm4',
-    name: 'Atorvastatin',
-    dosage: '20mg',
-    disease: 'Heart Medications',
-    frequency: 'Once daily',
-    schedule: ['08:30 PM'],
-    quantity: 18,
-    status: 'active',
-    patient: 'Sarah Connor',
-    patientAge: 48,
-    patientAvatar:
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
-    adherence: 70,
-    prescribedBy: 'Dr. Oliver Mitchell',
-  },
-  {
-    id: 'cm5',
-    name: 'Levothyroxine',
-    dosage: '50mcg',
-    disease: 'Thyroid',
-    frequency: 'Once daily',
-    schedule: ['07:00 AM'],
-    quantity: 4,
-    status: 'active',
-    patient: 'Michael Chang',
-    patientAge: 62,
-    patientAvatar:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    adherence: 82,
-    prescribedBy: 'Dr. Oliver Mitchell',
-  },
-  {
-    id: 'cm6',
-    name: 'Vitamin D3',
-    dosage: '2000 IU',
-    disease: 'Vitamins',
-    frequency: 'Once daily',
-    schedule: ['01:00 PM'],
-    quantity: 30,
-    status: 'active',
-    patient: 'Ibrahim Kadri',
-    patientAge: 54,
-    patientAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    adherence: 98,
-    prescribedBy: 'Dr. Oliver Mitchell',
-  },
-];
+import { getCohortPatients, getCohortPatientNames } from '../../../utils/cohort';
 
 export function MedicationsPage() {
   const { user } = useAuth();
@@ -129,17 +30,59 @@ export function MedicationsPage() {
   const [selectedDisease, setSelectedDisease] = useState('All');
   const [selectedPatient, setSelectedPatient] = useState('All Patients');
 
-  const userRole = user?.role || 'patient';
+  const userRole = (user?.role || 'patient').toLowerCase();
   const isCaregiver = userRole === 'caregiver' || userRole === 'admin';
+  const [cohortPatientFilters, setCohortPatientFilters] = useState(() =>
+    getCohortPatientNames(user)
+  );
+
+  useEffect(() => {
+    setCohortPatientFilters(getCohortPatientNames(user));
+  }, [user]);
 
   useEffect(() => {
     let cancelled = false;
 
     const loadMedications = async () => {
       try {
+        if (userRole === 'caregiver') {
+          const cohort = getCohortPatients(user);
+          const allCohortMeds = [];
+          cohort.forEach((p) => {
+            const pKey = p.email
+              ? p.email
+                  .trim()
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]/g, '_')
+              : '';
+            let pMeds = [];
+            try {
+              const raw = localStorage.getItem(`pillsync_patient_medications_${pKey}`);
+              if (raw) pMeds = JSON.parse(raw);
+            } catch {}
+
+            if (!Array.isArray(pMeds)) {
+              pMeds = [];
+            }
+
+            pMeds.forEach((m) => {
+              allCohortMeds.push({
+                ...m,
+                patient: p.name,
+                patientEmail: p.email,
+              });
+            });
+          });
+
+          if (!cancelled) {
+            setMedications(allCohortMeds);
+          }
+          return;
+        }
+
         const data = await medicationApi.getMedications();
         if (!cancelled) {
-          setMedications(data);
+          setMedications(data || []);
         }
       } catch (error) {
         console.error('Failed to fetch medications:', error);
@@ -155,9 +98,9 @@ export function MedicationsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [user, userRole]);
 
-  const displayedList = isCaregiver ? COHORT_MEDICATIONS : medications;
+  const displayedList = medications;
 
   const filteredMeds = displayedList.filter((med) => {
     const query = searchQuery.toLowerCase();
@@ -193,7 +136,7 @@ export function MedicationsPage() {
               </Badge>
               {isCaregiver && (
                 <Badge variant="success" size="sm">
-                  {COHORT_PATIENT_FILTERS.length - 1} Assigned Patients
+                  {cohortPatientFilters.length - 1} Assigned Patients
                 </Badge>
               )}
             </div>
@@ -218,131 +161,122 @@ export function MedicationsPage() {
         </div>
 
         {/* Caregiver Patient Selector Chips */}
-        {isCaregiver && (
-          <div className="meds-cohort-bar">
-            <span className="meds-cohort-label">
-              <Users className="h-4 w-4 text-indigo-600" />
-              Patient Roster:
+        {isCaregiver && cohortPatientFilters.length > 1 && (
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 mb-4">
+            <span className="text-xs font-bold text-slate-500 shrink-0 flex items-center gap-1 mr-1">
+              <Users className="h-3.5 w-3.5 text-indigo-600" /> Filter Patient:
             </span>
-            <div className="meds-cohort-chips">
-              {COHORT_PATIENT_FILTERS.map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setSelectedPatient(p)}
-                  className={`meds-cohort-chip ${
-                    selectedPatient === p ? 'meds-cohort-chip-active' : 'meds-cohort-chip-inactive'
-                  }`}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
+            {cohortPatientFilters.map((pName) => (
+              <button
+                key={pName}
+                type="button"
+                onClick={() => setSelectedPatient(pName)}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition shrink-0 ${
+                  selectedPatient === pName
+                    ? 'bg-indigo-600 text-white shadow-xs'
+                    : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                {pName}
+              </button>
+            ))}
           </div>
         )}
 
-        {/* Filter & Search Bar */}
-        <div className="meds-filter-bar">
+        {/* Toolbar: Search & Category Chips */}
+        <div className="meds-toolbar">
           <div className="meds-search-box">
-            <div className="meds-search-wrapper">
-              <Search className="meds-search-icon" />
-              <input
-                type="text"
-                placeholder={
-                  isCaregiver
-                    ? 'Search by medicine, condition, or patient name...'
-                    : 'Search prescription name or condition...'
-                }
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="meds-search-input"
-              />
-            </div>
+            <Search className="meds-search-icon" />
+            <input
+              type="text"
+              placeholder="Search by drug name or condition..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="meds-search-input"
+            />
           </div>
 
-          <div className="meds-categories-scroll">
-            {DISEASE_CATEGORIES.map((disease) => (
+          <div className="meds-categories">
+            {DISEASE_CATEGORIES.map((cat) => (
               <button
-                key={disease}
+                key={cat}
                 type="button"
-                onClick={() => setSelectedDisease(disease)}
-                className={`meds-category-chip ${
-                  selectedDisease === disease ? 'meds-category-chip-active' : ''
-                }`}
+                className={`meds-chip ${selectedDisease === cat ? 'active' : ''}`}
+                onClick={() => setSelectedDisease(cat)}
               >
-                {disease}
+                {cat}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Medication Grid */}
-        {loading && !isCaregiver ? (
-          <CardSkeleton count={3} />
+        {/* Content State */}
+        {loading ? (
+          <div className="meds-grid">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <CardSkeleton key={i} />
+            ))}
+          </div>
         ) : filteredMeds.length === 0 ? (
           <EmptyState
-            icon={Pill}
             title="No medications found"
-            message={
-              searchQuery
-                ? 'Try adjusting your search criteria or filter category'
-                : 'Add a medication to get started'
+            description={
+              searchQuery || selectedDisease !== 'All'
+                ? 'Try adjusting your search query or filters to find what you need.'
+                : isCaregiver
+                  ? 'No cohort medications logged yet. Click "Prescribe Medication" to add a prescription.'
+                  : 'Start by adding your first medication to track intake, adherence, and refills.'
             }
-            action={
-              !searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => navigate('/medications/new')}
-                  className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-700"
-                >
-                  Add Medication
-                </button>
-              )
-            }
+            actionLabel="Add Medication"
+            onAction={() => navigate('/medications/new')}
           />
         ) : (
           <div className="meds-grid">
             {filteredMeds.map((medication) => {
+              const maxStock = 60;
               const stockPercent = Math.min(
                 100,
-                Math.round(((medication.quantity || 10) / 30) * 100)
+                Math.round(((medication.quantity || 12) / maxStock) * 100)
               );
-              const isLowStock = stockPercent <= 25;
+              const isLowStock = (medication.quantity || 12) <= 10;
 
               return (
                 <div
                   key={medication.id}
+                  className="med-card"
                   onClick={() => navigate(`/medications/${medication.id}`)}
-                  className="med-card cursor-pointer"
                 >
-                  <div>
-                    {/* Patient identity bar for caregiver */}
+                  <div className="med-card-body">
+                    {/* Cohort Patient Badge for Caregivers */}
                     {isCaregiver && medication.patient && (
                       <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-100">
                         <div className="flex items-center gap-2">
-                          <img
-                            src={medication.patientAvatar}
-                            alt={medication.patient}
-                            className="h-6 w-6 rounded-full object-cover border border-slate-200"
-                          />
+                          {medication.patientAvatar ? (
+                            <img
+                              src={medication.patientAvatar}
+                              alt={medication.patient}
+                              className="h-6 w-6 rounded-full object-cover border border-slate-200"
+                            />
+                          ) : (
+                            <div className="h-6 w-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-bold">
+                              {medication.patient.slice(0, 2)}
+                            </div>
+                          )}
                           <span className="text-xs font-bold text-slate-900">
                             {medication.patient}
-                          </span>
-                          <span className="text-[10px] text-slate-400">
-                            ({medication.patientAge}y)
                           </span>
                         </div>
                         <Badge
                           variant={
-                            medication.adherence >= 85
+                            (medication.adherence || 100) >= 85
                               ? 'success'
-                              : medication.adherence >= 70
+                              : (medication.adherence || 100) >= 70
                                 ? 'warning'
                                 : 'danger'
                           }
                           size="xs"
                         >
-                          {medication.adherence}% Adherence
+                          {medication.adherence || 100}% Adherence
                         </Badge>
                       </div>
                     )}
@@ -359,14 +293,14 @@ export function MedicationsPage() {
                       </div>
 
                       <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-700">
-                        {medication.disease}
+                        {medication.disease || 'General'}
                       </span>
                     </div>
 
                     <div className="med-schedule-tags">
                       <span className="med-tag">
                         <Clock className="h-3 w-3 text-indigo-500" />
-                        {medication.frequency}
+                        {medication.frequency || 'Daily'}
                       </span>
                       {medication.schedule?.map((time) => (
                         <span key={time} className="med-tag">
@@ -379,7 +313,7 @@ export function MedicationsPage() {
                       <div className="med-stock-label-row">
                         <span>Supply Remaining</span>
                         <span className={isLowStock ? 'text-rose-600 font-bold' : ''}>
-                          {medication.quantity || 12} units
+                          {medication.quantity || 0} units
                         </span>
                       </div>
                       <div className="med-stock-track">

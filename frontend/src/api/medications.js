@@ -1,111 +1,134 @@
 import { apiClient, USE_MOCK_API } from './client';
+import {
+  getScopedStorage,
+  setScopedStorage,
+  getCurrentUserKey,
+  getCurrentUser,
+} from '../utils/userStorage';
 
-// Mock data
-const mockMedications = [
+export const DEFAULT_PATIENT_MEDS = [
   {
-    id: '1',
-    name: 'Aspirin',
-    dosage: '100mg',
-    quantity: 30,
-    frequency: 'Once daily',
-    schedule: ['Morning'],
-    disease: 'Heart Medications',
-    instructions: 'Take with food',
-    startDate: '2024-01-15',
-    endDate: null,
-    status: 'active',
-  },
-  {
-    id: '2',
-    name: 'Metformin',
-    dosage: '500mg',
-    quantity: 60,
-    frequency: 'Twice daily',
-    schedule: ['Morning', 'Evening'],
+    id: 'med-reg-1',
+    name: 'Metformin HCl',
+    condition: 'Type 2 Diabetes Mellitus',
     disease: 'Diabetes',
-    instructions: 'Take with meals',
-    startDate: '2023-06-20',
-    endDate: null,
+    dosage: '500mg',
+    form: 'Oral Tablet',
+    frequency: 'Twice daily',
+    schedule: ['08:00 AM', '08:00 PM'],
+    instructions: 'Take with or immediately after meals',
+    quantity: 60,
     status: 'active',
   },
   {
-    id: '3',
-    name: 'Levothyroxine',
-    dosage: '50mcg',
-    quantity: 90,
-    frequency: 'Once daily',
-    schedule: ['Morning'],
-    disease: 'Thyroid',
-    instructions: 'Take on empty stomach',
-    startDate: '2023-01-10',
-    endDate: null,
-    status: 'active',
-  },
-  {
-    id: '4',
-    name: 'Atenolol',
-    dosage: '50mg',
+    id: 'med-reg-2',
+    name: 'Lisinopril',
+    condition: 'Hypertension (High Blood Pressure)',
+    disease: 'Hypertension',
+    dosage: '10mg',
+    form: 'Oral Tablet',
+    frequency: 'Once daily (Morning)',
+    schedule: ['08:00 AM'],
+    instructions: 'Take in the morning with water',
     quantity: 30,
-    frequency: 'Once daily',
-    schedule: ['Morning'],
-    disease: 'Blood Pressure',
-    instructions: 'Do not stop abruptly',
-    startDate: '2024-03-01',
-    endDate: null,
+    status: 'active',
+  },
+  {
+    id: 'med-reg-3',
+    name: 'Atorvastatin (Lipitor)',
+    condition: 'High Cholesterol',
+    disease: 'Cardiovascular Care',
+    dosage: '20mg',
+    form: 'Oral Tablet',
+    frequency: 'Once daily (Bedtime)',
+    schedule: ['09:00 PM'],
+    instructions: 'Take at bedtime with water',
+    quantity: 30,
     status: 'active',
   },
 ];
 
+// User-scoped storage: brand new patient accounts start fresh with 0 medications
+function getStoredMedications() {
+  const stored = getScopedStorage('pillsync_patient_medications', null);
+
+  if (stored !== null && Array.isArray(stored)) {
+    return stored;
+  }
+
+  // All accounts start completely clean at 0 medications
+  setScopedStorage('pillsync_patient_medications', []);
+  return [];
+}
+
+function saveStoredMedications(meds) {
+  setScopedStorage('pillsync_patient_medications', meds);
+}
+
 const mockMedicationApi = {
   getMedications: async () => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return mockMedications;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    return getStoredMedications();
   },
 
   getMedicationById: async (id) => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return mockMedications.find((m) => m.id === id);
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    const meds = getStoredMedications();
+    return meds.find((m) => m.id === id);
   },
 
   createMedication: async (data) => {
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const meds = getStoredMedications();
+    const currentUser = getCurrentUser();
     const newMed = {
       id: Date.now().toString(),
       ...data,
-      status: 'active',
+      userId: getCurrentUserKey(),
+      patientEmail: currentUser?.email || 'patient@example.com',
+      patientName: currentUser?.name || 'Patient',
+      status: data.status || 'active',
+      createdAt: new Date().toISOString(),
     };
-    mockMedications.push(newMed);
+    meds.unshift(newMed);
+    saveStoredMedications(meds);
     return newMed;
   },
 
   updateMedication: async (id, data) => {
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    const index = mockMedications.findIndex((m) => m.id === id);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const meds = getStoredMedications();
+    const index = meds.findIndex((m) => m.id === id);
     if (index === -1) throw new Error('Medication not found');
-    mockMedications[index] = { ...mockMedications[index], ...data };
-    return mockMedications[index];
+    meds[index] = { ...meds[index], ...data };
+    saveStoredMedications(meds);
+    return meds[index];
   },
 
   deleteMedication: async (id) => {
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    const index = mockMedications.findIndex((m) => m.id === id);
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    const meds = getStoredMedications();
+    const index = meds.findIndex((m) => m.id === id);
     if (index === -1) throw new Error('Medication not found');
-    mockMedications.splice(index, 1);
+    meds.splice(index, 1);
+    saveStoredMedications(meds);
     return { success: true };
   },
 
   searchMedications: async (query) => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return mockMedications.filter(
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    const meds = getStoredMedications();
+    return meds.filter(
       (m) =>
         m.name.toLowerCase().includes(query.toLowerCase()) ||
-        m.disease.toLowerCase().includes(query.toLowerCase())
+        m.disease?.toLowerCase().includes(query.toLowerCase())
     );
   },
 
   getMedicationsByDisease: async (disease) => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return mockMedications.filter((m) => m.disease === disease);
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    const meds = getStoredMedications();
+    return meds.filter((m) => m.disease === disease);
   },
 };
 

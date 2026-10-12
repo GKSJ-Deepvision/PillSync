@@ -1,17 +1,124 @@
-/* Shell Layout Styles */
+/* ══════════════════════════════════════════════════════════════
+   PillSync Authenticated Shell Layout
+   Floating Sidebar, Serene Gradient Mesh, Modern SaaS Ergonomics
+   ══════════════════════════════════════════════════════════════ */
+
 .layout-shell {
   display: flex;
+  flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
-  background-color: #f8fafc;
+  background:
+    radial-gradient(at 5% 5%, rgba(58, 158, 144, 0.09) 0px, transparent 45%),
+    radial-gradient(at 95% 95%, rgba(78, 127, 103, 0.07) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(240, 250, 248, 0.8) 0px, transparent 70%), #f5faf8;
+  background-attachment: fixed;
   overflow: hidden;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .layout-shell {
+    flex-direction: row;
+  }
+}
+
+/* ── Mobile Top Header (< 768px) ── */
+.mobile-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 3.5rem;
+  padding: 0 1rem;
+  border-bottom: 1px solid rgba(214, 243, 237, 0.9);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+  z-index: 30;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .mobile-top-bar {
+    display: none !important;
+  }
+}
+
+.mobile-top-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.mobile-top-logo {
+  display: flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 3px 10px rgba(17, 24, 39, 0.25);
+  padding: 0.25rem;
+}
+
+.mobile-top-title {
+  font-size: 1.15rem;
+  font-weight: 850;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+}
+
+.mobile-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mobile-top-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 750;
+  text-transform: capitalize;
+  background: rgba(45, 130, 117, 0.12);
+  color: #1e5950;
+  border: 1px solid rgba(45, 130, 117, 0.28);
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+}
+
+.mobile-top-menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.25rem;
+  width: 2.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(214, 243, 237, 0.95);
+  background: #ffffff;
+  color: #1a4f47;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+.mobile-top-menu-btn:hover {
+  background: rgba(58, 158, 144, 0.08);
 }
 
 .layout-main-wrapper {
   display: flex;
   flex: 1 1 0%;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
+  min-height: 0;
   min-width: 0;
   overflow: hidden;
 }
@@ -21,29 +128,31 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding-bottom: 5rem;
+  padding-right: 0.5rem;
 }
 
 @media (min-width: 768px) {
   .layout-content-scroll {
     padding-bottom: 2.5rem;
+    padding-right: 1rem;
   }
 }
 
 .layout-container {
   margin-left: auto;
   margin-right: auto;
-  max-width: 80rem;
-  padding: 1.5rem 1rem;
+  max-width: 82rem;
+  padding: 1.25rem 1rem;
 }
 
 @media (min-width: 640px) {
   .layout-container {
-    padding: 1.75rem 1.5rem;
+    padding: 1.5rem 1.5rem;
   }
 }
 
 @media (min-width: 1024px) {
   .layout-container {
-    padding: 2rem 2rem;
+    padding: 1.75rem 2rem;
   }
 }

@@ -35,3 +35,5 @@ Pillow==11.*
 # Utilities
 python-dotenv
 pydantic==2.10.6
+whitenoise==6.8.2
+gunicorn==23.0.0

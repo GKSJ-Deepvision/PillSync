@@ -1,273 +1,899 @@
-/* PillSync Animated Welcome Landing Page Styles */
+/* ══════════════════════════════════════════════════════════════
+   PillSync Landing Page — KORU Wellness Design System
+   Pristine Porcelain Backgrounds, Sage/Mint Accents, Dark Pill CTAs
+   ══════════════════════════════════════════════════════════════ */
 
-.landing-root {
+.koru-landing-root {
   min-height: 100vh;
-  width: 100vw;
-  background: radial-gradient(circle at 50% 10%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
-  color: #ffffff;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  width: 100%;
+  background: #f7faf9;
+  color: #1a2421;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   overflow-x: hidden;
   position: relative;
-  font-family: inherit;
 }
 
-/* Background Glowing Mesh / Orbs */
-.landing-glow-orb-1 {
-  position: absolute;
-  top: -10%;
-  left: 20%;
-  width: 35rem;
-  height: 35rem;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, rgba(99, 102, 241, 0) 70%);
-  filter: blur(50px);
-  pointer-events: none;
-  animation: orbFloat 10s ease-in-out infinite alternate;
+/* ── Top Navigation Bar ── */
+.koru-nav-container {
+  max-width: 78rem;
+  margin: 1.25rem auto 0 auto;
+  padding: 0 1.5rem;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 50;
 }
 
-.landing-glow-orb-2 {
-  position: absolute;
-  top: 40%;
-  right: 15%;
-  width: 30rem;
-  height: 30rem;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0) 70%);
-  filter: blur(60px);
-  pointer-events: none;
-  animation: orbFloat 12s ease-in-out infinite alternate-reverse;
-}
-
-@keyframes orbFloat {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  100% {
-    transform: translate(30px, 40px) scale(1.1);
-  }
-}
-
-/* Header / Nav */
-.landing-nav {
+.koru-nav-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.5rem 2rem;
-  max-width: 80rem;
-  margin: 0 auto;
-  width: 100%;
-  box-sizing: border-box;
-  position: relative;
-  z-index: 20;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 0.75rem 1.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(220, 237, 232, 0.7);
+  box-shadow: 0 6px 20px -4px rgba(45, 130, 117, 0.07);
 }
 
-.landing-brand {
+.koru-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+}
+
+.koru-brand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 0.85rem;
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 14px rgba(17, 24, 39, 0.28);
+  padding: 0.35rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.koru-brand:hover .koru-brand-icon {
+  background: #1f2937;
+  transform: scale(1.08) rotate(3deg);
+  box-shadow: 0 6px 18px rgba(17, 24, 39, 0.38);
+}
+
+.koru-brand-icon.small {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 0.65rem;
+  padding: 0.25rem;
+  background: #111827;
+}
+
+.koru-brand-text {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.koru-brand-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+.koru-brand-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: #e6f5f1;
+  color: #2d8275;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  letter-spacing: 0.05em;
+}
+
+.koru-nav-links {
+  display: none;
+  align-items: center;
+  gap: 1.75rem;
+}
+
+@media (min-width: 860px) {
+  .koru-nav-links {
+    display: flex;
+  }
+}
+
+.koru-nav-link {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4b635c;
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+
+.koru-nav-link:hover {
+  color: #111827;
+}
+
+.koru-nav-actions {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  text-decoration: none;
-  color: #ffffff;
 }
 
-.landing-logo-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 2.75rem;
-  width: 2.75rem;
-  border-radius: 1rem;
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-  color: #ffffff;
-  box-shadow: 0 0 25px rgba(99, 102, 241, 0.5);
-  animation: pulseLogo 3s ease-in-out infinite;
-}
-
-@keyframes pulseLogo {
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
-    transform: scale(1);
-  }
-  50% {
-    box-shadow: 0 0 35px rgba(99, 102, 241, 0.7);
-    transform: scale(1.04);
-  }
-}
-
-.landing-brand-text {
-  font-size: 1.375rem;
-  font-weight: 800;
-  letter-spacing: -0.025em;
-  color: #ffffff;
-}
-
-.landing-nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.landing-signin-link {
-  padding: 0.5rem 1.25rem;
+.koru-btn-ghost-nav {
+  padding: 0.5rem 1rem;
   font-size: 0.875rem;
-  font-weight: 700;
-  color: #cbd5e1;
+  font-weight: 600;
+  color: #2d4b43;
   text-decoration: none;
-  transition: color 0.15s ease;
-}
-
-.landing-signin-link:hover {
-  color: #ffffff;
-}
-
-.landing-get-started-btn {
-  padding: 0.625rem 1.5rem;
   border-radius: 9999px;
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-  color: #ffffff;
-  font-size: 0.875rem;
-  font-weight: 700;
-  text-decoration: none;
-  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
-.landing-get-started-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(79, 70, 229, 0.6);
-  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+.koru-btn-ghost-nav:hover {
+  background: #edf7f4;
+  color: #111827;
 }
 
-/* Hero Section */
-.landing-hero {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 3rem 1.5rem;
-  max-width: 64rem;
-  margin: 0 auto;
-  position: relative;
-  z-index: 20;
-}
-
-.landing-tag-pill {
+/* Signature KORU Dark Pill Button */
+.koru-btn-dark {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.375rem 1rem;
+  gap: 0.65rem;
+  padding: 0.55rem 1.25rem;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  color: #a5b4fc;
-  font-size: 0.75rem;
+  background: #111827;
+  color: #ffffff;
+  font-size: 0.875rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(17, 24, 39, 0.2);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Animated Typewriter Title */
-.landing-title-container {
-  min-height: 5.5rem;
-  margin-bottom: 1rem;
+.koru-btn-dark:hover {
+  background: #1f2937;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(17, 24, 39, 0.28);
+}
+
+.koru-btn-circle-arrow {
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 1.5rem;
+  width: 1.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  transition: transform 0.2s ease;
 }
 
-.landing-title {
-  font-size: 2.75rem;
+.koru-btn-dark:hover .koru-btn-circle-arrow {
+  transform: translateX(2px);
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* ── Hero Section ── */
+.koru-hero-section {
+  max-width: 78rem;
+  margin: 0 auto;
+  padding: 3.5rem 1.5rem 4rem 1.5rem;
+  box-sizing: border-box;
+}
+
+.koru-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+
+@media (min-width: 960px) {
+  .koru-hero-grid {
+    grid-template-columns: 1.05fr 0.95fr;
+  }
+}
+
+.koru-hero-content {
+  text-align: left;
+}
+
+.koru-eyebrow-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 1rem;
+  border-radius: 9999px;
+  background: #eaf6f2;
+  border: 1px solid #d0ebe2;
+  color: #24685e;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 1.5rem;
+}
+
+.koru-hero-title {
+  font-size: 3.25rem;
   font-weight: 900;
-  letter-spacing: -0.035em;
-  line-height: 1.15;
-  background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 80%, #38bdf8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin: 0;
+  line-height: 1.1;
+  color: #111827;
+  letter-spacing: -0.04em;
+  margin: 0 0 1rem 0;
 }
 
 @media (min-width: 640px) {
-  .landing-title {
-    font-size: 3.75rem;
+  .koru-hero-title {
+    font-size: 4.25rem;
   }
 }
 
-.landing-typing-cursor {
-  display: inline-block;
-  font-weight: 300;
-  color: #818cf8;
-  -webkit-text-fill-color: #818cf8;
-  animation: cursorBlink 0.8s infinite;
-  margin-left: 2px;
+.koru-title-accent {
+  color: #2d8275;
 }
 
-@keyframes cursorBlink {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
+.koru-tagline-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #24685e;
+  margin-bottom: 1.5rem;
 }
 
-.landing-description {
+.koru-dot {
+  color: #92cdc2;
+}
+
+.koru-hero-desc {
   font-size: 1.125rem;
-  line-height: 1.6;
-  color: #94a3b8;
-  max-width: 42rem;
-  margin: 0 auto 2.25rem auto;
+  line-height: 1.7;
+  color: #4b635c;
+  max-width: 36rem;
+  margin: 0 0 2.25rem 0;
+  font-weight: 450;
 }
 
-/* CTA Button Group */
-.landing-cta-group {
+.koru-hero-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2.75rem;
+}
+
+.koru-hero-primary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.95rem 2.25rem;
+  border-radius: 9999px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 8px 24px -4px rgba(17, 24, 39, 0.25);
+  transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.koru-hero-primary-btn:hover {
+  background: #1f2937;
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px -4px rgba(17, 24, 39, 0.35);
+}
+
+.koru-hero-secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.95rem 2rem;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 1.5px solid #d6ede7;
+  color: #24685e;
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.koru-hero-secondary-btn:hover {
+  background: #edf7f4;
+  border-color: #7dcfc2;
+  color: #111827;
+}
+
+/* Trust Bar */
+.koru-trust-bar {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2efe9;
+}
+
+.koru-trust-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.koru-trust-number {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+.koru-trust-label {
+  font-size: 0.72rem;
+  color: #637f76;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.koru-trust-divider {
+  width: 1px;
+  height: 2rem;
+  background: #d6ede7;
+}
+
+/* ── Right Column: KORU Phone / App Mockup ── */
+.koru-showcase-column {
+  display: flex;
+  justify-content: center;
+}
+
+.koru-phone-frame {
+  width: 100%;
+  max-width: 25rem;
+  background: #ffffff;
+  border-radius: 2.25rem;
+  border: 8px solid #ffffff;
+  box-shadow:
+    0 25px 60px -12px rgba(45, 130, 117, 0.22),
+    0 8px 24px -4px rgba(0, 0, 0, 0.05),
+    0 0 0 1px #d6ede7;
+  padding: 1.5rem 1.25rem;
+  box-sizing: border-box;
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.koru-phone-frame:hover {
+  transform: translateY(-4px);
+}
+
+.koru-app-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.koru-welcome-heading {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.koru-welcome-sub {
+  font-size: 0.78rem;
+  color: #637f76;
+  margin: 0.25rem 0 0 0;
+  font-weight: 500;
+}
+
+.koru-app-header-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.koru-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.2rem;
+  width: 2.2rem;
+  border-radius: 50%;
+  border: 1px solid #d6ede7;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+/* 7-Day Habit Strip (Directly matching Screen 2) */
+.koru-week-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  padding: 0.75rem 0.5rem;
+  background: #edf7f4;
+  border-radius: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.koru-day-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.koru-check-slot {
+  height: 1.15rem;
+  width: 1.15rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.koru-check-slot.checked {
+  background: #2d8275;
+}
+
+.koru-day-circle {
+  height: 1.9rem;
+  width: 1.9rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 750;
+  color: #4b635c;
+  background: #ffffff;
+  border: 1.5px solid #d6ede7;
+}
+
+.koru-day-circle.is-today {
+  background: #2d8275;
+  border-color: #2d8275;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(45, 130, 117, 0.4);
+}
+
+.koru-day-circle.is-future {
+  border-style: dashed;
+  color: #9cb8b0;
+  background: transparent;
+}
+
+/* Reminder Banner */
+.koru-reminder-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.1rem;
+  background: linear-gradient(135deg, #dcf0ea 0%, #eef8f4 100%);
+  border-radius: 1.25rem;
+  border: 1px solid #c7e7dd;
+  margin-bottom: 1.25rem;
+}
+
+.koru-reminder-text h4 {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.koru-reminder-text p {
+  font-size: 0.7rem;
+  color: #3b5f55;
+  margin: 0.2rem 0 0 0;
+}
+
+.koru-checkin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
+  background: #ffffff;
+  border-radius: 9999px;
+  border: 1px solid #bce1d5;
+  color: #24685e;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(45, 130, 117, 0.12);
+  transition: transform 0.15s ease;
+}
+
+.koru-checkin-btn:hover {
+  transform: scale(1.04);
+}
+
+/* Today's To Do */
+.koru-todo-section {
+  text-align: left;
+}
+
+.koru-todo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.koru-todo-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.koru-todo-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  background: #2d8275;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* Filter Tabs */
+.koru-tabs-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  border-bottom: 1px solid #e5f0ec;
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.85rem;
+}
+
+.koru-tab {
+  background: none;
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #637f76;
+  padding: 0.3rem 0;
+  cursor: pointer;
+  position: relative;
+}
+
+.koru-tab.active {
+  color: #111827;
+}
+
+.koru-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -0.45rem;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  background: #111827;
+  border-radius: 2px;
+}
+
+.koru-tab-count {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #2d8275;
+  margin-left: 0.2rem;
+}
+
+.koru-tab-count.red {
+  color: #ef4444;
+}
+
+/* Medicine Cards (Matching Screen 2 & 3) */
+.koru-cards-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.koru-med-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  background: #f3faf7;
+  border-radius: 1.15rem;
+  border: 1px solid #dcf0ea;
+  transition: all 0.2s ease;
+}
+
+.koru-med-item.taken {
+  background: #ffffff;
+  border-color: #bce1d5;
+}
+
+.koru-med-name {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.koru-med-sub {
+  font-size: 0.7rem;
+  color: #637f76;
+  margin: 0.2rem 0 0.4rem 0;
+}
+
+.koru-med-tags {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.koru-med-tag {
+  font-size: 0.62rem;
+  font-weight: 750;
+  padding: 0.18rem 0.55rem;
+  border-radius: 9999px;
+  background: #1f4740;
+  color: #ffffff;
+}
+
+.koru-med-check {
+  height: 2.1rem;
+  width: 2.1rem;
+  border-radius: 50%;
+  border: 1.5px solid #a6d8cb;
+  background: #ffffff;
+  color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.koru-med-check.done {
+  background: #2d8275;
+  border-color: #2d8275;
+  color: #ffffff;
+}
+
+/* Gauge Card */
+.koru-gauge-card {
+  padding: 0.85rem 1rem;
+  background: #ffffff;
+  border-radius: 1.15rem;
+  border: 1px solid #d6ede7;
+  box-shadow: 0 4px 14px rgba(45, 130, 117, 0.08);
+}
+
+.koru-gauge-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #24685e;
+  text-transform: uppercase;
+  margin-bottom: 0.45rem;
+}
+
+.koru-gauge-percent {
+  color: #111827;
+  font-weight: 900;
+}
+
+.koru-gauge-bar {
+  height: 0.45rem;
+  background: #e2efe9;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 0.45rem;
+}
+
+.koru-gauge-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3a9e90, #10b981);
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+}
+
+.koru-gauge-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #4b635c;
+}
+
+/* ── Features Section ── */
+.koru-features-section {
+  max-width: 78rem;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.koru-section-head {
+  max-width: 40rem;
+  margin: 0 auto 3.5rem auto;
+}
+
+.koru-section-pill {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #24685e;
+  background: #e6f5f1;
+  padding: 0.35rem 1rem;
+  border-radius: 9999px;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.koru-section-title {
+  font-size: 2.35rem;
+  font-weight: 900;
+  color: #111827;
+  letter-spacing: -0.03em;
+  margin: 0 0 0.85rem 0;
+}
+
+.koru-section-sub {
+  font-size: 1.05rem;
+  color: #4b635c;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.koru-features-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .koru-features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .koru-features-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.koru-feature-card {
+  padding: 2rem 1.75rem;
+  background: #ffffff;
+  border-radius: 1.5rem;
+  border: 1px solid #d6ede7;
+  box-shadow: 0 4px 16px -2px rgba(45, 130, 117, 0.06);
+  text-align: left;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.koru-feature-card:hover {
+  transform: translateY(-4px);
+  border-color: #88d4c5;
+  box-shadow: 0 16px 36px -6px rgba(45, 130, 117, 0.15);
+}
+
+.koru-feature-icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 3rem;
+  width: 3rem;
+  border-radius: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.koru-feature-icon-box.teal {
+  background: #e6f6f2;
+  color: #24685e;
+}
+
+.koru-feature-icon-box.mint {
+  background: #dcf2ec;
+  color: #167a6c;
+}
+
+.koru-feature-icon-box.sage {
+  background: #eef5f1;
+  color: #356754;
+}
+
+.koru-feature-icon-box.dark {
+  background: #111827;
+  color: #ffffff;
+}
+
+.koru-feature-card-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 0.5rem 0;
+}
+
+.koru-feature-card-desc {
+  font-size: 0.875rem;
+  color: #4b635c;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Call To Action Section ── */
+.koru-cta-section {
+  max-width: 78rem;
+  margin: 0 auto;
+  padding: 0 1.5rem 5rem 1.5rem;
+  box-sizing: border-box;
+}
+
+.koru-cta-card {
+  background: linear-gradient(135deg, #24685e 0%, #1f4740 60%, #111827 100%);
+  border-radius: 2.25rem;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #ffffff;
+  box-shadow: 0 20px 48px -10px rgba(17, 24, 39, 0.3);
+}
+
+.koru-cta-content {
+  max-width: 42rem;
+  margin: 0 auto;
+}
+
+.koru-cta-heading {
+  font-size: 2.45rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin: 0 0 1rem 0;
+}
+
+.koru-cta-sub {
+  font-size: 1.1rem;
+  color: #aee7da;
+  line-height: 1.65;
+  margin: 0 0 2.25rem 0;
+}
+
+.koru-cta-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  margin-bottom: 3.5rem;
 }
 
-.landing-primary-cta {
+.koru-btn-dark.large {
+  padding: 0.95rem 2.25rem;
+  font-size: 1.05rem;
+}
+
+.koru-btn-ghost-dark {
   display: inline-flex;
   align-items: center;
-  gap: 0.625rem;
-  padding: 0.875rem 2rem;
+  padding: 0.95rem 2rem;
   border-radius: 9999px;
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-  color: #ffffff;
-  font-size: 1rem;
-  font-weight: 800;
-  text-decoration: none;
-  box-shadow:
-    0 10px 25px -5px rgba(79, 70, 229, 0.5),
-    0 8px 10px -6px rgba(79, 70, 229, 0.4);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.landing-primary-cta:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 16px 32px -5px rgba(79, 70, 229, 0.6);
-  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
-}
-
-.landing-secondary-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.625rem;
-  padding: 0.875rem 2rem;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
   color: #ffffff;
   font-size: 1rem;
   font-weight: 700;
@@ -275,90 +901,51 @@
   transition: all 0.2s ease;
 }
 
-.landing-secondary-cta:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: translateY(-2px);
+.koru-btn-ghost-dark:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
-/* Feature Cards Grid */
-.landing-features-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.25rem;
-  width: 100%;
-  max-width: 60rem;
+/* ── Footer ── */
+.koru-footer {
+  border-top: 1px solid #dcefe8;
+  padding: 2.25rem 1.5rem;
+  background: #ffffff;
 }
 
-@media (min-width: 640px) {
-  .landing-features-grid {
-    grid-template-columns: repeat(3, 1fr);
+.koru-footer-inner {
+  max-width: 78rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .koru-footer-inner {
+    flex-direction: row;
   }
 }
 
-.landing-feature-card {
-  padding: 1.5rem;
-  border-radius: 1.25rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  text-align: left;
-  transition: all 0.25s ease;
-}
-
-.landing-feature-card:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(99, 102, 241, 0.4);
-  transform: translateY(-4px);
-  box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.4);
-}
-
-.landing-feature-icon-box {
+.koru-footer-brand {
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 2.75rem;
-  width: 2.75rem;
-  border-radius: 0.875rem;
-  margin-bottom: 1rem;
+  gap: 0.65rem;
 }
 
-.landing-feature-icon-box.purple {
-  background: rgba(99, 102, 241, 0.15);
-  color: #818cf8;
-}
-
-.landing-feature-icon-box.emerald {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-}
-
-.landing-feature-icon-box.amber {
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-}
-
-.landing-feature-title {
-  font-size: 1rem;
+.koru-footer-title {
+  font-size: 1.05rem;
   font-weight: 800;
-  color: #ffffff;
-  margin: 0 0 0.375rem 0;
+  color: #111827;
 }
 
-.landing-feature-desc {
-  font-size: 0.8125rem;
-  color: #94a3b8;
-  line-height: 1.5;
-  margin: 0;
+.koru-footer-copy {
+  font-size: 0.8rem;
+  color: #637f76;
 }
 
-/* Footer */
-.landing-footer {
-  padding: 1.5rem 2rem;
-  text-align: center;
-  font-size: 0.75rem;
-  color: #64748b;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  position: relative;
-  z-index: 20;
+.koru-footer-note {
+  font-size: 0.78rem;
+  color: #82a097;
 }

@@ -20,7 +20,7 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError("Email is required")
 
-        email = self.normalize_email(email)
+        email = self.normalize_email(email).strip().lower()
 
         user = self.model(
             email=email,
@@ -63,6 +63,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=20,
         choices=UserRole.choices,
         default=UserRole.PATIENT,
+    )
+    assigned_caregiver = models.CharField(
+        max_length=150,
+        default="Caregiver Clinician",
+        blank=True,
     )
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

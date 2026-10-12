@@ -1,4 +1,4 @@
-/* PillSync Healthcare Register Page Styles - Self-Contained */
+/* PillSync Healthcare Register Page Styles - KORU Wellness Template */
 .register-page-wrapper {
   min-height: 100vh;
   width: 100vw;
@@ -6,8 +6,8 @@
   align-items: center;
   justify-content: center;
   background:
-    radial-gradient(circle at 15% 20%, rgba(79, 70, 229, 0.09) 0%, transparent 40%),
-    radial-gradient(circle at 85% 80%, rgba(16, 185, 129, 0.09) 0%, transparent 40%), #f8fafc;
+    radial-gradient(circle at 10% 20%, rgba(58, 158, 144, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(78, 127, 103, 0.08) 0%, transparent 40%), #f5faf8;
   padding: 2rem 1rem;
   box-sizing: border-box;
 }
@@ -17,12 +17,14 @@
   max-width: 34rem;
   background-color: #ffffff;
   border-radius: 1.75rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.85);
   box-shadow:
-    0 25px 50px -12px rgba(15, 23, 42, 0.12),
-    0 0 0 1px rgba(226, 232, 240, 0.8);
+    0 25px 60px -15px rgba(45, 130, 117, 0.22),
+    0 10px 25px -5px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(174, 231, 218, 0.4);
   padding: 2.5rem 2.25rem;
   box-sizing: border-box;
+  backdrop-filter: blur(16px);
 }
 
 @media (max-width: 480px) {
@@ -38,21 +40,22 @@
 
 .register-logo-box {
   display: inline-flex;
-  height: 3.25rem;
-  width: 3.25rem;
+  height: 3.5rem;
+  width: 3.5rem;
   align-items: center;
   justify-content: center;
-  border-radius: 1rem;
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-  color: #ffffff;
-  box-shadow: 0 8px 20px -4px rgba(79, 70, 229, 0.35);
+  border-radius: 1.15rem;
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 20px -4px rgba(17, 24, 39, 0.3);
+  padding: 0.45rem;
   margin-bottom: 0.875rem;
 }
 
 .register-title {
   font-size: 1.625rem;
   font-weight: 900;
-  color: #0f172a;
+  color: #123b35;
   letter-spacing: -0.025em;
   margin: 0;
 }
@@ -73,9 +76,9 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #059669;
-  background-color: #ecfdf5;
-  border: 1px solid #a7f3d0;
+  color: #22655b;
+  background-color: #edfaf7;
+  border: 1px solid #c6f0e8;
   padding: 0.25rem 0.625rem;
   border-radius: 9999px;
   margin-top: 0.75rem;
@@ -117,14 +120,14 @@
 }
 
 .register-role-card:hover {
-  border-color: #a5b4fc;
-  background-color: #f8faff;
+  border-color: #aee7da;
+  background-color: #f0faf8;
 }
 
 .register-role-card.active {
-  border-color: #4f46e5;
-  background-color: #eef2ff;
-  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+  border-color: #3a9e90;
+  background-color: #f0faf8;
+  box-shadow: 0 0 0 2px rgba(58, 158, 144, 0.25);
 }
 
 .register-role-card-title {
@@ -134,7 +137,7 @@
 }
 
 .register-role-card.active .register-role-card-title {
-  color: #4338ca;
+  color: #22655b;
 }
 
 .register-role-card-desc {
@@ -199,8 +202,8 @@
 }
 
 .register-input-field:focus {
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  border-color: #3a9e90;
+  box-shadow: 0 0 0 3px rgba(58, 158, 144, 0.2);
 }
 
 .register-input-field::placeholder {
@@ -232,12 +235,12 @@
 
 .register-terms-box input {
   margin-top: 0.125rem;
-  accent-color: #4f46e5;
+  accent-color: #3a9e90;
   cursor: pointer;
 }
 
 .register-terms-link {
-  color: #4f46e5;
+  color: #2d8275;
   font-weight: 700;
   text-decoration: none;
 }
@@ -255,20 +258,20 @@
   gap: 0.5rem;
   border-radius: 0.75rem;
   border: none;
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  background: linear-gradient(135deg, #2d8275 0%, #3a9e90 100%);
   color: #ffffff;
   font-size: 0.875rem;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.28);
+  box-shadow: 0 4px 14px rgba(45, 130, 117, 0.35);
   transition: all 120ms ease;
   margin-top: 0.5rem;
 }
 
 .register-submit-btn:hover {
-  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, #22655b 0%, #2d8275 100%);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(79, 70, 229, 0.35);
+  box-shadow: 0 6px 18px rgba(45, 130, 117, 0.45);
 }
 
 .register-submit-btn:disabled {
@@ -288,7 +291,7 @@
 
 .register-footer-box a {
   font-weight: 800;
-  color: #4f46e5;
+  color: #2d8275;
   text-decoration: none;
 }
 

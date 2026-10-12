@@ -50,6 +50,8 @@
   border: 1px solid #e2e8f0;
   border-radius: 1.25rem;
   padding: 1rem;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .upload-box {
@@ -64,6 +66,15 @@
   border-radius: 1.2rem;
   padding: 1.25rem;
   cursor: pointer;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.upload-box:hover {
+  border-color: #818cf8;
+  background: linear-gradient(135deg, #e0e7ff, #f8fafc);
 }
 
 .upload-box svg {
@@ -71,17 +82,77 @@
   margin-bottom: 0.8rem;
 }
 
-.upload-box h3 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 800;
-  color: #0f172a;
+.upload-box-preview {
+  width: 100%;
+  max-height: 180px;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 0.75rem;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
-.upload-box p {
-  margin-top: 0.4rem;
+.upload-box-preview img {
+  max-height: 180px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.upload-file-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.upload-file-name {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+  max-width: 100%;
+  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.upload-file-hint {
+  margin: 0.35rem 0 0;
   color: #64748b;
   font-size: 0.75rem;
+  line-height: 1.3;
+}
+
+.upload-action-btn {
+  margin-top: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 0.5rem;
+  background: #f0fdfa;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0f766e;
+  border: 1px solid #99f6e4;
+  transition: all 0.15s ease;
+}
+
+.upload-box:hover .upload-action-btn {
+  background: #ccfbf1;
 }
 
 .scan-status {

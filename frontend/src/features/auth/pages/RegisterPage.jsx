@@ -1,18 +1,23 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../context/useAuth';
-import { Alert } from '../../../components/common';
-import { Mail, Lock, User, ShieldCheck, Pill, ArrowRight, Stethoscope, Shield } from 'lucide-react';
+import { Alert, PillSyncIcon } from '../../../components/common';
+import { Mail, Lock, User, ShieldCheck, ArrowRight, Stethoscope, Shield } from 'lucide-react';
 import { isValidEmail } from '../../../utils/validation';
 import './RegisterPage.css';
 
 export function RegisterPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { register } = useAuth();
   const [error, setError] = useState(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
-  const [selectedRole, setSelectedRole] = useState('patient');
+  const initialPortal = searchParams.get('portal');
+  const wasAdminAttempted = initialPortal === 'admin';
+  const [selectedRole, setSelectedRole] = useState(
+    initialPortal === 'caregiver' ? 'caregiver' : 'patient'
+  );
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -53,12 +58,18 @@ export function RegisterPage() {
     setIsAuthenticating(true);
     try {
       await register({
-        name: formData.name,
-        email: formData.email,
+        name: formData.name.trim(),
+        email: formData.email.trim(),
         password: formData.password,
         role: selectedRole,
       });
-      navigate('/profile');
+      if (selectedRole === 'caregiver') {
+        navigate('/caregiver/portal');
+      } else if (selectedRole === 'admin') {
+        navigate('/admin/portal');
+      } else {
+        navigate('/patient/portal');
+      }
     } catch (err) {
       console.error('Registration failed:', err);
       setError(err.message || 'Registration failed. Please try again.');
@@ -72,7 +83,7 @@ export function RegisterPage() {
       <div className="register-card-container">
         <div className="register-header">
           <div className="register-logo-box">
-            <Pill className="h-6 w-6" />
+            <PillSyncIcon className="h-6 w-6 text-white" />
           </div>
           <h1 className="register-title">Create your account</h1>
           <p className="register-subtitle">
@@ -84,6 +95,23 @@ export function RegisterPage() {
           </div>
         </div>
 
+        {wasAdminAttempted && (
+          <div className="mb-4 rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Shield className="h-4 w-4 text-amber-600 shrink-0" />
+              <span>
+                Admin Portal has <strong>Sign In only</strong>. Self-registration is restricted.
+              </span>
+            </div>
+            <Link
+              to="/login?portal=admin"
+              className="font-bold underline text-amber-800 hover:text-amber-950"
+            >
+              Sign In as Admin
+            </Link>
+          </div>
+        )}
+
         {error && (
           <Alert type="danger" message={error} onClose={() => setError(null)} className="mb-4" />
         )}
@@ -92,7 +120,10 @@ export function RegisterPage() {
           {/* Role Selection */}
           <div className="register-role-section">
             <span className="register-role-label">Choose Account Type</span>
-            <div className="register-role-grid">
+            <div
+              className="register-role-grid"
+              style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}
+            >
               <button
                 type="button"
                 onClick={() => setSelectedRole('patient')}
@@ -100,7 +131,7 @@ export function RegisterPage() {
               >
                 <User className="h-5 w-5 text-indigo-600" />
                 <span className="register-role-card-title">Patient</span>
-                <span className="register-role-card-desc">Doses & Logs</span>
+                <span className="register-role-card-desc">Personal Doses &amp; Logs</span>
               </button>
 
               <button
@@ -110,18 +141,21 @@ export function RegisterPage() {
               >
                 <Stethoscope className="h-5 w-5 text-indigo-600" />
                 <span className="register-role-card-title">Caregiver</span>
-                <span className="register-role-card-desc">Manage Patients</span>
+                <span className="register-role-card-desc">Manage Patient Cohorts</span>
               </button>
+            </div>
 
-              <button
-                type="button"
-                onClick={() => setSelectedRole('admin')}
-                className={`register-role-card ${selectedRole === 'admin' ? 'active' : ''}`}
+            <div className="mt-3.5 flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-xs text-slate-600">
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-teal-600 shrink-0" />
+                <span>Admin portal is restricted to Sign In only.</span>
+              </div>
+              <Link
+                to="/login?portal=admin"
+                className="font-semibold text-teal-700 underline hover:text-teal-900"
               >
-                <Shield className="h-5 w-5 text-indigo-600" />
-                <span className="register-role-card-title">Admin</span>
-                <span className="register-role-card-desc">Platform Oversight</span>
-              </button>
+                Admin Sign In &rarr;
+              </Link>
             </div>
           </div>
 

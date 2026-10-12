@@ -30,14 +30,31 @@ class TodayReminderListView(generics.ListAPIView):
     serializer_class = ReminderSerializer
 
     def get_queryset(self):
-        patient_id = self.request.query_params.get("patient_id")
+        from datetime import date as dt_date
+        from datetime import datetime, time
+
+        from django.db.models import Q
+
+        patient_id = (
+            self.request.query_params.get("patient_id")
+            if hasattr(self.request, "query_params")
+            else self.request.GET.get("patient_id")
+        )
         today = timezone.localdate()
+        sys_today = dt_date.today()
+        min_date = min(today, sys_today)
+        max_date = max(today, sys_today)
+
+        start_of_day = timezone.make_aware(datetime.combine(min_date, time.min))
+        end_of_day = timezone.make_aware(datetime.combine(max_date, time.max))
 
         queryset = Reminder.objects.select_related(
             "schedule",
             "schedule__medicine",
         ).filter(
-            dose_datetime__date=today,
+            Q(dose_datetime__date=today)
+            | Q(dose_datetime__date=sys_today)
+            | Q(dose_datetime__range=(start_of_day, end_of_day))
         )
 
         if patient_id:

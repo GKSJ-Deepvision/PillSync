@@ -37,9 +37,9 @@
 
 /* Color Variants */
 .badge-primary {
-  background-color: #eef2ff;
-  color: #4338ca;
-  border: 1px solid #c7d2fe;
+  background-color: #f0faf8;
+  color: #2d8275;
+  border: 1px solid #aee7da;
 }
 
 .badge-success {

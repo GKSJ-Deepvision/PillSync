@@ -11,12 +11,16 @@ def health_check(request):
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("auth/", include("apps.accounts.urls")),
+    path("api/auth/", include("apps.accounts.urls")),
     path("notifications/", include("apps.notifications.urls")),
     path("api/profiles/", include("apps.profiles.urls")),
     path("api/medications/", include("apps.medications.urls")),
     path("api/reminders/", include("apps.reminders.urls")),
     path("api/adherence/", include("apps.adherence.urls")),
     path("api/ocr/", include("apps.ocr.urls")),
+    path("api/prescriptions/", include("apps.prescriptions.urls")),
+    path("api/refills/", include("apps.refills.urls")),
+    path("api/analytics/", include("apps.analytics.urls")),
     path("api/health/", health_check, name="health-check"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(

@@ -6,3 +6,4 @@ export { Alert } from './Alert';
 export { Badge } from './Badge';
 export { Skeleton, CardSkeleton } from './Skeleton';
 export { EmptyState } from './EmptyState';
+export { PillSyncLogo, PillSyncIcon } from './PillSyncLogo';

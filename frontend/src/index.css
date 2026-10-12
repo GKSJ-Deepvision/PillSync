@@ -1,31 +1,50 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* ── Google Fonts: Inter ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@import 'tailwindcss';
+@config "../tailwind.config.js";
+
+html {
+  scroll-behavior: smooth;
+}
+
+*,
+::before,
+::after {
+  border-color: #e2e8f0;
+}
 
 @layer base {
   :root {
     --font-sans:
       'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
-    /* Healthcare SaaS Color Palette */
-    --color-bg: #f8fafc;
+    /* ── Executive Modern Health SaaS Palette (KORU Wellness Template) ── */
+    --color-bg: #f5faf8;
+    --color-bg-alt: #edf5f2;
     --color-surface: #ffffff;
-    --color-surface-soft: #f1f5f9;
-    --color-border: #e2e8f0;
-    --color-border-subtle: #f1f5f9;
+    --color-surface-soft: #f0faf8;
 
-    /* Brand Primary: Medical Indigo / Sky */
-    --color-primary-50: #eef2ff;
-    --color-primary-100: #e0e7ff;
-    --color-primary-500: #6366f1;
-    --color-primary-600: #4f46e5;
-    --color-primary-700: #4338ca;
+    /* Borders */
+    --color-border: #d6f3ed;
+    --color-border-subtle: #edf7f5;
+
+    /* Brand Primary — KORU Mint & Sage Wellness */
+    --color-primary-50: #f0faf8;
+    --color-primary-100: #d6f3ed;
+    --color-primary-200: #aee7da;
+    --color-primary-300: #7dcfc2;
+    --color-primary-400: #50b8a9;
+    --color-primary-500: #3a9e90;
+    --color-primary-600: #2d8275;
+    --color-primary-700: #22655b;
+    --color-primary-800: #1a4f47;
+    --color-primary-900: #123b35;
 
     /* Status Colors */
     --color-success-50: #f0fdf4;
-    --color-success-500: #22c55e;
-    --color-success-600: #16a34a;
-    --color-success-700: #15803d;
+    --color-success-500: #10b981;
+    --color-success-600: #059669;
 
     --color-warning-50: #fffbeb;
     --color-warning-500: #f59e0b;
@@ -35,9 +54,23 @@
     --color-danger-500: #ef4444;
     --color-danger-600: #dc2626;
 
+    /* Text */
     --color-text-primary: #0f172a;
     --color-text-secondary: #475569;
     --color-text-muted: #94a3b8;
+
+    /* Shadows & Floating Elevations */
+    --shadow-card: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+    --shadow-float: 0 20px 45px -10px rgba(15, 23, 42, 0.12), 0 8px 16px -4px rgba(0, 0, 0, 0.04);
+    --shadow-float-glow:
+      0 20px 45px -10px rgba(99, 102, 241, 0.35), 0 0 25px 0 rgba(6, 182, 212, 0.2);
+
+    /* Radius */
+    --radius-sm: 0.5rem;
+    --radius-md: 0.875rem;
+    --radius-lg: 1.25rem;
+    --radius-xl: 1.75rem;
+    --radius-pill: 9999px;
   }
 
   html {
@@ -53,7 +86,11 @@
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    background-color: var(--color-bg);
+    background:
+      radial-gradient(at 0% 0%, #eef2ff 0px, transparent 40%),
+      radial-gradient(at 100% 0%, #f0fdf4 0px, transparent 35%),
+      radial-gradient(at 50% 100%, #f8fafc 0px, transparent 50%), #f1f5f9;
+    background-attachment: fixed;
     overflow-x: hidden;
   }
 
@@ -63,22 +100,324 @@
     flex-direction: column;
   }
 
-  /* Standard custom scrollbar */
+  /* Minimal scrollbar — teal-toned */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
-
   ::-webkit-scrollbar-track {
     background: transparent;
   }
-
   ::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: #aee7da;
     border-radius: 9999px;
   }
-
   ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: #7dcfc2;
+  }
+
+  /* ── Global Anti-Caret & Cursor Management ── */
+  /* Completely prevent blinking text editing caret across non-input elements */
+  *:not(input):not(textarea):not([contenteditable='true']) {
+    caret-color: transparent !important;
+  }
+
+  /* Default arrow cursor across all standard elements instead of text I-beam */
+  html,
+  body,
+  #root,
+  div,
+  span,
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  section,
+  article,
+  main,
+  header,
+  footer,
+  nav,
+  aside,
+  table,
+  tr,
+  td,
+  th,
+  ul,
+  ol,
+  li,
+  dl,
+  dt,
+  dd {
+    cursor: default;
+  }
+
+  /* Headings, UI labels, buttons, navigation, and badges should not be selectable like an edit field */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .dashboard-greeting-title,
+  .dashboard-greeting-subtitle,
+  .sidebar-container,
+  .mobile-top-bar,
+  .mobile-nav-bar,
+  .badge,
+  [class*='badge'],
+  label:not([for]),
+  svg,
+  img {
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: default;
+  }
+
+  /* Genuine input text fields preserve text editing cursor and caret */
+  input:not([type='button']):not([type='submit']):not([type='reset']):not([type='checkbox']):not(
+      [type='radio']
+    ),
+  textarea,
+  [contenteditable='true'] {
+    cursor: text !important;
+    caret-color: var(--color-primary-600) !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+  }
+}
+
+/* ── Keyframes for Floating & Ambient Animations ── */
+@keyframes floatGentle {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes floatGentleAlt {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 15px rgba(58, 158, 144, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(125, 207, 194, 0.55);
+  }
+}
+
+@keyframes shimmerEffect {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ── Global Utility Tokens ── */
+@layer utilities {
+  /* Ultra-smooth Glassmorphism Card */
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-card);
+    border-radius: var(--radius-lg);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .glass-card:hover {
+    background: var(--glass-bg-hover);
+    box-shadow: var(--shadow-float);
+    transform: translateY(-4px);
+    border-color: rgba(125, 207, 194, 0.6);
+  }
+
+  /* Floating Card Variant */
+  .floating-card {
+    animation: floatGentle 6s ease-in-out infinite;
+    box-shadow: var(--shadow-float);
+  }
+
+  .floating-card-alt {
+    animation: floatGentleAlt 7s ease-in-out infinite;
+    box-shadow: var(--shadow-float);
+  }
+
+  /* Gradient Text */
+  .gradient-text-teal {
+    background: linear-gradient(135deg, #1a3a35 0%, #2d8275 40%, #3a9e90 75%, #7dcfc2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .gradient-text-vibrant {
+    background: linear-gradient(135deg, #22655b 0%, #3a9e90 50%, #50b8a9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .koru-card {
+    background: var(--color-surface);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .koru-card:hover {
+    box-shadow: var(--shadow-float);
+    transform: translateY(-3px);
+    border-color: var(--color-primary-300);
+  }
+
+  .koru-pill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.3rem 0.85rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    backdrop-filter: blur(8px);
+  }
+
+  .koru-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.85rem;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(135deg, #2d8275 0%, #3a9e90 60%, #50b8a9 100%);
+    color: #ffffff;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 8px 24px -4px rgba(45, 130, 117, 0.45);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .koru-btn-primary:hover {
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 14px 32px -6px rgba(45, 130, 117, 0.6);
+    background: linear-gradient(135deg, #22655b 0%, #2d8275 60%, #3a9e90 100%);
+  }
+
+  .koru-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.75rem;
+    border-radius: var(--radius-pill);
+    background: rgba(58, 158, 144, 0.08);
+    border: 1.5px solid var(--color-border);
+    color: var(--color-primary-600);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+
+  .koru-btn-ghost:hover {
+    background: rgba(58, 158, 144, 0.14);
+    border-color: var(--color-primary-300);
+    transform: translateY(-1px);
+  }
+
+  /* Progress bar */
+  .koru-progress-bar {
+    height: 0.375rem;
+    border-radius: 9999px;
+    background: var(--color-border);
+    overflow: hidden;
+  }
+
+  .koru-progress-fill {
+    height: 100%;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, var(--color-primary-400), var(--color-primary-300));
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Soft section heading */
+  .koru-section-label {
+    font-size: 0.6875rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-primary-500);
+  }
+
+  /* Check-in circle (inspired by KORU habit tracker) */
+  .koru-day-circle {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 2px solid var(--color-border);
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    transition: all 0.18s ease;
+  }
+
+  .koru-day-circle.done {
+    background: var(--color-primary-500);
+    border-color: var(--color-primary-500);
+    color: #fff;
+    box-shadow: 0 2px 8px -2px rgba(58, 158, 144, 0.4);
+  }
+
+  .koru-day-circle.today {
+    border-color: var(--color-primary-400);
+    color: var(--color-primary-600);
+    background: var(--color-primary-50);
+  }
+
+  /* Activity card (KORU exercise card style) */
+  .koru-activity-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1rem;
+    background: var(--color-surface);
+    border: 1.5px solid var(--color-border-subtle);
+    border-radius: var(--radius-md);
+    transition: all 0.18s ease;
+  }
+
+  .koru-activity-card:hover {
+    border-color: var(--color-primary-300);
+    background: var(--color-surface-soft);
+    transform: translateX(3px);
   }
 }
