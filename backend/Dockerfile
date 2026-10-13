@@ -17,10 +17,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY backend/requirements/ requirements/
+COPY requirements/ requirements/
 RUN pip install --upgrade pip && pip install -r requirements/base.txt
 
-COPY backend/ .
+COPY . .
 
 RUN adduser --disabled-password --gecos "" appuser && chown -R appuser:appuser /app
 USER appuser
