@@ -29,6 +29,7 @@ EXPOSE 8000
 
 # Apply schema changes before serving so new reminder relationships are available
 # when the database volume is reused across application updates.
-CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"]
+# CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000}"]
 # FastAPI alternative:
 # CMD ["uvicorn", "config.main:app", "--host", "0.0.0.0", "--port", "8000"]
