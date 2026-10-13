@@ -733,6 +733,10 @@ class OCRUploadView(APIView):
                 )
 
             except Exception:
+                logger.exception(
+                    "OCR processing failed for record %s",
+                    record.pk,
+                )
                 record.status = OCRRecord.Status.FAILED
                 record.save(update_fields=["status"])
 
