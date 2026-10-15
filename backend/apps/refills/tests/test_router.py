@@ -26,6 +26,22 @@ def test_health_reports_model_status():
     assert "version" in body
 
 
+def test_cors_allows_deployed_frontend_origin():
+    response = client.options(
+        "/api/health",
+        headers={
+            "Origin": "https://pillsync-web-optm.onrender.com",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+
+    assert response.status_code == 200
+    assert (
+        response.headers["access-control-allow-origin"]
+        == "https://pillsync-web-optm.onrender.com"
+    )
+
+
 def test_predict_matches_spec_worked_example():
     payload = {
         "medication": {
