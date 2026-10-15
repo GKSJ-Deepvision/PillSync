@@ -96,3 +96,14 @@ def test_build_features_returns_expected_length_and_prescribed_dose():
     bundle = build_features({"stock_quantity": 40}, schedules, [], today=date(2026, 1, 1))
     assert bundle.prescribed_daily_dose == 2
     assert len(bundle.values) == len(bundle.names)
+
+
+def test_build_features_accepts_timezone_aware_supabase_timestamps():
+    logs = [
+        {"scheduled_for": "2026-01-08T08:00:00+05:30", "status": "taken"},
+        {"scheduled_for": "2026-01-09T08:00:00Z", "status": "missed"},
+    ]
+
+    bundle = build_features({"stock_quantity": 10}, [], logs, today=date(2026, 1, 10))
+
+    assert bundle.as_dict()["adherence_rate_7d"] == 0.5

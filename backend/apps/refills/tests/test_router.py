@@ -62,6 +62,37 @@ def test_predict_matches_spec_worked_example():
     assert body["stock_status"] == "ok"
 
 
+def test_predict_batch_accepts_timezone_aware_dose_history():
+    payload = {
+        "as_of": "2026-01-10",
+        "cases": [
+            {
+                "medication": {"id": "m1", "stock_quantity": 10},
+                "schedules": [
+                    {"dose_quantity": 1, "days_of_week": list(range(7)), "is_active": True}
+                ],
+                "dose_logs": [
+                    {
+                        "scheduled_for": "2026-01-08T08:00:00+05:30",
+                        "status": "taken",
+                        "dose_quantity": 1,
+                    },
+                    {
+                        "scheduled_for": "2026-01-09T08:00:00Z",
+                        "status": "missed",
+                        "dose_quantity": 1,
+                    },
+                ],
+            }
+        ],
+    }
+
+    response = client.post("/api/v1/refills/predict/batch", json=payload)
+
+    assert response.status_code == 200
+    assert response.json()["summary"]["total"] == 1
+
+
 def test_predict_batch_sorts_by_urgency_and_summarizes():
     payload = {
         "as_of": "2026-01-01",

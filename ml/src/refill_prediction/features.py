@@ -14,7 +14,7 @@ payload it receives straight through without any ORM in between.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from statistics import pstdev
 from typing import Any
 from collections.abc import Iterable
@@ -67,10 +67,14 @@ def daily_dose_from_schedules(schedules: Iterable[dict[str, Any]]) -> float:
 
 
 def _parse_ts(value: Any) -> datetime:
-    if isinstance(value, datetime):
-        return value
-    text = str(value).replace("Z", "+00:00")
-    return datetime.fromisoformat(text)
+    parsed = (
+        value
+        if isinstance(value, datetime)
+        else datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    )
+    if parsed.utcoffset() is not None:
+        return parsed.astimezone(UTC).replace(tzinfo=None)
+    return parsed
 
 
 def _resolved(logs: list[dict[str, Any]]) -> list[dict[str, Any]]:
