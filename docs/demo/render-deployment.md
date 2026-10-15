@@ -24,6 +24,11 @@ The services below were deployed on Render's Free plan.
    - `VITE_SUPABASE_URL` to the Supabase project URL.
    - `VITE_SUPABASE_ANON_KEY` to the Supabase public anon key. Never use a
      Supabase service-role key in a frontend variable.
+   - `VITE_CLOUDINARY_CLOUD_NAME`, `VITE_CLOUDINARY_UPLOAD_PRESET`, and
+     `VITE_CLOUDINARY_FOLDER` for prescription-image uploads.
+   - Do not set `VITE_GROQ_API_KEY`; Vite variables are public browser code.
+     Store `GROQ_API_KEY` as a secret on the Supabase `diet-ai` Edge Function
+     instead.
 5. In Supabase, add `https://pillsync-web-optm.onrender.com` to the project's
    authentication redirect URL allowlist. Verify that the database schema and
    row-level security policies required by the frontend are applied.

@@ -30,5 +30,11 @@ services:
         sync: false
       - key: VITE_SUPABASE_ANON_KEY
         sync: false
+      - key: VITE_CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: VITE_CLOUDINARY_UPLOAD_PRESET
+        sync: false
+      - key: VITE_CLOUDINARY_FOLDER
+        sync: false
       - key: VITE_APP_NAME
         value: PillSync
