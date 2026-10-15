@@ -1,5 +1,6 @@
 from datetime import date
 
+from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -29,6 +30,28 @@ class Medication(models.Model):
     manufacturer = models.CharField(max_length=255, blank=True, null=True)
     active_ingredient = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # Legacy char fields (kept for backwards compatibility)
+    assigned_patient_id = models.CharField(max_length=100, blank=True, null=True)
+    assigned_patient_name = models.CharField(max_length=255, blank=True, null=True)
+
+    # Proper FK-based patient/caregiver ownership
+    patient = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="medications",
+        help_text="The patient this medication is prescribed for.",
+    )
+    caregiver = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="managed_medications",
+        help_text="The caregiver who added/manages this medication.",
+    )
 
     def __str__(self):
         return f"{self.name} ({self.dosage})"

@@ -1,6 +1,12 @@
 const RAW_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
 const API_BASE_URL = RAW_API_BASE_URL.replace(/\/+$/, "");
 
+function getAuthHeaders() {
+  const token = localStorage.getItem("pillsync_token");
+  return token
+    ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+    : { "Content-Type": "application/json" };
+}
 
 export async function loginUser({ email, password }) {
   const response = await fetch(`${API_BASE_URL}/accounts/login/`, {
@@ -58,12 +64,70 @@ export async function fetchUserProfile(token) {
   return await response.json();
 }
 
-/* Medications API */
-export async function fetchMedications() {
-  const response = await fetch(`${API_BASE_URL}/medications/`);
-  if (!response.ok) throw new Error("Failed to load medications.");
+/* ── User listing (for dropdowns) ── */
+export async function fetchAllUsers(roleFilter = "") {
+  const url = roleFilter
+    ? `${API_BASE_URL}/accounts/users/?role=${roleFilter}`
+    : `${API_BASE_URL}/accounts/users/`;
+  const response = await fetch(url, { headers: getAuthHeaders() });
+  if (!response.ok) throw new Error("Failed to load users.");
+  return await response.json();
+}
+
+/* ── Caregiver–Patient Assignment API ── */
+export async function fetchAssignments({ caregiverId, patientId } = {}) {
+  const params = new URLSearchParams();
+  if (caregiverId) params.set("caregiver_id", caregiverId);
+  if (patientId) params.set("patient_id", patientId);
+  const url = `${API_BASE_URL}/accounts/assignments/${params.toString() ? "?" + params.toString() : ""}`;
+  const response = await fetch(url, { headers: getAuthHeaders() });
+  if (!response.ok) throw new Error("Failed to load assignments.");
+  return await response.json();
+}
+
+export async function createAssignment({ caregiverId, patientId, note = "" }) {
+  const response = await fetch(`${API_BASE_URL}/accounts/assignments/`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ caregiver_id: caregiverId, patient_id: patientId, note }),
+  });
   const data = await response.json();
-  return data.map((med) => ({
+  if (!response.ok && response.status !== 200) {
+    throw new Error(data.detail || "Failed to create assignment.");
+  }
+  return data;
+}
+
+export async function deleteAssignment(assignmentId) {
+  const response = await fetch(`${API_BASE_URL}/accounts/assignments/${assignmentId}/`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error("Failed to remove assignment.");
+  return true;
+}
+
+export async function fetchCaregiverPatients(caregiverId) {
+  const response = await fetch(
+    `${API_BASE_URL}/accounts/caregivers/${caregiverId}/patients/`,
+    { headers: getAuthHeaders() }
+  );
+  if (!response.ok) throw new Error("Failed to load caregiver's patients.");
+  return await response.json();
+}
+
+export async function fetchPatientCaregivers(patientId) {
+  const response = await fetch(
+    `${API_BASE_URL}/accounts/patients/${patientId}/caregivers/`,
+    { headers: getAuthHeaders() }
+  );
+  if (!response.ok) throw new Error("Failed to load patient's caregivers.");
+  return await response.json();
+}
+
+/* Medications API */
+function mapMed(med) {
+  return {
     id: med.id,
     name: med.name,
     dosage: med.dosage,
@@ -81,7 +145,41 @@ export async function fetchMedications() {
     activeIngredient: med.active_ingredient,
     manufacturer: med.manufacturer,
     fdaNdc: med.fda_ndc,
-  }));
+    // Ownership fields
+    patientId: med.patient_id ?? null,
+    patientName: med.patient_name ?? null,
+    caregiverId: med.caregiver_id ?? null,
+    caregiverName: med.caregiver_name ?? null,
+    // Legacy
+    assignedPatientId: med.assigned_patient_id ?? null,
+    assignedPatientName: med.assigned_patient_name ?? null,
+  };
+}
+
+export async function fetchMedications() {
+  const response = await fetch(`${API_BASE_URL}/medications/`, {
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error("Failed to load medications.");
+  const data = await response.json();
+  return data.map(mapMed);
+}
+
+/**
+ * Fetch medications for a specific patient (used by caregivers in patient detail view).
+ */
+export async function fetchPatientMedications(patientId) {
+  // The backend filters by patient FK; we also request only this patient's meds
+  const response = await fetch(
+    `${API_BASE_URL}/medications/?patient_id=${patientId}`,
+    { headers: getAuthHeaders() }
+  );
+  if (!response.ok) throw new Error("Failed to load patient medications.");
+  const data = await response.json();
+  // Filter client-side as an extra safety layer
+  return data.map(mapMed).filter(
+    (m) => String(m.patientId) === String(patientId)
+  );
 }
 
 export async function addMedication(medData) {
@@ -101,35 +199,25 @@ export async function addMedication(medData) {
     active_ingredient: medData.activeIngredient || "",
     manufacturer: medData.manufacturer || "",
     fda_ndc: medData.fdaNdc || "",
+    // Ownership
+    patient_id: medData.patientId ?? null,
+    caregiver_id: medData.caregiverId ?? null,
+    // Legacy
+    assigned_patient_id: medData.assignedPatientId
+      ? String(medData.assignedPatientId)
+      : null,
+    assigned_patient_name: medData.assignedPatientName || null,
   };
 
   const response = await fetch(`${API_BASE_URL}/medications/`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders(),
     body: JSON.stringify(payload),
   });
 
   if (!response.ok) throw new Error("Failed to save medication.");
   const med = await response.json();
-  return {
-    id: med.id,
-    name: med.name,
-    dosage: med.dosage,
-    stock: med.stock,
-    totalStock: med.total_stock,
-    frequency: med.frequency,
-    diseaseCategory: med.disease_category,
-    timesOfDay: med.times_of_day || [],
-    foodTiming: med.food_timing || "after_food",
-    startDate: med.start_date || "",
-    endDate: med.end_date || "",
-    timingDetails: med.timing_details || {},
-    stockDays: med.stock_days,
-    refillThreshold: med.refill_threshold,
-    activeIngredient: med.active_ingredient,
-    manufacturer: med.manufacturer,
-    fdaNdc: med.fda_ndc,
-  };
+  return mapMed(med);
 }
 
 export async function takeDoseApi(medId) {
@@ -137,31 +225,18 @@ export async function takeDoseApi(medId) {
     `${API_BASE_URL}/medications/${medId}/take-dose/`,
     {
       method: "POST",
+      headers: getAuthHeaders(),
     },
   );
   if (!response.ok) throw new Error("Failed to record dose intake.");
   const med = await response.json();
-  return {
-    id: med.id,
-    name: med.name,
-    dosage: med.dosage,
-    stock: med.stock,
-    totalStock: med.total_stock,
-    frequency: med.frequency,
-    diseaseCategory: med.disease_category,
-    timesOfDay: med.times_of_day || [],
-    foodTiming: med.food_timing || "after_food",
-    startDate: med.start_date || "",
-    endDate: med.end_date || "",
-    timingDetails: med.timing_details || {},
-    stockDays: med.stock_days,
-    refillThreshold: med.refill_threshold,
-  };
+  return mapMed(med);
 }
 
 export async function deleteMedicationApi(medId) {
   const response = await fetch(`${API_BASE_URL}/medications/${medId}/`, {
     method: "DELETE",
+    headers: getAuthHeaders(),
   });
   if (!response.ok) throw new Error("Failed to delete medication.");
   return true;
@@ -171,6 +246,7 @@ export async function searchFdaDrugs(query) {
   if (!query) return [];
   const response = await fetch(
     `${API_BASE_URL}/medications/fda-search/?q=${encodeURIComponent(query)}`,
+    { headers: getAuthHeaders() }
   );
   if (!response.ok) return [];
   const data = await response.json();
@@ -179,7 +255,9 @@ export async function searchFdaDrugs(query) {
 
 /* Reminders API */
 export async function fetchReminders() {
-  const response = await fetch(`${API_BASE_URL}/reminders/`);
+  const response = await fetch(`${API_BASE_URL}/reminders/`, {
+    headers: getAuthHeaders(),
+  });
   if (!response.ok) throw new Error("Failed to load reminders.");
   const data = await response.json();
   return data.map((r) => ({
@@ -200,7 +278,7 @@ export async function updateReminderStatusApi(reminderId, status) {
     `${API_BASE_URL}/reminders/${reminderId}/status/`,
     {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ status }),
     },
   );
@@ -221,7 +299,9 @@ export async function updateReminderStatusApi(reminderId, status) {
 
 /* Analytics API */
 export async function fetchAnalyticsOverview() {
-  const response = await fetch(`${API_BASE_URL}/analytics/overview/`);
+  const response = await fetch(`${API_BASE_URL}/analytics/overview/`, {
+    headers: getAuthHeaders(),
+  });
   if (!response.ok) throw new Error("Failed to load analytics.");
   return await response.json();
 }
@@ -232,23 +312,28 @@ export async function scanPrescriptionOcrApi(formDataOrText) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
 
+  const headers = getAuthHeaders();
+
   if (typeof formDataOrText === "string") {
     options = {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { ...headers },
       body: JSON.stringify({ raw_text: formDataOrText }),
       signal: controller.signal,
     };
   } else if (formDataOrText instanceof FormData) {
+    // Don't set Content-Type for FormData — browser sets it with boundary
+    const { "Content-Type": _ct, ...headersWithoutCt } = headers;
     options = {
       method: "POST",
+      headers: headersWithoutCt,
       body: formDataOrText,
       signal: controller.signal,
     };
   } else {
     options = {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { ...headers },
       body: JSON.stringify(formDataOrText),
       signal: controller.signal,
     };
@@ -268,7 +353,7 @@ export async function scanPrescriptionOcrApi(formDataOrText) {
 export async function confirmOcrMedicationApi(confirmData) {
   const response = await fetch(`${API_BASE_URL}/ocr/confirm/`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders(),
     body: JSON.stringify(confirmData),
   });
   if (!response.ok) throw new Error("Failed to confirm OCR medication.");
@@ -277,7 +362,9 @@ export async function confirmOcrMedicationApi(confirmData) {
 
 /* Refill Prediction API */
 export async function fetchRefillPredictionsApi() {
-  const response = await fetch(`${API_BASE_URL}/refills/predictions/`);
+  const response = await fetch(`${API_BASE_URL}/refills/predictions/`, {
+    headers: getAuthHeaders(),
+  });
   if (!response.ok) throw new Error("Failed to fetch refill predictions.");
   return await response.json();
 }
@@ -285,7 +372,7 @@ export async function fetchRefillPredictionsApi() {
 export async function updateStockApi(medicationId, newStock) {
   const response = await fetch(`${API_BASE_URL}/refills/update-stock/`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders(),
     body: JSON.stringify({ medication_id: medicationId, new_stock: newStock }),
   });
   if (!response.ok) throw new Error("Failed to update stock.");
@@ -299,7 +386,7 @@ export async function requestRefillApi(
 ) {
   const response = await fetch(`${API_BASE_URL}/refills/request-refill/`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders(),
     body: JSON.stringify({ medication_id: medicationId, quantity, notes }),
   });
   if (!response.ok) throw new Error("Failed to place refill order request.");
@@ -308,7 +395,9 @@ export async function requestRefillApi(
 
 /* Adherence Tracking API */
 export async function fetchAdherenceMetricsApi() {
-  const response = await fetch(`${API_BASE_URL}/adherence/metrics/`);
+  const response = await fetch(`${API_BASE_URL}/adherence/metrics/`, {
+    headers: getAuthHeaders(),
+  });
   if (!response.ok) throw new Error("Failed to fetch adherence metrics.");
   return await response.json();
 }
@@ -323,7 +412,7 @@ export async function logAdherenceDoseApi({
 }) {
   const response = await fetch(`${API_BASE_URL}/adherence/log/`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders(),
     body: JSON.stringify({
       medication_id: medicationId,
       reminder_id: reminderId,
@@ -339,7 +428,9 @@ export async function logAdherenceDoseApi({
 
 /* Notifications API */
 export async function fetchNotificationsApi() {
-  const response = await fetch(`${API_BASE_URL}/notifications/`);
+  const response = await fetch(`${API_BASE_URL}/notifications/`, {
+    headers: getAuthHeaders(),
+  });
   if (!response.ok) throw new Error("Failed to fetch notifications.");
   return await response.json();
 }
@@ -349,6 +440,7 @@ export async function markNotificationReadApi(notificationId) {
     `${API_BASE_URL}/notifications/${notificationId}/read/`,
     {
       method: "POST",
+      headers: getAuthHeaders(),
     },
   );
   if (!response.ok) throw new Error("Failed to mark notification as read.");

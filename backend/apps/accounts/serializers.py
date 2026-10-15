@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
+from .models import CaregiverPatientAssignment
+
 
 class UserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
@@ -57,3 +59,38 @@ class RegisterSerializer(serializers.Serializer):
 
         user._role = role
         return user
+
+
+class AssignmentSerializer(serializers.ModelSerializer):
+    caregiver_name = serializers.SerializerMethodField()
+    patient_name = serializers.SerializerMethodField()
+    caregiver_email = serializers.SerializerMethodField()
+    patient_email = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CaregiverPatientAssignment
+        fields = [
+            "id",
+            "caregiver",
+            "caregiver_name",
+            "caregiver_email",
+            "patient",
+            "patient_name",
+            "patient_email",
+            "assigned_at",
+            "note",
+        ]
+
+    def get_caregiver_name(self, obj):
+        name = obj.caregiver.get_full_name()
+        return name if name.strip() else obj.caregiver.username
+
+    def get_patient_name(self, obj):
+        name = obj.patient.get_full_name()
+        return name if name.strip() else obj.patient.username
+
+    def get_caregiver_email(self, obj):
+        return obj.caregiver.email
+
+    def get_patient_email(self, obj):
+        return obj.patient.email

@@ -8,7 +8,7 @@ import {
   takeDoseApi,
   deleteMedicationApi,
 } from "../services/api";
-import { Plus, Search, Filter, RefreshCw } from "lucide-react";
+import { Plus, Search, Filter, RefreshCw, ShieldAlert, User } from "lucide-react";
 
 export default function MedicationsPage() {
   const auth = useAuth() || {};
@@ -27,11 +27,14 @@ export default function MedicationsPage() {
       : viewMode || user?.role || "patient";
 
   const isPatient = activeRole === "patient";
+  const isCaregiver = activeRole === "caregiver";
 
   const loadMeds = async () => {
     setLoading(true);
     setError(null);
     try {
+      // fetchMedications sends auth token → backend returns only
+      // the medications the logged-in user is authorized to see.
       const data = await fetchMedications();
       setMedicines(data);
     } catch (err) {
@@ -44,7 +47,7 @@ export default function MedicationsPage() {
 
   useEffect(() => {
     loadMeds();
-  }, []);
+  }, [user?.id, activeRole]); // Reload when user or view-mode changes
 
   const handleTakeDose = async (id) => {
     try {
@@ -56,7 +59,7 @@ export default function MedicationsPage() {
   };
 
   const handleDeleteMedicine = async (id) => {
-    if (isPatient) return;
+    if (isPatient) return; // Patients cannot delete
     try {
       await deleteMedicationApi(id);
       setMedicines((prev) => prev.filter((m) => m.id !== id));
@@ -68,11 +71,15 @@ export default function MedicationsPage() {
 
   const handleAddMedicine = async (newMed) => {
     try {
+      // Attach the current patient's ID if we're in patient view
+      if (isPatient && user?.id) {
+        newMed.patientId = user.id;
+      }
       const saved = await addMedication(newMed);
       setMedicines((prev) => [saved, ...prev]);
     } catch (err) {
       console.error("Failed to save medicine", err);
-      alert("Failed to save medicine.");
+      alert(err.message || "Failed to save medicine.");
     }
   };
 
@@ -114,24 +121,39 @@ export default function MedicationsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">
-            Assigned Medications & Schedule
+            {isPatient ? "My Medications" : "Patient Medications"}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             {isPatient
-              ? "View your assigned prescriptions, dosages, timing, and active inventory."
-              : "Manage patient prescription schedules, disease categories, and inventory."}
+              ? "Your assigned prescriptions, dosages, timing, and active inventory."
+              : "Manage prescription schedules, disease categories, and inventory for assigned patients."}
           </p>
         </div>
 
-        {!isPatient && (
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="px-5 py-2.5 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-600/20 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            Add New Medicine
-          </button>
-        )}
+        {/* Role badge */}
+        <div className="flex items-center gap-3">
+          {isPatient && (
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 text-xs font-semibold border border-sky-200 dark:border-sky-800">
+              <User className="w-3.5 h-3.5" />
+              My Medicines Only
+            </span>
+          )}
+          {isCaregiver && (
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-50 dark:bg-violet-950 text-violet-700 dark:text-violet-300 text-xs font-semibold border border-violet-200 dark:border-violet-800">
+              <ShieldAlert className="w-3.5 h-3.5" />
+              Caregiver View
+            </span>
+          )}
+          {!isPatient && (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="px-5 py-2.5 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-600/20 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              Add New Medicine
+            </button>
+          )}
+        </div>
       </div>
 
       {error && (
@@ -140,6 +162,17 @@ export default function MedicationsPage() {
           <button onClick={loadMeds} className="underline font-bold cursor-pointer">
             Try again
           </button>
+        </div>
+      )}
+
+      {/* Patient privacy notice */}
+      {isPatient && (
+        <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-medium flex items-center gap-2">
+          <ShieldAlert className="w-4 h-4 shrink-0" />
+          <span>
+            <strong>Privacy Protected:</strong> You can only see the medications
+            assigned to you. Contact your caregiver to add or change prescriptions.
+          </span>
         </div>
       )}
 

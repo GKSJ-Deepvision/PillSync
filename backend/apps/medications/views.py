@@ -1,23 +1,112 @@
 import requests
+from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Medication
 from .serializers import MedicationSerializer
 
 
+def _get_user_role(user):
+    """Determine the role of a user (admin, caregiver, patient)."""
+    if user.is_superuser or user.is_staff:
+        return "admin"
+    email = (user.email or user.username or "").lower()
+    if "caregiver" in email or "doctor" in email:
+        return "caregiver"
+    return "patient"
+
+
+def _get_queryset_for_user(user):
+    """
+    Return the appropriate Medication queryset based on the user's role.
+
+    - Admin: sees ALL medications.
+    - Caregiver: sees medications for their assigned patients OR medications
+      they directly added (caregiver FK).
+    - Patient: sees ONLY medications assigned to them (patient FK or
+      legacy assigned_patient_id matching their user.id as string).
+    - Unauthenticated: falls back to all (dev/demo mode).
+    """
+    if not user or not user.is_authenticated:
+        # Dev/demo fallback — return all
+        return Medication.objects.all().order_by("-id")
+
+    role = _get_user_role(user)
+
+    if role == "admin":
+        return Medication.objects.all().order_by("-id")
+
+    if role == "caregiver":
+        # Medications where this user is the caregiver, OR
+        # medications for patients assigned to this caregiver
+        from apps.accounts.models import CaregiverPatientAssignment
+
+        assigned_patient_ids = CaregiverPatientAssignment.objects.filter(
+            caregiver=user
+        ).values_list("patient_id", flat=True)
+
+        return Medication.objects.filter(
+            patient_id__in=list(assigned_patient_ids)
+        ).union(
+            Medication.objects.filter(caregiver=user)
+        ).order_by()
+
+    # Patient role
+    return Medication.objects.filter(patient=user).order_by("-id")
+
+
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def medication_list_create(request):
+    """
+    GET: List medications filtered by the requesting user's role.
+    POST: Create a new medication. Caregivers can specify a patient;
+          patients can only add for themselves.
+    """
     if request.method == "GET":
-        meds = Medication.objects.all().order_by("-id")
+        meds = _get_queryset_for_user(request.user)
+        # Ensure consistent ordering for union querysets
+        try:
+            meds = meds.order_by("-id")
+        except Exception:
+            pass
         serializer = MedicationSerializer(meds, many=True)
         return Response(serializer.data)
 
     elif request.method == "POST":
-        serializer = MedicationSerializer(data=request.data)
+        user = request.user
+        role = _get_user_role(user) if user and user.is_authenticated else "anonymous"
+
+        data = request.data.copy()
+
+        # Resolve patient assignment
+        if role == "patient":
+            # Patients always add for themselves
+            data["patient_id"] = user.id
+            data["caregiver_id"] = None
+        elif role == "caregiver":
+            # Caregivers specify a patient_id; default caregiver = self
+            if not data.get("caregiver_id"):
+                data["caregiver_id"] = user.id
+            # Validate that the specified patient is actually assigned to this caregiver
+            specified_patient_id = data.get("patient_id")
+            if specified_patient_id:
+                from apps.accounts.models import CaregiverPatientAssignment
+
+                is_assigned = CaregiverPatientAssignment.objects.filter(
+                    caregiver=user, patient_id=specified_patient_id
+                ).exists()
+                if not is_assigned:
+                    return Response(
+                        {"detail": "You can only add medications for your assigned patients."},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+        # Admin or anonymous: no restriction
+
+        serializer = MedicationSerializer(data=data)
         if serializer.is_valid():
             med = serializer.save()
             med.update_stock_days()
@@ -63,15 +152,54 @@ def sync_reminders_for_medication(med):
 @api_view(["GET", "PUT", "DELETE"])
 @permission_classes([AllowAny])
 def medication_detail(request, pk):
+    """
+    GET / PUT / DELETE a single medication.
+    Access control:
+      - Patients can only GET their own meds; cannot PUT/DELETE.
+      - Caregivers can GET/PUT/DELETE meds for their assigned patients.
+      - Admins have full access.
+    """
     try:
         med = Medication.objects.get(pk=pk)
     except Medication.DoesNotExist:
         return Response({"detail": "Medication not found."}, status=status.HTTP_404_NOT_FOUND)
 
+    user = request.user
+    role = _get_user_role(user) if user and user.is_authenticated else "anonymous"
+
+    # Access check
+    if user and user.is_authenticated and role == "patient":
+        if med.patient_id != user.id:
+            return Response(
+                {"detail": "You do not have permission to access this medication."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+    if user and user.is_authenticated and role == "caregiver":
+        from apps.accounts.models import CaregiverPatientAssignment
+
+        patient_ids = list(
+            CaregiverPatientAssignment.objects.filter(caregiver=user).values_list(
+                "patient_id", flat=True
+            )
+        )
+        if med.patient_id not in patient_ids and med.caregiver_id != user.id:
+            return Response(
+                {"detail": "You do not have permission to access this medication."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
     if request.method == "GET":
         return Response(MedicationSerializer(med).data)
 
-    elif request.method == "PUT":
+    # Patients cannot modify medications
+    if role == "patient":
+        return Response(
+            {"detail": "Patients cannot modify medications."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    if request.method == "PUT":
         serializer = MedicationSerializer(med, data=request.data, partial=True)
         if serializer.is_valid():
             updated_med = serializer.save()
@@ -94,6 +222,16 @@ def take_dose(request, pk):
         med = Medication.objects.get(pk=pk)
     except Medication.DoesNotExist:
         return Response({"detail": "Medication not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Patients can only log doses for their own meds
+    user = request.user
+    if user and user.is_authenticated:
+        role = _get_user_role(user)
+        if role == "patient" and med.patient_id != user.id:
+            return Response(
+                {"detail": "You can only log doses for your own medications."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
     med_data = MedicationSerializer(med).data
     med_data["status"] = "taken"

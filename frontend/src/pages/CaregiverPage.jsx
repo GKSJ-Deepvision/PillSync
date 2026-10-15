@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   fetchAnalyticsOverview,
@@ -6,7 +6,12 @@ import {
   addMedication,
   takeDoseApi,
   deleteMedicationApi,
+  fetchAssignments,
+  createAssignment,
+  deleteAssignment,
+  fetchAllUsers,
 } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 import Modal from "../components/common/Modal";
 import MedicineCard from "../components/medications/MedicineCard";
 import AddMedicineModal from "../components/medications/AddMedicineModal";
@@ -30,6 +35,9 @@ import {
   Mail,
   Phone,
   ShieldCheck,
+  Link2,
+  Unlink,
+  ShieldAlert,
 } from "lucide-react";
 
 const INITIAL_PATIENTS = [
@@ -168,6 +176,8 @@ const INITIAL_CAREGIVERS = [
 
 export default function CaregiverPage() {
   const navigate = useNavigate();
+  const auth = useAuth() || {};
+  const currentUser = auth.user;
   const [loading, setLoading] = useState(true);
 
   // Modals state
@@ -183,6 +193,13 @@ export default function CaregiverPage() {
   const [search, setSearch] = useState("");
   const [selectedDisease, setSelectedDisease] = useState("All");
   const [reportMsg, setReportMsg] = useState(null);
+
+  // Backend assignment state
+  const [assignments, setAssignments] = useState([]);
+  const [allPatientUsers, setAllPatientUsers] = useState([]);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [assignForm, setAssignForm] = useState({ caregiverId: "", patientId: "", note: "" });
+  const [assignLoading, setAssignLoading] = useState(false);
 
   // Notifications Feed
   const [notifications] = useState([
@@ -274,6 +291,15 @@ export default function CaregiverPage() {
     alertRefill: true,
   });
 
+  const loadAssignments = useCallback(async () => {
+    try {
+      const data = await fetchAssignments();
+      setAssignments(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Failed to load assignments", err);
+    }
+  }, []);
+
   useEffect(() => {
     async function load() {
       setLoading(true);
@@ -290,7 +316,13 @@ export default function CaregiverPage() {
       }
     }
     load();
-  }, []);
+    loadAssignments();
+
+    // Load all patient users for the assignment dropdown
+    fetchAllUsers("patient")
+      .then((users) => setAllPatientUsers(Array.isArray(users) ? users : []))
+      .catch((e) => console.warn("Could not fetch patient users:", e));
+  }, [loadAssignments]);
 
   const handleAddPatient = (e) => {
     e.preventDefault();
@@ -380,13 +412,41 @@ export default function CaregiverPage() {
 
   const handleAddMedicine = async (newMed) => {
     try {
-      const saved = await addMedication(newMed);
+      // Find the real DB user id for the selected patient
+      // newMed.assignedPatientId might be the local roster ID ("p1", "p2"...)
+      // or an actual DB user ID from the assignments table.
+      // We check the backend assignments first.
+      let dbPatientUserId = null;
+      if (newMed.assignedPatientId) {
+        // Try to find in real assignments (these have integer DB ids)
+        const matchedAssignment = assignments.find(
+          (a) =>
+            String(a.patient) === String(newMed.assignedPatientId) ||
+            String(a.patient_name) === String(newMed.assignedPatientId)
+        );
+        if (matchedAssignment) {
+          dbPatientUserId = matchedAssignment.patient;
+        } else {
+          // Fallback: try direct integer parse (if already a DB id)
+          const parsed = parseInt(newMed.assignedPatientId, 10);
+          if (!isNaN(parsed)) dbPatientUserId = parsed;
+        }
+      }
+
+      const enrichedMed = {
+        ...newMed,
+        patientId: dbPatientUserId,
+        caregiverId: currentUser?.id ?? null,
+      };
+
+      const saved = await addMedication(enrichedMed);
       setMedicines((prev) => [saved, ...prev]);
 
+      // Also update the local roster display
       if (newMed.assignedPatientId) {
         setPatientsList((prev) =>
           prev.map((p) => {
-            if (p.id === newMed.assignedPatientId) {
+            if (String(p.id) === String(newMed.assignedPatientId)) {
               const newPatientMed = {
                 name: newMed.name,
                 dosage: newMed.dosage,
@@ -408,9 +468,45 @@ export default function CaregiverPage() {
           }),
         );
       }
+      setReportMsg(`Medicine "${newMed.name}" added successfully for patient!`);
+      setTimeout(() => setReportMsg(null), 4000);
     } catch (err) {
       console.error("Failed to add medicine for patient:", err);
-      alert("Failed to save medicine.");
+      alert(err.message || "Failed to save medicine.");
+    }
+  };
+
+  const handleCreateAssignment = async (e) => {
+    e.preventDefault();
+    if (!assignForm.caregiverId || !assignForm.patientId) return;
+    setAssignLoading(true);
+    try {
+      await createAssignment({
+        caregiverId: assignForm.caregiverId,
+        patientId: assignForm.patientId,
+        note: assignForm.note,
+      });
+      setReportMsg("Patient successfully assigned to caregiver!");
+      setTimeout(() => setReportMsg(null), 4000);
+      setAssignForm({ caregiverId: "", patientId: "", note: "" });
+      setIsAssignModalOpen(false);
+      loadAssignments();
+    } catch (err) {
+      alert(err.message || "Failed to create assignment.");
+    } finally {
+      setAssignLoading(false);
+    }
+  };
+
+  const handleRemoveAssignment = async (assignmentId, patientName) => {
+    if (!window.confirm(`Remove assignment for ${patientName}?`)) return;
+    try {
+      await deleteAssignment(assignmentId);
+      setReportMsg(`Assignment for "${patientName}" removed.`);
+      setTimeout(() => setReportMsg(null), 4000);
+      loadAssignments();
+    } catch (err) {
+      alert(err.message || "Failed to remove assignment.");
     }
   };
 
@@ -895,6 +991,80 @@ export default function CaregiverPage() {
                         className="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold text-xs hover:bg-indigo-100 transition-colors border border-indigo-200 dark:border-indigo-800"
                       >
                         Contact
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 3c. Caregiver–Patient Assignments (Backend-synced) */}
+          <div className="space-y-4 pt-4 border-t border-slate-200/60 dark:border-slate-800">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <Link2 className="w-5 h-5 text-emerald-600" />
+                Patient–Caregiver Assignments
+                <span className="ml-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                  {assignments.length} active
+                </span>
+              </h3>
+              <button
+                onClick={() => setIsAssignModalOpen(true)}
+                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+              >
+                <Plus className="w-3.5 h-3.5" /> Assign Patient
+              </button>
+            </div>
+
+            {/* Privacy notice */}
+            <div className="p-3 rounded-2xl bg-sky-50 dark:bg-sky-950 border border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-300 text-xs font-medium flex items-start gap-2">
+              <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>
+                <strong>Role-Based Access:</strong> Caregivers can only view and manage medications for their
+                assigned patients. Patients can only see their own medicines — no cross-patient visibility.
+              </span>
+            </div>
+
+            {assignments.length === 0 ? (
+              <div className="p-6 rounded-3xl glass-card text-center text-slate-500 text-xs">
+                No active caregiver-patient assignments found. Click "+ Assign Patient" to link a caregiver to a patient.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {assignments.map((a) => (
+                  <div
+                    key={a.id}
+                    className="p-4 rounded-2xl glass-card border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-4 hover:border-emerald-400/40 transition-all"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center shrink-0">
+                        <Users className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                          <span className="text-emerald-600 dark:text-emerald-400">{a.caregiver_name}</span>
+                          <span className="text-slate-400 mx-1.5">→</span>
+                          <span className="text-brand-600 dark:text-brand-400">{a.patient_name}</span>
+                        </p>
+                        <p className="text-[10px] text-slate-400 font-medium mt-0.5">
+                          {a.caregiver_email} cares for {a.patient_email}
+                        </p>
+                        {a.note && (
+                          <p className="text-[10px] text-slate-400 italic mt-0.5">{a.note}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800">
+                        <CheckCircle2 className="w-3 h-3" /> Active
+                      </span>
+                      <button
+                        onClick={() => handleRemoveAssignment(a.id, a.patient_name)}
+                        title="Remove assignment"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                      >
+                        <Unlink className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -1560,6 +1730,96 @@ export default function CaregiverPage() {
         patientsList={patientsList}
         defaultPatientId={defaultPatientIdForMedicine}
       />
+
+      {/* Assign Patient to Caregiver Modal */}
+      <Modal
+        isOpen={isAssignModalOpen}
+        onClose={() => setIsAssignModalOpen(false)}
+        title="Assign Patient to Caregiver"
+      >
+        <form onSubmit={handleCreateAssignment} className="space-y-4">
+          <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950 border border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-300 text-xs font-medium flex items-start gap-2">
+            <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>This assignment grants the caregiver access to manage medications for the selected patient. The patient will only be able to see their own medicines.</span>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+              Caregiver User ID
+            </label>
+            <input
+              type="number"
+              placeholder="Enter caregiver user ID (from backend)"
+              value={assignForm.caregiverId}
+              onChange={(e) => setAssignForm({ ...assignForm, caregiverId: e.target.value })}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              required
+            />
+            <p className="text-[10px] text-slate-400 mt-1">Tip: Find user IDs in the admin panel or /api/accounts/users/?role=caregiver</p>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+              Patient
+            </label>
+            {allPatientUsers.length > 0 ? (
+              <select
+                value={assignForm.patientId}
+                onChange={(e) => setAssignForm({ ...assignForm, patientId: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                required
+              >
+                <option value="">Select a patient...</option>
+                {allPatientUsers.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name} ({u.email})
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="number"
+                placeholder="Enter patient user ID"
+                value={assignForm.patientId}
+                onChange={(e) => setAssignForm({ ...assignForm, patientId: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                required
+              />
+            )}
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+              Note (optional)
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Primary caregiver for post-surgery recovery"
+              value={assignForm.note}
+              onChange={(e) => setAssignForm({ ...assignForm, note: e.target.value })}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+            />
+          </div>
+
+          <div className="pt-2 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setIsAssignModalOpen(false)}
+              className="px-4 py-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={assignLoading}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-brand-600 hover:from-emerald-500 hover:to-brand-500 text-white font-bold text-xs shadow-md shadow-emerald-500/20 flex items-center gap-1.5 disabled:opacity-60"
+            >
+              {assignLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Link2 className="w-3.5 h-3.5" />}
+              {assignLoading ? "Assigning..." : "Assign Patient"}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
