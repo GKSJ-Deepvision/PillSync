@@ -20,7 +20,8 @@ export async function extractPrescriptionText(file) {
       ),
     };
   return {
-    text: result.text || "No text was recognized.",
+    text: result.text || "",
+    rawText: result.raw_text || "",
     medicines: result.medicines || [],
     confidence: result.confidence,
     engine: result.engine,

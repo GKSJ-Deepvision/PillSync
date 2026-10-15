@@ -128,10 +128,13 @@ reuses a pool of only ~64 unique drug names (the Category/Strength/
 Manufacturer columns are randomized per row, so they're not usable as
 per-drug facts and aren't surfaced). Combined with the 78 handwritten +10
 printed names, the working vocabulary has ~150 unique medicines. That's
-enough to make the demo dataset work correctly, but a production deployment
-would want to load a real national drug database instead — `vocabulary.py`
-is written so that's a matter of pointing `_load_reference_csv` (or adding
-another loader) at a bigger name list, not restructuring the matching logic.
+enough to make the demo dataset work correctly. The name-only list is bundled
+in `src/ocr/medicine_names.txt` so deployments still have the full demo
+vocabulary when the git-ignored raw datasets are absent. This is not a
+comprehensive drug database; a production deployment would want to load a
+maintained national drug database instead — `vocabulary.py` is written so
+that's a matter of pointing `_load_reference_csv` (or adding another loader)
+at a bigger name list, not restructuring the matching logic.
 
 ## Reproducing the training run
 

@@ -14,6 +14,7 @@ class MedicineExtraction(BaseModel):
 
 class OCRResponse(BaseModel):
     text: str
+    raw_text: str = ""
     medicines: list[MedicineExtraction]
     confidence: float = Field(ge=0, le=1)
     engine: str

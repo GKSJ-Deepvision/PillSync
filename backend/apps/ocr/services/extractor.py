@@ -56,12 +56,19 @@ def extract_prescription(image_bytes: bytes) -> OCRResponse:
         )
         for medicine in parsed
     )
+    raw_text = text.strip()
     engine = (
         "trained-medicine-model"
         if not text or text == "\n".join(dict.fromkeys(recognized_names))
         else "tesseract+trained-medicine-model"
     )
-    return OCRResponse(text=medicine_text, medicines=parsed, confidence=confidence, engine=engine)
+    return OCRResponse(
+        text=medicine_text,
+        raw_text=raw_text,
+        medicines=parsed,
+        confidence=confidence,
+        engine=engine,
+    )
 
 
 def _configure_tesseract(pytesseract) -> None:

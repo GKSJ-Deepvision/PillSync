@@ -9,6 +9,7 @@ export default function OCRPage() {
   const { user } = useAuth();
   const [file, setFile] = useState(null);
   const [text, setText] = useState("");
+  const [rawText, setRawText] = useState("");
   const [confidence, setConfidence] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -19,6 +20,7 @@ export default function OCRPage() {
     event.preventDefault();
     setError("");
     setText("");
+    setRawText("");
     setConfidence(null);
     setMedicines([]);
     setMedicineMessage("");
@@ -32,6 +34,7 @@ export default function OCRPage() {
     setBusy(false);
     if (result.error) return setError(result.error.message);
     setText(result.text);
+    setRawText(result.rawText);
     setConfidence(result.confidence);
     setMedicines(result.medicines);
     const saveResult = await addOcrMedicines(user.id, result.medicines);
@@ -45,7 +48,14 @@ export default function OCRPage() {
       );
     else if (result.medicines.length)
       setMedicineMessage("Those medicines are already in your Medicines list.");
-    else setMedicineMessage("No medicine names were recognized.");
+    else if (result.rawText)
+      setMedicineMessage(
+        "Text was read, but no medicine name matched the recognition list. Verify the text and add the medicine manually."
+      );
+    else
+      setMedicineMessage(
+        "No text could be read. Try a sharp, well-lit photo with the full medicine name in focus."
+      );
   };
 
   return (
@@ -90,10 +100,10 @@ export default function OCRPage() {
           </div>
           <div className="mt-4 min-h-56 rounded-lg border border-ink/10 bg-porcelain-dim p-4">
             <p className="whitespace-pre-wrap font-mono text-sm leading-6 text-ink">
-              {text || "The recognized prescription text will appear here."}
+              {text || rawText || "The recognized prescription text will appear here."}
             </p>
           </div>
-          {text && (
+          {(text || rawText) && (
             <p className="mt-3 font-body text-xs text-ink-fog">
               Check the generated text with a healthcare professional before taking medicine.
             </p>

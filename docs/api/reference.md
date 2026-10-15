@@ -56,7 +56,9 @@ Supported types are JPEG, PNG, WEBP, TIFF, and BMP; uploads are limited to
 10 MiB. The response contains extracted text, medicine candidates, a
 confidence score, and the engine identifier. A `415` indicates an unsupported
 content type, `413` an oversized image, and `422` an image that could not be
-processed.
+processed. `text` contains medicine details accepted by the medicine matcher;
+`raw_text` contains the text read by OCR, including text that did not match a
+known medicine name.
 
 ## Access and data handling
 

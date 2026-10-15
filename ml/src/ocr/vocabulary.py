@@ -49,6 +49,7 @@ except ImportError:  # pragma: no cover - exercised when rapidfuzz isn't install
 
 ROOT = Path(__file__).resolve().parents[2]  # .../ml
 REFERENCE_CSV = ROOT / "data" / "raw" / "medicine_reference" / "medicine_dataset.csv"
+BUILTIN_MEDICINE_NAMES = Path(__file__).with_name("medicine_names.txt")
 HANDWRITTEN_LABEL_FILES = [
     ROOT / "data" / "raw" / "ocr_handwritten" / split / f"{split.lower()}_labels.csv"
     for split in ("Training", "Validation", "Testing")
@@ -119,12 +120,18 @@ class MedicineVocabulary:
 
         for name in PRINTED_GENERIC_NAMES:
             self._add(name)
+        self._load_bundled_names()
         self._load_handwritten_names()
         self._load_reference_csv()
 
         # Precompute normalized keys once so matching doesn't re-normalize
         # ~150 names on every call.
         self._keys = list(self._canonical_by_key.keys())
+
+    def _load_bundled_names(self) -> None:
+        with BUILTIN_MEDICINE_NAMES.open(encoding="utf-8") as handle:
+            for name in handle:
+                self._add(name)
 
     def _add(self, name: str, generic: str | None = None) -> None:
         name = name.strip()
