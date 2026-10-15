@@ -1,9 +1,15 @@
-# Dependencies for training / evaluating the refill-prediction model.
-# The backend service only needs scikit-learn + joblib at inference time
-# (see backend/requirements/base.txt); pandas/numpy are needed here for the
-# synthetic-data generator and training script.
+# Dependencies for training / evaluating the ml/ models.
+# The backend service only needs the smaller set in
+# backend/requirements/base.txt at inference time; this file additionally
+# covers everything needed to reproduce training runs.
 scikit-learn==1.5.*
 pandas==2.2.*
 numpy==1.26.*
 joblib==1.4.*
 Pillow==11.*
+
+# OCR (ml/src/ocr)
+scikit-image==0.24.*      # HOG descriptors (features.py), used at both train + inference time
+opencv-python-headless==4.*  # augmentation only (features.py: rotation/shear/morphology/blur)
+rapidfuzz==3.*             # fuzzy medicine-name matching (vocabulary.py)
+pytesseract==0.3.*         # printed-prescription text extraction (recognizer.PrintedMedicineRecognizer)

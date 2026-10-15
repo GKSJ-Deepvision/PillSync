@@ -7,6 +7,7 @@ import { supabase } from "../../lib/supabaseClient";
 const ROLES = [
   { value: "patient", label: "Patient" },
   { value: "caregiver", label: "Caregiver" },
+  { value: "doctor", label: "Doctor" },
   { value: "admin", label: "Admin" },
 ];
 

@@ -116,7 +116,8 @@ jobs:
         if: steps.check.outputs.backend == 'true'
         uses: docker/build-push-action@v6
         with:
-          context: ./backend
+          context: .
+          file: backend/Dockerfile
           push: ${{ inputs.publish_images }}
           tags: ${{ env.REGISTRY }}/${{ github.repository }}/pillsync-backend:${{ needs.readiness.outputs.image_tag }}
           labels: |

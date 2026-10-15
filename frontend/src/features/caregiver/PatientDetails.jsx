@@ -7,6 +7,7 @@ import MedicationFormModal from "../medications/MedicationFormModal";
 import { listPrescriptions } from "../prescriptions/api";
 import RefillOutlookCard from "../../components/dashboard/RefillOutlookCard";
 import { predictRefillsBatch } from "../refills/mlApi";
+import ProfilePhoto from "../../components/common/ProfilePhoto";
 
 function formatDate(value) {
   if (!value) return "Not provided";
@@ -53,7 +54,7 @@ export default function PatientDetails({ patient, onBack }) {
         supabase
           .from("profiles")
           .select(
-            "id, full_name, phone, date_of_birth, blood_group, conditions, emergency_contact_name, emergency_contact_phone, emergency_contact_relation"
+            "id, full_name, avatar_url, phone, date_of_birth, blood_group, conditions, emergency_contact_name, emergency_contact_phone, emergency_contact_relation"
           )
           .eq("id", patient.id)
           .single(),
@@ -118,7 +119,13 @@ export default function PatientDetails({ patient, onBack }) {
       </button>
       <div className="card">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
+          <div className="flex items-center gap-3">
+            <ProfilePhoto
+              src={details.profile?.avatar_url}
+              name={details.profile?.full_name}
+              className="h-12 w-12"
+            />
+            <div>
             <p className="font-body text-xs font-semibold uppercase tracking-wider text-ink-fog">
               Patient overview
             </p>
@@ -128,6 +135,7 @@ export default function PatientDetails({ patient, onBack }) {
             >
               {details.profile?.full_name || "Unnamed patient"}
             </h2>
+            </div>
           </div>
           <span className={`badge ${status.tone}`}>{status.label}</span>
         </div>

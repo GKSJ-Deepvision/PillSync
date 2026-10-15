@@ -1,0 +1,10 @@
+{
+  "augmented_train_samples": 24960,
+  "original_train_samples": 3120,
+  "classes": 78,
+  "train_accuracy": 0.9595753205128205,
+  "validation_accuracy": 0.6948717948717948,
+  "test_accuracy": 0.5525641025641026,
+  "test_top3_accuracy": 0.6987179487179487,
+  "model": "/home/claude/pillsync/PillSync/ml/models/handwritten_medicine_classifier.joblib"
+}

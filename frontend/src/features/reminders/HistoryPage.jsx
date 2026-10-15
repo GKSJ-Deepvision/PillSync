@@ -124,10 +124,12 @@ export default function HistoryPage() {
                       </p>
                       <p className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">
                         {new Date(log.scheduled_for).toLocaleTimeString([], {
+                          timeZone: "Asia/Kolkata",
                           hour: "numeric",
                           minute: "2-digit",
+                          hourCycle: "h12",
                         })}{" "}
-                        · {log.dose_quantity} dose(s)
+                        IST · {log.dose_quantity} dose(s)
                       </p>
                     </div>
                     <span className={`badge ${STATUS_BADGE[log.status] ?? STATUS_BADGE.pending}`}>

@@ -25,6 +25,21 @@ function emptySchedule() {
   };
 }
 
+function getScheduleTimeParts(timeOfDay) {
+  const [rawHour = "08", minute = "00"] = (timeOfDay || "08:00").split(":");
+  const hour24 = Number(rawHour);
+  return {
+    hour: String(hour24 % 12 || 12),
+    minute,
+    period: hour24 < 12 ? "AM" : "PM",
+  };
+}
+
+function toScheduleTime(hour, minute, period) {
+  const hour24 = (Number(hour) % 12) + (period === "PM" ? 12 : 0);
+  return `${String(hour24).padStart(2, "0")}:${minute}`;
+}
+
 function toFormState(medication) {
   if (!medication) {
     return {
@@ -265,7 +280,9 @@ export default function MedicationFormModal({
             </div>
 
             <div className="space-y-3">
-              {form.schedules.map((s) => (
+              {form.schedules.map((s) => {
+                const time = getScheduleTimeParts(s.time_of_day);
+                return (
                 <div key={s.key} className="rounded-xl border border-ink/10 p-3">
                   <div className="mb-2 grid grid-cols-3 gap-2">
                     <input
@@ -274,12 +291,49 @@ export default function MedicationFormModal({
                       value={s.label}
                       onChange={(e) => updateSchedule(s.key, { label: e.target.value })}
                     />
-                    <input
-                      type="time"
-                      className="field-input py-2 text-[13px]"
-                      value={s.time_of_day}
-                      onChange={(e) => updateSchedule(s.key, { time_of_day: e.target.value })}
-                    />
+                    <div className="flex min-w-0 gap-1">
+                      <select
+                        aria-label="Schedule hour"
+                        className="field-input min-w-0 flex-1 px-1 py-2 text-center text-[13px]"
+                        value={time.hour}
+                        onChange={(e) =>
+                          updateSchedule(s.key, {
+                            time_of_day: toScheduleTime(e.target.value, time.minute, time.period),
+                          })
+                        }
+                      >
+                        {Array.from({ length: 12 }, (_, index) => String(index + 1)).map((hour) => (
+                          <option key={hour} value={hour}>{hour}</option>
+                        ))}
+                      </select>
+                      <select
+                        aria-label="Schedule minute"
+                        className="field-input min-w-0 flex-1 px-1 py-2 text-center text-[13px]"
+                        value={time.minute}
+                        onChange={(e) =>
+                          updateSchedule(s.key, {
+                            time_of_day: toScheduleTime(time.hour, e.target.value, time.period),
+                          })
+                        }
+                      >
+                        {Array.from({ length: 60 }, (_, index) => String(index).padStart(2, "0")).map((minute) => (
+                          <option key={minute} value={minute}>{minute}</option>
+                        ))}
+                      </select>
+                      <select
+                        aria-label="AM or PM"
+                        className="field-input min-w-0 flex-1 px-1 py-2 text-center text-[13px]"
+                        value={time.period}
+                        onChange={(e) =>
+                          updateSchedule(s.key, {
+                            time_of_day: toScheduleTime(time.hour, time.minute, e.target.value),
+                          })
+                        }
+                      >
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                      </select>
+                    </div>
                     <input
                       type="number"
                       min="0.5"
@@ -305,7 +359,8 @@ export default function MedicationFormModal({
                     )}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

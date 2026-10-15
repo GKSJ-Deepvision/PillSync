@@ -3,10 +3,6 @@ import DashboardLayout from "../components/layout/DashboardLayout";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
 import { timeOfDayGreeting } from "../utils/greeting";
-import {
-  DUMMY_ADHERENCE_LEADERBOARD,
-  DUMMY_RECENT_ACTIVITY,
-} from "../features/admin/mockAdminData";
 
 export default function AdminDashboard() {
   const { profile } = useAuth();
@@ -16,6 +12,13 @@ export default function AdminDashboard() {
   const [counts, setCounts] = useState({ patient: 0, caregiver: 0, admin: 0 });
   const [recent, setRecent] = useState([]);
   const [fitnessCounts, setFitnessCounts] = useState({ dietPlans: 0, assignments: 0, logs: 0 });
+  const [platformCounts, setPlatformCounts] = useState({
+    medications: 0,
+    schedules: 0,
+    prescriptions: 0,
+    doseLogs: 0,
+    notifications: 0,
+  });
   const [caregivers, setCaregivers] = useState([]);
   const [patients, setPatients] = useState([]);
   const [links, setLinks] = useState([]);
@@ -48,10 +51,6 @@ export default function AdminDashboard() {
       setLinks(linkData || []);
     }
     async function loadFitnessStats() {
-      // Real counts against the fitness tables (docs/database/schema_fitness.sql).
-      // Row Level Security lets admins read every row here (is_admin() policy),
-      // so these numbers are live, not mocked — only the leaderboard names
-      // below are placeholder/demo data.
       const [dietPlans, assignments, logs] = await Promise.all([
         supabase.from("diet_plans").select("id", { count: "exact", head: true }),
         supabase.from("exercise_assignments").select("id", { count: "exact", head: true }),
@@ -63,8 +62,25 @@ export default function AdminDashboard() {
         logs: logs.count ?? 0,
       });
     }
+    async function loadPlatformStats() {
+      const [medications, schedules, prescriptions, doseLogs, notifications] = await Promise.all([
+        supabase.from("medications").select("id", { count: "exact", head: true }),
+        supabase.from("medication_schedules").select("id", { count: "exact", head: true }),
+        supabase.from("prescriptions").select("id", { count: "exact", head: true }),
+        supabase.from("dose_logs").select("id", { count: "exact", head: true }),
+        supabase.from("notifications").select("id", { count: "exact", head: true }),
+      ]);
+      setPlatformCounts({
+        medications: medications.count ?? 0,
+        schedules: schedules.count ?? 0,
+        prescriptions: prescriptions.count ?? 0,
+        doseLogs: doseLogs.count ?? 0,
+        notifications: notifications.count ?? 0,
+      });
+    }
     loadStats();
     loadFitnessStats();
+    loadPlatformStats();
   }, []);
 
   const assignPatient = async (event) => {
@@ -236,49 +252,29 @@ export default function AdminDashboard() {
 
       <div className="card mt-6">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-base font-semibold text-ink">Top adherence streaks</h2>
-          <span className="badge bg-porcelain-dim text-ink-fog">Demo data</span>
+          <h2 className="font-display text-base font-semibold text-ink">Platform usage</h2>
+          <span className="badge bg-mint-soft text-mint-deep">Live data</span>
         </div>
         <p className="mt-1 font-body text-[12px] text-ink-fog">
-          Placeholder leaderboard for demoing the admin UI — swap for a real query against
-          fitness_logs once you have live patient data.
+          Current records created across the medication, reminder, prescription, and notification
+          workflows.
         </p>
-        <ul className="mt-4 divide-y divide-ink/5">
-          {DUMMY_ADHERENCE_LEADERBOARD.map((row) => (
-            <li key={row.name} className="flex items-center justify-between py-3">
-              <span className="font-body text-sm font-medium text-ink">{row.name}</span>
-              <span className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">
-                {row.streak}-day streak · {row.adherence}% med adherence
-              </span>
-            </li>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {[
+            ["Medications", platformCounts.medications],
+            ["Schedules", platformCounts.schedules],
+            ["Prescriptions", platformCounts.prescriptions],
+            ["Dose logs", platformCounts.doseLogs],
+            ["Notifications", platformCounts.notifications],
+          ].map(([label, value]) => (
+            <div key={label} className="rounded-lg border border-ink/10 bg-porcelain-dim p-3">
+              <p className="font-body text-xs text-ink-fog">{label}</p>
+              <p className="mt-1 font-display text-2xl font-semibold text-ink">{value}</p>
+            </div>
           ))}
-        </ul>
-      </div>
-
-      <div className="card mt-6">
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-base font-semibold text-ink">
-            Recent platform activity
-          </h2>
-          <span className="badge bg-porcelain-dim text-ink-fog">Demo data</span>
         </div>
-        <ul className="mt-4 divide-y divide-ink/5">
-          {DUMMY_RECENT_ACTIVITY.map((row, i) => (
-            <li key={i} className="flex items-center justify-between py-3">
-              <span className="font-body text-sm text-ink">{row.text}</span>
-              <span className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">
-                {row.when}
-              </span>
-            </li>
-          ))}
-        </ul>
       </div>
 
-      <p className="mt-6 font-body text-[13px] text-ink-fog">
-        Full activity auditing, caregiver↔patient assignment tools and platform-wide analytics are
-        scoped for later milestones — this view proves role-gated admin access and read access
-        across every profile via Row Level Security.
-      </p>
     </DashboardLayout>
   );
 }

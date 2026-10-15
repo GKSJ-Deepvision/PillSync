@@ -112,6 +112,7 @@ export default function PatientDashboard() {
             messages={messages}
             title="Messages from your care team"
             emptyText="Your caregiver messages will appear here."
+            defaultCollapsed={messages.length > 0}
           />
         </div>
         {/* Dose Summary */}
@@ -130,15 +131,24 @@ export default function PatientDashboard() {
         <div className="space-y-6">
           {/* Today's reminders */}
           <div className="card">
-            <div className="mb-4 flex items-center justify-between">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-display text-base font-semibold text-ink">Today&apos;s doses</h2>
-              <Link
-                to="/medications"
-                className="font-body text-[13px] font-semibold"
-                style={{ color: "var(--brand-deep)" }}
-              >
-                Manage medicines →
-              </Link>
+                <div className="flex items-center gap-4">
+                  <Link
+                    to="/appointments"
+                    className="font-body text-[13px] font-semibold"
+                    style={{ color: "var(--brand-deep)" }}
+                  >
+                    Book a doctor
+                  </Link>
+                  <Link
+                    to="/medications"
+                    className="font-body text-[13px] font-semibold"
+                    style={{ color: "var(--brand-deep)" }}
+                  >
+                    Manage medicines →
+                  </Link>
+                </div>
             </div>
             <TodayReminders patientId={user?.id} />
           </div>

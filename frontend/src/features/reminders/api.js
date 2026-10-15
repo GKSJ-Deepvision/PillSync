@@ -1,7 +1,14 @@
 import { supabase } from "../../lib/supabaseClient";
 
-function localDateStr(d = new Date()) {
-  return d.toLocaleDateString("en-CA"); // YYYY-MM-DD, local time
+function indiaDateStr(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+  return `${values.year}-${values.month}-${values.day}`;
 }
 
 /**
@@ -20,8 +27,8 @@ export async function ensureTodayDoseLogs(patientId) {
   if (error) return { error };
 
   const now = new Date();
-  const dow = now.getDay();
-  const todayStr = localDateStr(now);
+  const todayStr = indiaDateStr(now);
+  const dow = new Date(`${todayStr}T00:00:00Z`).getUTCDay();
 
   const dueToday = (schedules ?? []).filter(
     (s) => s.medications.is_active && (s.days_of_week ?? []).includes(dow)
@@ -31,7 +38,9 @@ export async function ensureTodayDoseLogs(patientId) {
 
   const rows = dueToday.map((s) => {
     const [h, m] = s.time_of_day.split(":");
-    const scheduledFor = new Date(`${todayStr}T${h.padStart(2, "0")}:${m.padStart(2, "0")}:00`);
+    const scheduledFor = new Date(
+      `${todayStr}T${h.padStart(2, "0")}:${m.padStart(2, "0")}:00+05:30`
+    );
     return {
       schedule_id: s.id,
       medication_id: s.medication_id,
@@ -65,10 +74,8 @@ export async function autoMarkMissed(patientId, graceMinutes = 60) {
 }
 
 export async function listTodayDoses(patientId) {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  const end = new Date();
-  end.setHours(23, 59, 59, 999);
+  const start = new Date(`${indiaDateStr()}T00:00:00+05:30`);
+  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000 - 1);
 
   const { data, error } = await supabase
     .from("dose_logs")

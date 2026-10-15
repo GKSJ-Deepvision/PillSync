@@ -15,6 +15,9 @@ import DietPlannerPage from "../features/fitness/pages/DietPlannerPage";
 import ProgressStreakPage from "../features/fitness/pages/ProgressStreakPage";
 import PrescriptionUploadPage from "../features/prescriptions/PrescriptionUploadPage";
 import OCRPage from "../features/ocr/OCRPage";
+import DoctorsPage from "../features/appointments/DoctorsPage";
+import DoctorDashboard from "../features/appointments/DoctorDashboard";
+import AdminDoctorsPage from "../features/appointments/AdminDoctorsPage";
 
 import PatientDashboard from "../pages/PatientDashboard";
 import CaregiverDashboard from "../pages/CaregiverDashboard";
@@ -24,6 +27,7 @@ function RoleDashboard() {
   const { role } = useAuth();
   if (role === "caregiver") return <CaregiverDashboard />;
   if (role === "admin") return <AdminDashboard />;
+  if (role === "doctor") return <DoctorDashboard />;
   return <PatientDashboard />;
 }
 
@@ -113,6 +117,30 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["patient"]}>
             <ProgressStreakPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/appointments"
+        element={
+          <ProtectedRoute allowedRoles={["patient"]}>
+            <DoctorsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/doctor/schedule"
+        element={
+          <ProtectedRoute allowedRoles={["doctor"]}>
+            <DoctorDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/doctors"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminDoctorsPage />
           </ProtectedRoute>
         }
       />

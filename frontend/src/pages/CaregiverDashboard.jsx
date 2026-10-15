@@ -9,6 +9,7 @@ import { listMedications } from "../features/medications/api";
 import { listDoseHistory } from "../features/reminders/api";
 import { predictRefillsForCaregiver } from "../features/refills/mlApi";
 import MessageInbox from "../components/dashboard/MessageInbox";
+import ProfilePhoto from "../components/common/ProfilePhoto";
 
 export default function CaregiverDashboard() {
   const { profile, user } = useAuth();
@@ -35,7 +36,7 @@ export default function CaregiverDashboard() {
     async function loadLinks() {
       const { data, error } = await supabase
         .from("caregiver_links")
-        .select("id, status, patient:patient_id(id, full_name)")
+        .select("id, status, patient:patient_id(id, full_name, avatar_url)")
         .eq("caregiver_id", user.id)
         .eq("status", "accepted");
       if (mounted) {
@@ -163,19 +164,26 @@ export default function CaregiverDashboard() {
                       key={p.patient_id}
                       className="flex items-center justify-between gap-3 py-2.5"
                     >
-                      <div>
-                        <p className="font-body text-sm font-semibold text-ink">
-                          {p.patient_name || "Patient"}
-                        </p>
-                        <p className="font-body text-xs text-ink-fog">
-                          {p.predictions
-                            .filter(
-                              (pr) => pr.stock_status === "low" || pr.stock_status === "empty"
-                            )
-                            .map((pr) => pr.medication_name)
-                            .filter(Boolean)
-                            .join(", ") || "Adherence needs attention"}
-                        </p>
+                      <div className="flex min-w-0 items-center gap-3">
+                        <ProfilePhoto
+                          src={links.find((link) => link.patient?.id === p.patient_id)?.patient?.avatar_url}
+                          name={p.patient_name}
+                          className="h-10 w-10"
+                        />
+                        <div className="min-w-0">
+                          <p className="font-body text-sm font-semibold text-ink">
+                            {p.patient_name || "Patient"}
+                          </p>
+                          <p className="font-body text-xs text-ink-fog">
+                            {p.predictions
+                              .filter(
+                                (pr) => pr.stock_status === "low" || pr.stock_status === "empty"
+                              )
+                              .map((pr) => pr.medication_name)
+                              .filter(Boolean)
+                              .join(", ") || "Adherence needs attention"}
+                          </p>
+                        </div>
                       </div>
                       <button
                         type="button"
@@ -225,8 +233,15 @@ export default function CaregiverDashboard() {
                       className="flex w-full items-center justify-between rounded-lg px-2 py-3 text-left transition hover:bg-porcelain-dim"
                       onClick={() => setSelectedPatient(link.patient)}
                     >
-                      <span className="font-body text-sm font-medium text-ink">
-                        {link.patient?.full_name || "Unnamed patient"}
+                      <span className="flex min-w-0 items-center gap-3">
+                        <ProfilePhoto
+                          src={link.patient?.avatar_url}
+                          name={link.patient?.full_name}
+                          className="h-10 w-10"
+                        />
+                        <span className="truncate font-body text-sm font-medium text-ink">
+                          {link.patient?.full_name || "Unnamed patient"}
+                        </span>
                       </span>
                       <span className="flex items-center gap-3">
                         <span className="badge bg-mint-soft text-mint-deep">{link.status}</span>

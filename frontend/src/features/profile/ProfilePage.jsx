@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
+import ProfilePhoto from "../../components/common/ProfilePhoto";
 import { useAuth } from "../../context/AuthContext";
+import { uploadCloudinaryImage } from "../../lib/cloudinary";
 
 export default function ProfilePage() {
   const { profile, role, updateProfile, user } = useAuth();
@@ -16,6 +18,7 @@ export default function ProfilePage() {
   });
   const [status, setStatus] = useState({ type: null, message: "" });
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   useEffect(() => {
     if (!profile) return;
@@ -61,6 +64,30 @@ export default function ProfilePage() {
     );
   };
 
+  const handlePhotoUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    setStatus({ type: null, message: "" });
+
+    const { data, error: uploadError } = await uploadCloudinaryImage(file);
+    if (uploadError) {
+      setStatus({ type: "error", message: uploadError.message });
+      setUploadingPhoto(false);
+      event.target.value = "";
+      return;
+    }
+
+    const { error: profileError } = await updateProfile({ avatar_url: data.secureUrl });
+    setUploadingPhoto(false);
+    setStatus(
+      profileError
+        ? { type: "error", message: profileError.message }
+        : { type: "success", message: "Profile photo updated." }
+    );
+    event.target.value = "";
+  };
+
   return (
     <DashboardLayout eyebrow="Account" title="My profile">
       <div className="max-w-2xl">
@@ -85,6 +112,31 @@ export default function ProfilePage() {
         )}
 
         <form onSubmit={handleSubmit} className="card space-y-5">
+          <div className="flex items-center gap-4 border-b border-ink/5 pb-5">
+            <ProfilePhoto
+              src={profile?.avatar_url}
+              name={profile?.full_name}
+              className="h-16 w-16 text-base"
+            />
+            <div>
+              <p className="field-label">Profile photo</p>
+              <label
+                htmlFor="profile-photo"
+                className={`btn-secondary inline-flex cursor-pointer px-3 py-2 text-xs ${uploadingPhoto ? "pointer-events-none opacity-60" : ""}`}
+              >
+                {uploadingPhoto ? "Uploading…" : "Choose photo"}
+              </label>
+              <input
+                id="profile-photo"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                disabled={uploadingPhoto}
+                onChange={handlePhotoUpload}
+              />
+              <p className="mt-1 font-body text-xs text-ink-fog">JPG, PNG, or WebP · up to 8 MB</p>
+            </div>
+          </div>
           <div>
             <h2 className="font-display text-base font-semibold text-ink">Basic details</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">

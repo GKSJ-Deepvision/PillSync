@@ -52,6 +52,10 @@ credentials.json
 *.tfvars
 
 # ---- ML / data ----
+# Raw datasets (handwritten/printed OCR images + medicine reference CSV) are
+# intentionally NOT committed here -- they're ~65MB and don't need to churn
+# through git history. Get them via the data+model bundle described in
+# ml/README.md (built by scripts/package_ocr_bundle.sh) instead.
 ml/data/raw/*
 ml/data/processed/*
 ml/models/*
@@ -64,8 +68,11 @@ ml/models/*
 *.onnx
 *.pkl
 *.joblib
+# The trained handwritten-word classifier IS committed (~38MB, compressed):
+# unlike the raw datasets, the whole point of committing it is so the app
+# works out of the box without a separate training/download step.
 !ml/models/handwritten_medicine_classifier.joblib
-!ml/models/printed_medicine_classifier.joblib
+!ml/models/handwritten_medicine_classifier.metrics.json
 .ipynb_checkpoints/
 
 # ---- Editors and OS ----

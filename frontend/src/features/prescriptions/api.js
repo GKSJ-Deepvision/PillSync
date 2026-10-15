@@ -1,36 +1,16 @@
 import { supabase } from "../../lib/supabaseClient";
-
-const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "dhc3fnbl2";
-const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
-const FOLDER = import.meta.env.VITE_CLOUDINARY_FOLDER || "assets";
+import { uploadCloudinaryImage } from "../../lib/cloudinary";
 
 export async function uploadPrescriptionImage(patientId, file) {
-  if (!UPLOAD_PRESET) {
-    return {
-      error: new Error(
-        "Cloudinary upload preset is missing. Set VITE_CLOUDINARY_UPLOAD_PRESET in frontend/.env."
-      ),
-    };
-  }
-  const body = new FormData();
-  body.append("file", file);
-  body.append("upload_preset", UPLOAD_PRESET);
-  body.append("folder", FOLDER);
-
-  const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-    method: "POST",
-    body,
-  });
-  const result = await response.json();
-  if (!response.ok)
-    return { error: new Error(result.error?.message || "Cloudinary upload failed.") };
+  const { data: uploadedImage, error: uploadError } = await uploadCloudinaryImage(file);
+  if (uploadError) return { error: uploadError };
 
   const { data, error } = await supabase
     .from("prescriptions")
     .insert({
       patient_id: patientId,
-      image_url: result.secure_url,
-      cloudinary_public_id: result.public_id,
+      image_url: uploadedImage.secureUrl,
+      cloudinary_public_id: uploadedImage.publicId,
       original_filename: file.name,
       mime_type: file.type,
       file_size: file.size,
@@ -55,7 +35,7 @@ export async function uploadPrescriptionImage(patientId, file) {
         sender_id: patientId,
         title: "New prescription uploaded",
         body: `${file.name} is ready to review.`,
-        image_url: result.secure_url,
+        image_url: uploadedImage.secureUrl,
       }))
     );
     if (messageError) return { data, error: messageError };

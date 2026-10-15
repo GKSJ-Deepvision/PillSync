@@ -1,10 +1,12 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import ThemeSwitcher from "./ThemeSwitcher";
+import ProfilePhoto from "../common/ProfilePhoto";
 
 const NAV_BY_ROLE = {
   patient: [
     { to: "/dashboard", label: "Today", icon: "ring" },
+    { to: "/appointments", label: "Book a doctor", icon: "user" },
     { to: "/medications", label: "Medicines", icon: "pill" },
     { to: "/prescriptions", label: "Prescriptions", icon: "history" },
     { to: "/ocr", label: "OCR Reader", icon: "scan" },
@@ -21,6 +23,12 @@ const NAV_BY_ROLE = {
   ],
   admin: [
     { to: "/dashboard", label: "Overview", icon: "ring" },
+    { to: "/admin/doctors", label: "Doctors", icon: "user" },
+    { to: "/profile", label: "My Profile", icon: "user" },
+  ],
+  doctor: [
+    { to: "/dashboard", label: "Appointments", icon: "ring" },
+    { to: "/doctor/schedule", label: "Availability", icon: "history" },
     { to: "/profile", label: "My Profile", icon: "user" },
   ],
 };
@@ -34,6 +42,7 @@ const ROLE_LABEL = {
   patient: "Patient",
   caregiver: "Caregiver",
   admin: "Administrator",
+  doctor: "Doctor",
 };
 
 const ICON_PATHS = {
@@ -165,13 +174,6 @@ export default function DashboardLayout({ title, eyebrow, children }) {
     navigate("/login", { replace: true });
   };
 
-  const initials = (profile?.full_name || "?")
-    .split(" ")
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-
   return (
     <div className="flex min-h-screen bg-porcelain">
       <aside className="hidden w-64 shrink-0 flex-col border-r border-ink/5 bg-white px-5 py-6 sm:flex">
@@ -213,9 +215,11 @@ export default function DashboardLayout({ title, eyebrow, children }) {
         </div>
 
         <div className="flex items-center gap-3 rounded-xl border border-ink/5 px-3 py-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink font-display text-xs font-semibold text-porcelain">
-            {initials}
-          </span>
+          <ProfilePhoto
+            src={profile?.avatar_url}
+            name={profile?.full_name}
+            className="h-9 w-9"
+          />
           <div className="min-w-0 flex-1">
             <p className="truncate font-body text-[13px] font-semibold text-ink">
               {profile?.full_name || "—"}

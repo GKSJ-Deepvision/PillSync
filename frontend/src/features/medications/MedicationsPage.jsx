@@ -14,11 +14,8 @@ const STATUS_DOT = {
 
 function formatTime(t) {
   if (!t) return "";
-  const [h, m] = t.split(":");
-  const hour = Number(h);
-  const ampm = hour >= 12 ? "PM" : "AM";
-  const h12 = hour % 12 === 0 ? 12 : hour % 12;
-  return `${h12}:${m} ${ampm}`;
+  const [hour, minute] = t.slice(0, 5).split(":").map(Number);
+  return `${hour % 12 || 12}:${String(minute).padStart(2, "0")} ${hour < 12 ? "AM" : "PM"} IST`;
 }
 
 export default function MedicationsPage() {

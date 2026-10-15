@@ -30,6 +30,14 @@ joblib==1.4.*
 pytesseract==0.3.*
 Pillow==11.*
 python-multipart==0.0.*
+# rapidfuzz powers ml/src/ocr/vocabulary.py, the fuzzy medicine-name gate
+# used by the prescription parser to reject non-medicine OCR text (doctor
+# name, "MBBS, MD", "Rx", etc). Falls back to a slower stdlib difflib
+# matcher if this isn't installed, but installing it is strongly recommended.
+rapidfuzz==3.*
+# scikit-image is needed at inference time by ml/src/ocr/features.py (HOG
+# descriptor) for the handwritten-word recognizer.
+scikit-image==0.24.*
 # opencv-python-headless==4.*
 # spacy==3.*
 # openai==1.*

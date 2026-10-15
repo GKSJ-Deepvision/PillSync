@@ -14,6 +14,11 @@ const ROLES = [
     label: "Caregiver",
     blurb: "Watch over medication adherence for someone you care for.",
   },
+  {
+    value: "doctor",
+    label: "Doctor",
+    blurb: "Create an account for an administrator-reviewed doctor listing.",
+  },
 ];
 
 export default function RegisterPage() {
@@ -81,7 +86,7 @@ export default function RegisterPage() {
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <div>
           <span className="field-label">I am a</span>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {ROLES.map((r) => (
               <button
                 key={r.value}

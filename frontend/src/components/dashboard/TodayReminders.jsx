@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTodayDoses } from "../../features/reminders/useTodayDoses";
 import {
   notificationPermission,
@@ -12,8 +12,26 @@ const STATUS_STYLE = {
   missed: { label: "Missed", className: "bg-rose-soft text-rose-deep" },
 };
 
-function formatTime(iso) {
-  return new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+const ACTION_WINDOW_MINUTES = 60;
+
+export function isDoseActionWindowOpen(dose, now = Date.now()) {
+  if (!dose || !dose.scheduled_for || !(dose.status === "pending" || dose.status === "snoozed")) {
+    return false;
+  }
+
+  const scheduled = new Date(dose.scheduled_for).getTime();
+  const expiresAt = scheduled + ACTION_WINDOW_MINUTES * 60 * 1000;
+  return now >= scheduled && now <= expiresAt;
+}
+
+export function formatDoseTime(iso) {
+  const time = new Date(iso).toLocaleTimeString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    hour: "numeric",
+    minute: "2-digit",
+    hourCycle: "h12",
+  });
+  return `${time} IST`;
 }
 
 export { useTodayDoses };
@@ -21,6 +39,12 @@ export { useTodayDoses };
 export default function TodayReminders({ patientId }) {
   const { doses, loading, takeAction } = useTodayDoses(patientId);
   const [permission, setPermission] = useState(notificationPermission());
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const enableNotifications = async () => {
     const result = await requestNotificationPermission();
@@ -59,6 +83,7 @@ export default function TodayReminders({ patientId }) {
         <ul className="space-y-2">
           {doses.map((d) => {
             const status = STATUS_STYLE[d.status] ?? STATUS_STYLE.pending;
+            const actionWindowOpen = isDoseActionWindowOpen(d, now);
             const actionable = d.status === "pending" || d.status === "snoozed";
             return (
               <li
@@ -70,7 +95,7 @@ export default function TodayReminders({ patientId }) {
                     {d.medications?.name ?? "Medicine"}
                   </p>
                   <p className="font-mono text-[11px] uppercase tracking-wide text-ink-fog">
-                    {formatTime(d.scheduled_for)} · {d.dose_quantity} dose(s)
+                    {formatDoseTime(d.scheduled_for)} · {d.dose_quantity} dose(s)
                   </p>
                 </div>
 
@@ -80,9 +105,15 @@ export default function TodayReminders({ patientId }) {
                     <div className="flex gap-1.5">
                       <button
                         type="button"
+                        disabled={!actionWindowOpen}
                         onClick={() => takeAction(d.id, "taken")}
-                        className="rounded-lg px-2.5 py-1.5 font-body text-[12px] font-semibold text-white"
-                        style={{ backgroundColor: "var(--brand)" }}
+                        className="rounded-lg px-2.5 py-1.5 font-body text-[12px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+                        style={{ backgroundColor: actionWindowOpen ? "var(--brand)" : "#CBD5E1" }}
+                        title={
+                          actionWindowOpen
+                            ? "Mark this dose as taken."
+                            : "This dose can only be marked taken during its scheduled time window."
+                        }
                       >
                         Taken
                       </button>

@@ -16,8 +16,12 @@ export default function MessageInbox({
   emptyText = "No messages yet.",
   onCompose,
   composeLabel = "New message",
+  defaultCollapsed = false,
 }) {
   const [openId, setOpenId] = useState(null);
+  const [collapsed, setCollapsed] = useState(defaultCollapsed);
+
+  const hasMessages = messages.length > 0;
 
   return (
     <section className="card message-inbox" aria-labelledby="message-inbox-title">
@@ -31,7 +35,17 @@ export default function MessageInbox({
           </h2>
         </div>
         <div className="flex items-center gap-2">
-          <span className="badge bg-indigo-soft text-indigo-deep">{messages.length}</span>
+          {hasMessages && <span className="badge bg-indigo-soft text-indigo-deep">{messages.length}</span>}
+          {hasMessages && (
+            <button
+              type="button"
+              onClick={() => setCollapsed((current) => !current)}
+              className="btn-secondary px-3 py-2 text-[11px]"
+              aria-label={collapsed ? "View messages" : "Hide messages"}
+            >
+              {collapsed ? "View messages" : "Hide messages"}
+            </button>
+          )}
           {onCompose && (
             <button type="button" onClick={onCompose} className="btn-brand px-3 py-2 text-xs">
               {composeLabel}
@@ -40,7 +54,13 @@ export default function MessageInbox({
         </div>
       </div>
 
-      {messages.length === 0 ? (
+      {collapsed ? (
+        <div className="mt-5 rounded-xl border border-dashed border-ink/10 bg-porcelain-dim px-4 py-4 text-center">
+          <p className="font-body text-sm text-ink-fog">
+            Messages are hidden. Click “View messages” to open the inbox.
+          </p>
+        </div>
+      ) : messages.length === 0 ? (
         <p className="mt-5 rounded-xl bg-porcelain-dim px-4 py-5 font-body text-sm text-ink-fog">
           {emptyText}
         </p>

@@ -12,5 +12,10 @@ Milestone 4 requires a deployed application. Record the live URL and the deploym
 steps you actually used in `docs/demo/` — a deployment nobody else can reproduce
 does not count.
 
+The Render Blueprint is [`render.yaml`](../render.yaml). Follow the
+[Render deployment runbook](../docs/demo/render-deployment.md) to configure the
+required environment variables, deploy the frontend and backend, and record the
+resulting live URLs.
+
 Deployment credentials belong in GitHub Secrets or your cloud provider's secret
 store. Never in this folder.

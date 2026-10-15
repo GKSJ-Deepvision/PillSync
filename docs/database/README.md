@@ -5,6 +5,12 @@ Auth). The full, runnable schema is in [`schema.sql`](./schema.sql) — paste
 it into the Supabase SQL Editor once per project. This file explains the
 design behind it.
 
+For doctor appointments, run [`schema_appointments.sql`](./schema_appointments.sql)
+after `schema.sql`. Doctors register with the Doctor role; an administrator
+then links that account to verified name, experience, specialization, hospital,
+and address details. Only active listings and unbooked future slots appear to
+patients.
+
 ## Why Supabase for Milestone 1
 
 The spec calls for Django REST Framework or FastAPI with JWT/OAuth2 auth on
@@ -27,7 +33,7 @@ auth.users (Supabase-managed)
 profiles ──────────────< caregiver_links >────────────── profiles
  id (PK, = auth.users.id)   caregiver_id (FK → profiles.id)   (same table,
  role: patient|caregiver|   patient_id   (FK → profiles.id)    self-referencing)
-       admin                status: pending|accepted|revoked
+   doctor|admin          status: pending|accepted|revoked
  full_name, phone,
  date_of_birth, avatar_url
  blood_group, conditions[]
@@ -48,6 +54,15 @@ profiles ──────────────< caregiver_links >───�
   self-serve UI for it; Milestone 1 ships the table, RLS, and an admin-only
   write path).
 
+## Doctor appointments
+
+`doctor_profiles` stores administrator-managed directory details, while
+`doctor_availability` stores one row per free appointment slot. A patient
+booking claims one slot atomically; the database assigns the doctor's daily
+queue number and prevents double-booking. Patients see their number only when
+their scheduled time arrives. Doctor and patient access is limited by row-level
+security, with cancellation and visit status changes handled by database RPCs.
+
 ## Row Level Security = the real access control
 
 The UI's `ProtectedRoute` (frontend) only decides what renders. The
@@ -59,6 +74,7 @@ enforcement that actually matters lives in Postgres:
 | `profiles_select_admin` | Admins can read every profile — powers the admin dashboard's user counts. |
 | `profiles_select_linked_patient` | A caregiver can read a patient's profile only once `caregiver_links.status = 'accepted'`. |
 | `links_select_participant` / `links_admin_write` | Caregivers and patients see links that involve them; only admins create or change links in Milestone 1. |
+| Appointment policies | Patients see free slots and their own bookings; doctors see their bookings and patients; only admins manage listings. |
 
 ## Auto-provisioning
 
