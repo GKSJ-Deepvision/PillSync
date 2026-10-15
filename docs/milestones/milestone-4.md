@@ -8,19 +8,20 @@
 
 | Criterion | Status | Evidence (file, path or link) |
 |---|---|---|
-| Fully deployed frontend and backend | ☐ In progress | Render Blueprint is ready in [`render.yaml`](../../render.yaml); no Render services have been provisioned yet. |
+| Fully deployed frontend and backend | ☑ Done | Frontend: https://pillsync-web-optm.onrender.com; API: https://pillsync-api-free.onrender.com. Both are on Render's $0 Free plan. |
 | Analytics dashboards operational | ☑ Done | Frontend adherence analytics in `frontend/src/features/adherence/AdherenceDashboard.jsx`; patient dashboard in `frontend/src/pages/PatientDashboard.jsx`. |
 | Refill and adherence visualisations | ☑ Done | `frontend/src/components/dashboard/RefillOutlookCard.jsx`, `frontend/src/features/refills/RefillsPage.jsx`, and adherence dashboard. |
-| Testing and validation completed | ☑ Done | 21 backend/ML tests and 25 frontend tests passed; production frontend build succeeded. No coverage or live end-to-end deployment test was run. |
+| Testing and validation completed | ☑ Done | 22 backend/ML tests and 25 frontend tests passed; production frontend build succeeded. Live health and browser-to-API CORS checks passed. No full medication end-to-end test was run. |
 | End-to-end medication workflow demonstrated | ☐ In progress | No deployed end-to-end demonstration has been recorded. Use synthetic demo data only. |
-| Documentation complete | ☐ In progress | [Render deployment runbook](../demo/render-deployment.md); live URLs and runtime evidence remain to be added after deployment. |
+| Documentation complete | ☑ Done | [Render deployment runbook](../demo/render-deployment.md) records the live services and remaining verification. |
 
 ## Deployment
 
-- **Live URL:** Not deployed
-- **Platform:** Render (configured, not yet deployed)
+- **Frontend URL:** https://pillsync-web-optm.onrender.com
+- **Backend URL:** https://pillsync-api-free.onrender.com
+- **Platform:** Render Free plan ($0/month)
 - **Deployment steps:** [Render deployment runbook](../demo/render-deployment.md)
-- **Container images built:** ☐ backend ☐ frontend (CI build not yet run)
+- **Builds:** ☑ Backend Docker image built and deployed ☐ Frontend container (static site; no container)
 
 ## Performance metrics
 
@@ -38,10 +39,11 @@
 
 ## Testing summary
 
-- Backend and ML tests: 21 passed (pytest); coverage not measured.
+- Backend and ML tests: 22 passed (pytest); coverage not measured.
 - Frontend tests: 25 passed (Vitest); production Vite build succeeded.
 - End-to-end scenarios covered: None recorded.
-- Known failing or skipped tests: The release-readiness script reports no blocking gaps. Docker/Render deployment and live smoke tests remain unrun. Pytest emitted NumPy/joblib deprecation and scikit-learn model-version warnings; the frontend build emitted a large-chunk warning.
+- Live checks: Backend `/api/health` returned 200; a browser-origin batch refill request returned 200 with CORS enabled. Full sign-in/medication workflow was not exercised.
+- Known failing or skipped tests: The release-readiness script reports no blocking gaps. Pytest emitted NumPy/joblib deprecation and scikit-learn model-version warnings; the frontend build emitted a large-chunk warning.
 
 ## Demo
 
@@ -50,10 +52,10 @@
 
 ## Retrospective
 
-The frontend already includes adherence and refill dashboards, and the project
-has unit tests for core calculations and backend APIs. The Render Blueprint and
-deployment runbook make the frontend/backend setup reproducible. The milestone
-is still in progress: Render provisioning, live smoke tests, end-to-end
-demonstration, notification verification, and performance measurements remain
-to be completed. The current backend APIs are not authenticated, so only
-synthetic demo data should be used until access controls are added.
+The frontend and FastAPI backend are deployed on Render's free plan. The
+frontend includes adherence and refill dashboards, and automated tests cover
+core calculations and backend APIs. Live health and cross-origin API checks
+passed. A full medication workflow demonstration, notification verification,
+and performance measurements remain to be completed. The current backend APIs
+are not authenticated, so only synthetic demo data should be used until access
+controls are added.

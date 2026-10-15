@@ -3,43 +3,37 @@
 ## Deployment state
 
 The repository contains a Render Blueprint at [`render.yaml`](../../render.yaml).
-It defines a Docker web service for the FastAPI backend and a static site for
-the React frontend. This runbook describes how to deploy it; it does not claim
-that a Render service has been created. Record the actual URLs and deployment
-date here after completing the steps below.
+The services below were deployed on Render's Free plan.
 
-- **Frontend URL:** Not deployed
-- **Backend URL:** Not deployed
-- **Deployment date:** Not deployed
+- **Frontend URL:** https://pillsync-web-optm.onrender.com
+- **Backend URL:** https://pillsync-api-free.onrender.com
+- **Deployment date:** 2026-10-15
 - **Render Blueprint:** `render.yaml`
 
 ## Deploy
 
 1. Push this branch to the Git provider connected to Render.
-2. In the Render Dashboard, choose **New > Blueprint**, connect the repository,
-   select this branch, and confirm `render.yaml`.
-3. Supply the Blueprint's prompted environment variables:
-   - `CORS_ALLOWED_ORIGINS`: the exact frontend origin, for example
-     `https://pillsync-web.onrender.com` (no trailing slash).
-   - `VITE_API_BASE_URL`: the backend URL plus `/api`, for example
-     `https://pillsync-api.onrender.com/api`.
-   - `VITE_SUPABASE_URL`: the Supabase project URL.
-   - `VITE_SUPABASE_ANON_KEY`: the Supabase public anon key. Never use a
+2. Create the backend as a Docker web service from this branch. Leave **Root
+   Directory** blank, set **Dockerfile Path** to `backend/Dockerfile`, and
+   select the **Free** instance.
+3. Create the frontend as a static site from this branch. Set **Root
+   Directory** to `frontend`, **Build Command** to `npm ci && npm run build`,
+   **Publish Directory** to `dist`, and select the free static site.
+4. Set the frontend build variables:
+   - `VITE_API_BASE_URL=https://pillsync-api-free.onrender.com/api`
+   - `VITE_SUPABASE_URL` to the Supabase project URL.
+   - `VITE_SUPABASE_ANON_KEY` to the Supabase public anon key. Never use a
      Supabase service-role key in a frontend variable.
-4. Click **Deploy Blueprint**. Wait for the backend health check and frontend
-   build to pass. Update the frontend variables if Render assigns different
-   service URLs, then redeploy the frontend.
-5. In Supabase, add the actual frontend origin to the project's authentication
-   redirect URL allowlist. Verify that the database schema and row-level
-   security policies required by the frontend are applied.
-6. Verify `https://<backend-host>/api/health` returns
+5. In Supabase, add `https://pillsync-web-optm.onrender.com` to the project's
+   authentication redirect URL allowlist. Verify that the database schema and
+   row-level security policies required by the frontend are applied.
+6. Verify `https://pillsync-api-free.onrender.com/api/health` returns
    `{"status":"ok","service":"pillsync-backend"}` and
-   `https://<backend-host>/docs` loads. Then sign in with a synthetic test
-   account and smoke-test medication creation, dose logging, adherence
-   analytics, and refill predictions.
-7. Replace the "Not deployed" fields above and in
-   [`milestone-4.md`](../milestones/milestone-4.md) with the real Render URLs,
-   date, and verification evidence.
+   `https://pillsync-api-free.onrender.com/docs` loads. The backend health
+   endpoint and a browser-origin refill API/CORS request have been verified.
+   Full sign-in and medication workflow tests remain to be run.
+7. If the frontend domain changes, update the allowed origin in
+   `backend/config/main.py` and redeploy the backend.
 
 ## Current limitations
 
