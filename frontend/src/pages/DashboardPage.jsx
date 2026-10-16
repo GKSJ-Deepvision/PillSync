@@ -4,6 +4,7 @@ import AddMedicineModal from "../components/medications/AddMedicineModal";
 import StockProgressBar from "../components/refills/StockProgressBar";
 import CaregiverPage from "./CaregiverPage";
 import AnalyticsPage from "./AnalyticsPage";
+import { useConnections } from "../hooks/useConnections";
 import {
   fetchMedications,
   addMedication,
@@ -52,6 +53,9 @@ function PatientDashboardContent({ user, viewMode }) {
   const [error, setError] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("All");
+
+  // Live caregiver connections for patient
+  const { connections: caregiverConnections } = useConnections(user);
 
   const loadData = async () => {
     setLoading(true);
@@ -276,9 +280,11 @@ function PatientDashboardContent({ user, viewMode }) {
               <>
                 Monitoring{" "}
                 <strong className="text-white font-bold">
-                  3 assigned family members & patients
+                  {caregiverConnections.length} assigned patient{caregiverConnections.length !== 1 ? "s" : ""}
                 </strong>
-                . 1 active missed-dose alert requires attention.
+                {caregiverConnections.length > 0 && (
+                  <span> — {caregiverConnections.map((c) => c.name || c.patient_name).join(", ")}</span>
+                )}
               </>
             ) : isAdmin ? (
               <>
@@ -295,6 +301,11 @@ function PatientDashboardContent({ user, viewMode }) {
                   {todayDoses.length} assigned doses scheduled for today
                 </strong>{" "}
                 across {categoryFilteredMeds.length} active prescription(s).
+                {caregiverConnections.length > 0 && (
+                  <span className="block mt-0.5 text-brand-200">
+                    Your caregiver: <strong className="text-white">{caregiverConnections[0].name || caregiverConnections[0].caregiver_name}</strong>
+                  </span>
+                )}
               </>
             )}
           </p>
@@ -414,14 +425,27 @@ function PatientDashboardContent({ user, viewMode }) {
         <div className="p-5 rounded-3xl glass-card border border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              Assigned Caregiver
+              {caregiverConnections.length > 0 ? "Assigned Caregiver" : "Care Team"}
             </p>
-            <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
-              Active
-            </h3>
-            <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 mt-1 block">
-              Dr. Sarah Jenkins
-            </span>
+            {caregiverConnections.length > 0 ? (
+              <>
+                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white mt-1 truncate max-w-[140px]">
+                  {caregiverConnections[0].name ||
+                    caregiverConnections[0].caregiver_name ||
+                    "Caregiver"}
+                </h3>
+                <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 mt-1 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> Active • {caregiverConnections.length} assigned
+                </span>
+              </>
+            ) : (
+              <>
+                <h3 className="text-2xl font-extrabold text-slate-400 dark:text-slate-600 mt-1">—</h3>
+                <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-600 mt-1 block">
+                  No caregiver assigned
+                </span>
+              </>
+            )}
           </div>
           <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
             <Sparkles className="w-6 h-6" />

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useConnections } from "../hooks/useConnections";
 import {
   User,
   Mail,
@@ -19,12 +20,16 @@ import {
   ShieldCheck,
   UserCog,
   Link2,
+  RefreshCw,
 } from "lucide-react";
 
 export default function ProfilePage() {
   const { user, viewMode, login } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [saveMessage, setSaveMessage] = useState(null);
+
+  // Live bidirectional connections from backend
+  const { connections, loading: connLoading, error: connError, reload: reloadConnections } = useConnections(user);
 
   // Determine the ACTUAL logged-in role — never override with viewMode
   // viewMode is just a UI lens; the real user role is what matters for profile display
@@ -510,18 +515,26 @@ export default function ProfilePage() {
                     <label className="block text-slate-500 dark:text-slate-400 font-semibold mb-1">
                       Assigned Caregiver / Doctor
                     </label>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="assignedCaregiver"
-                        value={formData.assignedCaregiver}
-                        onChange={handleChange}
-                        className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-brand-500 outline-none"
-                      />
+                    {/* Live data is shown in "My Connections" panel on the right */}
+                    {connLoading ? (
+                      <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 flex items-center gap-2 text-slate-400 text-xs">
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Loading caregiver info...
+                      </div>
+                    ) : connections.length > 0 ? (
+                      <div className="space-y-2">
+                        {connections.map((c, i) => (
+                          <div key={i} className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 font-bold text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900 flex items-center gap-2 text-xs">
+                            <Shield className="w-4 h-4 text-indigo-500 shrink-0" />
+                            <div>
+                              <div>{c.name || c.caregiver_name || "Caregiver"}</div>
+                              <div className="text-[10px] font-normal text-indigo-500">{c.email || c.caregiver_email || ""}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     ) : (
-                      <div className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 font-bold text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900 flex items-center gap-2">
-                        <Shield className="w-4 h-4 text-indigo-500" />
-                        {formData.assignedCaregiver}
+                      <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 text-slate-400 text-xs">
+                        No caregiver assigned yet.
                       </div>
                     )}
                   </div>
@@ -619,6 +632,89 @@ export default function ProfilePage() {
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                   Excellent tracking record! 0 missed doses recorded this month.
                 </p>
+              </div>
+            )}
+          </div>
+
+          {/* ── My Connections (Live from Backend) ── */}
+          <div className="p-6 rounded-3xl glass-card border border-slate-200/80 dark:border-slate-800/80 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <Link2 className="w-4 h-4 text-emerald-500" />
+                {isCaregiver ? "My Assigned Patients" : "My Caregiver(s)"}
+              </h3>
+              <button
+                type="button"
+                onClick={reloadConnections}
+                title="Refresh connections"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-950 transition-colors"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${connLoading ? "animate-spin text-brand-500" : ""}`} />
+              </button>
+            </div>
+
+            {connLoading ? (
+              <div className="flex items-center gap-2 text-slate-400 text-xs p-3">
+                <RefreshCw className="w-4 h-4 animate-spin" /> Loading connections...
+              </div>
+            ) : connError ? (
+              <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-300 text-xs font-medium">
+                Could not load connections. Make sure you are logged in.
+              </div>
+            ) : connections.length === 0 ? (
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 text-center text-xs text-slate-400 space-y-1">
+                <Users className="w-6 h-6 mx-auto text-slate-300 dark:text-slate-600 mb-1" />
+                {isCaregiver
+                  ? "No patients assigned to you yet. Go to Caregiver Portal → Assign Patient."
+                  : "No caregiver assigned to you yet. Ask your caregiver to link your account."}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {connections.map((c, i) => {
+                  const name = c.name || c.caregiver_name || c.patient_name || "Unknown";
+                  const email = c.email || c.caregiver_email || c.patient_email || "";
+                  const initial = name.charAt(0).toUpperCase();
+                  return (
+                    <div
+                      key={i}
+                      className={`p-3.5 rounded-2xl flex items-center gap-3 border text-xs font-medium ${
+                        isCaregiver
+                          ? "bg-sky-50 dark:bg-sky-950/40 border-sky-200 dark:border-sky-800"
+                          : "bg-violet-50 dark:bg-violet-950/40 border-violet-200 dark:border-violet-800"
+                      }`}
+                    >
+                      {/* Avatar circle */}
+                      <div
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center font-extrabold text-base shrink-0 ${
+                          isCaregiver
+                            ? "bg-sky-200 dark:bg-sky-800 text-sky-800 dark:text-sky-100"
+                            : "bg-violet-200 dark:bg-violet-800 text-violet-800 dark:text-violet-100"
+                        }`}
+                      >
+                        {initial}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-extrabold truncate ${
+                          isCaregiver
+                            ? "text-sky-800 dark:text-sky-200"
+                            : "text-violet-800 dark:text-violet-200"
+                        }`}>
+                          {name}
+                        </p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-normal truncate">
+                          {email}
+                        </p>
+                      </div>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                        isCaregiver
+                          ? "bg-sky-100 dark:bg-sky-900 border-sky-200 dark:border-sky-700 text-sky-700 dark:text-sky-300"
+                          : "bg-violet-100 dark:bg-violet-900 border-violet-200 dark:border-violet-700 text-violet-700 dark:text-violet-300"
+                      }`}>
+                        {isCaregiver ? "Patient" : "Caregiver"}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
