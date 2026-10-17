@@ -6,7 +6,7 @@ Two tables this milestone, related one-to-many via a self-referencing link
 | Table | Purpose |
 |---|---|
 | `profiles` | One row per Supabase Auth user, keyed on the same UUID as `auth.users.id` — no separate foreign key needed. Holds `role` (single source of truth for RBAC), identity fields, and patient-only fields (`blood_group`, `conditions`, emergency contact) that stay empty for caregiver/admin rows. |
-| `caregiver_links` | Many-to-many join table: `caregiver_id` / `patient_id` (both FKs to `profiles.id`), a `status` of `pending` / `accepted` / `revoked`, unique on the `(caregiver, patient)` pair. Writes are admin-only this milestone; self-serve invite/accept is Milestone 2 scope. |
+| `caregiver_links` | Many-to-many join table: `caregiver_id` / `patient_id` (both FKs to `profiles.id`), a `status` of `pending` / `accepted` / `revoked`, unique on the `(caregiver, patient)` pair. Admins can write directly. Caregivers and patients create and answer link requests through database functions (see `schema-caregiver-requests.sql` and `schema-caregiver-requests-patient-side.sql`); `requested_by` records who started a request. |
 
 A `handle_new_user()` trigger auto-creates a `profiles` row on every signup
 using the `role` / `full_name` passed in `auth.signUp()`'s metadata. A second
