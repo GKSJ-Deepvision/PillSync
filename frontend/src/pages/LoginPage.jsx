@@ -5,7 +5,7 @@ import { supabase } from "../lib/supabaseClient";
 import { PillIcon } from "../components/icons";
 
 export default function LoginPage() {
-  const { signIn, signInWithGoogle, signOut } = useAuth();
+  const { signIn, signOut } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -150,13 +150,6 @@ export default function LoginPage() {
             </div>
           </form>
 
-          <button
-            onClick={signInWithGoogle}
-            className="flex w-full items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-gray-300 hover:bg-gray-50 hover:shadow-md"
-          >
-            Continue with Google
-          </button>
-
           <div className="flex items-center justify-between px-1 text-sm">
             <Link
               to="/forgot-password"
@@ -181,3 +174,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
