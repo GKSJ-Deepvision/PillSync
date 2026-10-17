@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { UserIcon } from "../../components/icons";
+import CaregiverRequestsCard from "./CaregiverRequestsCard";
 
 export default function ProfilePage() {
   const { profile, role, updateProfile } = useAuth();
@@ -473,6 +474,8 @@ export default function ProfilePage() {
               </p>
 
             </div>
+
+            {role === "patient" && <CaregiverRequestsCard />}
 
             {/* Health reminder */}
             {role === "patient" && (

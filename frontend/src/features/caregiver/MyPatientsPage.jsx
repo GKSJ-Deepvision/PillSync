@@ -1,13 +1,31 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
 import { useAuth } from "../../context/AuthContext";
+import PatientRequestsCard from "./PatientRequestsCard";
+
+async function fetchPendingCount(userId) {
+  const { count } = await supabase
+    .from("caregiver_links")
+    .select("id", { count: "exact", head: true })
+    .eq("caregiver_id", userId)
+    .eq("status", "pending")
+    .eq("requested_by", userId);
+  return count ?? 0;
+}
 
 export default function MyPatientsPage() {
   const { user } = useAuth();
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showAdd, setShowAdd] = useState(false);
+  const [patientEmail, setPatientEmail] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [addMessage, setAddMessage] = useState("");
+  const [addIsError, setAddIsError] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     if (!user) return;
@@ -103,7 +121,35 @@ export default function MyPatientsPage() {
     };
 
     loadPatients();
+  }, [user, refreshKey]);
+
+  useEffect(() => {
+    if (!user) return;
+    fetchPendingCount(user.id).then(setPendingCount);
   }, [user]);
+
+  const handleAddPatient = async (event) => {
+    event.preventDefault();
+    setAdding(true);
+    setAddMessage("");
+    setAddIsError(false);
+
+    const { error: rpcError } = await supabase.rpc("request_caregiver_link", {
+      p_patient_email: patientEmail.trim(),
+    });
+
+    if (rpcError) {
+      setAddIsError(true);
+      setAddMessage(rpcError.message || "Could not send the request.");
+    } else {
+      setAddMessage(
+        "Request sent. If a patient account exists for that email, they will see it on their Profile page and can accept. You will see the patient here once they accept."
+      );
+      setPatientEmail("");
+      setPendingCount(await fetchPendingCount(user.id));
+    }
+    setAdding(false);
+  };
 
   if (loading) {
     return (
@@ -155,6 +201,63 @@ export default function MyPatientsPage() {
             </div>
           </div>
         </div>
+
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              setShowAdd((v) => !v);
+              setAddMessage("");
+            }}
+            className="inline-flex items-center rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-700"
+          >
+            + Add patient
+          </button>
+          {pendingCount > 0 && (
+            <span className="text-sm text-slate-500">
+              {pendingCount} request{pendingCount === 1 ? "" : "s"} waiting for patient approval
+            </span>
+          )}
+        </div>
+
+        <PatientRequestsCard onChange={() => setRefreshKey((k) => k + 1)} />
+
+        {showAdd && (
+          <form
+            onSubmit={handleAddPatient}
+            className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+          >
+            <h2 className="text-base font-semibold text-slate-900">
+              Add a patient
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Enter the email the patient used to register. They will get a
+              request to accept before you can see any of their information.
+            </p>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <input
+                type="email"
+                required
+                value={patientEmail}
+                onChange={(e) => setPatientEmail(e.target.value)}
+                placeholder="patient@example.com"
+                className="w-full rounded-xl border border-slate-300 px-4 py-2 text-sm focus:border-sky-500 focus:outline-none"
+              />
+              <button
+                type="submit"
+                disabled={adding}
+                className="rounded-xl bg-sky-600 px-5 py-2 text-sm font-semibold text-white hover:bg-sky-700 disabled:opacity-60"
+              >
+                {adding ? "Sending..." : "Send request"}
+              </button>
+            </div>
+            {addMessage && (
+              <p className={`mt-3 text-sm ${addIsError ? "text-red-600" : "text-emerald-700"}`}>
+                {addMessage}
+              </p>
+            )}
+          </form>
+        )}
 
         {error && (
           <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
