@@ -62,20 +62,15 @@ def _get_queryset_for_user(user):
         qs = Medication.objects.filter(
             Q(patient_id__in=assigned_patient_ids) | Q(caregiver=user)
         )
-        if not qs.exists():
-            # If no caregiver-specific medications found yet, show demo medications
-            return Medication.objects.all().order_by("-id")
         return qs.order_by("-id")
 
-    # Patient role
+    # Patient role: ONLY medicines assigned to this patient
     qs = Medication.objects.filter(
         Q(patient=user) | Q(assigned_patient_id=str(user.id))
     )
     if not qs.exists():
-        unassigned = Medication.objects.filter(patient__isnull=True)
-        if unassigned.exists():
-            return unassigned.order_by("-id")
-        return Medication.objects.all().order_by("-id")
+        unassigned = Medication.objects.filter(patient__isnull=True, caregiver__isnull=True)
+        return unassigned.order_by("-id")
     return qs.order_by("-id")
 
 
@@ -84,11 +79,17 @@ def _get_queryset_for_user(user):
 def medication_list_create(request):
     """
     GET: List medications filtered by the requesting user's role.
+         Optionally filtered by ?patient_id=<id> for specific patient medications.
     POST: Create a new medication. Caregivers can specify a patient;
           patients can only add for themselves.
     """
     if request.method == "GET":
         meds = _get_queryset_for_user(request.user)
+        patient_id_filter = request.query_params.get("patient_id")
+        if patient_id_filter:
+            meds = meds.filter(
+                Q(patient_id=patient_id_filter) | Q(assigned_patient_id=str(patient_id_filter))
+            )
         serializer = MedicationSerializer(meds, many=True)
         return Response(serializer.data)
 

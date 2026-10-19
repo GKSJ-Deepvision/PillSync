@@ -12,12 +12,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { fetchCaregiverPatients, fetchPatientCaregivers } from "../services/api";
 
-export function useConnections(user) {
+export function useConnections(user, overrideRole = null) {
   const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const role = user?.role || "patient";
+  const role = overrideRole || user?.role || "patient";
   const userId = user?.id;
 
   const load = useCallback(async () => {
@@ -26,11 +26,11 @@ export function useConnections(user) {
     setError(null);
     try {
       let data = [];
-      if (role === "caregiver" || role === "admin") {
+      if (role === "caregiver") {
         // Caregiver sees their patients
         data = await fetchCaregiverPatients(userId);
       } else {
-        // Patient sees their caregivers
+        // Patient (or admin in patient view) sees their caregivers
         data = await fetchPatientCaregivers(userId);
       }
       setConnections(Array.isArray(data) ? data : []);

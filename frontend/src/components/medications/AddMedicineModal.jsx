@@ -46,6 +46,23 @@ export default function AddMedicineModal({
   const [isSearchingFda, setIsSearchingFda] = useState(false);
   const [showFdaResults, setShowFdaResults] = useState(false);
 
+  // Sync defaultPatientId whenever modal opens or default changes
+  useEffect(() => {
+    if (isOpen) {
+      if (defaultPatientId) {
+        setFormData((prev) => ({
+          ...prev,
+          assignedPatientId: defaultPatientId,
+        }));
+      } else if (patientsList && patientsList.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          assignedPatientId: prev.assignedPatientId || patientsList[0]?.id || "",
+        }));
+      }
+    }
+  }, [isOpen, defaultPatientId, patientsList]);
+
   useEffect(() => {
     if (!formData.name || formData.name.length < 2) {
       setFdaResults([]);
@@ -95,7 +112,7 @@ export default function AddMedicineModal({
     );
 
     const selectedPatientObj = patientsList.find(
-      (p) => p.id === formData.assignedPatientId,
+      (p) => String(p.id) === String(formData.assignedPatientId),
     );
 
     onAddMedicine({
@@ -115,6 +132,8 @@ export default function AddMedicineModal({
       manufacturer: formData.manufacturer,
       fdaNdc: formData.fdaNdc,
       stockDays,
+      patient_id: formData.assignedPatientId,
+      patientId: formData.assignedPatientId,
       assignedPatientId: formData.assignedPatientId,
       assignedPatientName: selectedPatientObj ? selectedPatientObj.name : "",
     });

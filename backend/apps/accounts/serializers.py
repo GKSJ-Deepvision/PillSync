@@ -7,10 +7,12 @@ from .models import CaregiverPatientAssignment
 class UserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     role = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField()
+    phone = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ("id", "username", "email", "name", "role")
+        fields = ("id", "username", "email", "name", "role", "avatar", "phone")
 
     def get_name(self, obj):
         if obj.first_name:
@@ -33,6 +35,13 @@ class UserSerializer(serializers.ModelSerializer):
         if "caregiver" in email or "doctor" in email:
             return "caregiver"
         return "patient"
+
+    def get_avatar(self, obj):
+        seed = (obj.username or obj.email or str(obj.id)).replace("@", "_")
+        return f"https://api.dicebear.com/7.x/avataaars/svg?seed={seed}"
+
+    def get_phone(self, obj):
+        return "+1 (555) 234-5678"
 
 
 class RegisterSerializer(serializers.Serializer):
@@ -75,6 +84,10 @@ class AssignmentSerializer(serializers.ModelSerializer):
     patient_name = serializers.SerializerMethodField()
     caregiver_email = serializers.SerializerMethodField()
     patient_email = serializers.SerializerMethodField()
+    caregiver_avatar = serializers.SerializerMethodField()
+    patient_avatar = serializers.SerializerMethodField()
+    caregiver_phone = serializers.SerializerMethodField()
+    patient_phone = serializers.SerializerMethodField()
 
     class Meta:
         model = CaregiverPatientAssignment
@@ -83,9 +96,13 @@ class AssignmentSerializer(serializers.ModelSerializer):
             "caregiver",
             "caregiver_name",
             "caregiver_email",
+            "caregiver_avatar",
+            "caregiver_phone",
             "patient",
             "patient_name",
             "patient_email",
+            "patient_avatar",
+            "patient_phone",
             "assigned_at",
             "note",
         ]
@@ -103,3 +120,17 @@ class AssignmentSerializer(serializers.ModelSerializer):
 
     def get_patient_email(self, obj):
         return obj.patient.email
+
+    def get_caregiver_avatar(self, obj):
+        seed = (obj.caregiver.username or obj.caregiver.email or str(obj.caregiver.id)).replace("@", "_")
+        return f"https://api.dicebear.com/7.x/avataaars/svg?seed={seed}"
+
+    def get_patient_avatar(self, obj):
+        seed = (obj.patient.username or obj.patient.email or str(obj.patient.id)).replace("@", "_")
+        return f"https://api.dicebear.com/7.x/avataaars/svg?seed={seed}"
+
+    def get_caregiver_phone(self, obj):
+        return "+1 (555) 234-5678"
+
+    def get_patient_phone(self, obj):
+        return "+1 (555) 876-5432"

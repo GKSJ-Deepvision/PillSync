@@ -11,7 +11,13 @@ from .serializers import ReminderSerializer
 @permission_classes([AllowAny])
 def reminder_list_create(request):
     if request.method == "GET":
-        reminders = Reminder.objects.all().order_by("id")
+        user = request.user
+        if user and user.is_authenticated:
+            from apps.medications.views import _get_queryset_for_user
+            allowed_med_ids = list(_get_queryset_for_user(user).values_list("id", flat=True))
+            reminders = Reminder.objects.filter(medication_id__in=allowed_med_ids).order_by("id")
+        else:
+            reminders = Reminder.objects.all().order_by("id")
         serializer = ReminderSerializer(reminders, many=True)
         return Response(serializer.data)
 

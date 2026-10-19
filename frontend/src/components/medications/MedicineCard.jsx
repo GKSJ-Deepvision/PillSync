@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Pill,
   Clock,
@@ -8,10 +7,19 @@ import {
   Tag,
   Trash2,
   Calendar,
+  User,
 } from "lucide-react";
 
-export default function MedicineCard({ medicine, onTake, onMiss, onDelete }) {
+export default function MedicineCard({
+  medicine,
+  onTake,
+  onMiss,
+  onDelete,
+  patientDisplayName,
+}) {
   const isLowStock = medicine.stock <= medicine.refillThreshold;
+  const effectivePatient =
+    patientDisplayName || medicine.patient_name || medicine.assignedPatientName;
 
   const diseaseColors = {
     Diabetes:
@@ -92,6 +100,12 @@ export default function MedicineCard({ medicine, onTake, onMiss, onDelete }) {
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
               {medicine.frequency}
             </p>
+            {effectivePatient && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 mt-1">
+                <User className="w-3 h-3 text-indigo-500" />
+                Patient: {effectivePatient}
+              </span>
+            )}
           </div>
         </div>
 

@@ -191,6 +191,7 @@ export default function CaregiverPage() {
   const [medicines, setMedicines] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedDisease, setSelectedDisease] = useState("All");
+  const [selectedPatientFilter, setSelectedPatientFilter] = useState("All");
   const [reportMsg, setReportMsg] = useState(null);
 
   // Backend assignment state
@@ -647,16 +648,42 @@ export default function CaregiverPage() {
     }, 400);
   };
 
+  const getPatientNameForMed = useCallback(
+    (med) => {
+      if (med.patient_name) return med.patient_name;
+      if (med.assignedPatientName) return med.assignedPatientName;
+      const targetId = med.patient_id ?? med.patient ?? med.assignedPatientId;
+      if (targetId) {
+        const found = patientsList.find(
+          (p) => String(p.id) === String(targetId),
+        );
+        if (found) return found.name;
+      }
+      return null;
+    },
+    [patientsList],
+  );
+
   const filteredMeds = medicines.filter((m) => {
+    const medPatientName = (getPatientNameForMed(m) || "").toLowerCase();
     const matchesSearch =
       m.name.toLowerCase().includes(search.toLowerCase()) ||
+      medPatientName.includes(search.toLowerCase()) ||
       (m.diseaseCategory &&
         m.diseaseCategory.toLowerCase().includes(search.toLowerCase()));
+
     const matchesDisease =
       selectedDisease === "All" ||
       (m.diseaseCategory &&
         m.diseaseCategory.toLowerCase() === selectedDisease.toLowerCase());
-    return matchesSearch && matchesDisease;
+
+    const matchesPatient =
+      selectedPatientFilter === "All" ||
+      String(m.patient_id ?? m.patient ?? m.assignedPatientId) ===
+        String(selectedPatientFilter) ||
+      medPatientName === selectedPatientFilter.toLowerCase();
+
+    return matchesSearch && matchesDisease && matchesPatient;
   });
 
   const totalMissedDoses = patientsList.reduce(
@@ -847,71 +874,122 @@ export default function CaregiverPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {patientsList.map((patient) => (
-                  <div
-                    key={patient.id}
-                    className="p-5 rounded-3xl glass-card border border-slate-200/80 dark:border-slate-800/80 space-y-4 hover:border-emerald-400/50 transition-all shadow-sm flex flex-col justify-between"
-                  >
-                    <div>
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="text-base font-bold text-slate-900 dark:text-white">
-                            {patient.name}
-                          </h4>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                            Age {patient.age} &bull;{" "}
-                            {Array.isArray(patient.conditions)
-                              ? patient.conditions.join(" • ")
-                              : patient.conditions}
-                          </p>
+                {patientsList.map((patient) => {
+                  const patientAvatar =
+                    patient.avatar ||
+                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${patient.name.replace(/ /g, "_")}`;
+
+                  const patientMedsCount =
+                    medicines.filter((m) => {
+                      const pId = String(patient.id);
+                      const mPId = String(
+                        m.patient_id ?? m.patient ?? m.assignedPatientId ?? "",
+                      );
+                      const pName = patient.name.toLowerCase().trim();
+                      const mPName = (
+                        m.patient_name ||
+                        m.assignedPatientName ||
+                        ""
+                      )
+                        .toLowerCase()
+                        .trim();
+                      return (
+                        (mPId && mPId === pId) || (mPName && mPName === pName)
+                      );
+                    }).length + (patient.medications?.length || 0);
+
+                  return (
+                    <div
+                      key={patient.id}
+                      className="p-5 rounded-3xl glass-card border border-slate-200/80 dark:border-slate-800/80 space-y-4 hover:border-emerald-400/50 transition-all shadow-sm flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={patientAvatar}
+                              alt={patient.name}
+                              onClick={() => setSelectedPatientDetail(patient)}
+                              className="w-12 h-12 rounded-2xl object-cover bg-slate-100 dark:bg-slate-800 ring-2 ring-emerald-500/30 cursor-pointer hover:scale-105 transition-transform shrink-0"
+                            />
+                            <div>
+                              <h4
+                                onClick={() => setSelectedPatientDetail(patient)}
+                                className="text-base font-bold text-slate-900 dark:text-white hover:text-brand-600 dark:hover:text-brand-400 transition-colors cursor-pointer"
+                              >
+                                {patient.name}
+                              </h4>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                Age {patient.age} &bull;{" "}
+                                {Array.isArray(patient.conditions)
+                                  ? patient.conditions.join(" • ")
+                                  : patient.conditions}
+                              </p>
+                              {patient.emergencyContact && (
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5 font-medium">
+                                  <Phone className="w-3 h-3 text-emerald-500" />
+                                  {patient.emergencyContact}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {patient.status === "Attention Needed" ||
+                            patient.missedDoses > 0 ? (
+                              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-300 flex items-center gap-1">
+                                🟠 Attention
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 flex items-center gap-1">
+                                🟢 Healthy
+                              </span>
+                            )}
+                            <button
+                              onClick={() =>
+                                handleDeletePatient(patient.id, patient.name)
+                              }
+                              title="Remove patient"
+                              className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-1.5">
-                          {patient.status === "Attention Needed" ||
-                          patient.missedDoses > 0 ? (
-                            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-300 flex items-center gap-1">
-                              🟠 Attention
+                        <div className="mt-4 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 grid grid-cols-3 gap-2 text-xs">
+                          <div>
+                            <span className="text-slate-400 block font-medium text-[10px]">
+                              Adherence Rate
                             </span>
-                          ) : (
-                            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 flex items-center gap-1">
-                              🟢 Healthy
+                            <strong className="text-slate-900 dark:text-white text-base font-bold">
+                              {patient.adherence}
+                            </strong>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 block font-medium text-[10px]">
+                              Missed Doses
                             </span>
-                          )}
-                          <button
-                            onClick={() => handleDeletePatient(patient.id, patient.name)}
-                            title="Remove patient"
-                            className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                            <strong
+                              className={`text-base font-bold ${
+                                patient.missedDoses > 0
+                                  ? "text-rose-600 dark:text-rose-400"
+                                  : "text-emerald-600"
+                              }`}
+                            >
+                              {patient.missedDoses} missed
+                            </strong>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 block font-medium text-[10px]">
+                              Prescriptions
+                            </span>
+                            <strong className="text-indigo-600 dark:text-indigo-400 text-base font-bold flex items-center gap-1">
+                              <Pill className="w-3.5 h-3.5" /> {patientMedsCount}
+                            </strong>
+                          </div>
                         </div>
                       </div>
-
-                      <div className="mt-4 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 grid grid-cols-2 gap-2 text-xs">
-                        <div>
-                          <span className="text-slate-400 block font-medium text-[10px]">
-                            Adherence Rate
-                          </span>
-                          <strong className="text-slate-900 dark:text-white text-base font-bold">
-                            {patient.adherence}
-                          </strong>
-                        </div>
-                        <div>
-                          <span className="text-slate-400 block font-medium text-[10px]">
-                            Missed Doses
-                          </span>
-                          <strong
-                            className={`text-base font-bold ${
-                              patient.missedDoses > 0
-                                ? "text-rose-600 dark:text-rose-400"
-                                : "text-emerald-600"
-                            }`}
-                          >
-                            {patient.missedDoses} missed
-                          </strong>
-                        </div>
-                      </div>
-                    </div>
 
                     <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                       <button
@@ -932,7 +1010,8 @@ export default function CaregiverPage() {
                       </button>
                     </div>
                   </div>
-                ))}
+                );
+              })}
               </div>
             )}
           </div>
@@ -1271,20 +1350,41 @@ export default function CaregiverPage() {
           </button>
         </div>
 
-        {/* Search & Condition Filter Pills */}
-        <div className="p-4 rounded-3xl glass-card border border-slate-200/80 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="relative w-full sm:w-80">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-            <input
-              type="text"
-              placeholder="Search medicine or disease..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-brand-500"
-            />
+        {/* Search, Patient Selector & Condition Filter Pills */}
+        <div className="p-4 rounded-3xl glass-card border border-slate-200/80 dark:border-slate-800/80 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+              <input
+                type="text"
+                placeholder="Search medicine or disease..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-brand-500"
+              />
+            </div>
+
+            {/* Patient Filter Dropdown */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider shrink-0">
+                Patient:
+              </span>
+              <select
+                value={selectedPatientFilter}
+                onChange={(e) => setSelectedPatientFilter(e.target.value)}
+                className="px-3 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-brand-500 focus:outline-none"
+              >
+                <option value="All">All Patients</option>
+                {patientsList.map((p) => (
+                  <option key={p.id} value={p.name}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 scrollbar-none">
+          <div className="flex items-center gap-1.5 overflow-x-auto w-full lg:w-auto pb-1 lg:pb-0 scrollbar-none">
             <Filter className="w-4 h-4 text-slate-400 shrink-0 mr-1" />
             {[
               "All",
@@ -1322,6 +1422,7 @@ export default function CaregiverPage() {
               <MedicineCard
                 key={med.id}
                 medicine={med}
+                patientDisplayName={getPatientNameForMed(med)}
                 onTake={handleTakeDose}
                 onMiss={() => alert(`Logged missed dose for ${med.name}`)}
                 onDelete={handleDeleteMedicine}
@@ -1346,17 +1447,33 @@ export default function CaregiverPage() {
         {selectedPatientDetail && (
           <div className="space-y-5">
             {/* Header info */}
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 text-white flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-extrabold">
-                  {selectedPatientDetail.name}
-                </h3>
-                <p className="text-xs text-brand-100 mt-0.5">
-                  Age {selectedPatientDetail.age} &bull; Gender:{" "}
-                  {selectedPatientDetail.gender}
-                </p>
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 text-white flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <img
+                  src={
+                    selectedPatientDetail.avatar ||
+                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedPatientDetail.name.replace(/ /g, "_")}`
+                  }
+                  alt={selectedPatientDetail.name}
+                  className="w-13 h-13 rounded-2xl bg-white/20 object-cover ring-2 ring-white/30 shrink-0"
+                />
+                <div>
+                  <h3 className="text-lg font-extrabold">
+                    {selectedPatientDetail.name}
+                  </h3>
+                  <p className="text-xs text-brand-100 mt-0.5">
+                    Age {selectedPatientDetail.age} &bull; Gender:{" "}
+                    {selectedPatientDetail.gender}
+                  </p>
+                  {selectedPatientDetail.emergencyContact && (
+                    <p className="text-[11px] text-brand-200 mt-0.5 flex items-center gap-1 font-medium">
+                      <Phone className="w-3 h-3" />
+                      {selectedPatientDetail.emergencyContact}
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="text-right">
+              <div className="text-right shrink-0">
                 <span className="text-[10px] font-bold uppercase tracking-wider block text-brand-200">
                   Adherence
                 </span>
@@ -1385,6 +1502,150 @@ export default function CaregiverPage() {
                 </span>
               </div>
             </div>
+
+            {/* Assigned Medicines & Prescriptions (Requirement 5) */}
+            {(() => {
+              const pId = String(selectedPatientDetail.id);
+              const pName =
+                selectedPatientDetail.name?.toLowerCase().trim() || "";
+
+              const pMeds = medicines.filter((m) => {
+                const mPId = String(
+                  m.patient_id ?? m.patient ?? m.assignedPatientId ?? "",
+                );
+                const mPName = (
+                  m.patient_name ||
+                  m.assignedPatientName ||
+                  ""
+                )
+                  .toLowerCase()
+                  .trim();
+                return (mPId && mPId === pId) || (mPName && mPName === pName);
+              });
+
+              // Merge local medications list if any
+              const combinedMeds = [...pMeds];
+              if (Array.isArray(selectedPatientDetail.medications)) {
+                selectedPatientDetail.medications.forEach((localMed) => {
+                  const already = combinedMeds.some(
+                    (m) =>
+                      m.name.toLowerCase() === localMed.name.toLowerCase(),
+                  );
+                  if (!already) {
+                    combinedMeds.push({
+                      id: `local-${localMed.name}`,
+                      name: localMed.name,
+                      dosage: localMed.dosage,
+                      frequency: localMed.frequency,
+                      stock: localMed.stock,
+                      timesOfDay: ["Morning"],
+                      diseaseCategory:
+                        selectedPatientDetail.conditions?.[0] || "General",
+                    });
+                  }
+                });
+              }
+
+              return (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                      <Pill className="w-3.5 h-3.5 text-brand-600" />
+                      Assigned Medicines ({combinedMeds.length})
+                    </h4>
+                    <button
+                      onClick={() => {
+                        setDefaultPatientIdForMedicine(
+                          selectedPatientDetail.id,
+                        );
+                        setSelectedPatientDetail(null);
+                        setIsAddMedicineOpen(true);
+                      }}
+                      className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+                    >
+                      <Plus className="w-3 h-3" /> Add Medicine
+                    </button>
+                  </div>
+
+                  {combinedMeds.length === 0 ? (
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-1">
+                      <p className="text-xs font-bold text-slate-600 dark:text-slate-300">
+                        No medicines assigned to this patient yet.
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        Click "+ Add Medicine" to prescribe a new medication schedule.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+                      {combinedMeds.map((med) => {
+                        const isLow =
+                          (med.stock || 0) <= (med.refillThreshold || 10);
+                        const scheduledTimes =
+                          Array.isArray(med.timesOfDay) &&
+                          med.timesOfDay.length > 0
+                            ? med.timesOfDay
+                                .map((t) =>
+                                  med.timingDetails?.[t]
+                                    ? `${t} (${med.timingDetails[t]})`
+                                    : t,
+                                )
+                                .join(", ")
+                            : med.frequency || "Daily";
+
+                        return (
+                          <div
+                            key={med.id || med.name}
+                            className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-3 text-xs"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-extrabold text-slate-900 dark:text-white text-sm">
+                                  {med.name}
+                                </span>
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300">
+                                  {med.dosage}
+                                </span>
+                                {med.diseaseCategory && (
+                                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                    {med.diseaseCategory}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[11px] text-slate-500 mt-1 flex items-center gap-2 flex-wrap">
+                                <span>
+                                  <strong>Frequency:</strong>{" "}
+                                  {med.frequency || "Daily"}
+                                </span>
+                                <span>•</span>
+                                <span>
+                                  <strong>Schedule:</strong> {scheduledTimes}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="text-right shrink-0">
+                              <span
+                                className={`inline-flex items-center gap-1 font-bold text-[10px] px-2 py-0.5 rounded-full border ${
+                                  isLow
+                                    ? "bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border-rose-300 dark:border-rose-800"
+                                    : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800"
+                                }`}
+                              >
+                                {isLow ? "⚠️ Low Stock" : "✓ In Stock"}
+                              </span>
+                              <div className="text-[11px] text-slate-500 mt-0.5 font-medium">
+                                {med.stock} units
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Today's Schedule Timeline */}
             <div>
