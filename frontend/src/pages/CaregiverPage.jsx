@@ -34,7 +34,6 @@ import {
   Trash2,
   Mail,
   Phone,
-  ShieldCheck,
   Link2,
   Unlink,
   ShieldAlert,
@@ -294,7 +293,42 @@ export default function CaregiverPage() {
   const loadAssignments = useCallback(async () => {
     try {
       const data = await fetchAssignments();
-      setAssignments(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
+      setAssignments(list);
+
+      // Merge backend assigned patients into patientsList so they are visible in roster and modals
+      if (list.length > 0) {
+        setPatientsList((prev) => {
+          const updated = [...prev];
+          list.forEach((a) => {
+            const strId = String(a.patient);
+            const exists = updated.some(
+              (p) => String(p.id) === strId || p.name === a.patient_name
+            );
+            if (!exists) {
+              updated.unshift({
+                id: strId,
+                name: a.patient_name,
+                relation: "(Assigned Patient)",
+                age: 45,
+                gender: "Patient",
+                adherence: "95%",
+                adherenceNum: 95,
+                status: "Healthy",
+                missedDoses: 0,
+                lastTaken: "Today",
+                conditions: ["General Care"],
+                allergies: "None reported",
+                emergencyContact: a.patient_email || "+1 (555) 000-1122",
+                assignedDoctor: a.caregiver_name,
+                todaySchedule: [],
+                medications: [],
+              });
+            }
+          });
+          return updated;
+        });
+      }
     } catch (err) {
       console.error("Failed to load assignments", err);
     }
@@ -478,17 +512,18 @@ export default function CaregiverPage() {
 
   const handleCreateAssignment = async (e) => {
     e.preventDefault();
-    if (!assignForm.caregiverId || !assignForm.patientId) return;
+    const effectiveCaregiverId = assignForm.caregiverId || currentUser?.id;
+    if (!effectiveCaregiverId || !assignForm.patientId) return;
     setAssignLoading(true);
     try {
       await createAssignment({
-        caregiverId: assignForm.caregiverId,
+        caregiverId: effectiveCaregiverId,
         patientId: assignForm.patientId,
         note: assignForm.note,
       });
       setReportMsg("Patient successfully assigned to caregiver!");
       setTimeout(() => setReportMsg(null), 4000);
-      setAssignForm({ caregiverId: "", patientId: "", note: "" });
+      setAssignForm({ caregiverId: currentUser?.id || "", patientId: "", note: "" });
       setIsAssignModalOpen(false);
       loadAssignments();
     } catch (err) {
@@ -1010,7 +1045,10 @@ export default function CaregiverPage() {
                 </span>
               </h3>
               <button
-                onClick={() => setIsAssignModalOpen(true)}
+                onClick={() => {
+                  setAssignForm((prev) => ({ ...prev, caregiverId: currentUser?.id || "" }));
+                  setIsAssignModalOpen(true);
+                }}
                 className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
               >
                 <Plus className="w-3.5 h-3.5" /> Assign Patient
@@ -1745,17 +1783,27 @@ export default function CaregiverPage() {
 
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-              Caregiver User ID
+              Caregiver
             </label>
-            <input
-              type="number"
-              placeholder="Enter caregiver user ID (from backend)"
-              value={assignForm.caregiverId}
-              onChange={(e) => setAssignForm({ ...assignForm, caregiverId: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-              required
-            />
-            <p className="text-[10px] text-slate-400 mt-1">Tip: Find user IDs in the admin panel or /api/accounts/users/?role=caregiver</p>
+            {currentUser?.id ? (
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-sm">
+                <span className="font-bold text-slate-800 dark:text-slate-200">
+                  {currentUser.name} ({currentUser.email})
+                </span>
+                <span className="text-xs px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-semibold">
+                  Active Caregiver
+                </span>
+              </div>
+            ) : (
+              <input
+                type="number"
+                placeholder="Enter caregiver user ID (from backend)"
+                value={assignForm.caregiverId}
+                onChange={(e) => setAssignForm({ ...assignForm, caregiverId: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                required
+              />
+            )}
           </div>
 
           <div>

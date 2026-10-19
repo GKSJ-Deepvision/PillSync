@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 from rest_framework import serializers
 
 from .models import CaregiverPatientAssignment
@@ -22,6 +22,13 @@ class UserSerializer(serializers.ModelSerializer):
             return obj._role
         if obj.is_superuser or obj.is_staff:
             return "admin"
+        try:
+            group_names = set(obj.groups.values_list("name", flat=True))
+            for r in ("admin", "caregiver", "patient"):
+                if r in group_names:
+                    return r
+        except Exception:
+            pass
         email = (obj.email or obj.username or "").lower()
         if "caregiver" in email or "doctor" in email:
             return "caregiver"
@@ -57,6 +64,8 @@ class RegisterSerializer(serializers.Serializer):
             user.is_superuser = True
             user.save()
 
+        group, _ = Group.objects.get_or_create(name=role)
+        user.groups.add(group)
         user._role = role
         return user
 

@@ -125,7 +125,7 @@ function PatientDashboardContent({ user, viewMode }) {
       return updated;
     });
 
-    setToastMsg(`Medicine marked as taken.`);
+    setToastMsg(`${medName || "Medicine"} (${dosage || "1 dose"}) marked as taken at ${timeNow}.`);
     setTimeout(() => setToastMsg(""), 4000);
   };
 
@@ -394,7 +394,7 @@ function PatientDashboardContent({ user, viewMode }) {
               Today's Adherence Rate
             </p>
             <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
-              {todayAdherence}%
+              {analytics?.adherenceRate ?? todayAdherence}%
             </h3>
             <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5 mt-1">
               <CheckCircle2 className="w-3 h-3" /> Live Tracking

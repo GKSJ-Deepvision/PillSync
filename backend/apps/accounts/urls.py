@@ -25,6 +25,6 @@ urlpatterns = [
     path("assignments/<int:pk>/", caregiver_assignment_detail_view, name="caregiver-assignment-detail"),
 
     # Convenience lookups
-    path("caregivers/<int:caregiver_id>/patients/", caregiver_patients_view, name="caregiver-patients"),
-    path("patients/<int:patient_id>/caregivers/", patient_caregivers_view, name="patient-caregivers"),
+    path("caregivers/<str:caregiver_id>/patients/", caregiver_patients_view, name="caregiver-patients"),
+    path("patients/<str:patient_id>/caregivers/", patient_caregivers_view, name="patient-caregivers"),
 ]

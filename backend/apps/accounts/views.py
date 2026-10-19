@@ -60,7 +60,19 @@ def login_view(request):
         return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
 
     if requested_role:
-        user._role = requested_role.lower()
+        role_lower = requested_role.lower()
+        user._role = role_lower
+        try:
+            from django.contrib.auth.models import Group
+            group, _ = Group.objects.get_or_create(name=role_lower)
+            user.groups.clear()
+            user.groups.add(group)
+            if role_lower == "admin":
+                user.is_staff = True
+                user.is_superuser = True
+                user.save()
+        except Exception:
+            pass
 
     refresh = RefreshToken.for_user(user)
     user_data = UserSerializer(user).data
@@ -203,8 +215,18 @@ def caregiver_patients_view(request, caregiver_id):
     """
     GET the list of patients assigned to a specific caregiver.
     """
+    cid = None
+    try:
+        cid = int(caregiver_id)
+    except (ValueError, TypeError):
+        if request.user and request.user.is_authenticated:
+            cid = request.user.id
+
+    if not cid:
+        return Response([])
+
     assignments = CaregiverPatientAssignment.objects.filter(
-        caregiver_id=caregiver_id
+        caregiver_id=cid
     ).select_related("patient")
 
     patients = []
@@ -225,8 +247,18 @@ def patient_caregivers_view(request, patient_id):
     """
     GET the list of caregivers assigned to a specific patient.
     """
+    pid = None
+    try:
+        pid = int(patient_id)
+    except (ValueError, TypeError):
+        if request.user and request.user.is_authenticated:
+            pid = request.user.id
+
+    if not pid:
+        return Response([])
+
     assignments = CaregiverPatientAssignment.objects.filter(
-        patient_id=patient_id
+        patient_id=pid
     ).select_related("caregiver")
 
     caregivers = []

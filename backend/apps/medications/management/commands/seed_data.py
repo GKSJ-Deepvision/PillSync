@@ -35,8 +35,12 @@ class Command(BaseCommand):
             },
         ]
 
+        from django.contrib.auth.models import Group
+        from apps.accounts.models import CaregiverPatientAssignment
+
         for acc in demo_accounts:
-            if not User.objects.filter(email=acc["email"]).exists():
+            u = User.objects.filter(email=acc["email"]).first()
+            if not u:
                 u = User.objects.create_user(
                     username=acc["email"],
                     email=acc["email"],
@@ -44,11 +48,38 @@ class Command(BaseCommand):
                     first_name=acc["first_name"],
                     last_name=acc["last_name"],
                 )
-                if acc["email"] == "admin@pillsync.com":
-                    u.is_staff = True
-                    u.is_superuser = True
-                    u.save()
                 self.stdout.write(self.style.SUCCESS(f"Created demo account: {acc['email']}"))
+
+            if "admin" in acc["email"]:
+                u.is_staff = True
+                u.is_superuser = True
+                u.save()
+                grp, _ = Group.objects.get_or_create(name="admin")
+                u.groups.add(grp)
+            elif "caregiver" in acc["email"]:
+                grp, _ = Group.objects.get_or_create(name="caregiver")
+                u.groups.add(grp)
+            else:
+                grp, _ = Group.objects.get_or_create(name="patient")
+                u.groups.add(grp)
+
+        caregiver_user = User.objects.filter(email="sarah.caregiver@pillsync.com").first()
+        alex_patient = User.objects.filter(email="alex.patient@pillsync.com").first()
+        demo_patient = User.objects.filter(email="patient@pillsync.com").first()
+
+        # Link caregiver to patients
+        if caregiver_user and alex_patient:
+            CaregiverPatientAssignment.objects.get_or_create(
+                caregiver=caregiver_user,
+                patient=alex_patient,
+                defaults={"note": "Primary Care Physician & Caregiver"},
+            )
+        if caregiver_user and demo_patient:
+            CaregiverPatientAssignment.objects.get_or_create(
+                caregiver=caregiver_user,
+                patient=demo_patient,
+                defaults={"note": "Primary Care Physician & Caregiver"},
+            )
 
         # Initial Medications
         med_records = [
@@ -123,7 +154,19 @@ class Command(BaseCommand):
         for m_data in med_records:
             med = Medication.objects.filter(name=m_data["name"]).first()
             if not med:
-                med = Medication.objects.create(**m_data)
+                med = Medication.objects.create(
+                    patient=alex_patient,
+                    caregiver=caregiver_user,
+                    assigned_patient_id=str(alex_patient.id) if alex_patient else None,
+                    assigned_patient_name="Alex Morgan",
+                    **m_data,
+                )
+            else:
+                if not med.patient and alex_patient:
+                    med.patient = alex_patient
+                    med.caregiver = caregiver_user
+                    med.assigned_patient_id = str(alex_patient.id)
+                    med.assigned_patient_name = "Alex Morgan"
             med.update_stock_days()
             med.save()
             created_meds.append(med)

@@ -8,13 +8,15 @@ function getAuthHeaders() {
     : { "Content-Type": "application/json" };
 }
 
-export async function loginUser({ email, password }) {
+export async function loginUser({ email, password, role }) {
+  const payload = { email, password };
+  if (role) payload.role = role;
   const response = await fetch(`${API_BASE_URL}/accounts/login/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(payload),
   });
 
   const data = await response.json();
@@ -183,6 +185,12 @@ export async function fetchPatientMedications(patientId) {
 }
 
 export async function addMedication(medData) {
+  let resolvedPatientId = medData.patientId ?? null;
+  if (!resolvedPatientId && medData.assignedPatientId) {
+    const parsed = parseInt(medData.assignedPatientId, 10);
+    if (!isNaN(parsed)) resolvedPatientId = parsed;
+  }
+
   const payload = {
     name: medData.name,
     dosage: medData.dosage || "500 mg",
@@ -200,7 +208,7 @@ export async function addMedication(medData) {
     manufacturer: medData.manufacturer || "",
     fda_ndc: medData.fdaNdc || "",
     // Ownership
-    patient_id: medData.patientId ?? null,
+    patient_id: resolvedPatientId,
     caregiver_id: medData.caregiverId ?? null,
     // Legacy
     assigned_patient_id: medData.assignedPatientId

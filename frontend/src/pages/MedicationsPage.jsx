@@ -7,6 +7,7 @@ import {
   addMedication,
   takeDoseApi,
   deleteMedicationApi,
+  fetchAllUsers,
 } from "../services/api";
 import { Plus, Search, Filter, RefreshCw, ShieldAlert, User } from "lucide-react";
 
@@ -20,6 +21,7 @@ export default function MedicationsPage() {
   const [search, setSearch] = useState("");
   const [selectedDisease, setSelectedDisease] = useState("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [patientsList, setPatientsList] = useState([]);
 
   const activeRole =
     user?.role === "admin"
@@ -47,7 +49,12 @@ export default function MedicationsPage() {
 
   useEffect(() => {
     loadMeds();
-  }, [user?.id, activeRole]); // Reload when user or view-mode changes
+    if (!isPatient) {
+      fetchAllUsers("patient")
+        .then((users) => setPatientsList(Array.isArray(users) ? users : []))
+        .catch((e) => console.warn("Could not load patient list for medication modal", e));
+    }
+  }, [user?.id, activeRole, isPatient]); // Reload when user or view-mode changes
 
   const handleTakeDose = async (id) => {
     try {
@@ -71,9 +78,13 @@ export default function MedicationsPage() {
 
   const handleAddMedicine = async (newMed) => {
     try {
-      // Attach the current patient's ID if we're in patient view
       if (isPatient && user?.id) {
         newMed.patientId = user.id;
+      } else if (!newMed.patientId && newMed.assignedPatientId) {
+        newMed.patientId = newMed.assignedPatientId;
+      }
+      if (isCaregiver && user?.id) {
+        newMed.caregiverId = user.id;
       }
       const saved = await addMedication(newMed);
       setMedicines((prev) => [saved, ...prev]);
@@ -241,6 +252,7 @@ export default function MedicationsPage() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onAddMedicine={handleAddMedicine}
+          patientsList={patientsList}
         />
       )}
     </div>
