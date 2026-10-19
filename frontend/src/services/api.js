@@ -369,8 +369,12 @@ export async function confirmOcrMedicationApi(confirmData) {
 }
 
 /* Refill Prediction API */
-export async function fetchRefillPredictionsApi() {
-  const response = await fetch(`${API_BASE_URL}/refills/predictions/`, {
+export async function fetchRefillPredictionsApi(patientId = null) {
+  const url =
+    patientId && patientId !== "All"
+      ? `${API_BASE_URL}/refills/predictions/?patient_id=${encodeURIComponent(patientId)}`
+      : `${API_BASE_URL}/refills/predictions/`;
+  const response = await fetch(url, {
     headers: getAuthHeaders(),
   });
   if (!response.ok) throw new Error("Failed to fetch refill predictions.");

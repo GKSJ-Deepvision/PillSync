@@ -1,8 +1,10 @@
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.medications.models import Medication
+from apps.medications.views import _get_queryset_for_user
 from apps.refills.models import RefillLog
 from apps.refills.serializers import (
     RefillLogSerializer,
@@ -16,8 +18,15 @@ class RefillPredictionsView(APIView):
     """Get refill predictions and stock depletion metrics for all medications."""
 
     def get(self, request):
+        user = request.user if request.user and request.user.is_authenticated else None
+        meds = _get_queryset_for_user(user) if user else Medication.objects.all()
+
+        patient_id = request.query_params.get("patient_id")
+        if patient_id and patient_id != "All":
+            meds = meds.filter(Q(patient_id=patient_id) | Q(assigned_patient_id=str(patient_id)))
+
         service = RefillPredictionService()
-        predictions = service.get_all_predictions()
+        predictions = service.get_all_predictions(queryset=meds)
         return Response(predictions, status=status.HTTP_200_OK)
 
 
@@ -25,8 +34,15 @@ class LowStockAlertsView(APIView):
     """Get list of medications that have fallen below refill threshold."""
 
     def get(self, request):
+        user = request.user if request.user and request.user.is_authenticated else None
+        meds = _get_queryset_for_user(user) if user else Medication.objects.all()
+
+        patient_id = request.query_params.get("patient_id")
+        if patient_id and patient_id != "All":
+            meds = meds.filter(Q(patient_id=patient_id) | Q(assigned_patient_id=str(patient_id)))
+
         service = RefillPredictionService()
-        low_stock = service.get_low_stock_medications()
+        low_stock = service.get_low_stock_medications(queryset=meds)
         return Response(low_stock, status=status.HTTP_200_OK)
 
 

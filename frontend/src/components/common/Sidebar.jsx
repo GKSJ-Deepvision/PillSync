@@ -48,7 +48,7 @@ export default function Sidebar({ mobileOpen, closeMobileSidebar }) {
       path: "/refills",
       icon: RefreshCw,
       badge: "Smart",
-      roles: ["caregiver", "admin"],
+      roles: ["caregiver", "admin", "patient"],
     },
     {
       name: "Caregiver Portal",

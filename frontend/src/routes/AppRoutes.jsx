@@ -65,7 +65,7 @@ function ProtectedLayout() {
             <Route
               path="/refills"
               element={
-                <ProtectedRoleRoute allowedRoles={["caregiver", "admin"]}>
+                <ProtectedRoleRoute allowedRoles={["caregiver", "admin", "patient"]}>
                   <RefillsPage />
                 </ProtectedRoleRoute>
               }
