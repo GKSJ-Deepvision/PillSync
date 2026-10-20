@@ -86,6 +86,20 @@ export default function NotificationsPage() {
       };
     }
 
+    // Snoozed dose notification
+    if (kind === "snoozed" || title.includes("snoozed")) {
+      return {
+        background: notification.read ? "#FAF5FF" : "#F5F3FF",
+        iconBackground: notification.read ? "#EDE9FE" : "#DDD6FE",
+        iconColor: notification.read ? "#7C3AED" : "#6D28D9",
+        borderColor: notification.read ? "#E9D5FF" : "#DDD6FE",
+        dotColor: "#8B5CF6",
+        buttonBackground: "#F5F3FF",
+        buttonColor: "#6D28D9",
+        buttonBorder: "#DDD6FE",
+      };
+    }
+
     // Fallback
     return {
       background: notification.read ? "#FFFFFF" : "#F8FAFC",

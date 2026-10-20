@@ -123,6 +123,17 @@ export default function RemindersPage() {
       .update(updates)
       .eq("id", logId);
 
+    if (status === "snoozed" && user) {
+      const log = logs.find((l) => l.id === logId);
+      const medicine = log?.medications;
+      await supabase.from("notifications").insert({
+        recipient_id: user.id,
+        kind: "snoozed",
+        title: "Dose snoozed",
+        body: `${medicine?.name ?? "Your medicine"}${medicine?.dosage ? ` (${medicine.dosage})` : ""} was snoozed for ${snoozeMinutes} minutes.`,
+      });
+    }
+
     load();
   };
 
