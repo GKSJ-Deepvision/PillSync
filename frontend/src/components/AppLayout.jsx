@@ -36,6 +36,7 @@ const ADMIN_NAV_ITEMS = [
   { to: "/admin/patients", label: "Patients", icon: UserIcon },
   { to: "/admin/caregivers", label: "Caregivers", icon: UserIcon },
   { to: "/admin/medications", label: "Medications", icon: PillIcon },
+  { to: "/admin/analytics", label: "Analytics", icon: ChartIcon },
   { to: "/admin/ocr", label: "OCR Monitoring", icon: ChartIcon },
   { to: "/profile", label: "Profile", icon: UserIcon },
 ];

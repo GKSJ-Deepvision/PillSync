@@ -23,6 +23,7 @@ import AdminPatientsPage from "./features/admin/AdminPatientsPage";
 import AdminCaregiversPage from "./features/admin/AdminCaregiversPage";
 import AdminMedicationsPage from "./features/admin/AdminMedicationsPage";
 import AdminOCRMonitoringPage from "./features/admin/AdminOCRMonitoringPage";
+import AdminAnalyticsPage from "./features/admin/AdminAnalyticsPage";
 
 export default function App() {
   return (
@@ -185,6 +186,14 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <AdminOCRMonitoringPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/analytics"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminAnalyticsPage />
               </ProtectedRoute>
             }
           />
