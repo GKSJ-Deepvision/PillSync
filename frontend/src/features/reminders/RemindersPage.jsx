@@ -360,7 +360,7 @@ export default function RemindersPage() {
                   </div>
 
                   {/* Actions */}
-                  {log.status === "pending" && (
+                  {(log.status === "pending" || log.status === "snoozed") && (
                     <div
                       className="grid grid-cols-3 gap-2 mt-5 pt-4"
                       style={{
